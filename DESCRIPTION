@@ -19,5 +19,6 @@ Imports:
   ggplot2,
   coda,
   stats,
-  RColorBrewer
+  RColorBrewer,
+  xtable
 LazyData: true

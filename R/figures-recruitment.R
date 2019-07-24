@@ -127,7 +127,7 @@ make.recr.mcmc.plot <- function(models,
 #'
 #' @return Nothing
 #' @export
-#' @importsFrom grDevices colorRampPalette
+#' @importFrom grDevices colorRampPalette
 make.recr.retro.mpd.plot <- function(base.model,
                                      models,
                                      model.names = NULL,

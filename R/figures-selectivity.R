@@ -10,7 +10,7 @@
 #'
 #' @return Nothing
 #' @export
-#' @importsFrom RColorBrewer brewer.pal
+#' @importFrom RColorBrewer brewer.pal
 make.selex.comparison.plot <- function(model,
                                        gear.names,
                                        show.mat = FALSE,
