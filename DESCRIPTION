@@ -10,4 +10,11 @@ Authors@R:
 Description: What the package does (one paragraph).
 License: What license it uses
 Encoding: UTF-8
+Imports:
+  grDevices,
+  stats,
+  gfutilities,
+  xtable,
+  testthat,
+  ggplot2
 LazyData: true
