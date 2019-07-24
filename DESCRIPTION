@@ -16,5 +16,7 @@ Imports:
   gfutilities,
   xtable,
   testthat,
-  ggplot2
+  ggplot2,
+  coda,
+  stats
 LazyData: true
