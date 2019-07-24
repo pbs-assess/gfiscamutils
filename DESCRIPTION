@@ -18,5 +18,6 @@ Imports:
   testthat,
   ggplot2,
   coda,
-  stats
+  stats,
+  RColorBrewer
 LazyData: true
