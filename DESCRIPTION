@@ -1,14 +1,14 @@
 Package: gfiscamutils
-Title: What the Package Does (One Line, Title Case)
+Title: Supplies Loading, Plotting, and Table-making Functions for iscam model output from Package gfiscam
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Chris",
+           family = "Grandin",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: What license it uses
+           email = "chris.grandin@gmail.com",
+           comment = c(ORCID = "https://orcid.org/0000-0002-6746-3486"))
+Description: Provides functions including loading, plotting and making tables for iscam outputs (from https://github.com/pbs-assess/gfiscam).
+License: GPL-3
 Encoding: UTF-8
 Imports:
   grDevices,
@@ -20,5 +20,6 @@ Imports:
   coda,
   stats,
   RColorBrewer,
-  xtable
+  xtable,
+  usethis
 LazyData: true
