@@ -152,7 +152,6 @@ make.priors.posts.plot <- function(model,
 #' @param ex.factor A factor to change the x-axis range
 #' @param ... Other graphical arguments
 #'
-#' @return Nothing
 #' @export
 plot.marg <- function(xx,
                       breaks = "sturges",
@@ -199,7 +198,6 @@ plot.marg <- function(xx,
 #' @param model An iscam model object
 #' @param axis.lab.freq the frequency of x-axis labelling
 #'
-#' @return Nothing
 #' @export
 make.traces.plot <- function(model,
                              axis.lab.freq = 200){

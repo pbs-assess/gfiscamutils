@@ -11,9 +11,6 @@ make.traces.plot(model, axis.lab.freq = 200)
 
 \item{axis.lab.freq}{the frequency of x-axis labelling}
 }
-\value{
-Nothing
-}
 \description{
 Make trace plots for all paramaters from the mcmc output
 }

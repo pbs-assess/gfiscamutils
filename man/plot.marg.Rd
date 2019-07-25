@@ -16,9 +16,6 @@ See [make.biomass.mcmc.plot()] to see how this is constructed}
 
 \item{...}{Other graphical arguments}
 }
-\value{
-Nothing
-}
 \description{
 Plot posterior histograms
 }

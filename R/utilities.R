@@ -1,4 +1,3 @@
-
 #' Calculate column quantiles for a data matrix
 #'
 #' @param data a matrix
@@ -43,24 +42,6 @@ split.prior.info <- function(prior.str,
   return(c(p.type, p.mean, p.sd))
 }
 
-cohortCatch <- function(cohort, catage, ages = 0:20) {
-  cohort.yrs <- cohort + ages
-  caa <- as.matrix(catage[catage$Yr %in% cohort.yrs, as.character(ages)])
-  w <- base.model$wtatage
-  w$yr <- w$yr * -1
-  waa <- w[w$fleet == 1 & w$yr %in% cohort.yrs, ]
-  waa <- waa[, names(waa) %in% ages]
-  catch.waa <- as.matrix(caa * waa)
-
-  ind <- 1:(nrow(caa) + 1)
-  if(length(ind) > length(ages)){
-    ind <- 1:nrow(caa)
-  }
-  cohort.catch <- diag(catch.waa[,ind])
-  names(cohort.catch) <- cohort.yrs[1:(nrow(caa))]
-  return(cohort.catch)
-}
-
 #' Get the value at given rank
 #'
 #' @param vec a vector of values
@@ -75,27 +56,19 @@ get.age.prop <- function(vec, place = 1){
   c(age, prop)
 }
 
-addpoly <- function(yrvec, lower, upper, color = 1, shade.col = NULL){
-  lower[lower<0] <- 0 ## max of value or 0
-  if(is.null(shade.col)){
-    shade.col <- rgb(t(col2rgb(color)), alpha = 0.2 * 255, maxColorValue = 255)
-  }
-  polygon(x = c(yrvec, rev(yrvec)),
-          y = c(lower, rev(upper)),
-          border = NA,
-          col = shade.col)
-  lines(yrvec, lower, lty = 3, col = color)
-  lines(yrvec, upper, lty = 3, col = color)
-}
-
+#' Get a pretty version of the parameter name
+#'
+#' @param name iscam parameter to pretty-up
+#' @param addToQ an integer to the parameter name for the q's. This is necessary
+#' because iscam sets the q parameter names to 1, 2, 3... regardless of the
+#' gear number. i.e. if gear 1 is a trawl fishery and gear 2 is a survey,
+#' iscam will call q1 the survey gear. We must add 1 to it to get q2 to
+#' accurately portray the survey gear number
+#'
+#' @return an R expression which represents the pretty version of the parameter name
+#' @export
 get.latex.name <- function(name, addToQ = 0){
-  ## Return a pretty version of the parameter name found in variable 'name'
-  ##
-  ## addToQ - an integer to the parameter name for the q's. This is necessary
-  ##  because iscam sets the q parameter names to 1, 2, 3... regardless of the
-  ##  gear number. i.e. if gear 1 is a trawl fishery and gear 2 is a survey,
-  ##  iscam will call q1 the survey gear. We must add 1 to it to get q2 to
-  ##  accurately portray the survey gear number
+
   if(name == "ro") return(expression("R"[0]))
   if(name == "rbar") return(expression(bar("R")))
   if(name == "rinit") return(expression(bar("R")[init]))
@@ -118,7 +91,6 @@ get.latex.name <- function(name, addToQ = 0){
   if(name == "selsd4") return(expression(hat(gamma)[4]))
   if(name == "sel5") return(expression(hat(a)[5]))
   if(name == "selsd5") return(expression(hat(gamma)[5]))
-
   if(name == "log_ro") return(expression("ln(R"[0]*")"))
   if(name == "h") return(expression("h"))
   if(name == "m1") return(expression("M"[1]))
@@ -136,23 +108,28 @@ get.latex.name <- function(name, addToQ = 0){
     digit <- as.numeric(sub("^log_q([1-9]+)$", "\\1", name))
     return(substitute("ln(q"[digit]*")", list(digit = digit)))
   }
-
   NULL
 }
 
+#' Draw a time series envelope on a device on which [plot.new()] has already been called
+#'
+#' @param yrs the years to plot
+#' @param quants a 3-row matrix, where the middle row is the median and the other two are
+#' the lower and upper values for some confidence interval.
+#' @param col color of the envelope
+#' @param first boolean. If TRUE, [plot.new()] will be called. If FALSE, [lines()] will be
+#'  called.
+#' @param opacity how opaque the envelope shading is. Percentage value
+#' @param ... other graphical parameters
+#'
+#' @export
 draw.envelope <- function(yrs,
                           quants,
                           col = "black",
                           first,
                           opacity = 75,
                           ...){
-  ## Draw a time series envelope on a device on which plot.new has already
-  ##  been called.
-  ## Assumptions: quants is a 3-row matrix, where the middle row is the
-  ##  median and the other two are the lower and upper values for some
-  ##  confidence interval.
-  ## first - boolean, if TRUE, plot will be called. If FALSE, lines will be
-  ##  called.
+
   lower  <- quants[1,]
   median <- quants[2,]
   upper  <- quants[3,]
@@ -191,11 +168,15 @@ draw.envelope <- function(yrs,
   }
 }
 
-c.model.list <- function(..., recursive = FALSE){
-  ## Extract the model class objects from the list of model lists,
-  ##  and merge them into a single model list containing all the model
-  ##  class objects.
-  ## To use: c(model.list.1, model.list.2)
+#' Extract the model class objects from the list of model lists,
+#' and merge them into a single model list containing all the model
+#' class objects
+#'
+#' @param ... one or more lists of iscam model objects
+#'
+#' @return an iscam model object list
+#' @export
+c.model.list <- function(...){
 
   lst <- list(...)
   ret.lst <- NULL
@@ -217,18 +198,27 @@ c.model.list <- function(..., recursive = FALSE){
   ret.lst
 }
 
-## Calculation of sigma and tau from rho and vartheta
+#' Calculation of sigma and tau from rho and vartheta
+#'
+#' @param rho parameter rho from iscam model
+#' @param vartheta parameter vartheta from iscam model
+#'
+#' @return a list of length 2, the calculated tau and sigma parameters
+#' @export
 calc.sig.tau <- function(rho, vartheta){
-  ## Calculation of sigma and tau from rho and vartheta
 
   tau <- sqrt((1 - rho) / vartheta)
   sigma <- sqrt(rho / vartheta)
   list(tau, sigma)
 }
 
+#' Calculate the number of rows and columns to have in a grid for plotting multiple figures
+#'
+#' @param num the number of figures
+#'
+#' @return a vector of length 2 representing the number of rows and columns
+#' @export
 get.rows.cols <- function(num){
-  ## Returns a vector of length 2 representing the number of rows and columns
-  ##  to use to pack a plot in a grid.
   if(num <= 64 && num > 49){
     if(num <= 56){
       nside <- c(8,7)
