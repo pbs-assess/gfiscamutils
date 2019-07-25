@@ -8,7 +8,6 @@
 #' @param space.size size of the vertical spaces for the table
 #' @param placement latex code for placement of the table in document
 #'
-#' @return
 #' @export
 #' @importFrom xtable xtable
 #' @importFrom gfutilities latex.bold latex.amp latex.mcol latex.size.str f get.align
@@ -79,7 +78,6 @@ make.maturity.table <- function(mat,
 #' @param space.size size of the vertical spaces for the table
 #' @param placement latex code for placement of the table in document
 #'
-#' @return
 #' @export
 #' @importFrom xtable xtable
 #' @importFrom gfutilities latex.bold latex.amp latex.mcol latex.size.str latex.cmidr f get.align

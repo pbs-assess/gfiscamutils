@@ -281,9 +281,8 @@ make.autocor.plot <- function(model){
 #'  dev.interactive() in R and interactive() in S-PLUS.
 #' @param ... graphical parameters
 #'
-#' @return Nothing
 #' @export
-#' @importFom grDevices dev.interactive
+#' @importFrom grDevices dev.interactive
 #' @importFrom coda is.mcmc.list mcmc.list as.mcmc nvar varnames chanames nchain
 #' @importFrom stats acf
 autocorr.plot <- function(x,
@@ -332,7 +331,7 @@ autocorr.plot <- function(x,
   invisible(x)
 }
 
-#' as.ts.mcmc was copied from coda package source, to fulfill
+#' Copied from coda package source, to fulfill
 #'  autocorr.plot requirement
 #'
 #' @param x an mcmc object

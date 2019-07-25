@@ -1,8 +1,7 @@
 #' Make an xtable of likelihood values - Herring specific
 #'
-#' @param models
-#' @param which 1 will put hg, prs, and cc in the table,
-#' 2 will put sog and wcvi in the table
+#' @param models an iscam model object
+#' @param which 1 will put hg, prs, and cc in the table, 2 will put sog and wcvi in the table
 #' @param digits number of decimal places for the values
 #' @param xcaption caption to appear in the calling document
 #' @param xlabel the label used to reference the table in latex
@@ -10,7 +9,6 @@
 #' @param space.size size of the vertical spaces for the table
 #' @param placement latex code for placement of the table in document
 #'
-#' @return
 #' @export
 make.likelihood.table <- function(models,
                                   which = 1,

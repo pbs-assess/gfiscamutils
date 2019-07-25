@@ -1,7 +1,0 @@
-catch.data.file <- "catch.csv"
-harvest.activity.file <- "harvesting-activities.csv"
-management.file <- "management-decisions.csv"
-gear.names.file <- "gear-names.csv"
-maturity.file <- "maturity-vectors.csv"
-variance.file <- "variance-parameter-results.csv"
-maturity.sens.file <- "maturity-sensitivity-results-table.csv"

@@ -189,7 +189,6 @@ make.catches.table <- function(catches,
 #' @param leg.y.loc y-based location to place the legend
 #' @param leg.cex text size for legend
 #'
-#' @return
 #' @export
 #' @importFrom ggplot2 ggplot aes geom_bar
 make.catches.plot <- function(catches,

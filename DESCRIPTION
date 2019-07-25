@@ -15,11 +15,15 @@ Imports:
   stats,
   gfutilities,
   xtable,
+  tidyr,
   testthat,
   ggplot2,
   coda,
   stats,
   RColorBrewer,
   xtable,
-  usethis
+  usethis,
+  PBSmodelling,
+  dplyr
 LazyData: true
+RoxygenNote: 6.1.1

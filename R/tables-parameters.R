@@ -217,7 +217,6 @@ make.parameters.table <- function(model,
 #' @param am1.lst A list of the AM1 iscam model objects
 #' @param am2.lst A list of the AM2 iscam model objects
 #'
-#' @return
 #' @export
 #' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align
 #' @importFrom xtable xtable
@@ -479,7 +478,7 @@ make.parameters.est.table <- function(model,
 
 #' Make a table of reference points
 #'
-#' @param model.am2
+#' @param model.am2 an iscam model object
 #' @rdname make.parameters.table
 #'
 #' @return an xtable
@@ -786,7 +785,8 @@ make.sens.q.table <- function(models,
 #' @export
 #' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align latex.perc latex.cmidr
 #' @importFrom xtable xtable
-#' @importFrom dplyr filter select mutate rename gather %>% spread arrange
+#' @importFrom dplyr filter select mutate rename %>% arrange
+#' @importFrom tidyr spread gather
 make.variance.table <- function(var,
                                 which.model = 1,
                                 digits = 3,
@@ -921,7 +921,8 @@ make.variance.table <- function(var,
 #' @export
 #' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align latex.perc latex.cmidr
 #' @importFrom xtable xtable
-#' @importFrom dplyr filter select mutate rename gather %>% spread arrange
+#' @importFrom dplyr filter select mutate rename %>% arrange
+#' @importFrom tidyr spread gather
 make.catchability.parameters.table.q.sens <- function(qa.lst,
                                                       qb.lst,
                                                       qc.lst,

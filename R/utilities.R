@@ -4,7 +4,6 @@
 #' @param data a matrix
 #' @param probs a vector of probabilities to be passed to [stats::quantile()]
 #'
-#' @return
 #' @export
 #' @importFrom stats quantile
 get.quants <- function(data,
@@ -28,7 +27,7 @@ get.quants <- function(data,
 #'
 #' @return a vector of length 3, e.g.:"Lognormal", 2.0, 1.01
 #' @export
-#' @importFrom gfutilties f
+#' @importFrom gfutilities f
 split.prior.info <- function(prior.str,
                              dec.points = 1,
                              first.to.lower = FALSE){

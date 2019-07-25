@@ -151,7 +151,7 @@ make.biomass.mcmc.plot <- function(models,
 #' Plot the relative biomass with credibility intervals for the mcmc
 #' cases of the models
 #'
-#' @rdName make.biomass.mcmc.plot
+#' @rdname make.biomass.mcmc.plot
 #' @export
 make.depletion.mcmc.plot <- function(models,
                                      model.names = NULL,
@@ -222,6 +222,8 @@ make.depletion.mcmc.plot <- function(models,
   }
 }
 
+#' Make a retrospective biomass plot
+#'
 #' @param base.model The base iscam model object
 #' @param models A list of iscam model objects to plot against the base model
 #' @param model.names A vector of names to show on the legend
@@ -234,9 +236,8 @@ make.depletion.mcmc.plot <- function(models,
 #' @param color.brew.class The RColorBrewer class, e.g. "Paired"
 #' @param ... Other graphical arguments
 #'
-#' @return Nothing
 #' @export
-#' @importFom grDevices colorRampPalette
+#' @importFrom grDevices colorRampPalette
 make.biomass.retro.mpd.plot <- function(base.model,
                                         models,
                                         model.names = NULL,

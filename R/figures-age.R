@@ -59,7 +59,7 @@ make.age.comp.estimates.plot <- function(model,
 
 #' Make age comp fit plot
 #'
-#' @rdName make.age.comp.estimates.plot
+#' @rdname make.age.comp.estimates.plot
 #' @export
 #' @importFrom PBSmodelling plotBubbles
 #' @importFrom grDevices gray
@@ -112,7 +112,7 @@ make.age.comp.fit.plot <- function(model,
 }
 
 #' Make age comp residuals plot
-#' @rdName make.age.comp.estimates.plot
+#' @rdname make.age.comp.estimates.plot
 #' @export
 #' @importFrom PBSmodelling plotBubbles
 #' @importFrom grDevices gray
@@ -157,7 +157,7 @@ make.age.comp.residuals.plot <- function(model,
 
 #' Make age comp data plot
 #'
-#' @rdName make.age.comp.estimates.plot
+#' @rdname make.age.comp.estimates.plot
 #' @export
 #' @importFrom PBSmodelling plotBubbles
 make.age.comp.data.plot <- function(model,
