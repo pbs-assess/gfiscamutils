@@ -27,7 +27,7 @@ get.quants <- function(data,
 #' @return a vector of length 3, e.g.:"Lognormal", 2.0, 1.01
 #' @export
 #' @importFrom gfutilities f
-split.prior.info <- function(prior.str,
+split_prior_info <- function(prior.str,
                              dec.points = 1,
                              first.to.lower = FALSE){
   p <- strsplit(prior.str, "\\(")[[1]]
@@ -847,12 +847,8 @@ ClipExtent <- function( dat, spObj, bufDist=NA, silent=FALSE ) {
   # and Y for these points is wrong) so that we don't show them in charts. We
   # retain the points themselves, because the associated data is still useful.
   # Return the points as a data frame, with updated X and Y info.
-  # Require sp library
-  require( sp )
   # Creat a buffer around the spatial object, if requested
   if( !is.na(bufDist) ) {
-    # Require rgeos library
-    require( rgeos )
     # Make a buffer
     spObj <- gBuffer( spgeom=spObj, byid=TRUE, width=bufDist )
   }  # End if making a buffer

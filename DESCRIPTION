@@ -22,6 +22,8 @@ Imports:
   RColorBrewer,
   usethis,
   PBSmodelling,
-  dplyr
+  dplyr,
+  sp,
+  rgeos
 LazyData: true
 RoxygenNote: 6.1.1

@@ -137,7 +137,7 @@ make.priors.posts.plot <- function(model,
       }
     title(xx$nm)
     }else{
-      plot.marg(xx,
+      plot_marg(xx,
                 breaks = "sturges",
                 col = "wheat")
     }
@@ -153,7 +153,7 @@ make.priors.posts.plot <- function(model,
 #' @param ... Other graphical arguments
 #'
 #' @export
-plot.marg <- function(xx,
+plot_marg <- function(xx,
                       breaks = "sturges",
                       ex.factor = 1.0,
                       ...){
