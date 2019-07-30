@@ -304,10 +304,10 @@ autocorr.plot <- function(x,
     x <- mcmc.list(as.mcmc(x))
   for(i in 1:nchain(x)) {
     xacf <- if(missing(lag.max))
-              acf(as.ts.mcmc(x[[i]]),
+              acf(as.tsmcmc(x[[i]]),
                   plot = FALSE)
             else
-              acf(as.ts.mcmc(x[[i]]),
+              acf(as.tsmcmc(x[[i]]),
                   lag.max = lag.max,
                   plot = FALSE)
     for(j in 1:nvar(x)){
@@ -333,10 +333,12 @@ autocorr.plot <- function(x,
 #'  autocorr.plot requirement
 #'
 #' @param x an mcmc object
-#' @param ... unused arguments for compatibility with generic as.ts
+#' @param ... unused arguments for compatibility with [coda::as.ts.mcmc()]
 #'
+#' @importFrom coda as.mcmc thin
+#' @importFrom stats ts start end
 #' @export
-as.ts.mcmc <- function(x, ...){
+as.tsmcmc <- function(x, ...){
 
   x <- as.mcmc(x)
   y <- ts(x,
