@@ -136,14 +136,14 @@ delete.dirs <- function(models.dir = model.dir,
 
 #' Create a .RData file to hold the model's data and outputs
 #'
-#' @param models.dir Directory name for all models location
-#' @param model.name Directory name of model to be loaded
+#' @param model.dir Directory name for all models location
 #' @param ovwrt.rdata overwrite the RData file if it exists? TRUE/FALSE
 #' @param load.proj Load the projections from the mcmc and do the calculations
 #'   to construct the decision tables
 #' @param low Lower quantile value to apply to MCMC samples
 #' @param high Higher quantile value to apply to MCMC samples
 #' @param burnin The number of samples to burn away from the beginning of the MCMC
+#' @param thin The thinning value for MCMC samples
 #' @param which.stock 1-5 for the five herring stocks: 1=HG, 2=PRD, 3=CC,
 #'   4=SOG, 5=WCVI
 #' @param which.model 1 = AM1 or 2 = AM2 for herring
@@ -224,6 +224,7 @@ create.rdata.file <- function(model.dir,
 #' @param low Lower quantile value to apply to MCMC samples
 #' @param high Higher quantile value to apply to MCMC samples
 #' @param burnin The number of samples to burn away from the beginning of the MCMC
+#' @param thin The thinning value for MCMC samples
 #' @param which.stock 1-5 for the five herring stocks: 1=HG, 2=PRD, 3=CC,
 #'   4=SOG, 5=WCVI
 #' @param which.model 1 = AM1 or 2 = AM2 for herring
@@ -300,7 +301,6 @@ create.rdata.file.retro <- function(model.dir,
 
 #' Load the iscam models and return as a list of iscam model objects
 #'
-#' @param models.dir Directory name for all models location
 #' @param model.dir.names Vector of directory names of models to be loaded
 #'
 #' @return A list of iscam model objects

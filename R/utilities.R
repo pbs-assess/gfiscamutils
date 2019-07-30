@@ -49,9 +49,9 @@ split.prior.info <- function(prior.str,
 #'
 #' @return the value at the rank and the index where it was found
 #' @export
-get.age.prop <- function(vec, place = 1){
+get.age.prop <- function(vec, rank = 1){
   prop <- rev(sort(vec))
-  prop <- prop[place]
+  prop <- prop[ran]
   age <- as.numeric(names(vec[vec == prop]))
   c(age, prop)
 }

@@ -4,7 +4,7 @@
 \alias{get.age.prop}
 \title{Get the value at given rank}
 \usage{
-get.age.prop(vec, place = 1)
+get.age.prop(vec, rank = 1)
 }
 \arguments{
 \item{vec}{a vector of values}

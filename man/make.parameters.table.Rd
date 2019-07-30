@@ -69,6 +69,8 @@ make.catchability.parameters.table.q.sens(qa.lst, qb.lst, qc.lst,
 
 \item{am2.lst}{A list of the AM2 iscam model objects}
 
+\item{digits}{Number of decimal points to show}
+
 \item{model.am2}{an iscam model object}
 
 \item{type}{1=biomass, 2=recruitment, 3=F, 4=U, 5=depletion}
@@ -93,10 +95,6 @@ variance-parameter-results.csv}
 \item{qb.lst}{List of AM1 models for q sensitivities}
 
 \item{qc.lst}{List of AM1 models for q sensitivities}
-
-\item{syr}{start year for table}
-
-\item{tabular.environment}{tabular environment for latex}
 }
 \value{
 an xtable

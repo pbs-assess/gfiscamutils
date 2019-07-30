@@ -1,11 +1,27 @@
 #' Make an xtable in the proper format for parameter estimates and priors
 #'
+#' @param var the variance parameter results data as loaded from
+#' variance-parameter-results.csv
+#' @param which.model which model to make the table for, 1 = AM1, 2 = AM2
+#' @param tab the contents of the csv file as read in nby [readr::read_csv()]
 #' @param model an iscam model object
+#' @param model.am2 an iscam model object
+#' @param models a list of iscam model objects
+#' @param model.names a vector of names of the models
+#' @param type 1=biomass, 2=recruitment, 3=F, 4=U, 5=depletion
+#' @param syr start year for table
+#' @param tabular.environment latex tabular environment value
 #' @param xcaption caption to appear in the calling document
 #' @param xlabel the label used to reference the table in latex
 #' @param font.size size of the font for the table
 #' @param space.size size of the vertical spaces for the table
 #' @param placement latex code for placement of the table in document
+#' @param am1.lst A list of the AM1 iscam model objects
+#' @param am2.lst A list of the AM2 iscam model objects
+#' @param digits Number of decimal points to show
+#' @param qa.lst List of AM1 models for q sensitivities
+#' @param qb.lst List of AM1 models for q sensitivities
+#' @param qc.lst List of AM1 models for q sensitivities
 #'
 #' @export
 #' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align
@@ -214,8 +230,6 @@ make.parameters.table <- function(model,
 #' Make a tbale of the catchability parameters - Herring specific
 #'
 #' @rdname make.parameters.table
-#' @param am1.lst A list of the AM1 iscam model objects
-#' @param am2.lst A list of the AM2 iscam model objects
 #'
 #' @export
 #' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align
@@ -478,7 +492,6 @@ make.parameters.est.table <- function(model,
 
 #' Make a table of reference points
 #'
-#' @param model.am2 an iscam model object
 #' @rdname make.parameters.table
 #'
 #' @return an xtable
@@ -541,9 +554,6 @@ make.ref.points.table <- function(model.am2,
 
 #' Make a table for values such as biomass and recruitment
 #'
-#' @param type 1=biomass, 2=recruitment, 3=F, 4=U, 5=depletion
-#' @param syr start year for table
-#' @param tabular.environment latex tabular environment value
 #' @rdname make.parameters.table
 #'
 #' @return an xtable
@@ -607,8 +617,6 @@ make.value.table <- function(model,
 #' Make a table with both spawning biomass and depletion in it.
 #' Based on [make.value.table()], but wider with both and extra headers
 #'
-#' @param syr start year for table
-#' @param tabular.environment tabular environment for latex
 #' @rdname make.parameters.table
 #'
 #' @return an xtable
@@ -682,7 +690,6 @@ make.biomass.depletion.table <- function(model,
 #' Make a table of the sensitivity parameter information as found in
 #' the CSV file in the data directory
 #'
-#' @param tab the contents of the csv file as read in nby [readr::read_csv()]
 #' @rdname make.parameters.table
 #'
 #' @return an xtable
@@ -717,8 +724,6 @@ make.sens.parameter.table <- function(tab,
 
 #' Make a table of the values of q, including quantiles
 #'
-#' @param models a list of iscam model objects
-#' @param model.names a vector of names of the models
 #' @rdname make.parameters.table
 #'
 #' @return an xtable
@@ -776,9 +781,6 @@ make.sens.q.table <- function(models,
 
 #' Make a table for the variance results data
 #'
-#' @param var the variance parameter results data as loaded from
-#' variance-parameter-results.csv
-#' @param which.model which model to make the table for, 1 = AM1, 2 = AM2
 #' @rdname make.parameters.table
 #'
 #' @return an xtable
@@ -912,9 +914,6 @@ make.variance.table <- function(var,
 
 #' Make a table of catchability parameters for sensitivities
 #'
-#' @param qa.lst List of AM1 models for q sensitivities
-#' @param qb.lst List of AM1 models for q sensitivities
-#' @param qc.lst List of AM1 models for q sensitivities
 #' @rdname make.parameters.table
 #'
 #' @return an xtable

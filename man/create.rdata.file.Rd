@@ -10,6 +10,8 @@ create.rdata.file(model.dir, ovwrt.rdata = FALSE, load.proj = TRUE,
   verbose = FALSE)
 }
 \arguments{
+\item{model.dir}{Directory name for all models location}
+
 \item{ovwrt.rdata}{overwrite the RData file if it exists? TRUE/FALSE}
 
 \item{load.proj}{Load the projections from the mcmc and do the calculations
@@ -21,6 +23,8 @@ to construct the decision tables}
 
 \item{burnin}{The number of samples to burn away from the beginning of the MCMC}
 
+\item{thin}{The thinning value for MCMC samples}
+
 \item{which.stock}{1-5 for the five herring stocks: 1=HG, 2=PRD, 3=CC,
 4=SOG, 5=WCVI}
 
@@ -29,10 +33,6 @@ to construct the decision tables}
 \item{fixed.cutoffs}{A vector of catch cutoffs to use in decision tables}
 
 \item{verbose}{Say more}
-
-\item{models.dir}{Directory name for all models location}
-
-\item{model.name}{Directory name of model to be loaded}
 }
 \value{
 Nothing

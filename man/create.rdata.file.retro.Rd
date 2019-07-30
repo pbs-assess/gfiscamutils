@@ -23,6 +23,8 @@ to construct the decision tables}
 
 \item{burnin}{The number of samples to burn away from the beginning of the MCMC}
 
+\item{thin}{The thinning value for MCMC samples}
+
 \item{which.stock}{1-5 for the five herring stocks: 1=HG, 2=PRD, 3=CC,
 4=SOG, 5=WCVI}
 

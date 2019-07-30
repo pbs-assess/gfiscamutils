@@ -19,9 +19,7 @@ Imports:
   testthat,
   ggplot2,
   coda,
-  stats,
   RColorBrewer,
-  xtable,
   usethis,
   PBSmodelling,
   dplyr

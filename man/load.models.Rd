@@ -8,8 +8,6 @@ load.models(model.dir.names)
 }
 \arguments{
 \item{model.dir.names}{Vector of directory names of models to be loaded}
-
-\item{models.dir}{Directory name for all models location}
 }
 \value{
 A list of iscam model objects
