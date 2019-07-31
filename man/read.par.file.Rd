@@ -4,12 +4,10 @@
 \alias{read.par.file}
 \title{Read in the contents of the iscam par file}
 \usage{
-read.par.file(file = NULL, verbose = FALSE)
+read.par.file(file = NULL)
 }
 \arguments{
-\item{file}{Filename (full path)}
-
-\item{verbose}{Say more}
+\item{file}{Filename}
 }
 \value{
 A list representing the contents of the iscam par file

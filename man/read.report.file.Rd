@@ -7,7 +7,7 @@
 read.report.file(fn)
 }
 \arguments{
-\item{fn}{Filename (full path)}
+\item{fn}{Filename}
 }
 \value{
 A list representing everything in the report file

@@ -4,32 +4,12 @@
 \alias{load.iscam.files}
 \title{Construct an iscam model object from its input and output files}
 \usage{
-load.iscam.files(model.dir, burnin = 1000, thin = 1, low = 0.025,
-  high = 0.975, load.proj = TRUE, which.stock = NULL,
-  which.model = NULL, fixed.cutoffs, verbose = FALSE)
+load.iscam.files(model.dir, ...)
 }
 \arguments{
 \item{model.dir}{The directory the model is in}
 
-\item{burnin}{The number of samples to burn away from the beginning of the MCMC}
-
-\item{thin}{The thinning to apply to the MCMC posterior samples}
-
-\item{low}{Lower quantile value to apply to MCMC samples}
-
-\item{high}{Higher quantile value to apply to MCMC samples}
-
-\item{load.proj}{Load the projections from the MCMC and do the calculations
-to construct the decision tables}
-
-\item{which.stock}{1-5 for the five herring stocks: 1=HG, 2=PRD, 3=CC,
-4=SOG, 5=WCVI}
-
-\item{which.model}{1 = AM1 or 2 = AM2 for herring}
-
-\item{fixed.cutoffs}{A vector of catch cutoffs to use in decision tables}
-
-\item{verbose}{Say more}
+\item{...}{arguments to pass to [calc.mcmc()]}
 }
 \value{
 An iscam model object

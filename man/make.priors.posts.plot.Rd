@@ -20,7 +20,7 @@ Plot priors and posteriors for the given isam model
 \details{
 Plots the priors overlaid on the posteriors for the given iscm model.
   If priors.only is TRUE, only the priors will be plotted.
-  The values in the control file (model$ctl$param) for each
+  The values in the control file (model$ctl$params) for each
   prior are:
   1. ival  = initial value
   2. lb    = lower bound

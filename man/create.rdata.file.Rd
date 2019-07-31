@@ -4,35 +4,14 @@
 \alias{create.rdata.file}
 \title{Create a .RData file to hold the model's data and outputs}
 \usage{
-create.rdata.file(model.dir, ovwrt.rdata = FALSE, load.proj = TRUE,
-  low = 0.025, high = 0.975, burnin = 1000, thin = 1,
-  which.stock = NULL, which.model = NULL, fixed.cutoffs,
-  verbose = FALSE)
+create.rdata.file(model.dir, ovwrt.rdata = FALSE, ...)
 }
 \arguments{
 \item{model.dir}{Directory name for all models location}
 
 \item{ovwrt.rdata}{overwrite the RData file if it exists? TRUE/FALSE}
 
-\item{load.proj}{Load the projections from the mcmc and do the calculations
-to construct the decision tables}
-
-\item{low}{Lower quantile value to apply to MCMC samples}
-
-\item{high}{Higher quantile value to apply to MCMC samples}
-
-\item{burnin}{The number of samples to burn away from the beginning of the MCMC}
-
-\item{thin}{The thinning value for MCMC samples}
-
-\item{which.stock}{1-5 for the five herring stocks: 1=HG, 2=PRD, 3=CC,
-4=SOG, 5=WCVI}
-
-\item{which.model}{1 = AM1 or 2 = AM2 for herring}
-
-\item{fixed.cutoffs}{A vector of catch cutoffs to use in decision tables}
-
-\item{verbose}{Say more}
+\item{...}{arguments to pass to [load.iscam.files()]}
 }
 \value{
 Nothing

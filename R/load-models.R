@@ -1,17 +1,7 @@
 #' Construct an iscam model object from its input and output files
 #'
 #' @param model.dir The directory the model is in
-#' @param burnin The number of samples to burn away from the beginning of the MCMC
-#' @param thin The thinning to apply to the MCMC posterior samples
-#' @param low Lower quantile value to apply to MCMC samples
-#' @param high Higher quantile value to apply to MCMC samples
-#' @param load.proj Load the projections from the MCMC and do the calculations
-#'   to construct the decision tables
-#' @param which.stock 1-5 for the five herring stocks: 1=HG, 2=PRD, 3=CC,
-#'   4=SOG, 5=WCVI
-#' @param which.model 1 = AM1 or 2 = AM2 for herring
-#' @param fixed.cutoffs A vector of catch cutoffs to use in decision tables
-#' @param verbose Say more
+#' @param ... arguments to pass to [calc.mcmc()]
 #'
 #' @details Load all the iscam files for output and input, and return the model object
 #'   If MCMC directory is present, load that and perform calculations for mcmc
@@ -19,21 +9,12 @@
 #'
 #' @return An iscam model object
 #' @export
-load.iscam.files <- function(model.dir,
-                             burnin = 1000,
-                             thin = 1,
-                             low = 0.025,
-                             high = 0.975,
-                             load.proj = TRUE,
-                             which.stock = NULL,
-                             which.model = NULL,
-                             fixed.cutoffs,
-                             verbose = FALSE){
+load.iscam.files <- function(model.dir, ...){
 
   model <- list()
   model$path <- model.dir
   ## Get the names of the input files
-  inp.files <- fetch.file.names(model.dir, starter.file.name)
+  inp.files <- fetch.file.names(model.dir, iscam.data.file)
   model$dat.file <- inp.files[[1]]
   model$ctl.file <- inp.files[[2]]
   model$proj.file <- inp.files[[3]]
@@ -66,16 +47,7 @@ load.iscam.files <- function(model.dir,
   ## If it has an 'mcmc' sub-directory, load it
   if(dir.exists(model$mcmcpath)){
     model$mcmc <- read.mcmc(model$mcmcpath)
-    ## Do the mcmc quantile calculations
-    model$mcmccalcs <- calc.mcmc(model,
-                                 burnin,
-                                 thin,
-                                 lower = low,
-                                 upper = high,
-                                 load.proj = load.proj,
-                                 which.stock = which.stock,
-                                 which.model = which.model,
-                                 fixed.cutoffs = fixed.cutoffs)
+    model$mcmccalcs <- calc.mcmc(model, ...)
     model$mcmc$params <- strip.areas.groups(model$mcmc$params)
     model$mcmc$params <- fix.m(model$mcmc$params)
     model$mcmc$params.est <- get.estimated.params(model$mcmc$params)
@@ -138,17 +110,7 @@ delete.dirs <- function(models.dir = model.dir,
 #'
 #' @param model.dir Directory name for all models location
 #' @param ovwrt.rdata overwrite the RData file if it exists? TRUE/FALSE
-#' @param load.proj Load the projections from the mcmc and do the calculations
-#'   to construct the decision tables
-#' @param low Lower quantile value to apply to MCMC samples
-#' @param high Higher quantile value to apply to MCMC samples
-#' @param burnin The number of samples to burn away from the beginning of the MCMC
-#' @param thin The thinning value for MCMC samples
-#' @param which.stock 1-5 for the five herring stocks: 1=HG, 2=PRD, 3=CC,
-#'   4=SOG, 5=WCVI
-#' @param which.model 1 = AM1 or 2 = AM2 for herring
-#' @param fixed.cutoffs A vector of catch cutoffs to use in decision tables
-#' @param verbose Say more
+#' @param ... arguments to pass to [load.iscam.files()]
 #'
 #' @details If an RData file exists, and overwrite is FALSE, return immediately.
 #'   If no RData file exists, the model will be loaded from outputs into
@@ -161,15 +123,7 @@ delete.dirs <- function(models.dir = model.dir,
 #' @export
 create.rdata.file <- function(model.dir,
                               ovwrt.rdata = FALSE,
-                              load.proj = TRUE,
-                              low = 0.025,
-                              high = 0.975,
-                              burnin = 1000,
-                              thin = 1,
-                              which.stock = NULL,
-                              which.model = NULL,
-                              fixed.cutoffs,
-                              verbose = FALSE){
+                              ...){
 
   if(!dir.exists(model.dir)){
     stop(curr.func.name,"Error - the directory ", model.dir,
@@ -199,102 +153,9 @@ create.rdata.file <- function(model.dir,
 
   ## If this point is reached, no RData file exists so it
   ##  has to be built from scratch
-  model <- load.iscam.files(model.dir,
-                            low = low,
-                            high = high,
-                            load.proj = load.proj,
-                            burnin = burnin,
-                            thin = thin,
-                            which.stock = which.stock,
-                            which.model = which.model,
-                            fixed.cutoffs = fixed.cutoffs)
+  model <- load.iscam.files(model.dir, ...)
 
 
-  ## Save the model as an RData file
-  save(model, file = rdata.file)
-  invisible()
-}
-
-#' Create a .RData file to hold the restrospective model's data and outputs
-#'
-#' @param model.dir Directory name for all models location
-#' @param ovwrt.rdata overwrite the RData file if it exists? TRUE/FALSE
-#' @param load.proj Load the projections from the mcmc and do the calculations
-#'   to construct the decision tables
-#' @param low Lower quantile value to apply to MCMC samples
-#' @param high Higher quantile value to apply to MCMC samples
-#' @param burnin The number of samples to burn away from the beginning of the MCMC
-#' @param thin The thinning value for MCMC samples
-#' @param which.stock 1-5 for the five herring stocks: 1=HG, 2=PRD, 3=CC,
-#'   4=SOG, 5=WCVI
-#' @param which.model 1 = AM1 or 2 = AM2 for herring
-#' @param verbose Say more
-#'
-#' @details Create a .RData file to hold the restrospective model's data and outputs.
-#'   If an RData file exists, and overwrite is FALSE, return immediately.
-#'   If no RData file exists, the model will be loaded from outputs into
-#'   an R list and saved as an RData file in the correct directory.
-#'   When this function exits, an RData file will be located in the
-#'   directory given by model.name.
-#'   Assumes the files model-setup.r and utilities.r has been sourced.
-#'
-#' @return Nothing
-#' @export
-create.rdata.file.retro <- function(model.dir,
-                                    ovwrt.rdata = FALSE,
-                                    load.proj = TRUE,
-                                    low = 0.025,
-                                    high = 0.975,
-                                    burnin = 1000,
-                                    thin = 1,
-                                    which.stock = NULL,
-                                    which.model = NULL,
-                                    verbose = FALSE){
-
-  if(!dir.exists(model.dir)){
-    warning("Warning - the directory ", model.dir,
-            " does not exist. Skipping...\n")
-    return(NULL)
-  }
-  ## The RData file will have the same name as the directory it is in
-  ## If the model.dir has a slash in it, remove the slash and
-  ##  everything before it. This allows a model to have a name which
-  ##  is a path.
-  tmp <- strsplit(model.dir, "/")[[1]]
-  ## Remove all double-dots
-  tmp <- tmp[tmp != ".."]
-  ## Keep only the last two strings
-  tmp <- tmp[c(length(tmp) - 1, length(tmp))]
-  rdata.file <- paste0(tmp, collapse = "-")
-  rdata.file <- file.path(model.dir, paste0(rdata.file, ".RData"))
-  if(file.exists(rdata.file)){
-    if(ovwrt.rdata){
-      ## Delete the RData file
-      message("RData file found in ", model.dir,
-              ". Deleting...\n")
-      unlink(rdata.file, force = TRUE)
-    }else{
-      message("RData file found in ", model.dir, "\n")
-      return(invisible())
-    }
-  }else{
-    message("No RData file found in ", model.dir,
-            ". Creating one now.\n")
-  }
-
-  ## If this point is reached, no RData file exists so it
-  ##  has to be built from scratch
-  model <- load.iscam.files(model.dir,
-                            low = low,
-                            high = high,
-                            load.proj = load.proj,
-                            burnin = burnin,
-                            thin = thin,
-                            which.stock = which.stock,
-                            which.model = which.model)
-
-
-  ## Save the model as an RData file
   save(model, file = rdata.file)
   invisible()
 }
@@ -340,15 +201,8 @@ load.models <- function(model.dir.names){
 #'   3. Projection file name
 #'
 #' @export
-fetch.file.names <- function(path, ## Full path to the file
-                             filename
-                             ){
-  ## Read the starter file and return a list with 3 elements:
-  ## 1. Data file name
-  ## 2. Control file name
-  ## 3. Projection file name
+fetch.file.names <- function(path, filename){
 
-  ## Get the path the file is in
   d <- readLines(file.path(path, filename), warn = FALSE)
   ## Remove comments
   d <- gsub("#.*", "", d)
@@ -361,7 +215,7 @@ fetch.file.names <- function(path, ## Full path to the file
 
 #' Read in the iscam report (.rep) file
 #'
-#' @param fn Filename (full path)
+#' @param fn Filename
 #'
 #' @return A list representing everything in the report file
 #' @export
@@ -868,12 +722,10 @@ read.control.file <- function(file = NULL,
 #' Read in the contents of the iscam projection file
 #'
 #' @param file Filename
-#' @param verbose Say more
 #'
 #' @return A list representing the contents of the iscam projection file
 #' @export
-read.projection.file <- function(file = NULL,
-                                 verbose = FALSE){
+read.projection.file <- function(file = NULL){
 
   data <- readLines(file, warn = FALSE)
 
@@ -938,13 +790,11 @@ read.projection.file <- function(file = NULL,
 
 #' Read in the contents of the iscam par file
 #'
-#' @param file Filename (full path)
-#' @param verbose Say more
+#' @param file Filename
 #'
 #' @return A list representing the contents of the iscam par file
 #' @export
-read.par.file <- function(file = NULL,
-                          verbose = FALSE){
+read.par.file <- function(file = NULL){
 
   data <- readLines(file, warn = FALSE)
   tmp <- list()
@@ -1215,11 +1065,8 @@ mcmc.thin <- function(mcmc.dat,
 #' @param lower Lower quantile value to apply to MCMC samples
 #' @param upper Upper quantile value to apply to MCMC samples
 #' @param load.proj Load the projections from the MCMC and do the calculations
+#' @param ... arguments to pass to [calc.probabilities()]
 #'   to construct the decision tables
-#' @param which.stock 1-5 for the five herring stocks: 1=HG, 2=PRD, 3=CC,
-#'   4=SOG, 5=WCVI
-#' @param which.model 1 = AM1 or 2 = AM2 for herring
-#' @param fixed.cutoffs A vector of catch cutoffs to use in decision tables
 #'
 #' @return A list of each parameter for which quantiles were calculated
 #' @export
@@ -1229,12 +1076,10 @@ calc.mcmc <- function(model,
                       lower = 0.025,
                       upper = 0.975,
                       load.proj = TRUE,
-                      which.stock = NULL,
-                      which.model = NULL,
-                      fixed.cutoffs){
+                      ...){
 
-  if(is.null(mcmc)){
-    stop("The mcmc list was null. Check read.mcmc function.")
+  if(is.null(model$mcmc)){
+    stop("The mcmc list was null. Check read.mcmc function.", call. = FALSE)
   }
 
   probs <- c(lower, 0.5, upper)
@@ -1399,9 +1244,10 @@ calc.mcmc <- function(model,
     proj.dat <- calc.probabilities(model,
                                    burnin,
                                    thin,
-                                   which.stock = which.stock,
-                                   which.model = which.model,
-                                   fixed.cutoffs = fixed.cutoffs)
+                                   ...)
+                                   # which.stock. = which.stock,
+                                   # which.model. = which.model,
+                                   # fixed.cutoffs. = fixed.cutoffs)
 
     proj.quants <- apply(model$mcmc$proj[model$mcmc$proj$TAC == 0,],
                          2,
@@ -1603,7 +1449,6 @@ calc.probabilities <- function(model,
     warning("which.model must be 1 or 2, not ", which.model, ".")
     return(NULL)
   }
-
   mc <- model$mcmc
   proj <- mc$proj
   tac <- sort(unique(proj$TAC))

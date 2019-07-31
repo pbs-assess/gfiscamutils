@@ -48,7 +48,7 @@ strip.static.params <- function(model, dat){
   ##  diagnostic plots. If there are no static parameters, NULL will be returned
 
   # Check the control file to see which parameters were static
-  inp <- as.data.frame(model$ctl$param)
+  inp <- as.data.frame(model$ctl$params)
   static <- inp[inp$phz <= 0,]
   snames <- rownames(static)
 

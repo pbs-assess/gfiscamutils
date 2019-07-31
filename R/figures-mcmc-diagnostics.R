@@ -5,7 +5,7 @@
 #'
 #' @details Plots the priors overlaid on the posteriors for the given iscm model.
 #'   If priors.only is TRUE, only the priors will be plotted.
-#'   The values in the control file (model$ctl$param) for each
+#'   The values in the control file (model$ctl$params) for each
 #'   prior are:
 #'   1. ival  = initial value
 #'   2. lb    = lower bound
@@ -43,7 +43,7 @@ make.priors.posts.plot <- function(model,
   mc <- mc[, -grep("sigma", names(mc))]
   post.names <- names(mc)
 
-  prior.specs <- as.data.frame(model$ctl$param)
+  prior.specs <- as.data.frame(model$ctl$params)
   ## Remove fixed parameters
   prior.specs <- prior.specs[prior.specs$phz > 0,]
   ## Remove upper and lower bound, and phase information, but keep initial

@@ -4,12 +4,10 @@
 \alias{read.projection.file}
 \title{Read in the contents of the iscam projection file}
 \usage{
-read.projection.file(file = NULL, verbose = FALSE)
+read.projection.file(file = NULL)
 }
 \arguments{
 \item{file}{Filename}
-
-\item{verbose}{Say more}
 }
 \value{
 A list representing the contents of the iscam projection file

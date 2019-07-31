@@ -5,8 +5,7 @@
 \title{Perform some quantile calculations on the MCMC posteriors}
 \usage{
 calc.mcmc(model, burnin = 1000, thin = 1, lower = 0.025,
-  upper = 0.975, load.proj = TRUE, which.stock = NULL,
-  which.model = NULL, fixed.cutoffs)
+  upper = 0.975, load.proj = TRUE, ...)
 }
 \arguments{
 \item{model}{An iscam model object}
@@ -19,15 +18,10 @@ calc.mcmc(model, burnin = 1000, thin = 1, lower = 0.025,
 
 \item{upper}{Upper quantile value to apply to MCMC samples}
 
-\item{load.proj}{Load the projections from the MCMC and do the calculations
+\item{load.proj}{Load the projections from the MCMC and do the calculations}
+
+\item{...}{arguments to pass to [calc.probabilities()]
 to construct the decision tables}
-
-\item{which.stock}{1-5 for the five herring stocks: 1=HG, 2=PRD, 3=CC,
-4=SOG, 5=WCVI}
-
-\item{which.model}{1 = AM1 or 2 = AM2 for herring}
-
-\item{fixed.cutoffs}{A vector of catch cutoffs to use in decision tables}
 }
 \value{
 A list of each parameter for which quantiles were calculated
