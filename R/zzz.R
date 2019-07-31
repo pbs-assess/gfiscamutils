@@ -1,4 +1,5 @@
 globalVariables(c(
+"iscam.starter.file",
 "Bed",
 "CRS",
 "Case",

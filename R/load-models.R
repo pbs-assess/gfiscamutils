@@ -16,7 +16,7 @@ load.iscam.files <- function(model.dir, mcmc.subdir = "mcmc", ...){
   model <- list()
   model$path <- model.dir
   ## Get the names of the input files
-  inp.files <- fetch.file.names(model.dir, iscam.data.file)
+  inp.files <- fetch.file.names(model.dir, iscam.starter.file)
   model$dat.file <- inp.files[[1]]
   model$ctl.file <- inp.files[[2]]
   model$proj.file <- inp.files[[3]]

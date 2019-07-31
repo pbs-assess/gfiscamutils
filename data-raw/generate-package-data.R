@@ -18,7 +18,7 @@ mpd.proj.file <- "iscammpd_proj_Gear1.csv"
 
 ## iscam program filenames
 iscam.exe.file <- "iscam.exe"
-iscam.data.file <- "iscam.dat"
+iscam.starter.file <- "iscam.dat"
 
 use_data(model.class, overwrite = TRUE)
 use_data(model.lst.class, overwrite = TRUE)
@@ -35,5 +35,5 @@ use_data(mcmc.vuln.biomass.file, overwrite = TRUE)
 use_data(mcmc.proj.file, overwrite = TRUE)
 use_data(mpd.proj.file, overwrite = TRUE)
 use_data(iscam.exe.file, overwrite = TRUE)
-use_data(iscam.data.file, overwrite = TRUE)
+use_data(iscam.starter.file, overwrite = TRUE)
 #use_data(, overwrite = TRUE)

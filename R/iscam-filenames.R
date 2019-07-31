@@ -65,5 +65,5 @@
 
 #' iscam input data filename
 #'
-#' Data file
-"iscam.data.file"
+#' Starter file
+"iscam.starter.file"
