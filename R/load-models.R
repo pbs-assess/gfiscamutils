@@ -142,7 +142,7 @@ create.rdata.file <- function(model.dir,
     if(ovwrt.rdata){
       ## Delete the RData file
       message("RData file found in ", model.dir,
-              ". Deleting...\n")
+              ". Replacing...\n")
       unlink(rdata.file, force = TRUE)
     }else{
       message("RData file found in ", model.dir, "\n")
