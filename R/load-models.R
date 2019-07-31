@@ -1,6 +1,8 @@
 #' Construct an iscam model object from its input and output files
 #'
 #' @param model.dir The directory the model is in
+#' @param mcmc.subdir subdirectory in which mcmc results for models are stored.
+#'  Can be the empty string in which case they will be in the model's root directory
 #' @param ... arguments to pass to [calc.mcmc()]
 #'
 #' @details Load all the iscam files for output and input, and return the model object
@@ -9,7 +11,7 @@
 #'
 #' @return An iscam model object
 #' @export
-load.iscam.files <- function(model.dir, ...){
+load.iscam.files <- function(model.dir, mcmc.subdir = "mcmc", ...){
 
   model <- list()
   model$path <- model.dir
@@ -42,7 +44,7 @@ load.iscam.files <- function(model.dir, ...){
   ## Set default mcmc members to NA. Later code depends on this.
   model$mcmc <- NA
   ## Set the mcmc path. This doesn't mean it exists.
-  model$mcmcpath <- file.path(model.dir, "mcmc")
+  model$mcmcpath <- file.path(model.dir, mcmc.subdir)
 
   ## If it has an 'mcmc' sub-directory, load it
   if(dir.exists(model$mcmcpath)){
