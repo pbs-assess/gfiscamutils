@@ -68,8 +68,8 @@ make.selex.comparison.plot <- function(model,
     a50 <- data[[sex]][[2]][1,]
     sigma_a50 <- data[[sex]][[2]][2,]
     if(is.null(a50) | is.null(sigma_a50)){
-      cat0("Error - element 'ma' of object 'bio' does not exist. Run the ",
-           "maturity/age model from the Biotool tab.")
+      warning("element 'ma' of object 'bio' does not exist. Run the ",
+              "maturity/age model from the Biotool tab.")
       return(NULL)
     }
     gear.names <- c(gear.names, "Female maturity")

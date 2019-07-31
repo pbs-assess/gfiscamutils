@@ -57,3 +57,13 @@
 #'
 #' MPD projection file
 "mpd.proj.file"
+
+#' iscam executable filename
+#'
+#' Executable file
+"iscam.exe.file"
+
+#' iscam input data filename
+#'
+#' Data file
+"iscam.data.file"

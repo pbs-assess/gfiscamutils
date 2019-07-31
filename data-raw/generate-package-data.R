@@ -16,6 +16,10 @@ mcmc.vuln.biomass.file <- "iscam_vbt_mcmc.csv"
 mcmc.proj.file <- "iscammcmc_proj_Gear1.csv"
 mpd.proj.file <- "iscammpd_proj_Gear1.csv"
 
+## iscam program filenames
+iscam.exe.file <- "iscam.exe"
+iscam.data.file <- "iscam.dat"
+
 use_data(model.class, overwrite = TRUE)
 use_data(model.lst.class, overwrite = TRUE)
 use_data(rep.file, overwrite = TRUE)
@@ -30,4 +34,6 @@ use_data(mcmc.fishing.mort.u.file, overwrite = TRUE)
 use_data(mcmc.vuln.biomass.file, overwrite = TRUE)
 use_data(mcmc.proj.file, overwrite = TRUE)
 use_data(mpd.proj.file, overwrite = TRUE)
+use_data(iscam.exe.file, overwrite = TRUE)
+use_data(iscam.data.file, overwrite = TRUE)
 #use_data(, overwrite = TRUE)

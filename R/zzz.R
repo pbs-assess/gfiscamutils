@@ -38,7 +38,6 @@ globalVariables(c(
 "bbox",
 "bind_rows",
 "box",
-"cat0",
 "col2rgb",
 "cols",
 "crop",

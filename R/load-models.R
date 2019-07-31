@@ -185,16 +185,16 @@ create.rdata.file <- function(model.dir,
   if(file.exists(rdata.file)){
     if(ovwrt.rdata){
       ## Delete the RData file
-      cat0(curr.func.name, "RData file found in ", model.dir,
-           ". Deleting...\n")
+      message("RData file found in ", model.dir,
+              ". Deleting...\n")
       unlink(rdata.file, force = TRUE)
     }else{
-      cat0(curr.func.name, "RData file found in ", model.dir, "\n")
+      message("RData file found in ", model.dir, "\n")
       return(invisible())
     }
   }else{
-    cat0(curr.func.name, "No RData file found in ", model.dir,
-         ". Creating one now.\n")
+    message("No RData file found in ", model.dir,
+            ". Creating one now.\n")
   }
 
   ## If this point is reached, no RData file exists so it
@@ -270,16 +270,16 @@ create.rdata.file.retro <- function(model.dir,
   if(file.exists(rdata.file)){
     if(ovwrt.rdata){
       ## Delete the RData file
-      cat0("RData file found in ", model.dir,
-           ". Deleting...\n")
+      message("RData file found in ", model.dir,
+              ". Deleting...\n")
       unlink(rdata.file, force = TRUE)
     }else{
-      cat0("RData file found in ", model.dir, "\n")
+      message("RData file found in ", model.dir, "\n")
       return(invisible())
     }
   }else{
-    cat0("No RData file found in ", model.dir,
-         ". Creating one now.\n")
+    message("No RData file found in ", model.dir,
+            ". Creating one now.\n")
   }
 
   ## If this point is reached, no RData file exists so it
