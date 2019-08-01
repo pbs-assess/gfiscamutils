@@ -218,7 +218,7 @@ make.catches.plot <- function(catches,
 #' @param group group number as it appears in iscam data file
 #' @param sex sex number as it appears in iscam data file
 #' @param type type number as it appears in iscam data file
-#' @param thm [ggplot::theme()] funnction to use
+#' @param thm [ggplot::theme()] function to use
 #'
 #' @return A ggplot object
 #' @importFrom ggplot2 ggplot scale_x_continuous scale_y_continuous scale_fill_grey theme
