@@ -5,7 +5,7 @@
 \title{Plot catch from a data frames as extracted from iscam data (dat) files}
 \usage{
 plot_catch(model, gear = 1, area = 1, group = 1, sex = 0,
-  type = 1, thm = theme_bw(), translate = FALSE)
+  type = 1, translate = FALSE)
 }
 \arguments{
 \item{model}{a gfiscamutils model object}
@@ -19,8 +19,6 @@ plot_catch(model, gear = 1, area = 1, group = 1, sex = 0,
 \item{sex}{sex number as it appears in iscam data file}
 
 \item{type}{type number as it appears in iscam data file}
-
-\item{thm}{[ggplot::theme()] function to use}
 
 \item{translate}{Logical. If TRUE, translate to French}
 }

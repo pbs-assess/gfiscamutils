@@ -218,7 +218,6 @@ make.catches.plot <- function(catches,
 #' @param group group number as it appears in iscam data file
 #' @param sex sex number as it appears in iscam data file
 #' @param type type number as it appears in iscam data file
-#' @param thm [ggplot::theme()] function to use
 #'
 #' @return A ggplot object
 #' @importFrom ggplot2 ggplot scale_x_continuous scale_y_continuous scale_fill_grey theme
@@ -232,7 +231,6 @@ plot_catch <- function(model,
                        group = 1,
                        sex = 0,
                        type = 1,
-                       thm = theme_bw(),
                        translate = FALSE){
   df <- as.data.frame(model$dat$catch)
   g <- ggplot(df, aes(x = year, y = value)) +
@@ -240,7 +238,6 @@ plot_catch <- function(model,
     scale_y_continuous(labels = comma ) +
     #expand_limits(x = rangeX) +
     scale_fill_grey(start = 0, end = 0.8) +
-    thm +
     theme(legend.position = "top") +
     #facet_wrap( ~ RegionName, ncol=2, dir="v", scales="free_y" )
     labs(x = en2fr("Year", translate),
