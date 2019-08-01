@@ -1,3 +1,30 @@
+#' Create RData files for models found in the directories given by `dirs`
+#'
+#' @param dirs List of directories to nuild Rdata fies for
+#' @param ... arguments passed to [create.rdata.file()]
+#'
+#' @export
+build_herring_rdata_files <- function(dirs, ...){
+  invisible(lapply(1:length(dirs),
+                   function(x){
+                     bm <- dirs[[x]]
+                     if(length(grep("HG", bm))){
+                       which_stock <- 1
+                     }else if(length(grep("PRD", bm))){
+                       which_stock <- 2
+                     }else if(length(grep("CC", bm))){
+                       which_stock <- 3
+                     }else if(length(grep("SOG", bm))){
+                       which_stock <- 4
+                     }else if(length(grep("WCVI", bm))){
+                       which_stock <- 5
+                     }else{
+                       which_stock <- 0
+                     }
+                     create.rdata.file(bm, which.stock = which_stock, ...)
+                   }))
+}
+
 #' Create a .RData file to hold the model's data and outputs
 #'
 #' @param model.dir Directory name for all models location
