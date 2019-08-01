@@ -20,7 +20,7 @@ plot_catch(model, gear = 1, area = 1, group = 1, sex = 0,
 
 \item{type}{type number as it appears in iscam data file}
 
-\item{thm}{[ggplot::theme()] funnction to use}
+\item{thm}{[ggplot::theme()] function to use}
 
 \item{translate}{Logical. If TRUE, translate to French}
 }
