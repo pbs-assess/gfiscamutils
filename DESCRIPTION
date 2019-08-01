@@ -26,6 +26,8 @@ Imports:
   dplyr,
   sp,
   rgeos,
-  here
+  here,
+  rosettafish,
+  scales
 LazyData: true
 RoxygenNote: 6.1.1

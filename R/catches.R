@@ -208,3 +208,43 @@ make.catches.plot <- function(catches,
   g <- ggplot(j, aes(year, gear, value)) + geom_bar(aes(colour=gear))
   g
 }
+
+#' Plot catch from a data frames as extracted from iscam data (dat) files
+#'
+#' @param model a gfiscamutils model object
+#' @param translate Logical. If TRUE, translate to French
+#' @param gear gear number as it appears in iscam data file
+#' @param area area number as it appears in iscam data file
+#' @param group group number as it appears in iscam data file
+#' @param sex sex number as it appears in iscam data file
+#' @param type type number as it appears in iscam data file
+#' @param thm [ggplot::theme()] funnction to use
+#'
+#' @return A ggplot object
+#' @importFrom ggplot2 ggplot scale_x_continuous scale_y_continuous scale_fill_grey theme
+#'  theme_bw facet_wrap labs
+#' @importFrom scales comma
+#' @importFrom rosettafish en2fr
+#' @export
+plot_catch <- function(model,
+                       gear = 1,
+                       area = 1,
+                       group = 1,
+                       sex = 0,
+                       type = 1,
+                       thm = theme_bw(),
+                       translate = FALSE){
+  df <- as.data.frame(model$dat$catch)
+  g <- ggplot(df, aes(x = year, y = value)) +
+    scale_x_continuous(breaks = seq(from = 1000, to = 3000, by = 10)) +
+    scale_y_continuous(labels = comma ) +
+    #expand_limits(x = rangeX) +
+    scale_fill_grey(start = 0, end = 0.8) +
+    thm +
+    theme(legend.position = "top") +
+    #facet_wrap( ~ RegionName, ncol=2, dir="v", scales="free_y" )
+    labs(x = en2fr("Year", translate),
+         y = paste(en2fr("Catch", translate), " (1000 t)"))
+
+  g
+}
