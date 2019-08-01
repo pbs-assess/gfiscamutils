@@ -5,7 +5,7 @@
 #' @export
 herring_theme <- function(){
   theme_bw() +
-  theme(legensd.box.background = element_rect(fill = alpha("white", 0.7)),
+  theme(legend.box.background = element_rect(fill = alpha("white", 0.7)),
         legend.box.margin = margin(1, 1, 1, 1, "mm"),
         legend.key = element_blank(),
         legend.margin = margin(),
