@@ -629,7 +629,12 @@ delete.dirs <- function(models.dir = model.dir,
 #' @export
 fetch.file.names <- function(path, filename){
 
-  d <- readLines(file.path(path, filename), warn = FALSE)
+  fn <- file.path(path, filename)
+  if(!file.exists(fn)){
+    stop("The file ", fn, " does not exist. It must be present and it must have three lines: ",
+         " data file name, control file name, and projection file name.", call. = FALSE)
+  }
+  d <- readLines(fn, warn = FALSE)
   ## Remove comments
   d <- gsub("#.*", "", d)
   ## Remove trailing whitespace
@@ -663,6 +668,11 @@ fetch.file.names <- function(path, filename){
 #'   A label must start with an alphabetic character followed by
 #'   any number of alphanumeric characters (includes underscore and .)
 read.report.file <- function(fn){
+
+  if(!file.exists(fn)){
+    warning("Report file ", basename(fn)," not found in ", dirname(fn), ". Setting data to NA.")
+    return(NA)
+  }
 
   dat <- readLines(fn, warn = FALSE)
   # Remove preceeding and trailing whitespace on all elements,
@@ -730,6 +740,11 @@ read.report.file <- function(fn){
 read.data.file <- function(file = NULL,
                            verbose = FALSE){
 
+  if(!file.exists(file)){
+    warning("Data file ", basename(file)," not found in ", dirname(file), ". Is your ",
+            iscam.starter.file, " set up correctly? Setting data to NA.")
+    return(NA)
+  }
   data <- readLines(file, warn=FALSE)
   tmp <- list()
   ind <- 0
@@ -979,6 +994,11 @@ read.control.file <- function(file = NULL,
     stop("You must supply the number of gears with age composition (num.age.gears).")
   }
 
+  if(!file.exists(file)){
+    warning("Control file ", basename(file)," not found in ", dirname(file), ". Is your ",
+            iscam.starter.file, " set up correctly? Setting data to NA.")
+    return(NA)
+  }
   data <- readLines(file, warn = FALSE)
 
   ## Remove any empty lines
@@ -1153,6 +1173,12 @@ read.control.file <- function(file = NULL,
 #' @export
 read.projection.file <- function(file = NULL){
 
+  if(!file.exists(file)){
+    warning("Projection file ", basename(file)," not found in ", dirname(file), ". Is your ",
+            iscam.starter.file, " set up correctly? Setting data to NA.")
+    return(NA)
+  }
+
   data <- readLines(file, warn = FALSE)
 
   ## Remove any empty lines
@@ -1221,6 +1247,11 @@ read.projection.file <- function(file = NULL){
 #' @return A list representing the contents of the iscam par file
 #' @export
 read.par.file <- function(file = NULL){
+
+  if(!file.exists(file)){
+    warning("Par file ", basename(file)," not found in ", dirname(file), ". Setting data to NA.")
+    return(NA)
+  }
 
   data <- readLines(file, warn = FALSE)
   tmp <- list()
@@ -1496,8 +1527,10 @@ calc.ahat <- function(model){
       stop("The structure of the model list is incorrect.")
     }
   }
-
   mpd <- model$mpd
+  if(is.na(mpd)){
+    return(NA)
+  }
   ahat <- mpd$A_hat
   sage <- mpd$n_A_sage[1]
   nage <- mpd$n_A_nage[1]
@@ -1636,6 +1669,9 @@ calc.mpd.logs <- function(mpd,
   inds <- unique(do.call(c, inds.lst))
   log.names <- paste0("log_", names(mpd)[inds])
   vals <- lapply(mpd[inds], log)
+  if(!length(vals)){
+    return(NA)
+  }
   names(vals) <- log.names
   c(mpd, vals)
 }

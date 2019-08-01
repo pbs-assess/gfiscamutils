@@ -233,6 +233,7 @@ plot_catch <- function(model,
                        type = 1,
                        translate = FALSE){
   df <- as.data.frame(model$dat$catch)
+  browser()
   g <- ggplot(df, aes(x = year, y = value)) +
     scale_x_continuous(breaks = seq(from = 1000, to = 3000, by = 10)) +
     scale_y_continuous(labels = comma ) +
