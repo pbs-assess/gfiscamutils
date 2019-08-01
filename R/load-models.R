@@ -1,3 +1,52 @@
+#' Create a .RData file to hold the model's data and outputs
+#'
+#' @param model.dir Directory name for all models location
+#' @param ovwrt.rdata overwrite the RData file if it exists? TRUE/FALSE
+#' @param ... arguments to pass to [load.iscam.files()]
+#'
+#' @details If an RData file exists, and overwrite is FALSE, return immediately.
+#'   If no RData file exists, the model will be loaded from outputs into
+#'   an R list and saved as a .RData file in the correct directory.
+#'   When this function exits, a .RData file will be located in the
+#'   directory given by model.name.
+#'   Assumes the files model-setup.r and utilities.r has been sourced.
+#'
+#' @return Nothing
+#' @export
+create.rdata.file <- function(model.dir,
+                              ovwrt.rdata = FALSE,
+                              ...){
+  if(!dir.exists(model.dir)){
+    stop(curr.func.name,"Error - the directory ", model.dir,
+         " does not exist. Fix the problem and try again.\n", call. = FALSE)
+  }
+  ## The RData file will have the same name as the directory it is in
+  ## If the model.name has a slash in it, remove the slash and
+  ##  everything before it. This allows a model to have a name which
+  ##  is a path.
+  j <- sub("^.*/([A-Z0-9]+)/[A-Z0-9]+$", "\\1", model.dir)
+  k <- sub(".*/", "", model.dir)
+  rdata.file <- file.path(model.dir, paste0(j, "-", k, ".RData"))
+  if(file.exists(rdata.file)){
+    if(ovwrt.rdata){
+      ## Delete the RData file
+      message("RData file found in ", model.dir, ". Replacing it...\n")
+      unlink(rdata.file, force = TRUE)
+    }else{
+      message("RData file found in ", model.dir, ". Leaving it...\n")
+      return(invisible())
+    }
+  }else{
+    message("No RData file found in ", model.dir, ". Creating it...\n")
+  }
+
+  ## If this point is reached, no RData file exists so it
+  ##  has to be built from scratch
+  model <- load.iscam.files(model.dir, ...)
+  save(model, file = rdata.file)
+  invisible()
+}
+
 #' Construct an iscam model object from its input and output files
 #'
 #' @param model.dir The directory the model is in
@@ -12,7 +61,6 @@
 #' @return An iscam model object
 #' @export
 load.iscam.files <- function(model.dir, mcmc.subdir = "mcmc", ...){
-
   model <- list()
   model$path <- model.dir
   ## Get the names of the input files
@@ -57,6 +105,466 @@ load.iscam.files <- function(model.dir, mcmc.subdir = "mcmc", ...){
   }
   class(model) <- model.class
   model
+}
+
+#' Perform some quantile calculations on the MCMC posteriors
+#'
+#' @param model An iscam model object
+#' @param burnin The number of samples to burn away from the beginning of the MCMC
+#' @param thin The thinning to apply to the MCMC posterior samples
+#' @param lower Lower quantile value to apply to MCMC samples
+#' @param upper Upper quantile value to apply to MCMC samples
+#' @param load.proj Load the projections from the MCMC and do the calculations
+#' @param ... arguments to pass to [calc.probabilities()]
+#'   to construct the decision tables
+#'
+#' @return A list of each parameter for which quantiles were calculated
+#' @export
+calc.mcmc <- function(model,
+                      burnin = 1000,
+                      thin = 1,
+                      lower = 0.025,
+                      upper = 0.975,
+                      load.proj = TRUE,
+                      ...){
+  if(is.null(model$mcmc)){
+    stop("The mcmc list was null. Check read.mcmc() function.", call. = FALSE)
+  }
+
+  probs <- c(lower, 0.5, upper)
+
+  ## Parameters
+  mc <- model$mcmc
+  mpd <- model$mpd
+  params.dat <- mc$params
+  params.dat <- strip.areas.groups(params.dat)
+  params.dat <- strip.static.params(model, params.dat)
+  nm <- names(params.dat)
+
+  p.dat <- params.dat[ , -which(nm %in% c("msy",
+                                          "fmsy",
+                                          "bmsy",
+                                          "umsy",
+                                          "ssb"))]
+  p.dat <- fix.m(p.dat)
+  p.dat <- mcmc.thin(p.dat, burnin, thin)
+  ## Calculate sigma and tau and add to p.dat
+  sigtau <- calc.sig.tau(p.dat$rho, p.dat$vartheta)
+  p.dat$tau <- sigtau[[1]]
+  p.dat$sigma <- sigtau[[2]]
+
+  p.dat.log <- calc.logs(p.dat)
+  p.quants <- apply(p.dat, 2, quantile, prob = probs)
+  p.quants.log <- apply(p.dat.log, 2, quantile, prob = probs)
+
+  ## Reference points
+  r.dat <- NULL
+  tryCatch({
+    r.dat <- as.data.frame(params.dat[ , which(nm %in% c("sbo"))])
+    r.dat <- mcmc.thin(r.dat, burnin, thin)
+    colnames(r.dat) <- "sbo"
+  }, warning = function(war){
+  }, error = function(err){
+    warning("MCMC calculations for SB0 failed.\n")
+  })
+
+  ## Spawning biomass
+  sbt.dat <- mcmc.thin(mc$sbt[[1]], burnin, thin)
+  sbt.quants <- apply(sbt.dat,
+                      2,
+                      quantile,
+                      prob = probs)
+  sbt.quants <- rbind(sbt.quants, mpd$sbt)
+  rownames(sbt.quants)[4] <- "MPD"
+
+  ## Depletion
+  depl.dat <- NULL
+  depl.quants <- NULL
+
+  tryCatch({
+    depl.dat <- apply(sbt.dat,
+                      2,
+                      function(x){x / r.dat$sbo})
+    depl.quants <- apply(sbt.dat / r.dat$sbo,
+                         2,
+                         quantile,
+                         prob = probs)
+    depl.quants <- rbind(depl.quants, mpd$sbt / mpd$sbo)
+    rownames(depl.quants)[4] <- "MPD"
+  }, warning = function(war){
+  }, error = function(err){
+  })
+
+  ## Natural mortality
+  nat.mort.dat <- mcmc.thin(mc$m, burnin, thin)
+  colnames(nat.mort.dat) <- gsub("m_age2_", "", colnames(nat.mort.dat))
+  nat.mort.quants <- apply(nat.mort.dat,
+                           2,
+                           quantile,
+                           prob = probs)
+
+  ## Recruitment
+  recr.dat <- mcmc.thin(mc$rt[[1]], burnin, thin)
+  recr.mean <- apply(recr.dat,
+                     2,
+                     mean)
+  recr.quants <- apply(recr.dat,
+                       2,
+                       quantile,
+                       prob = probs)
+  recr.quants <- rbind(recr.quants, mpd$rt)
+  rownames(recr.quants)[4] <- "MPD"
+
+  ## Recruitment deviations
+  recr.devs.dat <- mcmc.thin(mc$rdev[[1]], burnin, thin)
+  recr.devs.quants <- apply(recr.devs.dat,
+                            2,
+                            quantile,
+                            prob = probs)
+
+  ## Q for the survey indices
+  q.dat <- p.dat[, grep("^q[[:digit:]]+$", colnames(p.dat))]
+  num.indices <- ncol(q.dat)
+  g.nms <- model$dat$gear.names
+  colnames(q.dat) <- g.nms[(length(g.nms) - num.indices + 1):
+                             length(g.nms)]
+  q.quants <- apply(q.dat,
+                    2,
+                    quantile,
+                    prob = probs)
+
+  build.quant.list <- function(mc.dat, mpd.dat){
+    ## Run quantiles on each dataframe in a list of dataframes and append
+    ##  the MPD values as well. Returns a list of dataframes
+    quants <- lapply(mc.dat,
+                     function(x){
+                       apply(x,
+                             2,
+                             quantile,
+                             prob = probs,
+                             na.rm = TRUE)})
+    lapply(1:length(quants),
+           function(x){
+             quants[[x]] <- rbind(quants[[x]], mpd.dat[x,])
+             rownames(quants[[x]])[4] <- "MPD"
+             c.names <- colnames(quants[[x]])
+             colnames(quants[[x]]) <-
+               gsub("^.*_([[:digit:]]+$)", "\\1", c.names)
+             quants[[x]]
+           })
+  }
+  ## Vulnerable biomass by gear (list of data frames)
+  vuln.dat <- lapply(mc$vbt[[1]], mcmc.thin, burnin, thin)
+  ## Reshape the vulnerable biomass output from the MPD
+  vbt <- as.data.frame(mpd$vbt)
+  vbt <- split(vbt, vbt[,1])
+  vbt <- lapply(1:length(vbt),
+                function(x){
+                  vbt[[x]][,4]})
+  vbt <- do.call(rbind, vbt)
+  vuln.quants <- build.quant.list(vuln.dat, vbt)
+
+  ## Fishing mortalities by gear (list of data frames)
+  f.mort.dat <- lapply(mc$ft[[1]], mcmc.thin, burnin, thin)
+  f.mort.quants <- build.quant.list(f.mort.dat, mpd$ft)
+
+  u.mort.dat <- lapply(mc$ut[[1]], mcmc.thin, burnin, thin)
+  u.mort.quants <- build.quant.list(u.mort.dat, mpd$ut)
+
+  ## Add calculated reference points - these have already been thinned
+  ##  and burned in
+  sbt.yrs <- names(sbt.dat)
+  sbt.init <- sbt.dat[,1]
+  sbt.end <- sbt.dat[,ncol(sbt.dat)]
+  sbt.end.1 <- sbt.dat[,ncol(sbt.dat) - 1]
+  yr.sbt.init <- sbt.yrs[1]
+  yr.sbt.end <- as.numeric(sbt.yrs[length(sbt.yrs)])
+  yr.sbt.end.1 <- yr.sbt.end - 1
+
+  f.yrs <- names(f.mort.dat[[1]])
+  f.yrs <- gsub(".*_([[:digit:]]+)",
+                "\\1",
+                f.yrs)
+  f.end <- f.mort.dat[[1]][,ncol(f.mort.dat[[1]])]
+  yr.f.end <- f.yrs[length(f.yrs)]
+
+  proj.dat <- NULL
+  if(load.proj){
+    proj.dat <- calc.probabilities(model,
+                                   burnin,
+                                   thin,
+                                   ...)
+    # which.stock. = which.stock,
+    # which.model. = which.model,
+    # fixed.cutoffs. = fixed.cutoffs)
+
+    proj.quants <- apply(model$mcmc$proj[model$mcmc$proj$TAC == 0,],
+                         2,
+                         quantile,
+                         prob = probs,
+                         na.rm = TRUE)
+
+  }
+  r.quants <- NULL
+
+  proj <- mcmc.thin(mc$proj[mc$proj$TAC == 0,], burnin, thin)
+  last.yr <- sbt.yrs[length(sbt.yrs)]
+  last.yr.bt <- paste0("B", last.yr)
+  #tryCatch({
+  r.dat <- cbind(r.dat,
+                 0.3 * r.dat$sbo,
+                 sbt.end.1,
+                 sbt.end.1 / r.dat$sbo,
+                 sbt.end.1 / (0.3 * r.dat$sbo),
+                 sum(sbt.end.1 < (0.3 * r.dat$sbo)) / nrow(r.dat),
+                 proj[,last.yr.bt],
+                 proj[,last.yr.bt] / r.dat$sbo,
+                 proj[,last.yr.bt] / (0.3 * r.dat$sbo),
+                 sum(proj[,last.yr.bt] < (0.3 * r.dat$sbo)) / nrow(r.dat),
+                 sum(proj[,last.yr.bt] < (0.6 * r.dat$sbo)) / nrow(r.dat),
+                 proj$PropAge3,
+                 proj$PropAge4to10)
+  names(r.dat) <- c("sbo",
+                    paste0("0.3sbo"),
+                    paste0("sb", yr.sbt.end.1),
+                    paste0("sb", yr.sbt.end.1, "/sbo"),
+                    paste0("sb", yr.sbt.end.1, "/0.3sbo"),
+                    paste0("psb", yr.sbt.end.1, "/0.3sbo"),
+                    paste0("sb", yr.sbt.end),
+                    paste0("sb", yr.sbt.end, "/sbo"),
+                    paste0("sb", yr.sbt.end, "/0.3sbo"),
+                    paste0("psb", yr.sbt.end, "/0.3sbo"),
+                    paste0("psb", yr.sbt.end, "/0.6sbo"),
+                    "PropAge3",
+                    "PropAge4to10")
+
+  r.quants <- apply(r.dat, 2, quantile, prob = probs)
+  #}, warning = function(war){
+  #}, error = function(err){
+  ## If this is the case, a message will have been printed in the previous
+  ##  tryCatch above so none is needed here.
+  #})
+
+  desc.col <- c("$SB_0$",
+                "$0.3SB_0$",
+                paste0("$SB_{", yr.sbt.end.1, "}$"),
+                paste0("$SB_{", yr.sbt.end.1,
+                       "}/",
+                       "SB_0$"),
+                paste0("$SB_{", yr.sbt.end.1,
+                       "}/",
+                       "0.3SB_0$"),
+                paste0("$P(SB_{", yr.sbt.end.1,
+                       "}<",
+                       "0.3SB_0)$"),
+                paste0("$SB_{", yr.sbt.end, "}$"),
+                paste0("$SB_{", yr.sbt.end,
+                       "}/",
+                       "SB_0$"),
+                paste0("$SB_{", yr.sbt.end,
+                       "}/",
+                       "0.3SB_0$"),
+                paste0("$P(SB_{", yr.sbt.end,
+                       "}<",
+                       "0.3SB_0)$"),
+                paste0("$P(SB_{", yr.sbt.end,
+                       "}<",
+                       "0.6SB_0)$"),
+                "$\\text{Proportion aged 3}$",
+                "$\\text{Proportion aged 4-10}$")
+
+  r.quants <- t(r.quants)
+  r.quants <- cbind.data.frame(desc.col, r.quants)
+  col.names <- colnames(r.quants)
+  col.names <- latex.bold(latex.perc(col.names))
+  col.names[1] <- latex.bold("Reference point")
+  colnames(r.quants) <- col.names
+
+  sapply(c("p.dat",
+           "p.quants",
+           "p.dat.log",
+           "p.quants.log",
+           "r.dat",
+           "r.quants",
+           "sbt.dat",
+           "sbt.quants",
+           "depl.dat",
+           "depl.quants",
+           "nat.mort.dat",
+           "nat.mort.quants",
+           "recr.dat",
+           "recr.quants",
+           "recr.devs.dat",
+           "recr.devs.quants",
+           "q.dat",
+           "q.quants",
+           "vuln.dat",
+           "vuln.quants",
+           "f.mort.dat",
+           "f.mort.quants",
+           "u.mort.dat",
+           "u.mort.quants",
+           "proj.dat",
+           "proj.quants"),
+         function(x){get(x)})
+}
+
+#' Extract and calculate probabilities from the iscam projection model
+#'
+#' @param model An iscam model object
+#' @param burnin The number of samples to burn away from the beginning of the MCMC
+#' @param thin The thinning to apply to the MCMC posterior samples
+#' @param which.stock 1-5 for the five herring stocks: 1=HG, 2=PRD, 3=CC,
+#'   4=SOG, 5=WCVI
+#' @param which.model 1 = AM1 or 2 = AM2 for herring
+#' @param fixed.cutoffs A vector of catch cutoffs to use in decision tables
+#'
+#' @details Extract and calculate probabilities from the projection model.
+#'   Used for decision tables in the document (see make.decision.table())
+#'   in tables-decisions.r
+#'
+#' @return A data frame which has its names formatted for latex
+#' @export
+calc.probabilities <- function(model,
+                               burnin,
+                               thin,
+                               which.stock = NULL,
+                               which.model = NULL,
+                               fixed.cutoffs){
+
+  if(is.null(which.stock)){
+    warning("which.stock must be between 1 and 5.")
+    return(NULL)
+  }
+  if(which.stock < 1 | which.stock > 5){
+    warning("which.stock must be between 1 and 5.")
+    return(NULL)
+  }
+  if(is.null(which.model)){
+    warning("which.model must be 1 or 2, it is NULL.")
+    return(NULL)
+  }
+  if(which.model != 1 & which.model != 2){
+    warning("which.model must be 1 or 2, not ", which.model, ".")
+    return(NULL)
+  }
+  mc <- model$mcmc
+  proj <- mc$proj
+  tac <- sort(unique(proj$TAC))
+  p <- model$proj$ctl.options
+  s.yr <- p[rownames(p) == "syrmeanm", 1]
+  e.yr <- p[rownames(p) == "nyrmeanm", 1] + 2
+  e.yr.1 <- e.yr - 1
+  e.yr.2 <- e.yr - 2
+
+  fc <- fixed.cutoffs
+  proj.dat <- data.frame()
+  for(t in 1:length(tac)){
+    d <- proj[proj$TAC == tac[t],]
+    d <- mcmc.thin(d, burnin, thin)
+    n.row <- nrow(d)
+    k <- c(tac[t] * 1000,
+           length(which(d[,paste0("B", e.yr.1)] < d$X03B0)) / n.row,
+           median(d[,paste0("B", e.yr.1)] / d$X03B0),
+           length(which(d[,paste0("B", e.yr.1)] < (0.6 * d$B0))) / n.row)
+    #length(which(d[,paste0("B", e.yr.1)] < d$X09B0)) / n.row,
+    #median(d[,paste0("B", e.yr.1)] / d$X09B0))
+
+    if(t == 1){
+      col.names <- c(latex.mlc(c(e.yr.1,
+                                 "TAC (t)")),
+                     latex.mlc(c(paste0("P(SB_{",
+                                        e.yr.1,
+                                        "}<"),
+                                 "0.3SB_0)"),
+                               math.bold = TRUE),
+                     latex.mlc(c(paste0("Med(SB_{",
+                                        e.yr.1,
+                                        "}/"),
+                                 "0.3SB_0)"),
+                               math.bold = TRUE),
+                     latex.mlc(c(paste0("P(SB_{",
+                                        e.yr.1,
+                                        "}<"),
+                                 "0.6SB_0)"),
+                               math.bold = TRUE))
+    }
+    if(which.model == 2){
+      k <- c(k,
+             length(which(d[,paste0("B", e.yr.1)] < fc[which.stock])) / n.row,
+             median(d[,paste0("B", e.yr.1)] / fc[which.stock]))
+      if(t == 1){
+        col.names <- c(col.names,
+                       latex.mlc(c(paste0("P(SB_{",
+                                          e.yr.1,
+                                          "} <"),
+                                   paste0(f(fc[which.stock] * 1000),
+                                          "~t)")),
+                                 math.bold = TRUE),
+                       latex.mlc(c(paste0("Med(SB_{",
+                                          e.yr.1,
+                                          "} /"),
+                                   paste0(f(fc[which.stock] * 1000),
+                                          "~t)")),
+                                 math.bold = TRUE))
+      }
+    }
+
+    k <- c(k,
+           length(which(d$UT > 0.2)) / n.row,
+           length(which(d$UT > 0.1)) / n.row,
+           # length(which(d$UT > 0.05)) / n.row,
+           # length(which(d$UT > 0.03)) / n.row,
+           # length(which(d$UT > 0.07)) / n.row,
+           #length(which(d$UT > 0.08)) / n.row,
+           # length(which(d$UT > 0.09)) / n.row,
+           median(d$UT))
+    if(t == 1){
+      col.names <- c(col.names,
+                     latex.mlc(c(paste0("P(U_{",
+                                        e.yr.1,
+                                        "}>"),
+                                 "20\\%)"),
+                               math.bold = TRUE),
+                     latex.mlc(c(paste0("P(U_{",
+                                        e.yr.1,
+                                        "}>"),
+                                 "10\\%)"),
+                               math.bold = TRUE),
+                     #  latex.mlc(c(paste0("P(U_{",
+                     #                   e.yr.1,
+                     #                  "}>"),
+                     #         "5\\%)"),
+                     #   math.bold = TRUE),
+                     # latex.mlc(c(paste0("P(U_{",
+                     #                    e.yr.1,
+                     #                  "}>"),
+                     #        "3\\%)"),
+                     #  math.bold = TRUE),
+                     #latex.mlc(c(paste0("P(U_{",
+                     #                e.yr.1,
+                     #              "}>"),
+                     #   "7\\%)"),
+                     # math.bold = TRUE),
+                     # latex.mlc(c(paste0("P(U_{",
+                     #                 e.yr.1,
+                     #                "}>"),
+                     #        "8\\%)"),
+                     #     math.bold = TRUE),
+                     #latex.mlc(c(paste0("P(U_{",
+                     #        e.yr.1,
+                     #          "}>"),
+                     #  "9\\%)"),
+                     #  math.bold = TRUE),
+                     latex.math.bold(paste0("Med(U_{",
+                                            e.yr.1,
+                                            "})")))
+    }
+    proj.dat <- rbind(proj.dat, k)
+  }
+  colnames(proj.dat) <- col.names
+
+  proj.dat
 }
 
 #' Delete .Rdata files from all subdirectories
@@ -106,90 +614,6 @@ delete.dirs <- function(models.dir = model.dir,
   unlink(files, recursive = TRUE, force = TRUE)
   message("All files and directories were deleted from the ",
       sub.dir, " directory in each model directory.\n")
-}
-
-#' Create a .RData file to hold the model's data and outputs
-#'
-#' @param model.dir Directory name for all models location
-#' @param ovwrt.rdata overwrite the RData file if it exists? TRUE/FALSE
-#' @param ... arguments to pass to [load.iscam.files()]
-#'
-#' @details If an RData file exists, and overwrite is FALSE, return immediately.
-#'   If no RData file exists, the model will be loaded from outputs into
-#'   an R list and saved as a .RData file in the correct directory.
-#'   When this function exits, a .RData file will be located in the
-#'   directory given by model.name.
-#'   Assumes the files model-setup.r and utilities.r has been sourced.
-#'
-#' @return Nothing
-#' @export
-create.rdata.file <- function(model.dir,
-                              ovwrt.rdata = FALSE,
-                              ...){
-
-  if(!dir.exists(model.dir)){
-    stop(curr.func.name,"Error - the directory ", model.dir,
-         " does not exist. Fix the problem and try again.\n")
-  }
-  ## The RData file will have the same name as the directory it is in
-  ## If the model.name has a slash in it, remove the slash and
-  ##  everything before it. This allows a model to have a name which
-  ##  is a path.
-  j <- sub("^.*/([A-Z0-9]+)/[A-Z0-9]+$", "\\1", model.dir)
-  k <- sub(".*/", "", model.dir)
-  rdata.file <- file.path(model.dir, paste0(j, "-", k, ".RData"))
-  if(file.exists(rdata.file)){
-    if(ovwrt.rdata){
-      ## Delete the RData file
-      message("RData file found in ", model.dir,
-              ". Replacing...\n")
-      unlink(rdata.file, force = TRUE)
-    }else{
-      message("RData file found in ", model.dir, "\n")
-      return(invisible())
-    }
-  }else{
-    message("No RData file found in ", model.dir,
-            ". Creating one now.\n")
-  }
-
-  ## If this point is reached, no RData file exists so it
-  ##  has to be built from scratch
-  model <- load.iscam.files(model.dir, ...)
-
-
-  save(model, file = rdata.file)
-  invisible()
-}
-
-#' Load the iscam models and return as a list of iscam model objects
-#'
-#' @param model.dir.names Vector of directory names of models to be loaded
-#'
-#' @return A list of iscam model objects
-#' @export
-load.models <- function(model.dir.names){
-  model.dir.names.base <- basename(model.dir.names)
-  model.rdata.files <- file.path(model.dir.names,
-                                 paste0(model.dir.names.base,
-                                        ".Rdata"))
-  model.rdata.files <- lapply(model.dir.names,
-                              function(x){
-                                j <- sub("^.*/([A-Z0-9]+)/[A-Z0-9]+$", "\\1", x)
-                                k <- sub(".*/", "", x)
-                                file.path(x, paste0(j, "-", k, ".Rdata"))})
-
-  out <- lapply(1:length(model.rdata.files),
-                function(x){
-                  load(model.rdata.files[[x]])
-                  if(class(model) != model.class){
-                    model <- list(model)
-                  }
-                  model
-                })
-
-  class(out) <- model.lst.class
-  out
 }
 
 #' Read the iscam starter file to get the iscam input file names
@@ -1059,309 +1483,6 @@ mcmc.thin <- function(mcmc.dat,
   mcmc.window
 }
 
-#' Perform some quantile calculations on the MCMC posteriors
-#'
-#' @param model An iscam model object
-#' @param burnin The number of samples to burn away from the beginning of the MCMC
-#' @param thin The thinning to apply to the MCMC posterior samples
-#' @param lower Lower quantile value to apply to MCMC samples
-#' @param upper Upper quantile value to apply to MCMC samples
-#' @param load.proj Load the projections from the MCMC and do the calculations
-#' @param ... arguments to pass to [calc.probabilities()]
-#'   to construct the decision tables
-#'
-#' @return A list of each parameter for which quantiles were calculated
-#' @export
-calc.mcmc <- function(model,
-                      burnin = 1000,
-                      thin = 1,
-                      lower = 0.025,
-                      upper = 0.975,
-                      load.proj = TRUE,
-                      ...){
-
-  if(is.null(model$mcmc)){
-    stop("The mcmc list was null. Check read.mcmc function.", call. = FALSE)
-  }
-
-  probs <- c(lower, 0.5, upper)
-
-  ## Parameters
-  mc <- model$mcmc
-  mpd <- model$mpd
-  params.dat <- mc$params
-  params.dat <- strip.areas.groups(params.dat)
-  params.dat <- strip.static.params(model, params.dat)
-  nm <- names(params.dat)
-
-  p.dat <- params.dat[ , -which(nm %in% c("msy",
-                                          "fmsy",
-                                          "bmsy",
-                                          "umsy",
-                                          "ssb"))]
-  p.dat <- fix.m(p.dat)
-  p.dat <- mcmc.thin(p.dat, burnin, thin)
-  ## Calculate sigma and tau and add to p.dat
-  sigtau <- calc.sig.tau(p.dat$rho, p.dat$vartheta)
-  p.dat$tau <- sigtau[[1]]
-  p.dat$sigma <- sigtau[[2]]
-
-  p.dat.log <- calc.logs(p.dat)
-  p.quants <- apply(p.dat, 2, quantile, prob = probs)
-  p.quants.log <- apply(p.dat.log, 2, quantile, prob = probs)
-
-  ## Reference points
-  r.dat <- NULL
-  tryCatch({
-    r.dat <- as.data.frame(params.dat[ , which(nm %in% c("sbo"))])
-    r.dat <- mcmc.thin(r.dat, burnin, thin)
-    colnames(r.dat) <- "sbo"
-  }, warning = function(war){
-  }, error = function(err){
-    warning("MCMC calculations for SB0 failed.\n")
-  })
-
-  ## Spawning biomass
-  sbt.dat <- mcmc.thin(mc$sbt[[1]], burnin, thin)
-  sbt.quants <- apply(sbt.dat,
-                      2,
-                      quantile,
-                      prob = probs)
-  sbt.quants <- rbind(sbt.quants, mpd$sbt)
-  rownames(sbt.quants)[4] <- "MPD"
-
-  ## Depletion
-  depl.dat <- NULL
-  depl.quants <- NULL
-
-  tryCatch({
-    depl.dat <- apply(sbt.dat,
-                      2,
-                      function(x){x / r.dat$sbo})
-    depl.quants <- apply(sbt.dat / r.dat$sbo,
-                         2,
-                         quantile,
-                         prob = probs)
-    depl.quants <- rbind(depl.quants, mpd$sbt / mpd$sbo)
-    rownames(depl.quants)[4] <- "MPD"
-  }, warning = function(war){
-  }, error = function(err){
-  })
-
-  ## Natural mortality
-  nat.mort.dat <- mcmc.thin(mc$m, burnin, thin)
-  colnames(nat.mort.dat) <- gsub("m_age2_", "", colnames(nat.mort.dat))
-  nat.mort.quants <- apply(nat.mort.dat,
-                           2,
-                           quantile,
-                           prob = probs)
-
-  ## Recruitment
-  recr.dat <- mcmc.thin(mc$rt[[1]], burnin, thin)
-  recr.mean <- apply(recr.dat,
-                     2,
-                     mean)
-  recr.quants <- apply(recr.dat,
-                       2,
-                       quantile,
-                       prob = probs)
-  recr.quants <- rbind(recr.quants, mpd$rt)
-  rownames(recr.quants)[4] <- "MPD"
-
-  ## Recruitment deviations
-  recr.devs.dat <- mcmc.thin(mc$rdev[[1]], burnin, thin)
-  recr.devs.quants <- apply(recr.devs.dat,
-                            2,
-                            quantile,
-                            prob = probs)
-
-  ## Q for the survey indices
-  q.dat <- p.dat[, grep("^q[[:digit:]]+$", colnames(p.dat))]
-  num.indices <- ncol(q.dat)
-  g.nms <- model$dat$gear.names
-  colnames(q.dat) <- g.nms[(length(g.nms) - num.indices + 1):
-                           length(g.nms)]
-  q.quants <- apply(q.dat,
-                    2,
-                    quantile,
-                    prob = probs)
-
-  build.quant.list <- function(mc.dat, mpd.dat){
-    ## Run quantiles on each dataframe in a list of dataframes and append
-    ##  the MPD values as well. Returns a list of dataframes
-    quants <- lapply(mc.dat,
-                     function(x){
-                       apply(x,
-                             2,
-                             quantile,
-                             prob = probs,
-                             na.rm = TRUE)})
-    lapply(1:length(quants),
-           function(x){
-             quants[[x]] <- rbind(quants[[x]], mpd.dat[x,])
-             rownames(quants[[x]])[4] <- "MPD"
-             c.names <- colnames(quants[[x]])
-             colnames(quants[[x]]) <-
-               gsub("^.*_([[:digit:]]+$)", "\\1", c.names)
-             quants[[x]]
-           })
-  }
-  ## Vulnerable biomass by gear (list of data frames)
-  vuln.dat <- lapply(mc$vbt[[1]], mcmc.thin, burnin, thin)
-  ## Reshape the vulnerable biomass output from the MPD
-  vbt <- as.data.frame(mpd$vbt)
-  vbt <- split(vbt, vbt[,1])
-  vbt <- lapply(1:length(vbt),
-              function(x){
-                vbt[[x]][,4]})
-  vbt <- do.call(rbind, vbt)
-  vuln.quants <- build.quant.list(vuln.dat, vbt)
-
-  ## Fishing mortalities by gear (list of data frames)
-  f.mort.dat <- lapply(mc$ft[[1]], mcmc.thin, burnin, thin)
-  f.mort.quants <- build.quant.list(f.mort.dat, mpd$ft)
-
-  u.mort.dat <- lapply(mc$ut[[1]], mcmc.thin, burnin, thin)
-  u.mort.quants <- build.quant.list(u.mort.dat, mpd$ut)
-
-  ## Add calculated reference points - these have already been thinned
-  ##  and burned in
-  sbt.yrs <- names(sbt.dat)
-  sbt.init <- sbt.dat[,1]
-  sbt.end <- sbt.dat[,ncol(sbt.dat)]
-  sbt.end.1 <- sbt.dat[,ncol(sbt.dat) - 1]
-  yr.sbt.init <- sbt.yrs[1]
-  yr.sbt.end <- as.numeric(sbt.yrs[length(sbt.yrs)])
-  yr.sbt.end.1 <- yr.sbt.end - 1
-
-  f.yrs <- names(f.mort.dat[[1]])
-  f.yrs <- gsub(".*_([[:digit:]]+)",
-                 "\\1",
-                 f.yrs)
-  f.end <- f.mort.dat[[1]][,ncol(f.mort.dat[[1]])]
-  yr.f.end <- f.yrs[length(f.yrs)]
-
-  proj.dat <- NULL
-  if(load.proj){
-    proj.dat <- calc.probabilities(model,
-                                   burnin,
-                                   thin,
-                                   ...)
-                                   # which.stock. = which.stock,
-                                   # which.model. = which.model,
-                                   # fixed.cutoffs. = fixed.cutoffs)
-
-    proj.quants <- apply(model$mcmc$proj[model$mcmc$proj$TAC == 0,],
-                         2,
-                         quantile,
-                         prob = probs,
-                         na.rm = TRUE)
-
-  }
-  r.quants <- NULL
-
-  proj <- mcmc.thin(mc$proj[mc$proj$TAC == 0,], burnin, thin)
-  last.yr <- sbt.yrs[length(sbt.yrs)]
-  last.yr.bt <- paste0("B", last.yr)
-  #tryCatch({
-    r.dat <- cbind(r.dat,
-                   0.3 * r.dat$sbo,
-                   sbt.end.1,
-                   sbt.end.1 / r.dat$sbo,
-                   sbt.end.1 / (0.3 * r.dat$sbo),
-                   sum(sbt.end.1 < (0.3 * r.dat$sbo)) / nrow(r.dat),
-                   proj[,last.yr.bt],
-                   proj[,last.yr.bt] / r.dat$sbo,
-                   proj[,last.yr.bt] / (0.3 * r.dat$sbo),
-                   sum(proj[,last.yr.bt] < (0.3 * r.dat$sbo)) / nrow(r.dat),
-                   sum(proj[,last.yr.bt] < (0.6 * r.dat$sbo)) / nrow(r.dat),
-                   proj$PropAge3,
-                   proj$PropAge4to10)
-    names(r.dat) <- c("sbo",
-                      paste0("0.3sbo"),
-                      paste0("sb", yr.sbt.end.1),
-                      paste0("sb", yr.sbt.end.1, "/sbo"),
-                      paste0("sb", yr.sbt.end.1, "/0.3sbo"),
-                      paste0("psb", yr.sbt.end.1, "/0.3sbo"),
-                      paste0("sb", yr.sbt.end),
-                      paste0("sb", yr.sbt.end, "/sbo"),
-                      paste0("sb", yr.sbt.end, "/0.3sbo"),
-                      paste0("psb", yr.sbt.end, "/0.3sbo"),
-                      paste0("psb", yr.sbt.end, "/0.6sbo"),
-                      "PropAge3",
-                      "PropAge4to10")
-
-  r.quants <- apply(r.dat, 2, quantile, prob = probs)
-  #}, warning = function(war){
-  #}, error = function(err){
-    ## If this is the case, a message will have been printed in the previous
-    ##  tryCatch above so none is needed here.
-  #})
-
-  desc.col <- c("$SB_0$",
-                "$0.3SB_0$",
-                paste0("$SB_{", yr.sbt.end.1, "}$"),
-                paste0("$SB_{", yr.sbt.end.1,
-                       "}/",
-                       "SB_0$"),
-                paste0("$SB_{", yr.sbt.end.1,
-                       "}/",
-                       "0.3SB_0$"),
-                paste0("$P(SB_{", yr.sbt.end.1,
-                       "}<",
-                       "0.3SB_0)$"),
-                paste0("$SB_{", yr.sbt.end, "}$"),
-                paste0("$SB_{", yr.sbt.end,
-                       "}/",
-                       "SB_0$"),
-                paste0("$SB_{", yr.sbt.end,
-                       "}/",
-                       "0.3SB_0$"),
-                paste0("$P(SB_{", yr.sbt.end,
-                       "}<",
-                       "0.3SB_0)$"),
-                paste0("$P(SB_{", yr.sbt.end,
-                       "}<",
-                       "0.6SB_0)$"),
-                "$\\text{Proportion aged 3}$",
-                "$\\text{Proportion aged 4-10}$")
-
-  r.quants <- t(r.quants)
-  r.quants <- cbind.data.frame(desc.col, r.quants)
-  col.names <- colnames(r.quants)
-  col.names <- latex.bold(latex.perc(col.names))
-  col.names[1] <- latex.bold("Reference point")
-  colnames(r.quants) <- col.names
-
-  sapply(c("p.dat",
-           "p.quants",
-           "p.dat.log",
-           "p.quants.log",
-           "r.dat",
-           "r.quants",
-           "sbt.dat",
-           "sbt.quants",
-           "depl.dat",
-           "depl.quants",
-           "nat.mort.dat",
-           "nat.mort.quants",
-           "recr.dat",
-           "recr.quants",
-           "recr.devs.dat",
-           "recr.devs.quants",
-           "q.dat",
-           "q.quants",
-           "vuln.dat",
-           "vuln.quants",
-           "f.mort.dat",
-           "f.mort.quants",
-           "u.mort.dat",
-           "u.mort.quants",
-           "proj.dat",
-           "proj.quants"),
-           function(x){get(x)})
-}
-
 #' Calculate the estimated numbers-at-age for an iscam MCMC model
 #'
 #' @param model An iscam model object
@@ -1410,164 +1531,6 @@ calc.ahat <- function(model){
                     gears[[x]]
                   })
   gears
-}
-
-#' Extract and calculate probabilities from the iscam projection model
-#'
-#' @param model An iscam model object
-#' @param burnin The number of samples to burn away from the beginning of the MCMC
-#' @param thin The thinning to apply to the MCMC posterior samples
-#' @param which.stock 1-5 for the five herring stocks: 1=HG, 2=PRD, 3=CC,
-#'   4=SOG, 5=WCVI
-#' @param which.model 1 = AM1 or 2 = AM2 for herring
-#' @param fixed.cutoffs A vector of catch cutoffs to use in decision tables
-#'
-#' @details Extract and calculate probabilities from the projection model.
-#'   Used for decision tables in the document (see make.decision.table())
-#'   in tables-decisions.r
-#'
-#' @return A data frame which has its names formatted for latex
-#' @export
-calc.probabilities <- function(model,
-                               burnin,
-                               thin,
-                               which.stock = NULL,
-                               which.model = NULL,
-                               fixed.cutoffs){
-
-  if(is.null(which.stock)){
-    warning("which.stock must be between 1 and 5.")
-    return(NULL)
-  }
-  if(which.stock < 1 | which.stock > 5){
-    warning("which.stock must be between 1 and 5.")
-    return(NULL)
-  }
-  if(is.null(which.model)){
-    warning("which.model must be 1 or 2, it is NULL.")
-    return(NULL)
-  }
-  if(which.model != 1 & which.model != 2){
-    warning("which.model must be 1 or 2, not ", which.model, ".")
-    return(NULL)
-  }
-  mc <- model$mcmc
-  proj <- mc$proj
-  tac <- sort(unique(proj$TAC))
-  p <- model$proj$ctl.options
-  s.yr <- p[rownames(p) == "syrmeanm", 1]
-  e.yr <- p[rownames(p) == "nyrmeanm", 1] + 2
-  e.yr.1 <- e.yr - 1
-  e.yr.2 <- e.yr - 2
-
-  fc <- fixed.cutoffs
-  proj.dat <- data.frame()
-  for(t in 1:length(tac)){
-    d <- proj[proj$TAC == tac[t],]
-    d <- mcmc.thin(d, burnin, thin)
-    n.row <- nrow(d)
-    k <- c(tac[t] * 1000,
-           length(which(d[,paste0("B", e.yr.1)] < d$X03B0)) / n.row,
-           median(d[,paste0("B", e.yr.1)] / d$X03B0),
-           length(which(d[,paste0("B", e.yr.1)] < (0.6 * d$B0))) / n.row)
-           #length(which(d[,paste0("B", e.yr.1)] < d$X09B0)) / n.row,
-           #median(d[,paste0("B", e.yr.1)] / d$X09B0))
-
-    if(t == 1){
-      col.names <- c(latex.mlc(c(e.yr.1,
-                                 "TAC (t)")),
-                     latex.mlc(c(paste0("P(SB_{",
-                                        e.yr.1,
-                                        "}<"),
-                                 "0.3SB_0)"),
-                               math.bold = TRUE),
-                     latex.mlc(c(paste0("Med(SB_{",
-                                        e.yr.1,
-                                        "}/"),
-                                 "0.3SB_0)"),
-                               math.bold = TRUE),
-                     latex.mlc(c(paste0("P(SB_{",
-                                        e.yr.1,
-                                        "}<"),
-                                 "0.6SB_0)"),
-                               math.bold = TRUE))
-    }
-    if(which.model == 2){
-      k <- c(k,
-             length(which(d[,paste0("B", e.yr.1)] < fc[which.stock])) / n.row,
-             median(d[,paste0("B", e.yr.1)] / fc[which.stock]))
-      if(t == 1){
-        col.names <- c(col.names,
-                       latex.mlc(c(paste0("P(SB_{",
-                                          e.yr.1,
-                                          "} <"),
-                                   paste0(f(fc[which.stock] * 1000),
-                                          "~t)")),
-                                 math.bold = TRUE),
-                       latex.mlc(c(paste0("Med(SB_{",
-                                          e.yr.1,
-                                          "} /"),
-                                   paste0(f(fc[which.stock] * 1000),
-                                          "~t)")),
-                                 math.bold = TRUE))
-      }
-    }
-
-    k <- c(k,
-           length(which(d$UT > 0.2)) / n.row,
-           length(which(d$UT > 0.1)) / n.row,
-           # length(which(d$UT > 0.05)) / n.row,
-          # length(which(d$UT > 0.03)) / n.row,
-           # length(which(d$UT > 0.07)) / n.row,
-          #length(which(d$UT > 0.08)) / n.row,
-         # length(which(d$UT > 0.09)) / n.row,
-           median(d$UT))
-    if(t == 1){
-      col.names <- c(col.names,
-                     latex.mlc(c(paste0("P(U_{",
-                                        e.yr.1,
-                                        "}>"),
-                                 "20\\%)"),
-                               math.bold = TRUE),
-                     latex.mlc(c(paste0("P(U_{",
-                                       e.yr.1,
-                                        "}>"),
-                                 "10\\%)"),
-                               math.bold = TRUE),
-                    #  latex.mlc(c(paste0("P(U_{",
-                      #                   e.yr.1,
-                       #                  "}>"),
-                         #         "5\\%)"),
-                           #   math.bold = TRUE),
-                   # latex.mlc(c(paste0("P(U_{",
-                    #                    e.yr.1,
-                      #                  "}>"),
-                         #        "3\\%)"),
-                             #  math.bold = TRUE),
-                    #latex.mlc(c(paste0("P(U_{",
-                      #                e.yr.1,
-                       #              "}>"),
-                          #   "7\\%)"),
-                         # math.bold = TRUE),
-                   # latex.mlc(c(paste0("P(U_{",
-                      #                 e.yr.1,
-                       #                "}>"),
-                        #        "8\\%)"),
-                         #     math.bold = TRUE),
-                    #latex.mlc(c(paste0("P(U_{",
-                               #        e.yr.1,
-                             #          "}>"),
-                              #  "9\\%)"),
-                            #  math.bold = TRUE),
-                     latex.math.bold(paste0("Med(U_{",
-                                            e.yr.1,
-                                            "})")))
-    }
-    proj.dat <- rbind(proj.dat, k)
-  }
-  colnames(proj.dat) <- col.names
-
-  proj.dat
 }
 
 #' Fetch a data frame of the estimated MCMC parameters only
@@ -1675,4 +1638,34 @@ calc.mpd.logs <- function(mpd,
   vals <- lapply(mpd[inds], log)
   names(vals) <- log.names
   c(mpd, vals)
+}
+
+#' Load the iscam models and return as a list of iscam model objects
+#'
+#' @param model.dir.names Vector of directory names of models to be loaded
+#'
+#' @return A list of iscam model objects
+#' @export
+load.models <- function(model.dir.names){
+  model.dir.names.base <- basename(model.dir.names)
+  model.rdata.files <- file.path(model.dir.names,
+                                 paste0(model.dir.names.base,
+                                        ".Rdata"))
+  model.rdata.files <- lapply(model.dir.names,
+                              function(x){
+                                j <- sub("^.*/([A-Z0-9]+)/[A-Z0-9]+$", "\\1", x)
+                                k <- sub(".*/", "", x)
+                                file.path(x, paste0(j, "-", k, ".Rdata"))})
+
+  out <- lapply(1:length(model.rdata.files),
+                function(x){
+                  load(model.rdata.files[[x]])
+                  if(class(model) != model.class){
+                    model <- list(model)
+                  }
+                  model
+                })
+
+  class(out) <- model.lst.class
+  out
 }
