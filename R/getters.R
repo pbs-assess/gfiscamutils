@@ -118,3 +118,35 @@ get_pa <- function(models,
   df
 }
 
+#' Summarize survey index data
+#'
+#' @rdname get_catch
+#' @return a tibble
+#' @importFrom rosettafish en2fr
+#' @importFrom dplyr bind_rows mutate left_join select filter as_tibble
+#' @export
+get_surv_ind <- function(models,
+                         models_names,
+                         gear,
+                         area = 1,
+                         group = 1,
+                         sex = 0,
+                         translate = FALSE){
+  verify_models(models, models_names)
+  dfs <- lapply(seq_along(models), function(x){
+    lst <- models[[x]]$dat$indices
+    lst <- lapply(lst, as_tibble)
+    lst <- lst %>%
+      bind_rows() %>%
+      mutate(region = models_names[x])
+  })
+  df <- bind_rows(dfs) %>%
+    filter(area %in% area,
+           group %in% group,
+           sex %in% sex) %>%
+    left_join(gear) %>%
+    mutate(Gear = en2fr(as.factor(gearname), translate, allow_missing = TRUE),
+           region = en2fr(region, translate, allow_missing = TRUE)) %>%
+    select(-c(gear, gearname))
+  df
+}

@@ -4,6 +4,7 @@
 \alias{get_catch}
 \alias{get_wa}
 \alias{get_pa}
+\alias{get_surv_ind}
 \title{Summarize catch by region and gear}
 \usage{
 get_catch(models, models_names, gear, area = 1, group = 1, sex = 0,
@@ -14,6 +15,9 @@ get_wa(models, models_names, gear, area = 1, group = 1, sex = 0,
 
 get_pa(models, models_names, gear, area = 1, group = 1, sex = 0,
   translate = FALSE)
+
+get_surv_ind(models, models_names, gear, area = 1, group = 1,
+  sex = 0, translate = FALSE)
 }
 \arguments{
 \item{models}{list of iscam models. Must be a [gfiscamutils::model.lst.class] type}
@@ -38,6 +42,8 @@ a tibble
 a tibble
 
 a tibble
+
+a tibble
 }
 \description{
 Summarize catch by region and gear
@@ -45,4 +51,6 @@ Summarize catch by region and gear
 Summarize weight-at-age data
 
 Summarize proportion-at-age data
+
+Summarize survey index data
 }
