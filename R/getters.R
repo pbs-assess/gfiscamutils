@@ -48,8 +48,8 @@ get_catch <- function(models,
            sex %in% sex,
            type %in% type) %>%
     left_join(gear) %>%
-    mutate(Gear = en2fr(as.factor(gearname), translate),
-           region = en2fr(region, translate)) %>%
+    mutate(Gear = en2fr(as.factor(gearname), translate, allow_missing = TRUE),
+           region = en2fr(region, translate, allow_missing = TRUE)) %>%
     select(-c(gear, gearname))
   df
 }
@@ -79,8 +79,8 @@ get_wa <- function(models,
            group %in% group,
            sex %in% sex) %>%
     left_join(gear) %>%
-    mutate(Gear = en2fr(as.factor(gearname), translate),
-           region = en2fr(region, translate)) %>%
+    mutate(Gear = en2fr(as.factor(gearname), translate, allow_missing = TRUE),
+           region = en2fr(region, translate, allow_missing = TRUE)) %>%
     select(-c(gear, gearname))
   df
 }
