@@ -284,18 +284,6 @@ Season2Year <- function( dat ) {
   return( as.integer(res) )
 }  # End Season2Year function
 
-# Calculate sum if there are non-NA values, return NA if all values are NA
-SumNA <- function( x, omitNA=TRUE ) {
-  # An alternate version to sum(x, na.rm=TRUE), which returns 0 if x is all NA.
-  # This version retuns NA if x is all NA, otherwise it returns the sum.
-  # If all NA, NA; otherwise, sum
-  ifelse( all(is.na(x)),
-      res <- NA,
-      res <- sum(x, na.rm=omitNA) )
-  # Return the result
-  return( res )
-}  # End SumNA function
-
 # Calculate mean if there are non-NA values, return NA if all values are NA
 MeanNA <- function( x, omitNA=TRUE ) {
   # An alternate version to mean(x, na.rm=TRUE), which returns 0 if x is all NA.
@@ -406,23 +394,21 @@ PasteNicely <- function( x, intChars=", ", nChar="and " ) {
   return( res )
 }  # End PasteNicely function
 
-# Function to add a new column indicating group ID based on sequential data
-ConsecutiveGroup <- function( vec ) {
-  # Get a vector where the ID depends on whether the value of x is
-  # sequential. For example, indicate whether a series of years is sequential,
-  # or if there are say three groups of sequential years.
-  # Break up the data by groups with consecutive values
-  dUniqueGrps <- split( x=vec, f=cumsum(c(1, diff(vec) != 1)) )
-  # Put group id into the data
-  for( g in 1:length(dUniqueGrps) ) {
-    # Add the group ID to the table
-    dUniqueGrps[[g]] <- rep( g, times=length(dUniqueGrps[[g]]))
-  }  # End g loop over groups
-  # Unsplit the list
-  GroupID <- as.vector( unlist(dUniqueGrps) )
-  # Return the data with groups
-  return( GroupID )
-}  # End ConsecutiveGroup function
+#' Function to add a new column indicating group ID based on sequential data
+#'
+#' @param vec the vector
+#'
+#' @return a vector where the ID depends on whether the value of x is
+#'  sequential. For example, indicate whether a series of years is sequential,
+#'  or if there are say three groups of sequential years.
+#'  Break up the data by groups with consecutive values
+consecutive_group <- function(vec) {
+  d_unique_groups <- split(x = vec, f = cumsum(c(1, diff(vec) != 1)))
+  for(g in seq_along(d_unique_groups)){
+    d_unique_groups[[g]] <- rep(g, times = length(d_unique_groups[[g]]))
+  }
+  as.vector(unlist(d_unique_groups))
+}
 
 # Function to add a new column indicating the number of consecutive values
 CountConsecutive <- function( vec ) {

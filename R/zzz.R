@@ -136,5 +136,13 @@ globalVariables(c(
 "Age",
 "Year",
 "Weight",
-"muWeight"
+"muWeight",
+"Number",
+"Proportion",
+"MeanAge",
+"sBar",
+"GroupID",
+"Lower",
+"Upper"
+
 ))

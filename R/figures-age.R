@@ -1,3 +1,71 @@
+#' Plot proportions-at-age time series from a data frames as extracted from iscam data (dat) files
+#'
+#' @param df a data frame as constructed by [get_pa()]
+#' @param age_plus age plus group
+#' @param conf confidence value for the envelope
+#' @param xlim limits for the years shown on the plot
+#' @param ylim limits for the ages shown on the plot
+#' @param translate Logical. If TRUE, translate to French
+#'
+#' @return A ggplot object
+#' @importFrom dplyr filter as_tibble rename select group_by ungroup summarize
+#' @importFrom reshape2 melt
+#' @importFrom ggplot2 ggplot aes geom_line geom_point coord_cartesian expand_limits
+#'  labs xlab ylab facet_wrap geom_ribbon
+#' @importFrom stats qnorm
+#' @export
+plot_pa <- function(df,
+                    age_plus = 10,
+                    conf = 0.9,
+                    xlim = c(1000, 3000),
+                    ylim = c(0, NA),
+                    translate = FALSE){
+  df <- df %>%
+    filter(year >= xlim[1])
+  dfm <- melt(df, id.vars = c("year", "area", "group", "sex", "region", "Gear")) %>%
+    as_tibble() %>%
+    rename(Region = region,
+           Year = year,
+           Age = variable,
+           Number = value) %>%
+    select(-c(area, group, sex)) %>%
+    mutate(Age = as.numeric(as.character(Age)),
+           Age = ifelse(Age > age_plus, age_plus, Age)) %>%
+    group_by(Region, Year, Age) %>%
+    summarize(Number = sum(Number)) %>%
+    mutate(Proportion = Number / ifelse(all(is.na(Number)), NA, sum(Number, na.rm = TRUE))) %>%
+    ungroup() %>%
+    mutate(Age = factor(Age))
+
+  # Determine weighted mean and approximate CI age by year
+  dfm_ci <- dfm %>%
+    select(Region, Year, Age, Proportion) %>%
+    mutate(Age = as.numeric(Age)) %>%
+    group_by(Region, Year) %>%
+    summarize(MeanAge = weighted.mean(x = Age, w = Proportion),
+              sBar = qnorm(1 - (1 - conf) / 2) * sum(sqrt(Proportion * (1 - Proportion)) / sqrt(Age)),
+              Lower = exp(log(MeanAge) - log(sBar)),
+              Upper = exp(log(MeanAge) + log(sBar))) %>%
+    ungroup() %>%
+    mutate(GroupID = consecutive_group(Year))
+
+  g <- ggplot(dfm, aes(x = Year)) +
+    geom_point(aes(y = Age, size = ifelse(Proportion, Proportion, NA))) +
+    geom_path(data = dfm_ci, aes(y = MeanAge, group = GroupID), size = 2) +
+    geom_ribbon(data = dfm_ci,
+                aes(ymin = Lower, ymax = Upper, group = GroupID),
+                alpha = 0.25) +
+    coord_cartesian(xlim, ylim) +
+    expand_limits(x = xlim[1]:xlim[2]) +
+    labs(size = en2fr("Proportion", translate)) +
+    ylab(en2fr("Age", translate)) +
+    xlab(en2fr("Year", translate)) +
+    facet_wrap(~ Region, ncol = 2, dir = "v", scales = "free_y" ) +
+    theme(legend.position="top")
+    g
+}
+
+
 #' Plot age comp estimates
 #'
 #' @param model An iscam model object

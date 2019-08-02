@@ -3,12 +3,16 @@
 \name{get_catch}
 \alias{get_catch}
 \alias{get_wa}
+\alias{get_pa}
 \title{Summarize catch by region and gear}
 \usage{
 get_catch(models, models_names, gear, area = 1, group = 1, sex = 0,
   type = 1, translate = FALSE)
 
 get_wa(models, models_names, gear, area = 1, group = 1, sex = 0,
+  translate = FALSE)
+
+get_pa(models, models_names, gear, area = 1, group = 1, sex = 0,
   translate = FALSE)
 }
 \arguments{
@@ -32,9 +36,13 @@ get_wa(models, models_names, gear, area = 1, group = 1, sex = 0,
 a tibble
 
 a tibble
+
+a tibble
 }
 \description{
 Summarize catch by region and gear
 
 Summarize weight-at-age data
+
+Summarize proportion-at-age data
 }
