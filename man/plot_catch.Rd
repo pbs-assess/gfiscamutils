@@ -4,25 +4,12 @@
 \alias{plot_catch}
 \title{Plot catch from a data frames as extracted from iscam data (dat) files}
 \usage{
-plot_catch(models, models_names, gear, xlim = c(1000, 3000), area = 1,
-  group = 1, sex = 0, type = 1, translate = FALSE)
+plot_catch(df, xlim = c(1000, 3000), translate = FALSE)
 }
 \arguments{
-\item{models}{list of iscam models. Must be a [gfiscamutils::model.lst.class] type}
+\item{df}{a data frame as constructed by [get_catch()]}
 
-\item{models_names}{vector of model names that correspond to the input models}
-
-\item{gear}{gear number as it appears in iscam data file}
-
-\item{xlim}{vector of 2 - minimum and maximum years to plot}
-
-\item{area}{area number as it appears in iscam data file}
-
-\item{group}{group number as it appears in iscam data file}
-
-\item{sex}{sex number as it appears in iscam data file}
-
-\item{type}{type number as it appears in iscam data file}
+\item{xlim}{Limits for the years shown on the plot}
 
 \item{translate}{Logical. If TRUE, translate to French}
 }

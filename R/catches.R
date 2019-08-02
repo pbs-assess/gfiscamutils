@@ -182,83 +182,19 @@ make.catches.table <- function(catches,
   }
 }
 
-#' Plot the catches in a stacked-barplot with legend
-#'
-#' @param catches output of the [load.catches()] function
-#' @param gear.names names of the gears
-#' @param leg.y.loc y-based location to place the legend
-#' @param leg.cex text size for legend
-#'
-#' @export
-#' @importFrom ggplot2 ggplot aes geom_bar
-make.catches.plot <- function(catches,
-                              gear.names,
-                              leg.y.loc = 430,
-                              leg.cex = 1){
-  old.par <- par()
-  on.exit(par(old.par))
-  j <- as.data.frame(catches$dat$catch)
-  ## Make the gear catches into a list by gear
-  k <- lapply(gear.names[,1],
-              function(x){
-                j[j$gear == x,]
-              })
-  ## Remove zero-row gears (e.g. survey gears)
-  k <- k[sapply(k, nrow) > 0]
-  g <- ggplot(j, aes(year, gear, value)) + geom_bar(aes(colour=gear))
-  g
-}
-
 #' Plot catch from a data frames as extracted from iscam data (dat) files
 #'
-#' @param models list of iscam models. Must be a [gfiscamutils::model.lst.class] type
-#' @param models_names vector of model names that correspond to the input models
+#' @param df a data frame as constructed by [get_catch()]
+#' @param xlim Limits for the years shown on the plot
 #' @param translate Logical. If TRUE, translate to French
-#' @param gear gear number as it appears in iscam data file
-#' @param xlim vector of 2 - minimum and maximum years to plot
-#' @param area area number as it appears in iscam data file
-#' @param group group number as it appears in iscam data file
-#' @param sex sex number as it appears in iscam data file
-#' @param type type number as it appears in iscam data file
 #'
 #' @return A ggplot object
-#' @importFrom ggplot2 ggplot scale_x_continuous scale_y_continuous scale_fill_grey theme
-#'  theme_bw facet_wrap labs expand_limits
-#' @importFrom scales comma
-#' @importFrom rosettafish en2fr
-#' @importFrom dplyr mutate
+#' @importFrom ggplot2 ggplot geom_bar scale_x_continuous expand_limits scale_fill_grey theme
+#'  labs facet_wrap
 #' @export
-plot_catch <- function(models,
-                       models_names,
-                       gear,
+plot_catch <- function(df,
                        xlim = c(1000, 3000),
-                       area = 1,
-                       group = 1,
-                       sex = 0,
-                       type = 1,
                        translate = FALSE){
-  if(length(models) != length(models_names)){
-    stop("models_names must be the same length as models.", call. = FALSE)
-  }
-
-  dfs <- lapply(seq_along(models), function(x){
-    if(class(models[[x]]) != model.class){
-      stop("Model ", x, " in the list is not of the type ", model.class, call. = FALSE)
-    }
-    models[[x]]$dat$catch %>%
-      as_tibble() %>%
-      mutate(region = models_names[x])
-    })
-  df <- bind_rows(dfs) %>%
-    filter(area %in% area,
-           group %in% group,
-           sex %in% sex,
-           type %in% type) %>%
-    left_join(gear) %>%
-    mutate(Gear = en2fr(as.factor(gearname), translate),
-           region = en2fr(region, translate)) %>%
-    select(-c(gear, gearname))
-
   g <- ggplot(df, aes(x = year, y = value)) +
     geom_bar(stat = "identity", position = "stack", aes(fill = Gear), width = 1) +
     scale_x_continuous(limits = xlim) +
@@ -266,9 +202,18 @@ plot_catch <- function(models,
     scale_fill_grey(start = 0, end = 0.8) +
     theme(legend.position = "top") +
     labs(x = en2fr("Year", translate),
-         y = paste(en2fr("Catch", translate), " (1000 t)"))
-  if(length(dfs) > 1){
-    g <- g + facet_wrap( ~ region, ncol=2, dir = "v", scales = "free_y" )
-  }
+         y = paste(en2fr("Catch", translate), " (1000 t)")) +
+    facet_wrap( ~ region, ncol = 2, dir = "v", scales = "free_y" )
   g
 }
+
+#herr_final_yr_roe_catch <- function(models,
+#                                    models_names){
+
+  # filter( Year==max(yrRange), Gear%in%c("RoeGN", "RoeSN") ) %>%
+  #   dplyr::select( Catch ) %>%
+  #   mutate( Catch=Catch*1000 ) %>%
+  #   sum( ) %>%
+  #   format( big.mark=",", digits=0, scientific=FALSE )
+
+#}
