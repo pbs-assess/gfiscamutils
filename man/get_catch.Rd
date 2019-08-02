@@ -2,10 +2,14 @@
 % Please edit documentation in R/getters.R
 \name{get_catch}
 \alias{get_catch}
+\alias{get_wa}
 \title{Summarize catch by region and gear}
 \usage{
 get_catch(models, models_names, gear, area = 1, group = 1, sex = 0,
   type = 1, translate = FALSE)
+
+get_wa(models, models_names, gear, area = 1, group = 1, sex = 0,
+  translate = FALSE)
 }
 \arguments{
 \item{models}{list of iscam models. Must be a [gfiscamutils::model.lst.class] type}
@@ -26,7 +30,11 @@ get_catch(models, models_names, gear, area = 1, group = 1, sex = 0,
 }
 \value{
 a tibble
+
+a tibble
 }
 \description{
 Summarize catch by region and gear
+
+Summarize weight-at-age data
 }

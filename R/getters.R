@@ -53,3 +53,34 @@ get_catch <- function(models,
     select(-c(gear, gearname))
   df
 }
+
+#' Summarize weight-at-age data
+#'
+#' @rdname get_catch
+#' @return a tibble
+#' @importFrom rosettafish en2fr
+#' @importFrom dplyr bind_rows mutate left_join select filter as_tibble
+#' @export
+get_wa <- function(models,
+                   models_names,
+                   gear,
+                   area = 1,
+                   group = 1,
+                   sex = 0,
+                   translate = FALSE){
+  verify_models(models, models_names)
+  dfs <- lapply(seq_along(models), function(x){
+    models[[x]]$dat$weight.at.age %>%
+      as_tibble() %>%
+      mutate(region = models_names[x])
+  })
+  df <- bind_rows(dfs) %>%
+    filter(area %in% area,
+           group %in% group,
+           sex %in% sex) %>%
+    left_join(gear) %>%
+    mutate(Gear = en2fr(as.factor(gearname), translate),
+           region = en2fr(region, translate)) %>%
+    select(-c(gear, gearname))
+  df
+}
