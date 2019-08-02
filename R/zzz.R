@@ -129,5 +129,12 @@ globalVariables(c(
 "x",
 "y",
 "year",
-"yrRange"
+"yrRange",
+"variable",
+"area",
+"sex",
+"Age",
+"Year",
+"Weight",
+"muWeight"
 ))

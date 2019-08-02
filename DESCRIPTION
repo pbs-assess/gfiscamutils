@@ -28,6 +28,8 @@ Imports:
   rgeos,
   here,
   rosettafish,
-  scales
+  scales,
+  reshape2,
+  zoo
 LazyData: true
 RoxygenNote: 6.1.1
