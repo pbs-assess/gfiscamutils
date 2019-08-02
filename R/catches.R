@@ -211,9 +211,11 @@ make.catches.plot <- function(catches,
 
 #' Plot catch from a data frames as extracted from iscam data (dat) files
 #'
-#' @param model a gfiscamutils model object
+#' @param models list of iscam models. Must be a [gfiscamutils::model.lst.class] type
+#' @param models_names vector of model names that correspond to the input models
 #' @param translate Logical. If TRUE, translate to French
 #' @param gear gear number as it appears in iscam data file
+#' @param xlim vector of 2 - minimum and maximum years to plot
 #' @param area area number as it appears in iscam data file
 #' @param group group number as it appears in iscam data file
 #' @param sex sex number as it appears in iscam data file
@@ -221,28 +223,52 @@ make.catches.plot <- function(catches,
 #'
 #' @return A ggplot object
 #' @importFrom ggplot2 ggplot scale_x_continuous scale_y_continuous scale_fill_grey theme
-#'  theme_bw facet_wrap labs
+#'  theme_bw facet_wrap labs expand_limits
 #' @importFrom scales comma
 #' @importFrom rosettafish en2fr
+#' @importFrom dplyr mutate
 #' @export
-plot_catch <- function(model,
-                       gear = 1,
+plot_catch <- function(models,
+                       models_names,
+                       gear,
+                       xlim = c(1000, 3000),
                        area = 1,
                        group = 1,
                        sex = 0,
                        type = 1,
                        translate = FALSE){
-  df <- as.data.frame(model$dat$catch)
-  browser()
+  if(length(models) != length(models_names)){
+    stop("models_names must be the same length as models.", call. = FALSE)
+  }
+
+  dfs <- lapply(seq_along(models), function(x){
+    if(class(models[[x]]) != model.class){
+      stop("Model ", x, " in the list is not of the type ", model.class, call. = FALSE)
+    }
+    models[[x]]$dat$catch %>%
+      as_tibble() %>%
+      mutate(region = models_names[x])
+    })
+  df <- bind_rows(dfs) %>%
+    filter(area %in% area,
+           group %in% group,
+           sex %in% sex,
+           type %in% type) %>%
+    left_join(gear) %>%
+    mutate(Gear = en2fr(as.factor(gearname), translate),
+           region = en2fr(region, translate)) %>%
+    select(-c(gear, gearname))
+
   g <- ggplot(df, aes(x = year, y = value)) +
-    scale_x_continuous(breaks = seq(from = 1000, to = 3000, by = 10)) +
-    scale_y_continuous(labels = comma ) +
-    #expand_limits(x = rangeX) +
+    geom_bar(stat = "identity", position = "stack", aes(fill = Gear), width = 1) +
+    scale_x_continuous(limits = xlim) +
+    expand_limits(x = xlim[1]:xlim[2]) +
     scale_fill_grey(start = 0, end = 0.8) +
     theme(legend.position = "top") +
-    #facet_wrap( ~ RegionName, ncol=2, dir="v", scales="free_y" )
     labs(x = en2fr("Year", translate),
          y = paste(en2fr("Catch", translate), " (1000 t)"))
-
+  if(length(dfs) > 1){
+    g <- g + facet_wrap( ~ region, ncol=2, dir = "v", scales = "free_y" )
+  }
   g
 }

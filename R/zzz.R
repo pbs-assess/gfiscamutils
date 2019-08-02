@@ -56,6 +56,8 @@ globalVariables(c(
 "gBuffer",
 "gCentroid",
 "gear",
+"gearname",
+"Gear",
 "get.shade",
 "group",
 "hist",
