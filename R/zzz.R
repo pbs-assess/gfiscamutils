@@ -143,6 +143,10 @@ globalVariables(c(
 "sBar",
 "GroupID",
 "Lower",
-"Upper"
-
+"Upper",
+"wt",
+"timing",
+"Index",
+"iyr",
+"it"
 ))

@@ -147,6 +147,7 @@ get_surv_ind <- function(models,
     left_join(gear) %>%
     mutate(Gear = en2fr(as.factor(gearname), translate, allow_missing = TRUE),
            region = en2fr(region, translate, allow_missing = TRUE)) %>%
-    select(-c(gear, gearname))
+    select(-c(gear, gearname)) %>%
+    rename(year = iyr, value = it)
   df
 }
