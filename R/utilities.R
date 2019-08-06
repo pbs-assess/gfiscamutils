@@ -1,3 +1,24 @@
+#' Add missing columns with names in `by` not in the column names of `tab`. Order
+#' the table, ignoring the first column in the order given in the `by` vector.
+#' Set all NAs to 0 in the data columns only.
+#'
+#' @param tab data frame with years as the first column, and N columns of data
+#'  with names
+#' @param by a vector of names, which correspond to the names of the columns in tab
+#'
+#' @return a modified data frame
+#' @export
+add_cols_and_reorder <- function(tab, by){
+  if(any(!by %in% colnames(tab))){
+    tab[by[!by %in% colnames(tab)]] <- NA
+  }
+  tab[is.na(tab)] <- 0
+  tab[-1] <- apply(tab[-1], c(1,2), f)
+  tab_no_yr <- tab[-1]
+  tab_no_yr <- tab_no_yr[,match(by, names(tab_no_yr))]
+  cbind(tab[1], tab_no_yr)
+}
+
 #' Calculate column quantiles for a data matrix
 #'
 #' @param data a matrix
