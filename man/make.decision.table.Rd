@@ -9,7 +9,7 @@ make.decision.table(model, digits = 3, xcaption = "default",
   placement = "H")
 }
 \arguments{
-\item{model}{An iscal model object}
+\item{model}{An iscam model object}
 
 \item{digits}{Number of decimal places for the values in the table}
 
