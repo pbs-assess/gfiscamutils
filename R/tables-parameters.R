@@ -493,6 +493,7 @@ make.parameters.est.table <- function(model,
 #' Make a table of reference points
 #'
 #' @rdname make.parameters.table
+#' @param translate Logical. Translate to french if TRUE
 #'
 #' @return an xtable
 #' @export
@@ -504,7 +505,8 @@ make.ref.points.table <- function(model.am2,
                                   xlabel   = "default",
                                   font.size = 9,
                                   space.size = 10,
-                                  placement = "H"){
+                                  placement = "H",
+                                  translate = FALSE){
 
   if(class(model.am2) == model.lst.class){
     model <- model[[1]]
@@ -516,6 +518,7 @@ make.ref.points.table <- function(model.am2,
   tab.am2 <- model.am2$mcmccalcs$r.quants
   row.names <- tab.am2[,1]
   col.names.am2 <- colnames(tab.am2)
+  col.names.am2[1] <- paste0("\\textbf{", en2fr("Reference point", translate), "}")
   ## Remove latex rownames
   tab.am2 <- as.matrix(tab.am2[,-1])
   tab.am2 <- apply(tab.am2, c(1, 2) , as.numeric)

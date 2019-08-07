@@ -26,7 +26,7 @@ make.parameters.est.table(model, digits = 3, xcaption = "default",
 
 make.ref.points.table(model.am2, digits = 3, xcaption = "default",
   xlabel = "default", font.size = 9, space.size = 10,
-  placement = "H")
+  placement = "H", translate = FALSE)
 
 make.value.table(model, type, syr, digits = 3, xcaption = "default",
   xlabel = "default", font.size = 9, space.size = 10,
@@ -72,6 +72,8 @@ make.catchability.parameters.table.q.sens(qa.lst, qb.lst, qc.lst,
 \item{digits}{Number of decimal points to show}
 
 \item{model.am2}{an iscam model object}
+
+\item{translate}{Logical. Translate to french if TRUE}
 
 \item{type}{1=biomass, 2=recruitment, 3=F, 4=U, 5=depletion}
 
