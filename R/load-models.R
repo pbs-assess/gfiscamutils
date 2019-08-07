@@ -321,9 +321,6 @@ calc.mcmc <- function(model,
                                    burnin,
                                    thin,
                                    ...)
-    # which.stock. = which.stock,
-    # which.model. = which.model,
-    # fixed.cutoffs. = fixed.cutoffs)
 
     proj.quants <- apply(model$mcmc$proj[model$mcmc$proj$TAC == 0,],
                          2,
@@ -483,7 +480,6 @@ calc.probabilities <- function(model,
   e.yr <- p[rownames(p) == "nyrmeanm", 1] + 2
   e.yr.1 <- e.yr - 1
   e.yr.2 <- e.yr - 2
-
   fc <- fixed.cutoffs
   proj.dat <- data.frame()
   for(t in 1:length(tac)){

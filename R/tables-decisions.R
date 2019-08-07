@@ -1,6 +1,6 @@
 #' Produce a decision xtable for the given iscam model
 #'
-#' @param model An iscal model object
+#' @param model An iscam model object
 #' @param digits Number of decimal places for the values in the table
 #' @param xcaption Caption to appear in the calling document
 #' @param xlabel The label used to reference the table in latex
