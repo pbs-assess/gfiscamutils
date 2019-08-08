@@ -22,7 +22,6 @@ verify_models <- function(models, models_names){
 #' @param group group number as it appears in iscam data file
 #' @param sex sex number as it appears in iscam data file
 #' @param type type number as it appears in iscam data file
-#' @param translate Logical. If TRUE, translate to French
 #'
 #' @return a tibble
 #' @importFrom rosettafish en2fr
@@ -34,8 +33,7 @@ get_catch <- function(models,
                       area = 1,
                       group = 1,
                       sex = 0,
-                      type = 1,
-                      translate = FALSE){
+                      type = 1){
   verify_models(models, models_names)
   dfs <- lapply(seq_along(models), function(x){
     models[[x]]$dat$catch %>%
@@ -48,9 +46,8 @@ get_catch <- function(models,
            sex %in% sex,
            type %in% type) %>%
     left_join(gear) %>%
-    mutate(Gear = en2fr(as.factor(gearname), translate, allow_missing = TRUE),
-           region = en2fr(region, translate, allow_missing = TRUE)) %>%
-    select(-c(gear, gearname))
+    select(-gear) %>%
+    rename(gear = gearname)
   df
 }
 
@@ -66,8 +63,7 @@ get_wa <- function(models,
                    gear,
                    area = 1,
                    group = 1,
-                   sex = 0,
-                   translate = FALSE){
+                   sex = 0){
   verify_models(models, models_names)
   dfs <- lapply(seq_along(models), function(x){
     models[[x]]$dat$weight.at.age %>%
@@ -79,9 +75,8 @@ get_wa <- function(models,
            group %in% group,
            sex %in% sex) %>%
     left_join(gear) %>%
-    mutate(Gear = en2fr(as.factor(gearname), translate, allow_missing = TRUE),
-           region = en2fr(region, translate, allow_missing = TRUE)) %>%
-    select(-c(gear, gearname))
+    select(-gear) %>%
+    rename(gear = gearname)
   df
 }
 
@@ -97,8 +92,7 @@ get_pa <- function(models,
                    gear,
                    area = 1,
                    group = 1,
-                   sex = 0,
-                   translate = FALSE){
+                   sex = 0){
   verify_models(models, models_names)
   dfs <- lapply(seq_along(models), function(x){
     lst <- models[[x]]$dat$age.comps
@@ -112,9 +106,8 @@ get_pa <- function(models,
            group %in% group,
            sex %in% sex) %>%
     left_join(gear) %>%
-    mutate(Gear = en2fr(as.factor(gearname), translate, allow_missing = TRUE),
-           region = en2fr(region, translate, allow_missing = TRUE)) %>%
-    select(-c(gear, gearname))
+    select(-gear) %>%
+    rename(gear = gearname)
   df
 }
 
@@ -130,8 +123,7 @@ get_surv_ind <- function(models,
                          gear,
                          area = 1,
                          group = 1,
-                         sex = 0,
-                         translate = FALSE){
+                         sex = 0){
   verify_models(models, models_names)
   dfs <- lapply(seq_along(models), function(x){
     lst <- models[[x]]$dat$indices
@@ -145,9 +137,9 @@ get_surv_ind <- function(models,
            group %in% group,
            sex %in% sex) %>%
     left_join(gear) %>%
-    mutate(Gear = en2fr(as.factor(gearname), translate, allow_missing = TRUE),
-           region = en2fr(region, translate, allow_missing = TRUE)) %>%
-    select(-c(gear, gearname)) %>%
-    rename(year = iyr, value = it)
+    select(-gear) %>%
+    rename(gear = gearname,
+           year = iyr,
+           value = it)
   df
 }
