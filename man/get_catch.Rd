@@ -8,16 +8,14 @@
 \title{Summarize catch by region and gear}
 \usage{
 get_catch(models, models_names, gear, area = 1, group = 1, sex = 0,
-  type = 1, translate = FALSE)
+  type = 1)
 
-get_wa(models, models_names, gear, area = 1, group = 1, sex = 0,
-  translate = FALSE)
+get_wa(models, models_names, gear, area = 1, group = 1, sex = 0)
 
-get_pa(models, models_names, gear, area = 1, group = 1, sex = 0,
-  translate = FALSE)
+get_pa(models, models_names, gear, area = 1, group = 1, sex = 0)
 
 get_surv_ind(models, models_names, gear, area = 1, group = 1,
-  sex = 0, translate = FALSE)
+  sex = 0)
 }
 \arguments{
 \item{models}{list of iscam models. Must be a [gfiscamutils::model.lst.class] type}
@@ -33,8 +31,6 @@ get_surv_ind(models, models_names, gear, area = 1, group = 1,
 \item{sex}{sex number as it appears in iscam data file}
 
 \item{type}{type number as it appears in iscam data file}
-
-\item{translate}{Logical. If TRUE, translate to French}
 }
 \value{
 a tibble

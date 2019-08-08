@@ -26,6 +26,7 @@ verify_models <- function(models, models_names){
 #' @return a tibble
 #' @importFrom rosettafish en2fr
 #' @importFrom dplyr bind_rows mutate left_join select filter as_tibble
+#' @importFrom forcats fct_relevel
 #' @export
 get_catch <- function(models,
                       models_names,
@@ -47,7 +48,8 @@ get_catch <- function(models,
            type %in% type) %>%
     left_join(gear) %>%
     select(-gear) %>%
-    rename(gear = gearname)
+    rename(gear = gearname) %>%
+    mutate(region = fct_relevel(region, models_names))
   df
 }
 
@@ -57,6 +59,7 @@ get_catch <- function(models,
 #' @return a tibble
 #' @importFrom rosettafish en2fr
 #' @importFrom dplyr bind_rows mutate left_join select filter as_tibble
+#' @importFrom forcats fct_relevel
 #' @export
 get_wa <- function(models,
                    models_names,
@@ -76,7 +79,8 @@ get_wa <- function(models,
            sex %in% sex) %>%
     left_join(gear) %>%
     select(-gear) %>%
-    rename(gear = gearname)
+    rename(gear = gearname) %>%
+    mutate(region = fct_relevel(region, models_names))
   df
 }
 
@@ -86,6 +90,7 @@ get_wa <- function(models,
 #' @return a tibble
 #' @importFrom rosettafish en2fr
 #' @importFrom dplyr bind_rows mutate left_join select filter as_tibble
+#' @importFrom forcats fct_relevel
 #' @export
 get_pa <- function(models,
                    models_names,
@@ -107,7 +112,8 @@ get_pa <- function(models,
            sex %in% sex) %>%
     left_join(gear) %>%
     select(-gear) %>%
-    rename(gear = gearname)
+    rename(gear = gearname) %>%
+    mutate(region = fct_relevel(region, models_names))
   df
 }
 
@@ -117,6 +123,7 @@ get_pa <- function(models,
 #' @return a tibble
 #' @importFrom rosettafish en2fr
 #' @importFrom dplyr bind_rows mutate left_join select filter as_tibble
+#' @importFrom forcats fct_relevel
 #' @export
 get_surv_ind <- function(models,
                          models_names,
@@ -140,6 +147,7 @@ get_surv_ind <- function(models,
     select(-gear) %>%
     rename(gear = gearname,
            year = iyr,
-           value = it)
+           value = it) %>%
+    mutate(region = fct_relevel(region, models_names))
   df
 }
