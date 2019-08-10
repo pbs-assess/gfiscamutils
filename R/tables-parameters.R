@@ -499,6 +499,7 @@ make.parameters.est.table <- function(model,
 #' @export
 #' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align latex.perc
 #' @importFrom xtable xtable
+#' @importFrom rosettafish en2fr
 make.ref.points.table <- function(model.am2,
                                   digits = 3,
                                   xcaption = "default",

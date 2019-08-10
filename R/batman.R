@@ -3,7 +3,7 @@
 #'
 #' https://charlotte-ngs.github.io/BatmanPlot/BatmanPlotPost.html
 #'
-#' @importFrom ggplot2 stat_function geom_path aes element_blank labs
+#' @importFrom ggplot2 ggplot stat_function geom_path aes element_blank labs
 #' @return a ggplot2 object
 batman <- function(){
   sc <- function(x) sqrt(1 - x ^ 2)                                         # semicircle

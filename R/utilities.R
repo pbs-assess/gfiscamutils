@@ -1,3 +1,21 @@
+#' Verify that models object is a list of iscam models and that models is the same length as models_names
+#'
+#' @param models a list of iscam model objects
+#' @param models_names a vector of names for the models
+#'
+#' @export
+verify_models <- function(models,
+                          models_names){
+  if(length(models) != length(models_names)){
+    stop("models_names must be the same length as models.", call. = FALSE)
+  }
+  for(i in seq_along(models)){
+    if(class(models[[i]]) != model.class){
+      stop("Model ", i, " in the list is not of the type ", model.class, call. = FALSE)
+    }
+  }
+}
+
 #' Capitalize first letter of string
 #'
 #' @param x string
@@ -24,27 +42,6 @@ firstlower <- function(x) {
             typeof(x) == "character")
   substr(x, 1, 1) <- tolower(substr(x, 1, 1))
   x
-}
-
-#' Add missing columns with names in `by` not in the column names of `tab`. Order
-#' the table, ignoring the first column in the order given in the `by` vector.
-#' Set all NAs to 0 in the data columns only.
-#'
-#' @param tab data frame with years as the first column, and N columns of data
-#'  with names
-#' @param by a vector of names, which correspond to the names of the columns in tab
-#'
-#' @return a modified data frame
-#' @export
-add_cols_and_reorder <- function(tab, by){
-  if(any(!by %in% colnames(tab))){
-    tab[by[!by %in% colnames(tab)]] <- NA
-  }
-  tab[is.na(tab)] <- 0
-  tab[-1] <- apply(tab[-1], c(1,2), f)
-  tab_no_yr <- tab[-1]
-  tab_no_yr <- tab_no_yr[,match(by, names(tab_no_yr))]
-  cbind(tab[1], tab_no_yr)
 }
 
 #' Calculate column quantiles for a data matrix
