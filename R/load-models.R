@@ -1511,6 +1511,7 @@ extract.area.sex.matrices <- function(data = NULL,
 #' @param thin The thinning to apply to the MCMC posterior samples
 #'
 #' @return an mcmc.window object (CODA package)
+#' @importFrom coda mcmc
 #' @export
 mcmc.thin <- function(mcmc.dat,
                       burnin,
