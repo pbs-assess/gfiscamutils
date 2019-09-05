@@ -7,7 +7,7 @@
 build_herring_rdata_files(dirs, ...)
 }
 \arguments{
-\item{dirs}{List of directories to nuild Rdata fies for}
+\item{dirs}{List of directories to build Rdata files for}
 
 \item{...}{arguments passed to [create.rdata.file()]}
 }
