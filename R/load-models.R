@@ -1,6 +1,6 @@
 #' Create RData files for models found in the directories given by `dirs`
 #'
-#' @param dirs List of directories to nuild Rdata fies for
+#' @param dirs List of directories to build Rdata files for
 #' @param ... arguments passed to [create.rdata.file()]
 #'
 #' @export
