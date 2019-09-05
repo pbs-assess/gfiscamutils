@@ -48,7 +48,7 @@ create.rdata.file <- function(model.dir,
          " does not exist. Fix the problem and try again.\n", call. = FALSE)
   }
   ## The RData file will have the same name as the directory it is in
-  ## If the model.name has a slash in it, remove the slash and
+  ## If the model.dir has a slash in it, remove the slash and
   ##  everything before it. This allows a model to have a name which
   ##  is a path.
   j <- sub("^.*/([A-Z0-9]+)/[A-Z0-9]+$", "\\1", model.dir)
