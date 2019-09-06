@@ -120,6 +120,7 @@ get.latex.name <- function(name, addToQ = 0){
   if(name == "rinit") return(expression(bar("R")[init]))
   if(name == "m") return(expression("M"))
   if(name == "bo") return(expression("B"[0]))
+  if(name == "sbo") return(expression("SB"[0]))
   if(name == "vartheta") return(expression(vartheta))
   if(name == "rho") return(expression(rho))
   if(name == "bmsy") return(expression("B"[MSY]))
