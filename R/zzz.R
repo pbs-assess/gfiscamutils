@@ -148,5 +148,10 @@ globalVariables(c(
 "timing",
 "Index",
 "iyr",
-"it"
+"it",
+"retro.dir",
+"output.files",
+"iscam.exe.file",
+"linux.pipe.to.log",
+"dos.pipe.to.log"
 ))

@@ -6,7 +6,6 @@
 #'   If the retrospectives directory does not exist, this is ignored and the retrospectives are run.
 #'
 #' @export
-#' @importFrom gfiscamutils output.files retro.dir
 run_retro <- function(model, yrs = 2, overwrite = FALSE){
   stopifnot(is.numeric(yrs),
             length(yrs) == 1)
