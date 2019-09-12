@@ -591,17 +591,17 @@ calc.probabilities <- function(model,
   proj.dat
 }
 
-#' Delete .Rdata files from all model directories and the retrospective subdirectories
+#' Delete .Rdata files from all model directories and the retrospective subdirectories.
+#'   Herring has AM2 as a subdirectory of each model
 #'
-#' @param del.dir The models directory
+#' @param path path for the models directory
+#' @param subdir an optional subdirectory in each model directory to descend into
 #'
 #' @return Nothing
 #' @export
-delete.rdata.files <- function(path = NA){
-
+delete.rdata.files <- function(path = NA, subdir = "AM2"){
   stopifnot(!is.na(path))
-  dirs <- list.dirs(path, recursive = FALSE)
-
+  dirs <- file.path(list.dirs(path, recursive = FALSE), subdir)
   for(i in dirs){
     if(file.exists(file.path(i, rdata.file))){
       unlink(file.path(i, rdata.file), force = TRUE)
@@ -614,22 +614,22 @@ delete.rdata.files <- function(path = NA){
   invisible()
 }
 
-#' #' Delete all directories and files in a directory
-#' #'
-#' #' @param models.dir Directory name for all models location
-#' #' @param sub.dir The subdirectory to delete recursively from
-#' #'
-#' #' @return Nothing
-#' #' @export
-#' delete.dirs <- function(models.dir = model.dir,
-#'                         sub.dir = NULL){
+#' Delete all directories and files in a directory
 #'
-#'   dirs <- dir(models.dir)
-#'   files <- file.path(models.dir, dirs, sub.dir)
-#'   unlink(files, recursive = TRUE, force = TRUE)
-#'   message("All files and directories were deleted from the ",
-#'       sub.dir, " directory in each model directory.\n")
-#' }
+#' @param models.dir Directory name for all models location
+#' @param sub.dir The subdirectory to delete recursively from
+#'
+#' @return Nothing
+#' @export
+delete.dirs <- function(models.dir = model.dir,
+                        sub.dir = NULL){
+
+  dirs <- dir(models.dir)
+  files <- file.path(models.dir, dirs, sub.dir)
+  unlink(files, recursive = TRUE, force = TRUE)
+  message("All files and directories were deleted from the ",
+      sub.dir, " directory in each model directory.\n")
+}
 
 #' Read the iscam starter file to get the iscam input file names
 #'
