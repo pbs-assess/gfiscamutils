@@ -2,6 +2,9 @@
 model.class <- "model"
 model.lst.class <- "model.list"
 
+## RData file name for model storage
+rdata.file <- "aaa_gfiscam.RData"
+
 ## iscam files with names that don't change depending on model
 rep.file <- "iscam.rep"
 par.file <- "iscam.par"
@@ -59,6 +62,7 @@ dos.append.to.log <- paste(.dos.append.stdout, log.file, .dos.append.stderr)
 
 use_data(model.class, overwrite = TRUE)
 use_data(model.lst.class, overwrite = TRUE)
+use_data(rdata.file, overwrite = TRUE)
 use_data(rep.file, overwrite = TRUE)
 use_data(par.file, overwrite = TRUE)
 use_data(mcmc.file, overwrite = TRUE)

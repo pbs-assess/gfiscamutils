@@ -22,10 +22,17 @@ build_herring_rdata_files <- function(dirs, ...){
                        which_stock <- 0
                      }
                      create.rdata.file(bm, which.stock = which_stock, ...)
+                     # Create rdata files for the retrospectives, if they exist
+                     if(dir.exists(file.path(bm, retro.dir))){
+                       retros <- file.path(bm, retro.dir, dir(file.path(bm, retro.dir)))
+                       lapply(retros, function(y){
+                         create.rdata.file(y, which.stock = which_stock, ...)
+                       })
+                     }
                    }))
 }
 
-#' Create a .RData file to hold the model's data and outputs
+#' Create a .RData file to hold the model's data and outputs.
 #'
 #' @param model.dir Directory name for all models location
 #' @param ovwrt.rdata overwrite the RData file if it exists? TRUE/FALSE
@@ -47,13 +54,7 @@ create.rdata.file <- function(model.dir,
     stop(curr.func.name,"Error - the directory ", model.dir,
          " does not exist. Fix the problem and try again.\n", call. = FALSE)
   }
-  ## The RData file will have the same name as the directory it is in
-  ## If the model.dir has a slash in it, remove the slash and
-  ##  everything before it. This allows a model to have a name which
-  ##  is a path.
-  j <- sub("^.*/([A-Z0-9]+)/[A-Z0-9]+$", "\\1", model.dir)
-  k <- sub(".*/", "", model.dir)
-  rdata.file <- file.path(model.dir, paste0(j, "-", k, ".RData"))
+  rdata.file <- file.path(model.dir, rdata.file)
   if(file.exists(rdata.file)){
     if(ovwrt.rdata){
       ## Delete the RData file
@@ -590,54 +591,45 @@ calc.probabilities <- function(model,
   proj.dat
 }
 
-#' Delete .Rdata files from all subdirectories
+#' Delete .Rdata files from all model directories and the retrospective subdirectories
 #'
-#' @param del.dir The directory which has subdirectories
-#'   from which the files will be deleted
-#'
-#' @return Nothing
-#' @export
-delete.rdata.files <- function(del.dir = model.dir){
-
-  dirs <- list.dirs(del.dir, recursive = FALSE)
-  subdirs <- list.dirs(dirs, recursive = FALSE)
-
-  ## Extract the last two directory names from the full paths to create
-  ##  the filenames
-  rdata.files <- lapply(subdirs,
-                        function(x){
-                          d <- strsplit(x, "/")[[1]]
-                          fn <- paste0(d[length(d) - 1],
-                                       "-",
-                                       d[length(d)],
-                                       ".Rdata")
-                          dd <- file.path(x, fn)})
-
-  nil <- lapply(rdata.files,
-                function(x){
-                  if(file.exists(x)){
-                    unlink(x, force = TRUE)
-                    cat(paste0("Deleted ", x, "\n"))
-                  }
-                })
-}
-
-#' Delete all directories and files in a directory
-#'
-#' @param models.dir Directory name for all models location
-#' @param sub.dir The subdirectory to delete recursively from
+#' @param del.dir The models directory
 #'
 #' @return Nothing
 #' @export
-delete.dirs <- function(models.dir = model.dir,
-                        sub.dir = NULL){
+delete.rdata.files <- function(path = NA){
 
-  dirs <- dir(models.dir)
-  files <- file.path(models.dir, dirs, sub.dir)
-  unlink(files, recursive = TRUE, force = TRUE)
-  message("All files and directories were deleted from the ",
-      sub.dir, " directory in each model directory.\n")
+  stopifnot(!is.na(path))
+  dirs <- list.dirs(path, recursive = FALSE)
+
+  for(i in dirs){
+    if(file.exists(file.path(i, rdata.file))){
+      unlink(file.path(i, rdata.file), force = TRUE)
+      cat(paste0("Deleted ", file.path(i, rdata.file), "\n"))
+    }
+    if(dir.exists(file.path(i, retro.dir))){
+      delete.rdata.files(file.path(i, retro.dir))
+    }
+  }
+  invisible()
 }
+
+#' #' Delete all directories and files in a directory
+#' #'
+#' #' @param models.dir Directory name for all models location
+#' #' @param sub.dir The subdirectory to delete recursively from
+#' #'
+#' #' @return Nothing
+#' #' @export
+#' delete.dirs <- function(models.dir = model.dir,
+#'                         sub.dir = NULL){
+#'
+#'   dirs <- dir(models.dir)
+#'   files <- file.path(models.dir, dirs, sub.dir)
+#'   unlink(files, recursive = TRUE, force = TRUE)
+#'   message("All files and directories were deleted from the ",
+#'       sub.dir, " directory in each model directory.\n")
+#' }
 
 #' Read the iscam starter file to get the iscam input file names
 #'

@@ -14,6 +14,12 @@ NULL
 #' Class definition
 "model.lst.class"
 
+#' iscam model RData file name
+#'
+#' character
+"rdata.file"
+
+
 #' iscam and ADMB output file patterns
 #'
 #' character vector
