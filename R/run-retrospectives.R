@@ -1,20 +1,30 @@
-#' Run retrospectives for the given iscam model object
+#' Run retrospectives for the given iscam model directory
 #'
-#' @param model an iscam model object
+#' @param model a directory containing a valid iscam model
 #' @param yrs the number of years to run back for retrospectives.
 #' @param overwrite if the retrospectives directory exists and this is TRUE, re-run the retrospectives.
 #'   If the retrospectives directory does not exist, this is ignored and the retrospectives are run.
 #'
 #' @export
-run_retro <- function(model, yrs = 2, overwrite = FALSE){
+#' @importFrom stringr str_ends
+run_retro <- function(path,
+                      yrs = 2,
+                      overwrite = FALSE){
   stopifnot(is.numeric(yrs),
             length(yrs) == 1)
-  retro_path <- file.path(model$path, retro.dir)
-  if(dir.exists(retro_path) && !overwrite){
+  while(stringr::str_ends(path, "\\/")){
+    path <- substr(path, 1, nchar(path) - 1)
+  }
+  j <- grep("//", path)
+  calling_path <- getwd()
+  on.exit(setwd(calling_path))
+  setwd(path)
+  if(dir.exists(retro.dir) && !overwrite){
+    message("Directory ", file.path(path, retro.dir), " already exists and overwrite is FALSE so retrospectives were not run.")
     return(invisible())
   }
-  unlink(retro_path, recursive = TRUE, force = TRUE)
-  files <- dir(model$path)
+  unlink(retro.dir, recursive = TRUE, force = TRUE)
+  files <- dir()
   for(ind in seq_along(output.files)){
     # Remove any output files from the copy source so as not to mess up the retro directory
     pattern <- output.files[ind]
@@ -25,15 +35,15 @@ run_retro <- function(model, yrs = 2, overwrite = FALSE){
       files <- files[-gr]
     }
   }
-  dir.create(retro_path, showWarnings = FALSE)
+  dir.create(retro.dir, showWarnings = FALSE)
   for(i in seq_len(yrs)){
-    retrostr <- as.character(i)
-    if(nchar(retrostr) == 1){
-      retrostr <- paste0("0", retrostr)
+    dest_dir <- as.character(i)
+    if(nchar(dest_dir) == 1){
+      dest_dir <- paste0("0", dest_dir)
     }
-    dest_dir <- file.path(retro_path, retrostr)
+    dest_dir <- file.path(retro.dir, dest_dir)
     dir.create(dest_dir, showWarnings = FALSE)
-    file.copy(file.path(model$path, files),
+    file.copy(files,
               file.path(dest_dir, files))
     setwd(dest_dir)
     model_call <- paste0(iscam.exe.file, " -retro ", i)
@@ -42,8 +52,8 @@ run_retro <- function(model, yrs = 2, overwrite = FALSE){
     }else{
       model_call <- paste0(model_call, " ", dos.pipe.to.log)
     }
-    message("Please wait while retrospective model runs for model ", model$path, ".\n Retrospective ", i, " of ", yrs, "...")
+    message("Please wait while retrospective model runs for model ", path, ".\n Retrospective ", i, " of ", yrs, "...")
     shell(model_call)
+    setwd("../..")
   }
-  setwd(here::here())
 }
