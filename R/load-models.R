@@ -1692,28 +1692,28 @@ calc.mpd.logs <- function(mpd,
   c(mpd, vals)
 }
 
-#' Load the iscam models and return as a list of iscam model objects
+#' Load iscam models found in the given directory and return as a list of iscam model objects
 #'
-#' @param model.dir.names Vector of directory names of models to be loaded
+#' @param path_names a vector of the directory names for the models
+#' @param inc_retro recursively load the retrospectives directory
 #'
 #' @return A list of iscam model objects
 #' @export
-load.models <- function(model.dir.names){
-  model.dir.names.base <- basename(model.dir.names)
-  model.rdata.files <- file.path(model.dir.names,
-                                 paste0(model.dir.names.base,
-                                        ".Rdata"))
-  model.rdata.files <- lapply(model.dir.names,
-                              function(x){
-                                j <- sub("^.*/([A-Z0-9]+)/[A-Z0-9]+$", "\\1", x)
-                                k <- sub(".*/", "", x)
-                                file.path(x, paste0(j, "-", k, ".Rdata"))})
+load.models <- function(path_names, inc_retro = FALSE){
+   rdata_files <- file.path(path_names, rdata.file)
+   retro_dirs <- file.path(path_names, retro.dir)
 
-  out <- lapply(1:length(model.rdata.files),
+  out <- lapply(seq_along(rdata_files),
                 function(x){
-                  load(model.rdata.files[[x]])
+                  load(rdata_files[[x]])
                   if(class(model) != model.class){
                     model <- list(model)
+                  }
+                  if(inc_retro){
+                    model$retro <- NA
+                    if(dir.exists(retro_dirs[x])){
+                      model$retro <- load.models(file.path(retro_dirs[x], dir(retro_dirs[x])))
+                    }
                   }
                   model
                 })
