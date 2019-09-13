@@ -2,17 +2,20 @@
 % Please edit documentation in R/load-models.R
 \name{delete.rdata.files}
 \alias{delete.rdata.files}
-\title{Delete .Rdata files from all subdirectories}
+\title{Delete .Rdata files from all model directories and the retrospective subdirectories.
+  Herring has AM2 as a subdirectory of each model}
 \usage{
-delete.rdata.files(del.dir = model.dir)
+delete.rdata.files(path = NA, subdir = "AM2")
 }
 \arguments{
-\item{del.dir}{The directory which has subdirectories
-from which the files will be deleted}
+\item{path}{path for the models directory}
+
+\item{subdir}{an optional subdirectory in each model directory to descend into}
 }
 \value{
 Nothing
 }
 \description{
-Delete .Rdata files from all subdirectories
+Delete .Rdata files from all model directories and the retrospective subdirectories.
+  Herring has AM2 as a subdirectory of each model
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/load-models.R
 \name{create.rdata.file}
 \alias{create.rdata.file}
-\title{Create a .RData file to hold the model's data and outputs}
+\title{Create a .RData file to hold the model's data and outputs.}
 \usage{
 create.rdata.file(model.dir, ovwrt.rdata = FALSE, ...)
 }
@@ -17,7 +17,7 @@ create.rdata.file(model.dir, ovwrt.rdata = FALSE, ...)
 Nothing
 }
 \description{
-Create a .RData file to hold the model's data and outputs
+Create a .RData file to hold the model's data and outputs.
 }
 \details{
 If an RData file exists, and overwrite is FALSE, return immediately.

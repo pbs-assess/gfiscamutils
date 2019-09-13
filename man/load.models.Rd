@@ -2,16 +2,18 @@
 % Please edit documentation in R/load-models.R
 \name{load.models}
 \alias{load.models}
-\title{Load the iscam models and return as a list of iscam model objects}
+\title{Load iscam models found in the given directory and return as a list of iscam model objects}
 \usage{
-load.models(model.dir.names)
+load.models(path_names, inc_retro = FALSE)
 }
 \arguments{
-\item{model.dir.names}{Vector of directory names of models to be loaded}
+\item{path_names}{a vector of the directory names for the models}
+
+\item{inc_retro}{recursively load the retrospectives directory}
 }
 \value{
 A list of iscam model objects
 }
 \description{
-Load the iscam models and return as a list of iscam model objects
+Load iscam models found in the given directory and return as a list of iscam model objects
 }

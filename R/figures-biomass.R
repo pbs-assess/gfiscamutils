@@ -225,10 +225,8 @@ make.depletion.mcmc.plot <- function(models,
 #' Plot the MPD biomass time series along with the associated retrospectives
 #'
 #' @param model an iscam model object
-#' @param ylim limits of y-axis
-#' @param offset
+#' @param offset horizontal offset for B0 points in depletion plot
 #' @param show.bo.line Show the B0-based reference point lines
-#' @param ind.letter letter to show on the plot panel
 #' @param leg show the legend? Logical
 #'
 #' @return a ggplot object
@@ -236,12 +234,10 @@ make.depletion.mcmc.plot <- function(models,
 #' @importFrom ggplot2 aes geom_line
 #' @importFrom reshape2 melt
 #' @importFrom dplyr rename rename_at vars contains funs
+#' @importFrom scales comma
 biomass.plot.mpd <- function(model,
                              depl = FALSE,
-                             ylim,
-                             offset = 0.1,
-                             show.bo.line = FALSE,
-                             ind.letter = NULL,
+                             offset = 0.7,
                              leg = TRUE){
 
   if(class(model) == model.lst.class){
@@ -299,7 +295,6 @@ biomass.plot.mpd <- function(model,
     mutate(`Biomass (t)` = as.numeric(`Biomass (t)`),
            Year = as.numeric(Year))
 
-  horiz.offset <- 1.7
   p <- ggplot(bt, aes(x = Year,
                       y = `Biomass (t)`,
                       #ymin = 0,
@@ -310,7 +305,7 @@ biomass.plot.mpd <- function(model,
     theme(legend.position = c(1, 1),
           legend.justification = c(1, 1),
           legend.title = element_blank()) +
-    scale_y_continuous(labels = comma,
+    scale_y_continuous(labels = scales::comma,
                        limits = c(0, NA)) +
     coord_cartesian(expand = FALSE) +
     scale_x_continuous(breaks = seq(0, 3000, 5))
@@ -318,7 +313,7 @@ biomass.plot.mpd <- function(model,
   if(!depl){
     p <- p + geom_point(data = bo,
                         size = 2,
-                        position = position_dodge(width = horiz.offset),
+                        position = position_dodge(width = offset),
                         mapping = aes(color = Sensitivity),
                         show.legend = FALSE)
   }
