@@ -222,122 +222,114 @@ make.depletion.mcmc.plot <- function(models,
   }
 }
 
-#' Make a retrospective biomass plot
+#' Plot the MPD biomass time series along with the associated retrospectives
 #'
-#' @param base.model The base iscam model object
-#' @param models A list of iscam model objects to plot against the base model
-#' @param model.names A vector of names to show on the legend
-#' @param ylim The y limits for the plot
-#' @param offset The amount on the x-axis to offset each point and line for
-#'   multiple models
-#' @param show.bo.line Show the reference lines 0.2 and 0.4bo
-#' @param ind.letter A letter to show on the plot (for panel plots)
-#' @param leg Position of the legend. NULL means no legend is shown
-#' @param color.brew.class The RColorBrewer class, e.g. "Paired"
-#' @param ... Other graphical arguments
+#' @param model an iscam model object
+#' @param ylim limits of y-axis
+#' @param offset
+#' @param show.bo.line Show the B0-based reference point lines
+#' @param ind.letter letter to show on the plot panel
+#' @param leg show the legend? Logical
 #'
+#' @return a ggplot object
 #' @export
-#' @importFrom grDevices colorRampPalette
-make.biomass.retro.mpd.plot <- function(base.model,
-                                        models,
-                                        model.names = NULL,
-                                        ylim,
-                                        offset = 0.1,
-                                        show.bo.line = FALSE,
-                                        ind.letter = NULL,
-                                        leg = TRUE,
-                                        color.brew.class = "Paired",
-                                        ...
-                                        ){
+#' @importFrom ggplot2 aes geom_line
+#' @importFrom reshape2 melt
+#' @importFrom dplyr rename rename_at vars contains funs
+biomass.plot.mpd <- function(model,
+                             depl = FALSE,
+                             ylim,
+                             offset = 0.1,
+                             show.bo.line = FALSE,
+                             ind.letter = NULL,
+                             leg = TRUE){
 
-  par(mar = c(5.1, 5.1, 4.1, 3.1))
-
-  sbt <- lapply(models,
-                function(x){
-                  x[[1]]$mpd$sbt})
-
-  sbo <- base.model$mpd$sbo
+  if(class(model) == model.lst.class){
+    model <- model[[1]]
+    if(class(model) != model.class){
+      stop("The structure of the model list is incorrect.")
+    }
+  }
+  base_model_lst <- list(model)
+  class(base_model_lst) <- model.lst.class
+  models <- c(base_model_lst, model$retro)
 
   yrs <- lapply(models,
                 function(x){
-                  x[[1]]$mpd$syr:(x[[1]]$mpd$nyr + 1)})
-  xlim <- lapply(1:length(yrs),
+                  x$mpd$syr:(x$mpd$nyr + 1)})
+  if(depl){
+    bt <- lapply(models,
                  function(x){
-                   c(min(yrs[[x]]), max(yrs[[x]]))})
-  xlim <- do.call(rbind, xlim)
-  xlim <- c(min(xlim), max(xlim))
-
-  if(is.null(dev.list())){
-    ## If layout() is used outside this function,
-    ##  it calls plot.new and will mess up the figures
-    ##  if we call it again
-    plot.new()
+                   x$mpd$sbt / x$mpd$sbo })
+  }else{
+    bt <- lapply(models,
+                 function(x){
+                   x$mpd$sbt})
   }
-  plot.window(xlim = xlim,
-              ylim = ylim,
-              xlab = "",
-              ylab = "")
+  bt <- lapply(1:length(bt),
+               function(x){
+                 tmp <- as.data.frame(t(bt[[x]]))
+                 rownames(tmp) <- "Biomass (t)"
+                 colnames(tmp) <-  yrs[[x]]
+                 tmp})
+  models.names <- paste0("-", 1:(length(bt) - 1), " years")
+  models.names <- c("Base model", models.names)
+  names(bt) <- models.names
 
-  base.yrs <- base.model$mpd$syr:(base.model$mpd$nyr + 1)
-  base.sbt <- base.model$mpd$sbt
+  bt <- bind_rows(bt, .id = "Sensitivity") %>%
+    melt() %>%
+    as.tibble() %>%
+    mutate(Year = variable, `Biomass (t)` = value) %>%
+    select(-c(variable, value)) %>%
+    mutate(Year = as.numeric(as.character(Year))) %>%
+    mutate(Sensitivity = forcats::fct_relevel(Sensitivity,
+                                              models.names,
+                                              after = 0))
 
-  cols <- colorRampPalette(c("red", "blue", "green"))(length(model.names))
+  bo <- lapply(models,
+               function(x){
+                 x$mpd$sbo
+               })
+  names(bo) <- models.names
+  bo <- t(bind_cols(bo))
+  bo <- cbind(rownames(bo), bo, min(bt$Year))
+  colnames(bo) <- c("Sensitivity", "Biomass (t)", "Year")
+  bo <- bo %>%
+    as.tibble() %>%
+    mutate(`Biomass (t)` = as.numeric(`Biomass (t)`),
+           Year = as.numeric(Year))
 
-  if(leg){
-    layout(1:2, heights = c(1, 5))
-    par(mar = rep(0, 4))
-    plot(0, 0, type="n", ann=FALSE, axes=FALSE)
-    legend("center",
-           model.names,
-           bg = "transparent",
-           ncol = 6,
-           col = c(1, cols),
-           lty = c(1, rep(2, length(model.names) - 1)),
-           lwd = 2)
-    par(mar=c(5,4,0,2))
-  }
-  plot(base.yrs,
-       base.sbt,
-       col = 1,
-       lwd = 3,
-       las = 1,
-       lty = 1,
-       xlim = xlim,
-       ylim = ylim,
-       xlab = "",
-       ylab = "",
-       type = "l",
-       ...)
-  lapply(1:length(yrs),
-         function(x){
-           lines(yrs[[x]],
-                 sbt[[x]],
-                 xlab = "",
-                 ylab = "",
-                 col = cols[x],
-                 las = 1,
-                 lwd = 2,
-                 lty = 2,
-                 xlim = xlim,
-                 ylim = ylim,
-                 ...)})
+  horiz.offset <- 1.7
+  p <- ggplot(bt, aes(x = Year,
+                      y = `Biomass (t)`,
+                      #ymin = 0,
+                      #ymax = max(`Biomass (t)`),
+                      group = Sensitivity)) +
+    geom_line(aes(color = Sensitivity),
+              size = 1) +
+    theme(legend.position = c(1, 1),
+          legend.justification = c(1, 1),
+          legend.title = element_blank()) +
+    scale_y_continuous(labels = comma,
+                       limits = c(0, NA)) +
+    coord_cartesian(expand = FALSE) +
+    scale_x_continuous(breaks = seq(0, 3000, 5))
 
-  if(show.bo.line){
-    abline(h = 0.3 * sbo,
-           col = "red",
-           lty = 1,
-           lwd = 2)
-    mtext(expression("0.3SB"[0]),
-          4,
-          at = 0.3 * sbo,
-          col = "red",
-          las = 1)
+  if(!depl){
+    p <- p + geom_point(data = bo,
+                        size = 2,
+                        position = position_dodge(width = horiz.offset),
+                        mapping = aes(color = Sensitivity),
+                        show.legend = FALSE)
   }
 
-  mtext("Year", 1, line = 3)
-  mtext("Biomass (1000 mt)", 2, line = 3)
-
-  if(!is.null(ind.letter)){
-    panel.letter(ind.letter)
+  if(depl){
+    p <- p + ylab("Relative biomass")
   }
+
+  if(length(models) == 1){
+    p <- p + theme(legend.position = "none")
+  }
+
+  p
 }
