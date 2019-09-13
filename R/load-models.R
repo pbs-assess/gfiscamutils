@@ -608,7 +608,7 @@ delete.rdata.files <- function(path = NA, subdir = "AM2"){
       cat(paste0("Deleted ", file.path(i, rdata.file), "\n"))
     }
     if(dir.exists(file.path(i, retro.dir))){
-      delete.rdata.files(file.path(i, retro.dir))
+      delete.rdata.files(file.path(i, retro.dir), subdir = "")
     }
   }
   invisible()
