@@ -333,8 +333,6 @@ calc.mcmc <- function(model,
   r.quants <- NULL
 
   proj <- mcmc.thin(mc$proj[mc$proj$TAC == 0,], burnin, thin)
-  last.yr <- sbt.yrs[length(sbt.yrs)]
-  last.yr.bt <- paste0("B", last.yr)
   #tryCatch({
   r.dat <- cbind(r.dat,
                  0.3 * r.dat$sbo,
