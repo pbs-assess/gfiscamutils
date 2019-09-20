@@ -317,6 +317,9 @@ calc.mcmc <- function(model,
   yr.f.end <- f.yrs[length(f.yrs)]
 
   proj.dat <- NULL
+  proj.quants <- NULL
+  nonproj.sbt <- NULL
+  nonproj.sbt.quants <- NULL
   if(load.proj){
     proj.dat <- calc.probabilities(model,
                                    burnin,
@@ -330,6 +333,8 @@ calc.mcmc <- function(model,
                          na.rm = TRUE)
     ## Replace the final year of the sbt with the values obtained from the projections
     proj <- mcmc.thin(mc$proj[mc$proj$TAC == 0,], burnin, thin)
+    nonproj.sbt <- sbt.dat[,ncol(sbt.dat)]
+    nonproj.sbt.quants <- quantile(nonproj.sbt, probs = probs)
     sbt.dat[,ncol(sbt.dat)] <- proj[,2]
     sbt.quants <- apply(sbt.dat,
                         2,
@@ -339,22 +344,18 @@ calc.mcmc <- function(model,
     rownames(sbt.quants)[4] <- "MPD"
   }
   r.quants <- NULL
-
-  proj <- mcmc.thin(mc$proj[mc$proj$TAC == 0,], burnin, thin)
-  last.yr <- sbt.yrs[length(sbt.yrs)]
-  last.yr.bt <- paste0("B", last.yr)
-  #tryCatch({
+  last.yr.sbt <- sbt.dat[,ncol(sbt.dat)]
   r.dat <- cbind(r.dat,
                  0.3 * r.dat$sbo,
                  sbt.end.1,
                  sbt.end.1 / r.dat$sbo,
                  sbt.end.1 / (0.3 * r.dat$sbo),
                  sum(sbt.end.1 < (0.3 * r.dat$sbo)) / nrow(r.dat),
-                 proj[,last.yr.bt],
-                 proj[,last.yr.bt] / r.dat$sbo,
-                 proj[,last.yr.bt] / (0.3 * r.dat$sbo),
-                 sum(proj[,last.yr.bt] < (0.3 * r.dat$sbo)) / nrow(r.dat),
-                 sum(proj[,last.yr.bt] < (0.6 * r.dat$sbo)) / nrow(r.dat),
+                 last.yr.sbt,
+                 last.yr.sbt / r.dat$sbo,
+                 last.yr.sbt / (0.3 * r.dat$sbo),
+                 sum(last.yr.sbt < (0.3 * r.dat$sbo)) / nrow(r.dat),
+                 sum(last.yr.sbt < (0.6 * r.dat$sbo)) / nrow(r.dat),
                  proj$PropAge3,
                  proj$PropAge4to10)
   names(r.dat) <- c("sbo",
@@ -372,11 +373,6 @@ calc.mcmc <- function(model,
                     "PropAge4to10")
 
   r.quants <- apply(r.dat, 2, quantile, prob = probs)
-  #}, warning = function(war){
-  #}, error = function(err){
-  ## If this is the case, a message will have been printed in the previous
-  ##  tryCatch above so none is needed here.
-  #})
 
   desc.col <- c("$SB_0$",
                 "$0.3SB_0$",
@@ -438,7 +434,9 @@ calc.mcmc <- function(model,
            "u.mort.dat",
            "u.mort.quants",
            "proj.dat",
-           "proj.quants"),
+           "proj.quants",
+           "nonproj.sbt",
+           "nonproj.sbt.quants"),
          function(x){get(x)})
 }
 
