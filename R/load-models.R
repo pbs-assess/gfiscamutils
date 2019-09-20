@@ -328,7 +328,15 @@ calc.mcmc <- function(model,
                          quantile,
                          prob = probs,
                          na.rm = TRUE)
-
+    ## Replace the final year of the sbt with the values obtained from the projections
+    proj <- mcmc.thin(mc$proj[mc$proj$TAC == 0,], burnin, thin)
+    sbt.dat[,ncol(sbt.dat)] <- proj[,2]
+    sbt.quants <- apply(sbt.dat,
+                        2,
+                        quantile,
+                        prob = probs)
+    sbt.quants <- rbind(sbt.quants, mpd$sbt)
+    rownames(sbt.quants)[4] <- "MPD"
   }
   r.quants <- NULL
 
