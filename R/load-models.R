@@ -326,13 +326,14 @@ calc.mcmc <- function(model,
                                    thin,
                                    ...)
 
-    proj.quants <- apply(model$mcmc$proj[model$mcmc$proj$TAC == 0,],
+    proj <- mcmc.thin(mc$proj[mc$proj$TAC == 0,], burnin, thin)
+    proj.quants <- apply(proj,
                          2,
                          quantile,
                          prob = probs,
                          na.rm = TRUE)
     ## Replace the final year of the sbt with the values obtained from the projections
-    proj <- mcmc.thin(mc$proj[mc$proj$TAC == 0,], burnin, thin)
+    ## and include the model-estimated values and quantiles in case needed as 'nonproj' objects
     nonproj.sbt <- sbt.dat[,ncol(sbt.dat)]
     nonproj.sbt.quants <- quantile(nonproj.sbt, probs = probs)
     sbt.dat[,ncol(sbt.dat)] <- proj[,2]
