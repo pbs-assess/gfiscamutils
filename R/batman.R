@@ -48,7 +48,9 @@ batman <- function(){
   g <- g +
     bt_plot$left_plot +
     bt_plot$right_plot +
-    geom_path(data = cr) +
-    geom_path(data = cl)
+    geom_path(data = cr,
+              na.rm = TRUE) +
+    geom_path(data = cl,
+              na.rm = TRUE)
   g
 }

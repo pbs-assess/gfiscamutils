@@ -301,7 +301,8 @@ biomass.plot.mpd <- function(model,
                       #ymax = max(`Biomass (t)`),
                       group = Sensitivity)) +
     geom_line(aes(color = Sensitivity),
-              size = 1) +
+              size = 1,
+              na.rm = TRUE) +
     theme(legend.position = c(1, 1),
           legend.justification = c(1, 1),
           legend.title = element_blank()) +
@@ -315,7 +316,8 @@ biomass.plot.mpd <- function(model,
                         size = 2,
                         position = position_dodge(width = offset),
                         mapping = aes(color = Sensitivity),
-                        show.legend = FALSE)
+                        show.legend = FALSE,
+                        na.rm = TRUE)
   }
 
   if(depl){
