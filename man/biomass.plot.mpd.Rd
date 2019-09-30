@@ -9,11 +9,11 @@ biomass.plot.mpd(model, depl = FALSE, offset = 0.7, leg = TRUE)
 \arguments{
 \item{model}{an iscam model object}
 
+\item{depl}{if TRUE, plot the depletion line(s)}
+
 \item{offset}{horizontal offset for B0 points in depletion plot}
 
 \item{leg}{show the legend? Logical}
-
-\item{show.bo.line}{Show the B0-based reference point lines}
 }
 \value{
 a ggplot object

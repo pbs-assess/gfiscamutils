@@ -16,34 +16,6 @@ verify_models <- function(models,
   }
 }
 
-#' Capitalize first letter of string
-#'
-#' @param x string
-#'
-#' @return string with first letter capitalized
-#' @export
-firstup <- function(x){
-  stopifnot(!is.na(x),
-            !is.null(x),
-            typeof(x) == "character")
-  substr(x, 1, 1) <- toupper(substr(x, 1, 1))
-  x
-}
-
-#' Make first letter of string lowercase
-#'
-#' @param x string
-#'
-#' @return string with first letter lowercase
-#' @export
-firstlower <- function(x) {
-  stopifnot(!is.na(x),
-            !is.null(x),
-            typeof(x) == "character")
-  substr(x, 1, 1) <- tolower(substr(x, 1, 1))
-  x
-}
-
 #' Calculate column quantiles for a data matrix
 #'
 #' @param data a matrix

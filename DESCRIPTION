@@ -30,6 +30,9 @@ Imports:
   rosettafish,
   scales,
   reshape2,
-  zoo
+  zoo,
+  stringr,
+  tibble,
+  forcats
 LazyData: true
 RoxygenNote: 6.1.1

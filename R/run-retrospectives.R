@@ -1,9 +1,9 @@
 #' Run retrospectives for the given iscam model directory
 #'
-#' @param model a directory containing a valid iscam model
 #' @param yrs the number of years to run back for retrospectives.
 #' @param overwrite if the retrospectives directory exists and this is TRUE, re-run the retrospectives.
 #'   If the retrospectives directory does not exist, this is ignored and the retrospectives are run.
+#' @param path location of the iscam model directory for which to run retrospectives
 #'
 #' @export
 #' @importFrom stringr str_ends

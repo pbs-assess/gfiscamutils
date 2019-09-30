@@ -7,12 +7,12 @@
 run_retro(path, yrs = 2, overwrite = FALSE)
 }
 \arguments{
+\item{path}{location of the iscam model directory for which to run retrospectives}
+
 \item{yrs}{the number of years to run back for retrospectives.}
 
 \item{overwrite}{if the retrospectives directory exists and this is TRUE, re-run the retrospectives.
 If the retrospectives directory does not exist, this is ignored and the retrospectives are run.}
-
-\item{model}{a directory containing a valid iscam model}
 }
 \description{
 Run retrospectives for the given iscam model directory

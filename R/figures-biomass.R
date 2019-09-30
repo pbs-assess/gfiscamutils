@@ -226,15 +226,18 @@ make.depletion.mcmc.plot <- function(models,
 #'
 #' @param model an iscam model object
 #' @param offset horizontal offset for B0 points in depletion plot
-#' @param show.bo.line Show the B0-based reference point lines
 #' @param leg show the legend? Logical
+#' @param depl if TRUE, plot the depletion line(s)
 #'
 #' @return a ggplot object
 #' @export
-#' @importFrom ggplot2 aes geom_line
+#' @importFrom ggplot2 aes geom_line scale_y_continuous coord_cartesian
+#' scale_x_continuous geom_point position_dodge ylab
 #' @importFrom reshape2 melt
-#' @importFrom dplyr rename rename_at vars contains funs
+#' @importFrom dplyr rename rename_at vars contains funs bind_cols
 #' @importFrom scales comma
+#' @importFrom tibble as.tibble
+#' @importFrom forcats fct_relevel
 biomass.plot.mpd <- function(model,
                              depl = FALSE,
                              offset = 0.7,
@@ -278,9 +281,9 @@ biomass.plot.mpd <- function(model,
     mutate(Year = variable, `Biomass (t)` = value) %>%
     select(-c(variable, value)) %>%
     mutate(Year = as.numeric(as.character(Year))) %>%
-    mutate(Sensitivity = forcats::fct_relevel(Sensitivity,
-                                              models.names,
-                                              after = 0))
+    mutate(Sensitivity = fct_relevel(Sensitivity,
+                                     models.names,
+                                     after = 0))
 
   bo <- lapply(models,
                function(x){
@@ -306,7 +309,7 @@ biomass.plot.mpd <- function(model,
     theme(legend.position = c(1, 1),
           legend.justification = c(1, 1),
           legend.title = element_blank()) +
-    scale_y_continuous(labels = scales::comma,
+    scale_y_continuous(labels = comma,
                        limits = c(0, NA)) +
     coord_cartesian(expand = FALSE) +
     scale_x_continuous(breaks = seq(0, 3000, 5))

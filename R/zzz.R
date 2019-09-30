@@ -154,5 +154,7 @@ globalVariables(c(
 "iscam.exe.file",
 "linux.pipe.to.log",
 "dos.pipe.to.log",
-"rdata.file"
+"rdata.file",
+"Sensitivity",
+"Biomass (t)"
 ))
