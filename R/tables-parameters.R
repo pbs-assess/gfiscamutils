@@ -461,7 +461,7 @@ make.parameters.est.table <- function(model,
   ## The next set of names only pertains to the ARF assessment, the q's
   ##  and sel's are modified to line up with each other.
   new.col <- c("$R_0$",
-               "$Steepness (h)$",
+               "$h$",
                "$M$",
                "$\\overline{R}$",
                "$\\overline{R}_{init}$",
