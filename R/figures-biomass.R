@@ -240,6 +240,7 @@ make.depletion.mcmc.plot <- function(models,
 #' @importFrom forcats fct_relevel
 biomass.plot.mpd <- function(model,
                              depl = FALSE,
+                             xlim = NA,
                              offset = 0.7,
                              leg = TRUE){
 
@@ -314,7 +315,15 @@ biomass.plot.mpd <- function(model,
     coord_cartesian(expand = FALSE) +
     scale_x_continuous(breaks = seq(0, 3000, 5))
 
+  if(!is.na(xlim[1])){
+    p <- p +
+      xlim(xlim[1], xlim[2])
+  }
+
   if(!depl){
+    if(!is.na(xlim[1])){
+      bo$Year <- xlim[1]
+    }
     p <- p + geom_point(data = bo,
                         size = 2,
                         position = position_dodge(width = offset),
