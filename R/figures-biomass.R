@@ -307,9 +307,10 @@ biomass.plot.mpd <- function(model,
     geom_line(aes(color = Sensitivity),
               size = 1,
               na.rm = TRUE) +
-    theme(legend.position = c(1, 1),
-          legend.justification = c(1, 1),
+    theme(legend.position = "top",
+          #legend.justification = c(1, 1),
           legend.title = element_blank()) +
+    guides(fill = guide_legend(ncol = 2)) +
     scale_y_continuous(labels = comma,
                        limits = c(0, NA)) +
     coord_cartesian(expand = FALSE) +
