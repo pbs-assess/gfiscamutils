@@ -4,7 +4,8 @@
 \alias{biomass.plot.mpd}
 \title{Plot the MPD biomass time series along with the associated retrospectives}
 \usage{
-biomass.plot.mpd(model, depl = FALSE, offset = 0.7, leg = TRUE)
+biomass.plot.mpd(model, depl = FALSE, xlim = NA, offset = 0.7,
+  leg = TRUE)
 }
 \arguments{
 \item{model}{an iscam model object}
