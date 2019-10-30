@@ -947,6 +947,21 @@ Num2Word <- function( x ) {
   return( res )
 }  # End function Num2Word
 
+# Calculate percent change, difference, etc
+DeltaPercent <- function( x, nYrs=1, type ) {
+  # Numerator: difference
+  top <- x - lag( x, n=nYrs )
+  # Denominator: depends on the type
+  if( type=="PctChange" ) bot <- lag( x, n=nYrs )            # Previous value
+  if( type=="PctDiff" )   bot <- ( x + lag(x, n=nYrs) ) / 2  # Mean of values
+  # Error if there's no denominator
+  if( !exists("bot") )  stop( "No denominator; check 'type'" )
+  # Calculate percent change
+  res <- top / bot * 100
+  # Return the result
+  return( res )
+}  # End DeltaPercent function
+
 read.admb <- function(ifile){
 	ret=read.fit(ifile)
 
