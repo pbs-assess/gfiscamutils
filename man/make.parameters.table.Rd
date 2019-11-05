@@ -34,7 +34,8 @@ make.value.table(model, type, syr, digits = 3, xcaption = "default",
 
 make.biomass.depletion.table(model, syr, digits = 3,
   xcaption = "default", xlabel = "default", font.size = 9,
-  space.size = 10, placement = "H", tabular.environment = "tabular")
+  space.size = 10, placement = "H", tabular.environment = "tabular",
+  translate = FALSE)
 
 make.sens.parameter.table(tab, xcaption = "default",
   xlabel = "default", font.size = 9, space.size = 10,

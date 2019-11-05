@@ -634,6 +634,7 @@ make.value.table <- function(model,
 #' @export
 #' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align latex.perc latex.cmidr
 #' @importFrom xtable xtable
+#' @importFrom rosettafish en2fr
 make.biomass.depletion.table <- function(model,
                                          syr,
                                          digits = 3,
@@ -642,7 +643,8 @@ make.biomass.depletion.table <- function(model,
                                          font.size = 9,
                                          space.size = 10,
                                          placement = "H",
-                                         tabular.environment = "tabular"){
+                                         tabular.environment = "tabular",
+                                         translate = FALSE){
 
   if(class(model) == model.lst.class){
     model <- model[[1]]
@@ -671,11 +673,11 @@ make.biomass.depletion.table <- function(model,
                                latex.amp(),
                                latex.mcol(4,
                                           "c",
-                                          latex.bold("Spawning biomass")),
+                                          latex.bold(en2fr("Spawning biomass", translate))),
                                latex.amp(),
                                latex.mcol(4,
                                           "c",
-                                          latex.bold("Depletion")),
+                                          latex.bold(en2fr("Depletion", translate))),
                                latex.nline,
                                latex.cmidr("2-5", "lr"),
                                " ",
