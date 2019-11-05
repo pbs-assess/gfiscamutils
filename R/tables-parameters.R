@@ -399,13 +399,15 @@ make.catchability.parameters.table <- function(am1.lst,
 #' @export
 #' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align latex.perc
 #' @importFrom xtable xtable
+#' @importFrom rosettafish en2fr
 make.parameters.est.table <- function(model,
                                       digits = 3,
                                       xcaption = "default",
                                       xlabel   = "default",
                                       font.size = 9,
                                       space.size = 10,
-                                      placement = "H"){
+                                      placement = "H",
+                                      translate = FALSE){
 
   if(class(model) == model.lst.class){
     model <- model[[1]]
@@ -454,7 +456,7 @@ make.parameters.est.table <- function(model,
   names(mpd.param.vals) <- mcmc.names
   tab <- rbind(p.quants, as.numeric(mpd.param.vals))
   row.n <- rownames(tab)
-  row.n[length(row.n)] <- "MPD"
+  row.n[length(row.n)] <- en2fr("MPD", translate)
   rownames(tab) <- row.n
   tab <- f(t(tab), digits)
 
@@ -571,6 +573,7 @@ make.ref.points.table <- function(model.am2,
 #' @export
 #' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align latex.perc
 #' @importFrom xtable xtable
+#' @importFrom rosettafish en2fr
 make.value.table <- function(model,
                              type,
                              syr,
@@ -580,7 +583,8 @@ make.value.table <- function(model,
                              font.size = 9,
                              space.size = 10,
                              placement = "H",
-                             tabular.environment = "tabular"){
+                             tabular.environment = "tabular",
+                             translate = FALSE){
 
   if(class(model) == model.lst.class){
     model <- model[[1]]
@@ -606,8 +610,8 @@ make.value.table <- function(model,
   tab <- f(t(out.dat), digits)
   tab <- cbind(rownames(tab), tab)
   tab <- tab[tab[,1] >= syr,]
-  col.names <- colnames(tab)
-  col.names[1] <- "Year"
+  col.names <- en2fr(colnames(tab), translate, allow_missing = TRUE)
+  col.names[1] <- en2fr("Year", translate)
   col.names <- latex.bold(latex.perc(col.names))
   colnames(tab) <- col.names
 
