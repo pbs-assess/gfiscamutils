@@ -667,7 +667,7 @@ make.biomass.depletion.table <- function(model,
   tab <- tab[-nrow(tab),]
 
   col.names <- colnames(tab)
-  col.names[1] <- "Year"
+  col.names[1] <- en2fr("Year", translate)
   col.names <- latex.bold(latex.perc(col.names))
   colnames(tab) <- col.names
 
