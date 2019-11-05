@@ -520,6 +520,13 @@ make.ref.points.table <- function(model.am2,
 
   tab.am2 <- model.am2$mcmccalcs$r.quants
   row.names <- tab.am2[,1]
+  if( translate ) {
+    row.names <- gsub( pattern="SB", replacement=en2fr("SB", translate),
+                       x=row.names )
+    row.names <- gsub( pattern="Proportion aged",
+                       replacement=en2fr("Proportion aged", translate),
+                       x=row.names )
+  }
   col.names.am2 <- colnames(tab.am2)
   col.names.am2[1] <- paste0("\\textbf{", en2fr("Reference point", translate), "}")
   ## Remove latex rownames
