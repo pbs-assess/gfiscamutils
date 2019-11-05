@@ -475,7 +475,7 @@ make.parameters.est.table <- function(model,
                "$\\sigma$")
   col.names <- colnames(tab)
   col.names <- latex.bold(latex.perc(col.names))
-  col.names <- c(latex.bold("Parameter"), col.names)
+  col.names <- c(latex.bold(en2fr("Parameter", translate)), col.names)
   tab <- cbind(new.col, tab)
   colnames(tab) <- col.names
 
