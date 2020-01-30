@@ -5,13 +5,30 @@
 \alias{make.depletion.mcmc.plot}
 \title{Plot the biomass trajectories for iscam models}
 \usage{
-make.biomass.mcmc.plot(models, model.names = NULL, ylim, opacity = 75,
-  offset = 0.1, append.base.txt = NULL, show.bmsy.line = FALSE,
-  show.bo.line = FALSE, ind.letter = NULL, leg = NULL, ...)
+make.biomass.mcmc.plot(
+  models,
+  model.names = NULL,
+  ylim,
+  opacity = 75,
+  offset = 0.1,
+  append.base.txt = NULL,
+  show.bmsy.line = FALSE,
+  show.bo.line = FALSE,
+  ind.letter = NULL,
+  leg = NULL,
+  ...
+)
 
-make.depletion.mcmc.plot(models, model.names = NULL, ylim = c(0, 1),
-  opacity = 75, append.base.txt = NULL, ind.letter = NULL,
-  leg = NULL, ...)
+make.depletion.mcmc.plot(
+  models,
+  model.names = NULL,
+  ylim = c(0, 1),
+  opacity = 75,
+  append.base.txt = NULL,
+  ind.letter = NULL,
+  leg = NULL,
+  ...
+)
 }
 \arguments{
 \item{models}{A list of iscam model objects}

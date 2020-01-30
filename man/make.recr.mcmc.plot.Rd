@@ -4,9 +4,19 @@
 \alias{make.recr.mcmc.plot}
 \title{Plot the recruitment or deviations for MCMC iscam models}
 \usage{
-make.recr.mcmc.plot(models, model.names = NULL, type = 1, ylim,
-  offset = 0.1, append.base.txt = NULL, show.median = FALSE,
-  show.mean = FALSE, ind.letter = NULL, leg = NULL, ...)
+make.recr.mcmc.plot(
+  models,
+  model.names = NULL,
+  type = 1,
+  ylim,
+  offset = 0.1,
+  append.base.txt = NULL,
+  show.median = FALSE,
+  show.mean = FALSE,
+  ind.letter = NULL,
+  leg = NULL,
+  ...
+)
 }
 \arguments{
 \item{models}{A list of iscam model objects}

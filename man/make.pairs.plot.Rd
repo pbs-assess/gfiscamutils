@@ -4,8 +4,11 @@
 \alias{make.pairs.plot}
 \title{Plot the pairs scatterplots for the estimated parameters}
 \usage{
-make.pairs.plot(model, params = c("ro", "h", "m", "rbar", "rinit", "q1",
-  "q2", "sel1", "selsd1", "sel2", "selsd2", "sel3", "selsd3"))
+make.pairs.plot(
+  model,
+  params = c("ro", "h", "m", "rbar", "rinit", "q1", "q2", "sel1", "selsd1", "sel2",
+    "selsd2", "sel3", "selsd3")
+)
 }
 \arguments{
 \item{model}{An iscam model object}

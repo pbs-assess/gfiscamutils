@@ -4,8 +4,17 @@
 \alias{make.index.fit.plot}
 \title{Plot the index fits for MPD runs only}
 \usage{
-make.index.fit.plot(models, model.names = NULL, leg = NULL, start.yr,
-  end.yr, ind, ylim = c(0, 20), ind.letter = NULL, show.cv = FALSE)
+make.index.fit.plot(
+  models,
+  model.names = NULL,
+  leg = NULL,
+  start.yr,
+  end.yr,
+  ind,
+  ylim = c(0, 20),
+  ind.letter = NULL,
+  show.cv = FALSE
+)
 }
 \arguments{
 \item{models}{A list of iscam model objects}

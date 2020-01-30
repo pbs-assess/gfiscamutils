@@ -4,8 +4,10 @@
 \alias{calc.mpd.logs}
 \title{Calculate logs for several parameters using MPD}
 \usage{
-calc.mpd.logs(mpd, log.params = c("^ro$", "^m$", "^m1$", "^m2$",
-  "^rbar$", "^rinit$", "^q$"))
+calc.mpd.logs(
+  mpd,
+  log.params = c("^ro$", "^m$", "^m1$", "^m2$", "^rbar$", "^rinit$", "^q$")
+)
 }
 \arguments{
 \item{mpd}{A list of MPD outputs}

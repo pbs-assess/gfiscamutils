@@ -13,46 +13,117 @@
 \alias{make.catchability.parameters.table.q.sens}
 \title{Make an xtable in the proper format for parameter estimates and priors}
 \usage{
-make.parameters.table(model, xcaption = "default", xlabel = "default",
-  font.size = 9, space.size = 10, placement = "H")
+make.parameters.table(
+  model,
+  xcaption = "default",
+  xlabel = "default",
+  font.size = 9,
+  space.size = 10,
+  placement = "H"
+)
 
-make.catchability.parameters.table(am1.lst, am2.lst = NULL, digits = 3,
-  xcaption = "default", xlabel = "default", font.size = 9,
-  space.size = 10, placement = "H")
+make.catchability.parameters.table(
+  am1.lst,
+  am2.lst = NULL,
+  digits = 3,
+  xcaption = "default",
+  xlabel = "default",
+  font.size = 9,
+  space.size = 10,
+  placement = "H"
+)
 
-make.parameters.est.table(model, digits = 3, xcaption = "default",
-  xlabel = "default", font.size = 9, space.size = 10,
-  placement = "H", translate = FALSE)
+make.parameters.est.table(
+  model,
+  digits = 3,
+  xcaption = "default",
+  xlabel = "default",
+  font.size = 9,
+  space.size = 10,
+  placement = "H",
+  translate = FALSE
+)
 
-make.ref.points.table(model.am2, digits = 3, xcaption = "default",
-  xlabel = "default", font.size = 9, space.size = 10,
-  placement = "H", translate = FALSE)
+make.ref.points.table(
+  model.am2,
+  digits = 3,
+  xcaption = "default",
+  xlabel = "default",
+  font.size = 9,
+  space.size = 10,
+  placement = "H",
+  translate = FALSE
+)
 
-make.value.table(model, type, syr, digits = 3, xcaption = "default",
-  xlabel = "default", font.size = 9, space.size = 10,
-  placement = "H", tabular.environment = "tabular",
-  translate = FALSE)
+make.value.table(
+  model,
+  type,
+  syr,
+  digits = 3,
+  xcaption = "default",
+  xlabel = "default",
+  font.size = 9,
+  space.size = 10,
+  placement = "H",
+  tabular.environment = "tabular",
+  translate = FALSE
+)
 
-make.biomass.depletion.table(model, syr, digits = 3,
-  xcaption = "default", xlabel = "default", font.size = 9,
-  space.size = 10, placement = "H", tabular.environment = "tabular",
-  translate = FALSE)
+make.biomass.depletion.table(
+  model,
+  syr,
+  digits = 3,
+  xcaption = "default",
+  xlabel = "default",
+  font.size = 9,
+  space.size = 10,
+  placement = "H",
+  tabular.environment = "tabular",
+  translate = FALSE
+)
 
-make.sens.parameter.table(tab, xcaption = "default",
-  xlabel = "default", font.size = 9, space.size = 10,
-  placement = "H")
+make.sens.parameter.table(
+  tab,
+  xcaption = "default",
+  xlabel = "default",
+  font.size = 9,
+  space.size = 10,
+  placement = "H"
+)
 
-make.sens.q.table(models, model.names, digits = 3,
-  xcaption = "default", xlabel = "default", font.size = 9,
-  space.size = 10, placement = "H")
+make.sens.q.table(
+  models,
+  model.names,
+  digits = 3,
+  xcaption = "default",
+  xlabel = "default",
+  font.size = 9,
+  space.size = 10,
+  placement = "H"
+)
 
-make.variance.table(var, which.model = 1, digits = 3,
-  xcaption = "default", xlabel = "default", font.size = 9,
-  space.size = 10, placement = "H")
+make.variance.table(
+  var,
+  which.model = 1,
+  digits = 3,
+  xcaption = "default",
+  xlabel = "default",
+  font.size = 9,
+  space.size = 10,
+  placement = "H"
+)
 
-make.catchability.parameters.table.q.sens(qa.lst, qb.lst, qc.lst,
-  digits = 3, xcaption = "default", xlabel = "default",
-  font.size = 9, space.size = 10, placement = "H")
+make.catchability.parameters.table.q.sens(
+  qa.lst,
+  qb.lst,
+  qc.lst,
+  digits = 3,
+  xcaption = "default",
+  xlabel = "default",
+  font.size = 9,
+  space.size = 10,
+  placement = "H"
+)
 }
 \arguments{
 \item{model}{an iscam model object}

@@ -4,9 +4,16 @@
 \alias{make.likelihood.table}
 \title{Make an xtable of likelihood values - Herring specific}
 \usage{
-make.likelihood.table(models, which = 1, digits = 3,
-  xcaption = "default", xlabel = "default", font.size = 11,
-  space.size = 12, placement = "H")
+make.likelihood.table(
+  models,
+  which = 1,
+  digits = 3,
+  xcaption = "default",
+  xlabel = "default",
+  font.size = 11,
+  space.size = 12,
+  placement = "H"
+)
 }
 \arguments{
 \item{models}{an iscam model object}

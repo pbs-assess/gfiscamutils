@@ -4,9 +4,17 @@
 \alias{make.maturity.sens.table}
 \title{Make maturity sensitivity table - Herring specific}
 \usage{
-make.maturity.sens.table(mat, which.model = 1, end.yr, digits = 3,
-  xcaption = "default", xlabel = "default", font.size = 9,
-  space.size = 10, placement = "H")
+make.maturity.sens.table(
+  mat,
+  which.model = 1,
+  end.yr,
+  digits = 3,
+  xcaption = "default",
+  xlabel = "default",
+  font.size = 9,
+  space.size = 10,
+  placement = "H"
+)
 }
 \arguments{
 \item{mat}{the data loaded from the maturity-sensitivity-results-table.csv file}

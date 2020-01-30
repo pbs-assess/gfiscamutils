@@ -3,7 +3,6 @@
 \docType{package}
 \name{gfiscamutils}
 \alias{gfiscamutils}
-\alias{gfiscamutils-package}
 \title{gfiscamutils: A package for loading gfiscam model output, with plotting
   and table-making functions}
 \description{

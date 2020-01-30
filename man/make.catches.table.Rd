@@ -4,10 +4,19 @@
 \alias{make.catches.table}
 \title{Make a catch xtable for latex document.}
 \usage{
-make.catches.table(catches, start.yr, end.yr, weight.factor = 1000,
-  digits = 3, areas = NULL, xcaption = "default",
-  xlabel = "default", font.size = 9, space.size = 10,
-  placement = "H")
+make.catches.table(
+  catches,
+  start.yr,
+  end.yr,
+  weight.factor = 1000,
+  digits = 3,
+  areas = NULL,
+  xcaption = "default",
+  xlabel = "default",
+  font.size = 9,
+  space.size = 10,
+  placement = "H"
+)
 }
 \arguments{
 \item{catches}{output of the [load.catches()] function}

@@ -4,8 +4,16 @@
 \alias{make.natural.mort.mcmc.plot}
 \title{Plot the natural mortality for MCMC cases for iscam models}
 \usage{
-make.natural.mort.mcmc.plot(models, model.names = NULL, which.gear = 1,
-  ylim, opacity = 75, ind.letter = NULL, leg = NULL, ...)
+make.natural.mort.mcmc.plot(
+  models,
+  model.names = NULL,
+  which.gear = 1,
+  ylim,
+  opacity = 75,
+  ind.letter = NULL,
+  leg = NULL,
+  ...
+)
 }
 \arguments{
 \item{models}{A list of iscam model objects}

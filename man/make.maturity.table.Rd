@@ -4,9 +4,15 @@
 \alias{make.maturity.table}
 \title{Make a table of maturity data}
 \usage{
-make.maturity.table(mat, digits = 3, xcaption = "default",
-  xlabel = "default", font.size = 9, space.size = 10,
-  placement = "H")
+make.maturity.table(
+  mat,
+  digits = 3,
+  xcaption = "default",
+  xlabel = "default",
+  font.size = 9,
+  space.size = 10,
+  placement = "H"
+)
 }
 \arguments{
 \item{mat}{the maturity vectors data as loaded from maturity-vectors.csv}

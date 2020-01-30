@@ -4,8 +4,15 @@
 \alias{make.q.plot}
 \title{Plot the catchability trajectories for iscam models}
 \usage{
-make.q.plot(models, model.names = NULL, ylim, opacity = 75,
-  ind.letter = NULL, leg = NULL, ...)
+make.q.plot(
+  models,
+  model.names = NULL,
+  ylim,
+  opacity = 75,
+  ind.letter = NULL,
+  leg = NULL,
+  ...
+)
 }
 \arguments{
 \item{models}{A list of iscam model objects}

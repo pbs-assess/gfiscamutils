@@ -4,8 +4,10 @@
 \alias{calc.logs}
 \title{Calculate logs for several parameters using MCMC}
 \usage{
-calc.logs(mc, log.params = c("^ro$", "^m$", "^m1$", "^m2$", "^rbar$",
-  "^rinit$", "^q[1-9]+$"))
+calc.logs(
+  mc,
+  log.params = c("^ro$", "^m$", "^m1$", "^m2$", "^rbar$", "^rinit$", "^q[1-9]+$")
+)
 }
 \arguments{
 \item{mc}{A data frame of posteriors as seen in the MCMC output csv files}

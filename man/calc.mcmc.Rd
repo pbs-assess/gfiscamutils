@@ -4,8 +4,15 @@
 \alias{calc.mcmc}
 \title{Perform some quantile calculations on the MCMC posteriors}
 \usage{
-calc.mcmc(model, burnin = 1000, thin = 1, lower = 0.025,
-  upper = 0.975, load.proj = TRUE, ...)
+calc.mcmc(
+  model,
+  burnin = 1000,
+  thin = 1,
+  lower = 0.025,
+  upper = 0.975,
+  load.proj = TRUE,
+  ...
+)
 }
 \arguments{
 \item{model}{An iscam model object}

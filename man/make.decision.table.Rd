@@ -4,9 +4,15 @@
 \alias{make.decision.table}
 \title{Produce a decision xtable for the given iscam model}
 \usage{
-make.decision.table(model, digits = 3, xcaption = "default",
-  xlabel = "default", font.size = 10, space.size = 11,
-  placement = "H")
+make.decision.table(
+  model,
+  digits = 3,
+  xcaption = "default",
+  xlabel = "default",
+  font.size = 10,
+  space.size = 11,
+  placement = "H"
+)
 }
 \arguments{
 \item{model}{An iscam model object}

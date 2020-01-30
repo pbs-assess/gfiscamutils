@@ -4,8 +4,14 @@
 \alias{make.selex.comparison.plot}
 \title{Plot the selectivity for selected gears for the iscam model}
 \usage{
-make.selex.comparison.plot(model, gear.names, show.mat = FALSE,
-  bio = NULL, leg = NULL, color.brew.class = "Paired")
+make.selex.comparison.plot(
+  model,
+  gear.names,
+  show.mat = FALSE,
+  bio = NULL,
+  leg = NULL,
+  color.brew.class = "Paired"
+)
 }
 \arguments{
 \item{model}{An iscam model object}

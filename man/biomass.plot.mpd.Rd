@@ -4,8 +4,14 @@
 \alias{biomass.plot.mpd}
 \title{Plot the MPD biomass time series along with the associated retrospectives}
 \usage{
-biomass.plot.mpd(model, depl = FALSE, xlim = NA, offset = 0.7,
-  leg = TRUE)
+biomass.plot.mpd(
+  model,
+  depl = FALSE,
+  xlim = NA,
+  offset = 0.7,
+  leg = TRUE,
+  translate = FALSE
+)
 }
 \arguments{
 \item{model}{an iscam model object}
@@ -15,6 +21,8 @@ biomass.plot.mpd(model, depl = FALSE, xlim = NA, offset = 0.7,
 \item{offset}{horizontal offset for B0 points in depletion plot}
 
 \item{leg}{show the legend? Logical}
+
+\item{translate}{logical; translate labels}
 }
 \value{
 a ggplot object

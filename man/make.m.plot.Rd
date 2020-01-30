@@ -4,9 +4,19 @@
 \alias{make.m.plot}
 \title{Plot natural mortality for iscam models}
 \usage{
-make.m.plot(models, model.names = NULL, ylim, opacity = 75,
-  offset = 0.1, append.base.txt = NULL, show.bmsy.line = FALSE,
-  show.bo.line = FALSE, ind.letter = NULL, leg = NULL, ...)
+make.m.plot(
+  models,
+  model.names = NULL,
+  ylim,
+  opacity = 75,
+  offset = 0.1,
+  append.base.txt = NULL,
+  show.bmsy.line = FALSE,
+  show.bo.line = FALSE,
+  ind.letter = NULL,
+  leg = NULL,
+  ...
+)
 }
 \arguments{
 \item{models}{A list of iscam model objects}

@@ -7,14 +7,29 @@
 \alias{make.age.comp.data.plot}
 \title{Plot age comp estimates}
 \usage{
-make.age.comp.estimates.plot(model, which.gear, fg = gray(level = 0.1,
-  alpha = 0.5), bg = gray(level = 0.5, alpha = 0.5), inches = 0.12)
+make.age.comp.estimates.plot(
+  model,
+  which.gear,
+  fg = gray(level = 0.1, alpha = 0.5),
+  bg = gray(level = 0.5, alpha = 0.5),
+  inches = 0.12
+)
 
-make.age.comp.fit.plot(model, which.gear, fg = gray(level = 0.1, alpha =
-  0.5), bg = gray(level = 0.5, alpha = 0.5), inches = 0.12)
+make.age.comp.fit.plot(
+  model,
+  which.gear,
+  fg = gray(level = 0.1, alpha = 0.5),
+  bg = gray(level = 0.5, alpha = 0.5),
+  inches = 0.12
+)
 
-make.age.comp.residuals.plot(model, which.gear, fg = gray(level = 0.1,
-  alpha = 0.5), bg = gray(level = 0.5, alpha = 0.5), inches = 0.12)
+make.age.comp.residuals.plot(
+  model,
+  which.gear,
+  fg = gray(level = 0.1, alpha = 0.5),
+  bg = gray(level = 0.5, alpha = 0.5),
+  inches = 0.12
+)
 
 make.age.comp.data.plot(model, which.gear)
 }

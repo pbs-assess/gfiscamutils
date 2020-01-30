@@ -4,8 +4,12 @@
 \alias{read.control.file}
 \title{Read in the iscam control file}
 \usage{
-read.control.file(file = NULL, num.gears = NULL,
-  num.age.gears = NULL, verbose = FALSE)
+read.control.file(
+  file = NULL,
+  num.gears = NULL,
+  num.age.gears = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{file}{Filename}

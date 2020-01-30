@@ -4,9 +4,17 @@
 \alias{make.recr.retro.mpd.plot}
 \title{Plot the recruitment for the MPD cases for iscam models}
 \usage{
-make.recr.retro.mpd.plot(base.model, models, model.names = NULL, ylim,
-  offset = 0.1, ind.letter = NULL, leg = TRUE,
-  color.brew.class = "Paired", ...)
+make.recr.retro.mpd.plot(
+  base.model,
+  models,
+  model.names = NULL,
+  ylim,
+  offset = 0.1,
+  ind.letter = NULL,
+  leg = TRUE,
+  color.brew.class = "Paired",
+  ...
+)
 }
 \arguments{
 \item{base.model}{An iscam model object to compare against}

@@ -4,8 +4,15 @@
 \alias{make.nage2.plot}
 \title{Plot the estimated number of age 2's for iscam models}
 \usage{
-make.nage2.plot(models, model.names = NULL, ylim, opacity = 75,
-  ind.letter = NULL, leg = NULL, ...)
+make.nage2.plot(
+  models,
+  model.names = NULL,
+  ylim,
+  opacity = 75,
+  ind.letter = NULL,
+  leg = NULL,
+  ...
+)
 }
 \arguments{
 \item{models}{A list of iscam model objects}

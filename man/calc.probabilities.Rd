@@ -4,8 +4,14 @@
 \alias{calc.probabilities}
 \title{Extract and calculate probabilities from the iscam projection model}
 \usage{
-calc.probabilities(model, burnin, thin, which.stock = NULL,
-  which.model = NULL, fixed.cutoffs)
+calc.probabilities(
+  model,
+  burnin,
+  thin,
+  which.stock = NULL,
+  which.model = NULL,
+  fixed.cutoffs
+)
 }
 \arguments{
 \item{model}{An iscam model object}
