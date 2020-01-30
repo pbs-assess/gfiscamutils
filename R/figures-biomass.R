@@ -228,6 +228,7 @@ make.depletion.mcmc.plot <- function(models,
 #' @param offset horizontal offset for B0 points in depletion plot
 #' @param leg show the legend? Logical
 #' @param depl if TRUE, plot the depletion line(s)
+#' @param translate logical; translate labels
 #'
 #' @return a ggplot object
 #' @export
@@ -242,7 +243,8 @@ biomass.plot.mpd <- function(model,
                              depl = FALSE,
                              xlim = NA,
                              offset = 0.7,
-                             leg = TRUE){
+                             leg = TRUE,
+                             translate = FALSE){
 
   if(class(model) == model.lst.class){
     model <- model[[1]]
@@ -272,8 +274,10 @@ biomass.plot.mpd <- function(model,
                  rownames(tmp) <- "Biomass (t)"
                  colnames(tmp) <-  yrs[[x]]
                  tmp})
-  models.names <- paste0("-", 1:(length(bt) - 1), " years")
-  models.names <- c("Base model", models.names)
+  models.names <- paste0("-", 1:(length(bt) - 1), " ",
+                         en2fr("Years", translate, case="lower"))
+  models.names <- c(en2fr("Base model", translate, case="sentence"),
+                    models.names)
   names(bt) <- models.names
 
   bt <- bind_rows(bt, .id = "Sensitivity") %>%
@@ -310,10 +314,12 @@ biomass.plot.mpd <- function(model,
     theme(legend.position = "top",
           #legend.justification = c(1, 1),
           legend.title = element_blank()) +
-    guides(fill = guide_legend(ncol = 2)) +
+    guides(fill = guide_legend(nrow = 2)) +
+    labs( x=en2fr("Year", translate, case="sentence"),
+          y=paste( en2fr("Biomass", translate, case="sentence"), "(t)") ) +
     scale_y_continuous(labels = comma,
                        limits = c(0, NA)) +
-    coord_cartesian(expand = FALSE) +
+    coord_cartesian(expand = TRUE) +
     scale_x_continuous(breaks = seq(0, 3000, 5))
 
   if(!is.na(xlim[1])){
