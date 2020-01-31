@@ -340,7 +340,7 @@ biomass.plot.mpd <- function(model,
   }
 
   if(depl){
-    p <- p + ylab("Relative biomass")
+    p <- p + ylab(en2fr("Relative biomass", translate, case="sentence"))
   }
 
   if(length(models) == 1){
