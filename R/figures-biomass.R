@@ -228,9 +228,10 @@ make.depletion.mcmc.plot <- function(models,
 #' unfished spawning biomass as points.
 #'
 #' @param model an iscam model object
+#' @param depl logical; if TRUE, plot the depletion line(s)
+#' @param xlim numeric vector of length 2; trim the x-axis (default NA)
 #' @param offset horizontal offset for B0 points in depletion plot
 #' @param leg show the legend? Logical
-#' @param depl if TRUE, plot the depletion line(s)
 #' @param a_trans transparency for lines and points
 #' @param translate logical; translate labels
 #'
@@ -238,6 +239,7 @@ make.depletion.mcmc.plot <- function(models,
 #' @export
 #' @importFrom ggplot2 aes geom_line scale_y_continuous coord_cartesian
 #' scale_x_continuous geom_point position_dodge ylab labs scale_colour_viridis_d
+#' guides guide_legend
 #' @importFrom reshape2 melt
 #' @importFrom dplyr rename rename_at vars contains funs bind_cols
 #' @importFrom scales comma

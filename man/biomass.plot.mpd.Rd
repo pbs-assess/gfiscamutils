@@ -17,7 +17,9 @@ biomass.plot.mpd(
 \arguments{
 \item{model}{an iscam model object}
 
-\item{depl}{if TRUE, plot the depletion line(s)}
+\item{depl}{logical; if TRUE, plot the depletion line(s)}
+
+\item{xlim}{numeric vector of length 2; trim the x-axis (default NA)}
 
 \item{offset}{horizontal offset for B0 points in depletion plot}
 
