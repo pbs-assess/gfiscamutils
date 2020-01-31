@@ -231,12 +231,13 @@ make.depletion.mcmc.plot <- function(models,
 #' @param offset horizontal offset for B0 points in depletion plot
 #' @param leg show the legend? Logical
 #' @param depl if TRUE, plot the depletion line(s)
+#' @param a_trans transparency for lines and points
 #' @param translate logical; translate labels
 #'
 #' @return a ggplot object
 #' @export
 #' @importFrom ggplot2 aes geom_line scale_y_continuous coord_cartesian
-#' scale_x_continuous geom_point position_dodge ylab
+#' scale_x_continuous geom_point position_dodge ylab labs scale_colour_viridis_d
 #' @importFrom reshape2 melt
 #' @importFrom dplyr rename rename_at vars contains funs bind_cols
 #' @importFrom scales comma
@@ -247,6 +248,7 @@ biomass.plot.mpd <- function(model,
                              xlim = NA,
                              offset = 0.7,
                              leg = TRUE,
+                             a_trans = 0.75,
                              translate = FALSE){
 
   if(class(model) == model.lst.class){
@@ -313,7 +315,9 @@ biomass.plot.mpd <- function(model,
                       group = Sensitivity)) +
     geom_line(aes(color = Sensitivity),
               size = 1,
-              na.rm = TRUE) +
+              na.rm = TRUE,
+              alpha = a_trans) +
+    scale_colour_viridis_d( ) +
     theme(legend.position = "top",
           #legend.justification = c(1, 1),
           legend.title = element_blank()) +
@@ -339,7 +343,8 @@ biomass.plot.mpd <- function(model,
                         position = position_dodge(width = offset),
                         mapping = aes(color = Sensitivity),
                         show.legend = FALSE,
-                        na.rm = TRUE)
+                        na.rm = TRUE,
+                        alpha = a_trans)
   }
 
   if(depl){

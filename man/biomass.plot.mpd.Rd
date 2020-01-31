@@ -10,6 +10,7 @@ biomass.plot.mpd(
   xlim = NA,
   offset = 0.7,
   leg = TRUE,
+  a_trans = 0.75,
   translate = FALSE
 )
 }
@@ -21,6 +22,8 @@ biomass.plot.mpd(
 \item{offset}{horizontal offset for B0 points in depletion plot}
 
 \item{leg}{show the legend? Logical}
+
+\item{a_trans}{transparency for lines and points}
 
 \item{translate}{logical; translate labels}
 }
