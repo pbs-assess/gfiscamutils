@@ -222,7 +222,10 @@ make.depletion.mcmc.plot <- function(models,
   }
 }
 
-#' Plot the MPD biomass time series along with the associated retrospectives
+#' Plot the MPD biomass time series along with the associated retrospectives.
+#'
+#' Biomass can be absolute, or relative (i.e., depletion). Also plot estimated
+#' unfished spawning biomass as points.
 #'
 #' @param model an iscam model object
 #' @param offset horizontal offset for B0 points in depletion plot

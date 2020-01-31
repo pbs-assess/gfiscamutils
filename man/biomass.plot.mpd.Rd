@@ -2,7 +2,7 @@
 % Please edit documentation in R/figures-biomass.R
 \name{biomass.plot.mpd}
 \alias{biomass.plot.mpd}
-\title{Plot the MPD biomass time series along with the associated retrospectives}
+\title{Plot the MPD biomass time series along with the associated retrospectives.}
 \usage{
 biomass.plot.mpd(
   model,
@@ -28,5 +28,6 @@ biomass.plot.mpd(
 a ggplot object
 }
 \description{
-Plot the MPD biomass time series along with the associated retrospectives
+Biomass can be absolute, or relative (i.e., depletion). Also plot estimated
+unfished spawning biomass as points.
 }
