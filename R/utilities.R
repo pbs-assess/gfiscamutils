@@ -329,6 +329,20 @@ SumNA <- function( x, omitNA=TRUE ) {
   return( res )
 }  # End SumNA function
 
+# Calculate unique if there are non-NA values, return NA if all values are NA
+#' @export
+UniqueNA <- function( x ) {
+  # An alternate version to unique, which fails sometimes if there are no
+  # values. This version retuns NA if x is all NA, otherwise it returns the
+  # unique values.
+  # If all NA, NA; otherwise, unique
+  ifelse( all(is.na(x)),
+          res <- NA,
+          res <- unique(x) )
+  # Return the result
+  return( res )
+}  # End UniqueNA function
+
 # Calculate weighted mean if there are non-NA values, return NA if all values
 # are NA
 WtMeanNA <- function( x, w, omitNA=TRUE ) {

@@ -3,6 +3,7 @@
 S3method(c,model.list)
 export(MeanNA)
 export(SumNA)
+export(UniqueNA)
 export(as.tsmcmc)
 export(autocorr.plot)
 export(biomass.plot.mpd)
