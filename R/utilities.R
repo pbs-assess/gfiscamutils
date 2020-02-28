@@ -358,6 +358,7 @@ WtMeanNA <- function( x, w, omitNA=TRUE ) {
 }  # End MeanNA function
 
 # Calculate maximum if there are non-NA values, return NA if all values are NA
+#' @export
 MaxNA <- function( x, omitNA=TRUE ) {
   # An alternate version to max(x, na.rm=TRUE), which returns 0 if x is all NA.
   # This version retuns NA if x is all NA, otherwise it returns the maximum.
