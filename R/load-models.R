@@ -175,6 +175,9 @@ calc.mcmc <- function(model,
                                           "umsy",
                                           "ssb"))]
   p.dat <- fix.m(p.dat)
+  ## TODO: Update model output by running iscam again
+  browser()
+
   p.dat <- mcmc.thin(p.dat, burnin, thin)
   ## Calculate sigma and tau and add to p.dat
   sigtau <- calc.sig.tau(p.dat$rho, p.dat$vartheta)
