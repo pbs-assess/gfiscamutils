@@ -4,7 +4,7 @@
 \alias{run_retro}
 \title{Run retrospectives for the given iscam model directory}
 \usage{
-run_retro(path, yrs = 2, overwrite = FALSE)
+run_retro(path, yrs = 1:5, overwrite = FALSE)
 }
 \arguments{
 \item{path}{location of the iscam model directory for which to run retrospectives}
