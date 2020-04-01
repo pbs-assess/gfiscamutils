@@ -176,14 +176,14 @@ calc.mcmc <- function(model,
                                           "ssb"))]
   p.dat <- fix.m(p.dat)
   ## TODO: Update model output by running iscam again
-  browser()
 
   p.dat <- mcmc.thin(p.dat, burnin, thin)
   ## Calculate sigma and tau and add to p.dat
-  sigtau <- calc.sig.tau(p.dat$rho, p.dat$vartheta)
-  p.dat$tau <- sigtau[[1]]
-  p.dat$sigma <- sigtau[[2]]
-
+  if("rho" %in% names(p.dat) && "vartheta" %in% names(p.dat)){
+    sigtau <- calc.sig.tau(p.dat$rho, p.dat$vartheta)
+    p.dat$tau <- sigtau[[1]]
+    p.dat$sigma <- sigtau[[2]]
+  }
   p.dat.log <- calc.logs(p.dat)
   p.quants <- apply(p.dat, 2, quantile, prob = probs)
   p.quants.log <- apply(p.dat.log, 2, quantile, prob = probs)

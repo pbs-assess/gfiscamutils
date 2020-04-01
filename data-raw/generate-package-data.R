@@ -39,7 +39,7 @@ output.files <- c(rep.file,
                   "*.RData",
                   "variance",
                   "eigv.rpt",
-                  "fmin.log",
+                  "*.log",
                   "mcmc",
                   "sims")
 

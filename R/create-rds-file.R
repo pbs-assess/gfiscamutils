@@ -17,7 +17,7 @@ create_rds_file <- function(model_dir = NULL,
   }
 
   # The RDS file will have the same name as the directory it is in
-  rds_file <- file.path(model_dir, paste0(model_dir, ".rds"))
+  rds_file <- file.path(model_dir, paste0(basename(model_dir), ".rds"))
   if(file.exists(rds_file)){
     if(overwrite){
       unlink(rds_file, force = TRUE)
