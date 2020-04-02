@@ -7,7 +7,7 @@
 make.pairs.plot(
   model,
   params = c("ro", "h", "m", "rbar", "rinit", "q1", "q2", "sel1", "selsd1", "sel2",
-    "selsd2", "sel3", "selsd3")
+    "selsd2", "sel4", "selsd4", "sel5", "selsd5")
 )
 }
 \arguments{
