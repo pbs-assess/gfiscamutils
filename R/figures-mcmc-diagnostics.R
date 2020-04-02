@@ -36,11 +36,26 @@ make.priors.posts.plot <- function(model,
 
   mc <- model$mcmccalcs$p.dat.log
   ## Remove selectivity parameters, bo, vartheta, sigma, tau from the posts
-  mc <- mc[, -grep("^sel.*", names(mc))]
-  mc <- mc[, -grep("bo", names(mc))]
-  mc <- mc[, -grep("vartheta", names(mc))]
-  mc <- mc[, -grep("tau", names(mc))]
-  mc <- mc[, -grep("sigma", names(mc))]
+  sel_ind <- grep("^sel.*", names(mc))
+  if(length(sel_ind)){
+    mc <- mc[, -sel_ind]
+  }
+  bo_ind <- grep("bo", names(mc))
+  if(length(bo_ind)){
+    mc <- mc[, -bo_ind]
+  }
+  vartheta_ind <- grep("vartheta", names(mc))
+  if(length(vartheta_ind)){
+    mc <- mc[, -vartheta_ind]
+  }
+  tau_ind <- grep("tau", names(mc))
+  if(length(tau_ind)){
+    mc <- mc[, -tau_ind]
+  }
+  sigma_ind <- grep("sigma", names(mc))
+  if(length(sigma_ind)){
+    mc <- mc[, -sigma_ind]
+  }
   post.names <- names(mc)
 
   prior.specs <- as.data.frame(model$ctl$params)
@@ -368,8 +383,10 @@ make.pairs.plot <- function(model,
                                        "selsd1",
                                        "sel2",
                                        "selsd2",
-                                       "sel3",
-                                       "selsd3")){
+                                       "sel4",
+                                       "selsd4",
+                                       "sel5",
+                                       "selsd5")){
 
   if(class(model) == model.lst.class){
     model <- model[[1]]
