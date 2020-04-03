@@ -345,6 +345,7 @@ UniqueNA <- function( x ) {
 
 # Calculate weighted mean if there are non-NA values, return NA if all values
 # are NA
+#' @export
 WtMeanNA <- function( x, w, omitNA=TRUE ) {
   # An alternate version to weighted.mean(x, w, na.rm=TRUE), which returns 0 if
   # x is all NA. This version retuns NA if x is all NA, otherwise it returns the
