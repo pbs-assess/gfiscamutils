@@ -7,6 +7,7 @@
 #'
 #' @export
 #' @importFrom stringr str_ends
+#' @importFrom purrr map
 run_retro <- function(path,
                       yrs = 1:5,
                       overwrite = FALSE){

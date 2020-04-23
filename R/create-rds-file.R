@@ -2,6 +2,7 @@
 #'
 #' @param model_dir Directory name of model to be loaded
 #' @param overwrite Logical. If TRUE, overwrite the RDS file if it exists
+#' @param ... Parameters passed to [load.iscam.files()]
 #'
 #' @return [base::invisible()]
 #' @export

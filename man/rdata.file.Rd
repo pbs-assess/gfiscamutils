@@ -4,7 +4,9 @@
 \name{rdata.file}
 \alias{rdata.file}
 \title{iscam model RData file name}
-\format{An object of class \code{character} of length 1.}
+\format{
+An object of class \code{character} of length 1.
+}
 \usage{
 rdata.file
 }

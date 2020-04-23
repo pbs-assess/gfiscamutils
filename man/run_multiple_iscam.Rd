@@ -12,7 +12,7 @@ run_multiple_iscam(model_dirs, ...)
 \item{...}{Arguments passed to [run_iscam()]}
 }
 \value{
-
+Nothing
 }
 \description{
 Run multiple iscam models in parallel

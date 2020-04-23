@@ -12,6 +12,8 @@ License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 2.10)
 Imports:
+  furrr,
+  future,
   grDevices,
   stats,
   gfutilities,
@@ -19,6 +21,7 @@ Imports:
   tidyr,
   testthat,
   ggplot2,
+  rlang,
   coda,
   RColorBrewer,
   usethis,
@@ -29,10 +32,11 @@ Imports:
   here,
   rosettafish,
   scales,
+  purrr,
   reshape2,
   zoo,
   stringr,
   tibble,
   forcats
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0

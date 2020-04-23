@@ -156,5 +156,7 @@ globalVariables(c(
 "dos.pipe.to.log",
 "rdata.file",
 "Sensitivity",
-"Biomass (t)"
+"Biomass (t)",
+"allRegions",
+"jsSections"
 ))

@@ -54,7 +54,7 @@ run_iscam <- function(model_dir,
 #' @param model_dirs A vector of model directories
 #' @param ... Arguments passed to [run_iscam()]
 #'
-#' @return
+#' @return Nothing
 #' @importFrom furrr future_map future_options
 #' @importFrom future plan
 #' @export
@@ -63,5 +63,5 @@ run_multiple_iscam <- function(model_dirs, ...){
   future_map(model_dirs, ~run_iscam(...),
   .options = future_options(packages = c("gfiscamutils")),
   ...)
-plan()
+  plan()
 }
