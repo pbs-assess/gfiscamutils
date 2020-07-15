@@ -4,9 +4,7 @@
 \name{mpd.proj.file}
 \alias{mpd.proj.file}
 \title{iscam MPD projection filename}
-\format{
-An object of class \code{character} of length 1.
-}
+\format{An object of class \code{character} of length 1.}
 \usage{
 mpd.proj.file
 }

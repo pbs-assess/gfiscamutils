@@ -4,9 +4,7 @@
 \name{mcmc.vuln.biomass.file}
 \alias{mcmc.vuln.biomass.file}
 \title{iscam MCMC output vulnerable biomass filename}
-\format{
-An object of class \code{character} of length 1.
-}
+\format{An object of class \code{character} of length 1.}
 \usage{
 mcmc.vuln.biomass.file
 }

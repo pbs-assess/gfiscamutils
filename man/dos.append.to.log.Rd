@@ -5,9 +5,7 @@
 \alias{dos.append.to.log}
 \title{string to append to a program shell call to append the output of stdout and stderr
 to a file in DOS}
-\format{
-An object of class \code{character} of length 1.
-}
+\format{An object of class \code{character} of length 1.}
 \usage{
 dos.append.to.log
 }

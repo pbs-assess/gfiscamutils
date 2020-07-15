@@ -4,9 +4,7 @@
 \name{mcmc.recr.devs.file}
 \alias{mcmc.recr.devs.file}
 \title{iscam MCMC output recruitment deviations filename}
-\format{
-An object of class \code{character} of length 1.
-}
+\format{An object of class \code{character} of length 1.}
 \usage{
 mcmc.recr.devs.file
 }

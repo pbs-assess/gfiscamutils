@@ -4,9 +4,7 @@
 \name{model.lst.class}
 \alias{model.lst.class}
 \title{iscam models list}
-\format{
-An object of class \code{character} of length 1.
-}
+\format{An object of class \code{character} of length 1.}
 \usage{
 model.lst.class
 }

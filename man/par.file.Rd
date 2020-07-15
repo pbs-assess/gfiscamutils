@@ -4,9 +4,7 @@
 \name{par.file}
 \alias{par.file}
 \title{iscam parameter estimate filename}
-\format{
-An object of class \code{character} of length 1.
-}
+\format{An object of class \code{character} of length 1.}
 \usage{
 par.file
 }

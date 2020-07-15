@@ -5,9 +5,7 @@
 \alias{linux.pipe.to.log}
 \title{string to append to a program shell call to pipe the output of stdout and stderr
 to a file in Linux}
-\format{
-An object of class \code{character} of length 1.
-}
+\format{An object of class \code{character} of length 1.}
 \usage{
 linux.pipe.to.log
 }
