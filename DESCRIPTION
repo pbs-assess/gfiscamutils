@@ -38,5 +38,6 @@ Imports:
   stringr,
   tibble,
   forcats
+Remotes: pbs-assess/gfiscamutils, pbs-assess/rosettafish
 LazyData: true
 RoxygenNote: 7.1.0
