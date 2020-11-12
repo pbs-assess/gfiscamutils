@@ -4,7 +4,9 @@
 \name{log.file}
 \alias{log.file}
 \title{file name for log file piped to using shell call to iscam program}
-\format{An object of class \code{character} of length 1.}
+\format{
+An object of class \code{character} of length 1.
+}
 \usage{
 log.file
 }

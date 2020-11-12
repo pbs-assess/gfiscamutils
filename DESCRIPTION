@@ -40,4 +40,4 @@ Imports:
   forcats
 Remotes: pbs-assess/gfutilities, pbs-assess/rosettafish
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1

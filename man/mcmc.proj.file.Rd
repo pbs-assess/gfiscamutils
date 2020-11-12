@@ -4,7 +4,9 @@
 \name{mcmc.proj.file}
 \alias{mcmc.proj.file}
 \title{iscam MCMC projection filename}
-\format{An object of class \code{character} of length 1.}
+\format{
+An object of class \code{character} of length 1.
+}
 \usage{
 mcmc.proj.file
 }

@@ -4,7 +4,9 @@
 \name{mcmc.biomass.file}
 \alias{mcmc.biomass.file}
 \title{iscam MCMC output biomass filename}
-\format{An object of class \code{character} of length 1.}
+\format{
+An object of class \code{character} of length 1.
+}
 \usage{
 mcmc.biomass.file
 }

@@ -4,7 +4,9 @@
 \name{iscam.exe.file}
 \alias{iscam.exe.file}
 \title{iscam executable filename}
-\format{An object of class \code{character} of length 1.}
+\format{
+An object of class \code{character} of length 1.
+}
 \usage{
 iscam.exe.file
 }

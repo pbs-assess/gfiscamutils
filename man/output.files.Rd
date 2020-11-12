@@ -4,7 +4,9 @@
 \name{output.files}
 \alias{output.files}
 \title{iscam and ADMB output file patterns}
-\format{An object of class \code{character} of length 24.}
+\format{
+An object of class \code{character} of length 24.
+}
 \usage{
 output.files
 }

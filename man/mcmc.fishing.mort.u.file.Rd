@@ -4,7 +4,9 @@
 \name{mcmc.fishing.mort.u.file}
 \alias{mcmc.fishing.mort.u.file}
 \title{iscam MCMC output annual fishing mortality filename}
-\format{An object of class \code{character} of length 1.}
+\format{
+An object of class \code{character} of length 1.
+}
 \usage{
 mcmc.fishing.mort.u.file
 }
