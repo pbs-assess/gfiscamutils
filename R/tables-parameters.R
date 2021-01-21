@@ -541,12 +541,12 @@ make.ref.points.table <- function(model.am2,
   tab.am2.prop <- f(tab.am2.prop, 2)
   tab.am2 <- rbind(tab.am2.non, tab.am2.prop)
   # Proportions don't actually have confidence bounds
-  tab.am2[6,1] <- "--"
-  tab.am2[6,3] <- "--"
-  tab.am2[10,1] <- "--"
-  tab.am2[10,3] <- "--"
-  tab.am2[11,1] <- "--"
-  tab.am2[11,3] <- "--"
+  tab.am2[6,1] <- "-"
+  tab.am2[6,3] <- "-"
+  tab.am2[10,1] <- "-"
+  tab.am2[10,3] <- "-"
+  tab.am2[11,1] <- "-"
+  tab.am2[11,3] <- "-"
 
   tab <- cbind(row.names,
                as.data.frame(tab.am2))
