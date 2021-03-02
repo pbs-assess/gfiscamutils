@@ -287,121 +287,129 @@ get.rows.cols <- function(num){
 }
 
 # Function to transform from Season to Year
-Season2Year <- function( dat ) {
+Season2Year <- function(dat) {
   # The herring 'season' column is a combination of the two fishery years: for
   # example, season '20123' indicates the years 2012 and 2013. The input *.dat
   # file for the analysis using ADMB requires this to be an acual year, which we
   # define as the second (i.e., later) year, 2013. This function takes in a
   # vector of seasons (dat), and outputs a vector of years (res).
   # Grab the first 4 characters
-  chars <- substr( x=dat, start=1, stop=4 )
+  chars <- substr(x = dat, start = 1, stop = 4)
   # Convert to numeric
-  digits <- as.numeric( x=chars )
+  digits <- as.numeric(x = chars)
   # Add one to get the year
   res <- digits + 1
   # Return years (as an integer)
-  return( as.integer(res) )
-}  # End Season2Year function
+  return(as.integer(res))
+} # End Season2Year function
 
 # Calculate mean if there are non-NA values, return NA if all values are NA
 #' @export
-MeanNA <- function( x, omitNA=TRUE ) {
+mean_na <- function(x, omit_na = TRUE) {
   # An alternate version to mean(x, na.rm=TRUE), which returns 0 if x is all NA.
   # This version retuns NA if x is all NA, otherwise it returns the mean.
   # If all NA, NA; otherwise, mean
-  ifelse( all(is.na(x)),
-          res <- NA,
-          res <- mean(x, na.rm=omitNA) )
+  ifelse(all(is.na(x)),
+    res <- NA,
+    res <- mean(x, na.rm = omit_na)
+  )
   # Return the result
-  return( res )
-}  # End MeanNA function
+  return(res)
+} # End mean_na function
 
 # Calculate sum if there are non-NA values, return NA if all values are NA
 #' @export
-SumNA <- function( x, omitNA=TRUE ) {
+sum_na <- function(x, omit_na = TRUE) {
   # An alternate version to sum(x, na.rm=TRUE), which returns 0 if x is all NA.
   # This version retuns NA if x is all NA, otherwise it returns the sum.
   # If all NA, NA; otherwise, sum
-  ifelse( all(is.na(x)),
-          res <- NA,
-          res <- sum(x, na.rm=omitNA) )
+  ifelse(all(is.na(x)),
+    res <- NA,
+    res <- sum(x, na.rm = omit_na)
+  )
   # Return the result
-  return( res )
-}  # End SumNA function
+  return(res)
+} # End sum_na function
 
 # Calculate unique if there are non-NA values, return NA if all values are NA
 #' @export
-UniqueNA <- function( x ) {
+unique_na <- function(x) {
   # An alternate version to unique, which fails sometimes if there are no
   # values. This version retuns NA if x is all NA, otherwise it returns the
   # unique values.
   # If all NA, NA; otherwise, unique
-  ifelse( all(is.na(x)),
-          res <- NA,
-          res <- unique(x) )
+  ifelse(all(is.na(x)),
+    res <- NA,
+    res <- unique(x)
+  )
   # Return the result
-  return( res )
-}  # End UniqueNA function
+  return(res)
+} # End unique_na function
 
 # Calculate weighted mean if there are non-NA values, return NA if all values
 # are NA
 #' @export
-WtMeanNA <- function( x, w, omitNA=TRUE ) {
+wt_mean_na <- function(x, w, omit_na = TRUE) {
   # An alternate version to weighted.mean(x, w, na.rm=TRUE), which returns 0 if
   # x is all NA. This version retuns NA if x is all NA, otherwise it returns the
   # weighted mean.
   # If all NA, NA; otherwise, weighted mean
-  ifelse( all(is.na(x)),
-          res <- NA,
-          res <- weighted.mean(x, w, na.rm=omitNA) )
+  ifelse(all(is.na(x)),
+    res <- NA,
+    res <- weighted.mean(x, w, na.rm = omit_na)
+  )
   # Return the result
-  return( res )
-}  # End MeanNA function
+  return(res)
+} # End mean_na function
 
 # Calculate maximum if there are non-NA values, return NA if all values are NA
 #' @export
-MaxNA <- function( x, omitNA=TRUE ) {
+max_na <- function(x, omit_na = TRUE) {
   # An alternate version to max(x, na.rm=TRUE), which returns 0 if x is all NA.
   # This version retuns NA if x is all NA, otherwise it returns the maximum.
   # If all NA, NA; otherwise, maximum
-  ifelse( all(is.na(x)),
-          res <- NA,
-          res <- max(x, na.rm=omitNA) )
+  ifelse(all(is.na(x)),
+    res <- NA,
+    res <- max(x, na.rm = omit_na)
+  )
   # Return the result
-  return( res )
-}  # End MaxNA function
+  return(res)
+} # End max_na function
 
 # Calculate minimum if there are non-NA values, return NA if all values are NA
-MinNA <- function( x, omitNA=TRUE ) {
+#' @export
+min_na <- function(x, omit_na = TRUE) {
   # An alternate version to min(x, na.rm=TRUE), which returns 0 if x is all NA.
   # This version retuns NA if x is all NA, otherwise it returns the minimum.
   # If all NA, NA; otherwise, minimum
-  ifelse( all(is.na(x)),
-          res <- NA,
-          res <- min(x, na.rm=omitNA) )
+  ifelse(all(is.na(x)),
+    res <- NA,
+    res <- min(x, na.rm = omit_na)
+  )
   # Return the result
-  return( res )
-}  # End MinNA function
+  return(res)
+} # End min_na function
 
 # Fill in NA values with rolling mean of previous values
-RollMeanNA <- function( dat, n ) {
+#' @export
+roll_mean_na <- function(dat, n, omit_na = TRUE) {
   # Update the NAs in a vector with the mean of the previous values. The number
   # of values used can be less than n for NAs near the start of the vector, and
   # will be a maximum of n for values further along the vector. The value will
   # remain NA if no non-NA values are available.
   # Loop over observations starting with the second observation
-  for( i in 2:length(dat) ) {
+  for (i in 2:length(dat)) {
     # If the value is NA
-    if( is.na(dat[i]) ) {
+    if (is.na(dat[i])) {
       # Get window for current index: up to n previous values
-      muWindow <- ( i - min(n, i - 1) ):( i - 1 )
+      muWindow <- (i - min(n, i - 1)):(i - 1)
       # Calculate the mean of the values in the rolling window
-      dat[i] <- MeanNA( dat[muWindow] )
-    }  # End if value is NA
-  }  # End i loop over observations
+      dat[i] <- mean_na(dat[muWindow], omit_na = omit_na)
+    } # End if value is NA
+  } # End i loop over observations
   # Return the observations with NAs (mostly) replaced by the rolling mean
-  return( dat )
-}  # End RollMeanNA function
+  return(dat)
+} # End roll_mean_na function
 
 # Calculate plot margin by expanding the range of x and y as a percentage
 CalcXYLims <- function( x, y, pX=0.01, pY=0.01 ) {

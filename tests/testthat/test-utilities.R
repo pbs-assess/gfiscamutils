@@ -1,35 +1,40 @@
-test_that("MeanNA", {
-  expect_equal(MeanNA(x = NA), NA)
-  expect_equal(MeanNA(x = c(1:3, NA)), 2)
-  expect_true(is.na(MeanNA(x = c(1:3, NA), omitNA = FALSE)))
+test_that("mean_na", {
+  expect_equal(mean_na(x = NA), NA)
+  expect_equal(mean_na(x = c(1:3, NA)), 2)
+  expect_true(is.na(mean_na(x = c(1:3, NA), omit_na = FALSE)))
 })
 
-test_that("SumNA", {
-  expect_equal(SumNA(x = NA), NA)
-  expect_equal(SumNA(x = c(1:3, NA)), 6)
-  expect_true(is.na(SumNA(x = c(1:3, NA), omitNA = FALSE)))
+test_that("sum_na", {
+  expect_equal(sum_na(x = NA), NA)
+  expect_equal(sum_na(x = c(1:3, NA)), 6)
+  expect_true(is.na(sum_na(x = c(1:3, NA), omit_na = FALSE)))
 })
 
-test_that("UniqueNA", {
-  expect_equal(UniqueNA(x = NA), NA)
-  expect_equal(UniqueNA(x = c(1:3, NA)), c(1:3, NA))
+test_that("unique_na", {
+  expect_equal(unique_na(x = NA), NA)
+  expect_equal(unique_na(x = c(1:3, NA)), c(1:3, NA))
 })
 
-test_that("WtMeanNA", {
-  expect_equal(WtMeanNA(x = NA), NA)
-  expect_equal(WtMeanNA(x = c(1:3, NA)), 2)
-  expect_equal(WtMeanNA(x = c(1:3, NA), w=c(1, 1, 2, NA)), 2.25)
-  expect_true(is.na(WtMeanNA(x = c(1:3, NA), omitNA = FALSE)))
+test_that("wt_mean_na", {
+  expect_equal(wt_mean_na(x = NA), NA)
+  expect_equal(wt_mean_na(x = c(1:3, NA)), 2)
+  expect_equal(wt_mean_na(x = c(1:3, NA), w=c(1, 1, 2, NA)), 2.25)
+  expect_true(is.na(wt_mean_na(x = c(1:3, NA), omit_na = FALSE)))
 })
 
-test_that("MaxNA", {
-  expect_equal(MaxNA(x = NA), NA)
-  expect_equal(MaxNA(x = c(1:3, NA)), 3)
-  expect_true(is.na(MaxNA(x = c(1:3, NA), omitNA = FALSE)))
+test_that("max_na", {
+  expect_equal(max_na(x = NA), NA)
+  expect_equal(max_na(x = c(1:3, NA)), 3)
+  expect_true(is.na(max_na(x = c(1:3, NA), omit_na = FALSE)))
 })
 
-test_that("MinNA", {
-  expect_equal(MinNA(x = NA), NA)
-  expect_equal(MinNA(x = c(1:3, NA)), 1)
-  expect_true(is.na(MinNA(x = c(1:3, NA), omitNA = FALSE)))
+test_that("min_na", {
+  expect_equal(min_na(x = NA), NA)
+  expect_equal(min_na(x = c(1:3, NA)), 1)
+  expect_true(is.na(min_na(x = c(1:3, NA), omit_na = FALSE)))
+})
+
+test_that("roll_mean_na", {
+  expect_equal(roll_mean_na(dat = c(NA, NA), n=2), c(NA, NA))
+  expect_equal(roll_mean_na(dat = c(1:3, NA), n=2), c(1.0, 2.0, 3.0, 2.5))
 })
