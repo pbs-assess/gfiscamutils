@@ -971,7 +971,8 @@ ConvertLineEndings <- function( infile ) {
 Bold2 <- function(x) {paste('\\textbf{',sanitize(x, type="latex"),'}', sep ='')}
 
 # Change numbers into words (1:9)
-Num2Word <- function( x ) {
+#' @export
+num_to_word <- function( x ) {
   # Get the list of numbers and words
   vec <- c( one=1, two=2, three=3, four=4, five=5, six=6, seven=7, eight=8,
             nine=9 )
@@ -982,8 +983,8 @@ Num2Word <- function( x ) {
   # Error if the name isn't there
   if( length(res)==0 ) stop( "Numbers can be from 1 to 9 only." )
   # Return the result
-  return( res )
-}  # End function Num2Word
+  res
+}  # End function num_to_word
 
 # Calculate percent change, difference, etc
 DeltaPercent <- function( x, nYrs=1, type ) {
