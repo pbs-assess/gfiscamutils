@@ -286,7 +286,8 @@ get.rows.cols <- function(num){
   return(nside)
 }
 
-# Function to transform from Season to Year
+#' Function to transform from Season to Year
+#' @param dat Data frame
 Season2Year <- function(dat) {
   # The herring 'season' column is a combination of the two fishery years: for
   # example, season '20123' indicates the years 2012 and 2013. The input *.dat
@@ -299,12 +300,12 @@ Season2Year <- function(dat) {
   digits <- as.numeric(x = chars)
   # Add one to get the year
   res <- digits + 1
-  # Return years (as an integer)
   return(as.integer(res))
-} # End Season2Year function
+}
 
-# Calculate mean if there are non-NA values, return NA if all values are NA
-#' @export
+#' Calculate mean if there are non-NA values, return NA if all values are NA
+#' @param x value
+#' @param omit_na Omit NA TRUE or FALSE
 mean_na <- function(x, omit_na = TRUE) {
   # An alternate version to mean(x, na.rm=TRUE), which returns 0 if x is all NA.
   # This version retuns NA if x is all NA, otherwise it returns the mean.
@@ -313,12 +314,13 @@ mean_na <- function(x, omit_na = TRUE) {
     res <- NA,
     res <- mean(x, na.rm = omit_na)
   )
-  # Return the result
   return(res)
-} # End mean_na function
+}
 
-# Calculate sum if there are non-NA values, return NA if all values are NA
-#' @export
+#' Calculate sum if there are non-NA values, return NA if all values are NA
+#' @param x
+#' @param x value
+#' @param omit_na Omit NA TRUE or FALSE
 sum_na <- function(x, omit_na = TRUE) {
   # An alternate version to sum(x, na.rm=TRUE), which returns 0 if x is all NA.
   # This version retuns NA if x is all NA, otherwise it returns the sum.
@@ -327,12 +329,11 @@ sum_na <- function(x, omit_na = TRUE) {
     res <- NA,
     res <- sum(x, na.rm = omit_na)
   )
-  # Return the result
   return(res)
-} # End sum_na function
+}
 
-# Calculate unique if there are non-NA values, return NA if all values are NA
-#' @export
+#' Calculate unique if there are non-NA values, return NA if all values are NA
+#' @param x Value
 unique_na <- function(x) {
   # An alternate version to unique, which fails sometimes if there are no
   # values. This version retuns NA if x is all NA, otherwise it returns the
@@ -342,28 +343,27 @@ unique_na <- function(x) {
     res <- NA,
     res <- unique(x)
   )
-  # Return the result
   return(res)
-} # End unique_na function
+}
 
-# Calculate weighted mean if there are non-NA values, return NA if all values
-# are NA
-#' @export
+#' Calculate weighted mean if there are non-NA values, return NA if all values
+#' are NA
+#' @param x value
+#' @param w See [weighted.mean()]
+#' @param omit_na Omit NA TRUE or FALSE
+#' @importFrom stats weighted.mean
+#' @returns This version retuns NA if x is all NA, otherwise it returns the weighted mean
 wt_mean_na <- function(x, w, omit_na = TRUE) {
-  # An alternate version to weighted.mean(x, w, na.rm=TRUE), which returns 0 if
-  # x is all NA. This version retuns NA if x is all NA, otherwise it returns the
-  # weighted mean.
-  # If all NA, NA; otherwise, weighted mean
   ifelse(all(is.na(x)),
     res <- NA,
     res <- weighted.mean(x, w, na.rm = omit_na)
   )
-  # Return the result
   return(res)
-} # End mean_na function
+}
 
-# Calculate maximum if there are non-NA values, return NA if all values are NA
-#' @export
+#' Calculate maximum if there are non-NA values, return NA if all values are NA
+#' @param x value
+#' @param omit_na Omit NA TRUE or FALSE
 max_na <- function(x, omit_na = TRUE) {
   # An alternate version to max(x, na.rm=TRUE), which returns 0 if x is all NA.
   # This version retuns NA if x is all NA, otherwise it returns the maximum.
@@ -376,8 +376,9 @@ max_na <- function(x, omit_na = TRUE) {
   return(res)
 } # End max_na function
 
-# Calculate minimum if there are non-NA values, return NA if all values are NA
-#' @export
+#' Calculate minimum if there are non-NA values, return NA if all values are NA
+#' @param x value
+#' @param omit_na Omit NA TRUE or FALSE
 min_na <- function(x, omit_na = TRUE) {
   # An alternate version to min(x, na.rm=TRUE), which returns 0 if x is all NA.
   # This version retuns NA if x is all NA, otherwise it returns the minimum.
@@ -390,13 +391,16 @@ min_na <- function(x, omit_na = TRUE) {
   return(res)
 } # End min_na function
 
-# Fill in NA values with rolling mean of previous values
-#' @export
+#' Fill in NA values with rolling mean of previous values
+#' @description Update the NAs in a vector with the mean of the previous values. The number
+#' of values used can be less than n for NAs near the start of the vector, and
+#' will be a maximum of n for values further along the vector. The value will
+#' remain NA if no non-NA values are available.
+#' @param dat Data frame
+#' @param n N value for minimum
+#' @param omit_na Omit NA TRUE or FALSE
 roll_mean_na <- function(dat, n, omit_na = TRUE) {
-  # Update the NAs in a vector with the mean of the previous values. The number
-  # of values used can be less than n for NAs near the start of the vector, and
-  # will be a maximum of n for values further along the vector. The value will
-  # remain NA if no non-NA values are available.
+  #
   # Loop over observations starting with the second observation
   for (i in 2:length(dat)) {
     # If the value is NA
@@ -409,12 +413,15 @@ roll_mean_na <- function(dat, n, omit_na = TRUE) {
   } # End i loop over observations
   # Return the observations with NAs (mostly) replaced by the rolling mean
   return(dat)
-} # End roll_mean_na function
+}
 
-# Calculate plot margin by expanding the range of x and y as a percentage
+#' Set the space between the points and the plot border manually as a specified
+#' percentage of the range. Return a list with range for x and y
+#' @param x x
+#' @param y y
+#' @param pX pX
+#' @param pY pY
 CalcXYLims <- function( x, y, pX=0.01, pY=0.01 ) {
-  # Set the space between the points and the plot border manually as a specified
-  # percentage of the range. Return a list with range for x and y.
   # Get range of x
   rx <- range( x )
   # Calculate difference of x range
@@ -429,9 +436,12 @@ CalcXYLims <- function( x, y, pX=0.01, pY=0.01 ) {
   usrY <- c( ry[1]-pY*dry, ry[2]+pY*dry )
   # Return new x and y limits (i.e., xlim and ylim, respectively)
   return( list(x=usrX, y=usrY) )
-} # End CalcXYLims
+}
 
-# Paste strings nicely
+#' Paste strings nicely
+#' @param x vector of strings
+#' @param intChars Seperator
+#' @param nChar Last seperator
 PasteNicely <- function( x, intChars=", ", nChar="and " ) {
   # Get the length of the vector
   n <- length( x )
@@ -447,11 +457,11 @@ PasteNicely <- function( x, intChars=", ", nChar="and " ) {
     # Get print friendly values
     res <- paste( x, collapse=nCharSp )
   }  # End if not more than two
-  # Return the results
   return( res )
-}  # End PasteNicely function
+}
 
-# Function to add a new column indicating the number of consecutive values
+#' Function to add a new column indicating the number of consecutive values
+#' @param vec vector
 CountConsecutive <- function( vec ) {
   # Determine the number of consecutive values in a vector. For example,
   # indicate whether a series of years is sequential, or if there are say three
@@ -465,11 +475,11 @@ CountConsecutive <- function( vec ) {
   }  # End g loop over groups
   # Unsplit the list
   NConsec <- as.vector( unlist(dUniqueGrps) )
-  # Return the data with groups
   return( NConsec )
-}  # End ConsecutiveGroup function
+}
 
-# Load herring areas
+#' Load herring areas
+#' @param where Where
 LoadAreaData <- function( where ) {
   # Herring areas are kept in two csv files which indicate areas, once of which
   # has coarse area information, and other has finer details. This function
@@ -638,7 +648,10 @@ LoadAreaData <- function( where ) {
   return( res )
 }  # End LoadAreaData function
 
-# Load shapefiles: land, stat areas, etc
+#' Load shapefiles: land, stat areas, etc
+#' @param where Where
+#' @param a a
+#' @param bMax bMax
 LoadShapefiles <- function( where, a, bMax=5000 ) {
   # Load shapefiles for herring sections and aggegate sections to statistical
   # areas and region(s), and make tibbles to plot. In addition, load shapefile
@@ -821,9 +834,7 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
     fortify( region="id" ) %>%
     rename( Eastings=long, Northings=lat ) %>%
     as_tibble( )
-  # Update progress message
   cat( "done\n" )
-  # Return the data frames etc
   return( list(secDF=secDF, secCentDF=secCentDF,
                grpDF=grpDF, grpCentDF=grpCentDF,
                saDF=saDF, saCentDF=saCentDF,
@@ -833,9 +844,12 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
                secAllDF=secAllDF, saAllDF=saAllDF, regAllDF=regAllDF,
                extAllDF=extAllDF, xyAllRation=xyAllRatio,
                landAllCropDF=landAllCropDF) )
-}  # End LoadShapefiles function
+}
 
-# Function to make a circle
+#' Function to make a circle
+#' @param center center
+#' @param radius radius
+#' @param nPts num points
 MakeCircle <- function( center=c(0,0), radius=1, nPts=100 ){
   # Vector of points
   tt <- seq( from=0, to=2*pi, length.out=nPts )
@@ -847,7 +861,8 @@ MakeCircle <- function( center=c(0,0), radius=1, nPts=100 ){
   return( tibble(X=xx, Y=yy) )
 }  # End MakeCircle function
 
-# Function to switch from 0/1 to No/Yes
+#' Function to switch from 0/1 to No/Yes
+#' @param x Value
 YesNo <- function( x ) {
   # Input is a column/vector/etc of 0s and 1s, and output is No/Yes as an
   # ordered factor (Yes before No)
@@ -865,7 +880,11 @@ YesNo <- function( x ) {
   return( xFac )
 }  # End YesNo function
 
-# Clip to the extent of a supplied sp object
+#' Clip to the extent of a supplied sp object
+#' @param dat dat
+#' @param spObj spObj
+#' @param bufDist bufDist
+#' @param silent silent
 ClipExtent <- function( dat, spObj, bufDist=NA, silent=FALSE ) {
   # Given a set of spatial points, dat, and an spatial polygons object, spObj,
   # determine which points fall inside (or within a given buffer) of the object.
@@ -911,11 +930,12 @@ ClipExtent <- function( dat, spObj, bufDist=NA, silent=FALSE ) {
   # Wrangle data
   res <- samp %>%
     bind_rows( isNA )
-  # Return the data
   return( res )
-}  # End ClipExtent function
+}
 
-# Get the decade (or other rounded value) from the year
+#' Get the decade (or other rounded value) from the year
+#' @param dat dat
+#' @param r r
 GetDecade <- function( dat, r=10 ) {
   # Given a vector of years or dates, get the decade, and add an "s" to the end
   # for plot labels. Also deal with NAs.
@@ -929,7 +949,9 @@ GetDecade <- function( dat, r=10 ) {
   return( decade )
 }  # End GetDecade function
 
-# How to write a long table
+#' How to write a long table
+#' @param dat dat
+#' @param fn fn
 WriteLongTable <- function( dat, fn ) {
   # Write the xtable (first time)
   print( x=dat, file=fn, tabular.environment='longtable', floating=FALSE,
@@ -955,7 +977,8 @@ WriteLongTable <- function( dat, fn ) {
   #  write( x="\\bottomrule", file=fn, append=TRUE )
 }  # End WriteLongTable function
 
-# Convert line endings to Linux
+#' Convert line endings to Linux
+#' @param infile infile
 ConvertLineEndings <- function( infile ) {
   # Grab the text
   txt <- readLines( con=infile )
@@ -963,15 +986,16 @@ ConvertLineEndings <- function( infile ) {
   f <- file( description=infile, open="wb" )
   # Write file contents
   cat( txt, file=f, sep="\n" )
-  # Close the connection
-  close( con=f )
-}  # End ConvertLineEndings function
 
-# Bold and latex symbols
+  close( con=f )
+}
+
+#' Bold and latex symbols
+#' @param x x
 Bold2 <- function(x) {paste('\\textbf{',sanitize(x, type="latex"),'}', sep ='')}
 
-# Change numbers into words (1:9)
-#' @export
+#' Change numbers into words (1:9)
+#' @param x x
 num_to_word <- function( x ) {
   # Get the list of numbers and words
   vec <- c( one=1, two=2, three=3, four=4, five=5, six=6, seven=7, eight=8,
@@ -982,11 +1006,15 @@ num_to_word <- function( x ) {
   res <- names( vec[ind] )
   # Error if the name isn't there
   if( length(res)==0 ) stop( "Numbers can be from 1 to 9 only." )
-  # Return the result
   res
-}  # End function num_to_word
+}
 
-# Calculate percent change, difference, etc
+#' Calculate percent change, difference, etc
+#' @param x val
+#' @param nYrs num yrs
+#' @param type "PctChange" or "PctDiff"
+#' @importFrom stats lag
+#' @return value
 DeltaPercent <- function( x, nYrs=1, type ) {
   # Numerator: difference
   top <- x - lag( x, n=nYrs )
@@ -999,8 +1027,10 @@ DeltaPercent <- function( x, nYrs=1, type ) {
   res <- top / bot * 100
   # Return the result
   return( res )
-}  # End DeltaPercent function
+}
 
+#' Read admb
+#' @param ifile filename
 read.admb <- function(ifile){
   ret=read.fit(ifile)
 
@@ -1015,6 +1045,8 @@ read.admb <- function(ifile){
   return(A)
 }
 
+#' Read fit file
+#' @param ifile filename
 read.fit <- function(ifile){
   # __Example:
   #	file <-("~/admb/simple")
@@ -1045,6 +1077,9 @@ read.fit <- function(ifile){
   return(ret)
 }
 
+#' Read psv file
+#' @param fn filename
+#' @param nsamples num samples
 read.psv <- function(fn, nsamples = 10000){
   #This function reads the binary output from ADMB
   #-mcsave command line option.
@@ -1057,8 +1092,9 @@ read.psv <- function(fn, nsamples = 10000){
   return(mcmc)
 }
 
-# A simple function for creating transparent colors
-# Author: Nathan Stephens (hacks package)
+#' A simple function for creating transparent colors
+#' @param col.pal Color value
+#' @param a alpha value
 colr <-function(col.pal=1,a=1){
   col.rgb<-col2rgb(col.pal)/255
   rgb(t(col.rgb),alpha=a)
