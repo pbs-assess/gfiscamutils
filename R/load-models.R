@@ -1095,8 +1095,6 @@ read.control.file <- function(file = NULL,
                               "phi1phase",
                               "phi2phase",
                               "degfreephase")
-  ## Ignore the int check value
-  ind <- ind + 1
 
   ## Selectivity parameters for all gears
   nrows <- 10
@@ -1581,15 +1579,13 @@ calc.ahat <- function(model){
   }
 
   ## Now gears is a list of dataframes, 1 for each gear
-  ## Add years to rows and ages to columns
-  gears <- lapply(1:length(nagv),
-                  function(x){
-                    gears[[x]] <- as.data.frame(gears[[x]])
-                    rownames(gears[[x]]) <- as.data.frame(age.comps[[x]])$year
-                    colnames(gears[[x]]) <- sage:nage
-                    gears[[x]]
-                  })
-  gears
+  ## Add years and sex columns and age to column names
+  map(seq_along(nagv), ~{
+    k <- gears[[.x]] %>% as.data.frame %>% as_tibble
+    names(k) <- sage:nage
+    yr_sex <- age.comps[[.x]] %>% as.data.frame %>% as_tibble %>% select(year, sex)
+    yr_sex %>% bind_cols(k)
+  })
 }
 
 #' Fetch a data frame of the estimated MCMC parameters only
