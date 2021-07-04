@@ -29,8 +29,6 @@ create_rds_file <- function(model_dir = NULL,
     }
   }
 
-  message("Creating a new RDS file in ", model_dir, "\n")
-
   # If this point is reached, no RData file exists so it has to be built from scratch
   model <- load.iscam.files(model_dir, ...)
 
@@ -44,6 +42,7 @@ create_rds_file <- function(model_dir = NULL,
   # }
 
   saveRDS(model, file = rds_file)
+  message("Created a new RDS file in ", model_dir, "\n")
   invisible()
 }
 

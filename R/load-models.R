@@ -610,8 +610,8 @@ delete_files_ext <- function(path = NULL, ext = "rds"){
   stopifnot(!is.null(path))
   ext_full <- paste0(".", ext, "$")
   ans <- readline(paste0("Warning - you are about to delete all ", ext, " files recursively in the\n",
-                         path,
-                         " directory. You cannot undo this operation. Are you sure? (y/n) <ENTER> "))
+                         path, "\n",
+                         "directory. You cannot undo this operation. Are you sure? (y/n) <ENTER> "))
   if(ans == "n"){
     message("No files were deleted.")
     return(invisible())
