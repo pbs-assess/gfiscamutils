@@ -609,9 +609,9 @@ calc.probabilities <- function(model,
 delete_files_ext <- function(path = NULL, ext = "rds"){
   stopifnot(!is.null(path))
   ext_full <- paste0(".", ext, "$")
-  ans <- readline(paste0("Warning - you are about to delete all ", ext, " files recursively\n",
-                         "in the ", path, " directory. You cannot undo this operation.\n",
-                         "Are you sure? (y/n) <ENTER> "))
+  ans <- readline(paste0("Warning - you are about to delete all ", ext, " files recursively in the\n",
+                         path,
+                         " directory. You cannot undo this operation. Are you sure? (y/n) <ENTER> "))
   if(ans == "n"){
     message("No files were deleted.")
     return(invisible())
@@ -784,6 +784,7 @@ read.report.file <- function(fn){
 #' @param verbose Say more
 #'
 #' @return A list representing the contents of the iscam data file
+#' @importFrom stringr str_split
 #' @export
 read.data.file <- function(file = NULL,
                            verbose = FALSE){
@@ -898,21 +899,21 @@ read.data.file <- function(file = NULL,
   }
 
   ## Age-schedule and population parameters
-  tmp$linf      <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
-  tmp$k         <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
-  tmp$to        <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
-  tmp$lw.alpha  <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
-  tmp$lw.beta   <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
-  tmp$age.at.50.mat <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
-  tmp$sd.at.50.mat  <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  tmp$linf      <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
+  tmp$k         <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
+  tmp$to        <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
+  tmp$lw.alpha  <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
+  tmp$lw.beta   <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
+  tmp$age.at.50.mat <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
+  tmp$sd.at.50.mat  <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
   tmp$use.mat   <- as.numeric(dat[ind <- ind + 1])
-  tmp$mat.vec   <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+|,")[[1]])
+  tmp$mat.vec   <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+|,")[[1]])
 
   ## Delay-difference options
-  tmp$dd.k.age   <- as.numeric(dat[ind <- ind + 1])
-  tmp$dd.alpha.g <- as.numeric(dat[ind <- ind + 1])
-  tmp$dd.rho.g   <- as.numeric(dat[ind <- ind + 1])
-  tmp$dd.wk      <- as.numeric(dat[ind <- ind + 1])
+  tmp$dd.k.age   <- as.numeric(str_split(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
+  tmp$dd.alpha.g <- as.numeric(str_split(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
+  tmp$dd.rho.g   <- as.numeric(str_split(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
+  tmp$dd.wk      <- as.numeric(str_split(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
 
   ## Catch data
   tmp$num.catch.obs <- as.numeric(dat[ind <- ind + 1])
@@ -1575,7 +1576,7 @@ calc.ahat <- function(model){
     }
   }
   mpd <- model$mpd
-  if(is.na(mpd)){
+  if(is.na(mpd[1])){
     return(NA)
   }
   ahat <- mpd$A_hat
