@@ -1,3 +1,68 @@
+#' Plot biomass for MPD models against each other. Typically used for bridge models
+#'
+#' @param models Model list as output by [model_setup()]
+#' @param model_names A vector of model names to show in plots of the same length as `model`
+#'
+#' @return A [ggplot2::ggplot()] object
+#' @importFrom forcats fct_relevel
+#' @importFrom ggplot2 scale_color_viridis_d xlab ylab
+#' @importFrom purrr map_dbl
+#' @export
+#'
+#' @examples
+#' \dontrun
+#' library(here)
+#' library(gfiscamutils)
+#' bridge_models_text <- c("2015 Base model",
+#'                         "Update data to 2019",
+#'                         "Remove HS MSA survey",
+#'                         "Add Discard CPUE index",
+#'                         "Convert model to split sex",
+#'                         "Change fishing year to Feb 21 - Feb 20")
+#' bridge_models_text <- factor(bridge_models_text, levels = bridge_models_text)
+#' drs <- arrowtooth::set_dirs(base_model_dir = "base",
+#'                             bridge_models_dirs = bridge_models_dirs,
+#'                             sens_models_dirs = NULL)
+#' models <- arrowtooth::model_setup(main_dirs = drs,
+#'                                   bridge_models_text = bridge_models_text,
+#'                                   overwrite_rds_files = TRUE)
+#' plot_biomass_mpd(models$bridge_models, bridge_models_text)
+plot_biomass_mpd <- function(models,
+                             model_names = NULL){
+
+  mpd <- map(models, ~{
+    .x$mpd
+  })
+  sbt <- map(mpd, ~{
+    .x$sbt
+  })
+  start_year <- map_dbl(models, ~{
+    .x$dat$start.yr
+  }) %>%
+    min
+  end_year <- map_dbl(models, ~{
+    .x$dat$end.yr
+  }) %>%
+    max
+  sbt <- map(sbt, ~{
+    length(.x) = end_year - start_year + 1
+    .x
+  }) %>%
+    bind_rows
+
+  sbt <- start_year:end_year %>%
+    as_tibble() %>%
+    `names<-`("year") %>%
+    bind_cols(sbt) %>% tidyr::pivot_longer(cols = -year, names_to = "model", values_to = "sbt") %>%
+    mutate(model = fct_relevel(model, levels(model_names)))
+
+  ggplot(sbt, aes(x = year, y = sbt, color = model)) +
+    xlab("Year") +
+    ylab("Spawning biomass (thousand tonnes") +
+    geom_line(size = 1.5) +
+    scale_color_viridis_d()
+}
+
 #' Plot the biomass trajectories for iscam models
 #'
 #' Plot the biomass with credibility intervals for the mcmc

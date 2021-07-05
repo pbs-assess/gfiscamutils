@@ -39,6 +39,8 @@ Imports:
   tibble,
   forcats
 Remotes: pbs-assess/gfutilities, pbs-assess/rosettafish
+Suggests:
+  boot
 LazyData: true
 RoxygenNote: 7.1.1
 Config/testthat/edition: 3

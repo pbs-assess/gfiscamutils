@@ -16,6 +16,7 @@ globalVariables(c(
 "LocationName",
 "Location_Latitude",
 "Location_Longitude",
+"model",
 "Model",
 "Northings",
 "Parameter",
