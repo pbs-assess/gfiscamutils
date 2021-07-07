@@ -288,6 +288,7 @@ get.rows.cols <- function(num){
 
 #' Function to transform from Season to Year
 #' @param dat Data frame
+#' @export
 Season2Year <- function(dat) {
   # The herring 'season' column is a combination of the two fishery years: for
   # example, season '20123' indicates the years 2012 and 2013. The input *.dat
@@ -306,6 +307,7 @@ Season2Year <- function(dat) {
 #' Calculate mean if there are non-NA values, return NA if all values are NA
 #' @param x value
 #' @param omit_na Omit NA TRUE or FALSE
+#' @export
 mean_na <- function(x, omit_na = TRUE) {
   # An alternate version to mean(x, na.rm=TRUE), which returns 0 if x is all NA.
   # This version retuns NA if x is all NA, otherwise it returns the mean.
@@ -321,6 +323,7 @@ mean_na <- function(x, omit_na = TRUE) {
 #' @param x
 #' @param x value
 #' @param omit_na Omit NA TRUE or FALSE
+#' @export
 sum_na <- function(x, omit_na = TRUE) {
   # An alternate version to sum(x, na.rm=TRUE), which returns 0 if x is all NA.
   # This version retuns NA if x is all NA, otherwise it returns the sum.
@@ -334,6 +337,7 @@ sum_na <- function(x, omit_na = TRUE) {
 
 #' Calculate unique if there are non-NA values, return NA if all values are NA
 #' @param x Value
+#' @export
 unique_na <- function(x) {
   # An alternate version to unique, which fails sometimes if there are no
   # values. This version retuns NA if x is all NA, otherwise it returns the
@@ -352,6 +356,7 @@ unique_na <- function(x) {
 #' @param w See [weighted.mean()]
 #' @param omit_na Omit NA TRUE or FALSE
 #' @importFrom stats weighted.mean
+#' @export
 #' @returns This version retuns NA if x is all NA, otherwise it returns the weighted mean
 wt_mean_na <- function(x, w, omit_na = TRUE) {
   ifelse(all(is.na(x)),
@@ -364,6 +369,7 @@ wt_mean_na <- function(x, w, omit_na = TRUE) {
 #' Calculate maximum if there are non-NA values, return NA if all values are NA
 #' @param x value
 #' @param omit_na Omit NA TRUE or FALSE
+#' @export
 max_na <- function(x, omit_na = TRUE) {
   # An alternate version to max(x, na.rm=TRUE), which returns 0 if x is all NA.
   # This version retuns NA if x is all NA, otherwise it returns the maximum.
@@ -379,6 +385,7 @@ max_na <- function(x, omit_na = TRUE) {
 #' Calculate minimum if there are non-NA values, return NA if all values are NA
 #' @param x value
 #' @param omit_na Omit NA TRUE or FALSE
+#' @export
 min_na <- function(x, omit_na = TRUE) {
   # An alternate version to min(x, na.rm=TRUE), which returns 0 if x is all NA.
   # This version retuns NA if x is all NA, otherwise it returns the minimum.
@@ -399,6 +406,7 @@ min_na <- function(x, omit_na = TRUE) {
 #' @param dat Data frame
 #' @param n N value for minimum
 #' @param omit_na Omit NA TRUE or FALSE
+#' @export
 roll_mean_na <- function(dat, n, omit_na = TRUE) {
   #
   # Loop over observations starting with the second observation

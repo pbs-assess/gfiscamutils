@@ -9,7 +9,7 @@ plot_biomass_mpd(models, model_names = NULL)
 \arguments{
 \item{models}{Model list as output by [model_setup()]}
 
-\item{model_names}{A vector of model names to show in plots of the same legnthas `model`}
+\item{model_names}{A vector of model names to show in plots of the same length as `model`}
 }
 \value{
 A [ggplot2::ggplot()] object
