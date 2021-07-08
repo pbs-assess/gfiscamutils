@@ -320,7 +320,6 @@ mean_na <- function(x, omit_na = TRUE) {
 }
 
 #' Calculate sum if there are non-NA values, return NA if all values are NA
-#' @param x
 #' @param x value
 #' @param omit_na Omit NA TRUE or FALSE
 #' @export
