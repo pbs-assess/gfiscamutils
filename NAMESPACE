@@ -66,10 +66,14 @@ export(make.value.table)
 export(make.variance.table)
 export(max_na)
 export(mcmc.thin)
+<<<<<<< HEAD
 export(mean_na)
 export(min_na)
 export(plot_biomass_mpd)
+=======
+>>>>>>> Add recruitment MPD plot and ro and sbo to MPD plots
 export(plot_marg)
+export(plot_ts_mpd)
 export(read.control.file)
 export(read.data.file)
 export(read.list)

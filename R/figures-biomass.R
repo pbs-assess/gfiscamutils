@@ -2,6 +2,7 @@
 #'
 #' @param models Model list as output by [model_setup()]
 #' @param model_names A vector of model names to show in plots of the same length as `model`
+#' @param type Which value to plot. sbt = spawning biomass (and sbo), rt = recruitment (and ro)
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom forcats fct_relevel
@@ -27,14 +28,18 @@
 #'                                   bridge_models_text = bridge_models_text,
 #'                                   overwrite_rds_files = TRUE)
 #' plot_biomass_mpd(models$bridge_models, bridge_models_text)
-plot_biomass_mpd <- function(models,
-                             model_names = NULL){
+plot_ts_mpd <- function(models,
+                        model_names = NULL,
+                        type = "sbt"){
 
+  if(!type %in% c("sbt", "rt")){
+    stop("type '", type, "' is not one of the implemented time series", call. = FALSE)
+  }
   mpd <- map(models, ~{
     .x$mpd
   })
   sbt <- map(mpd, ~{
-    .x$sbt
+    .x[[type]]
   })
   start_year <- map_dbl(models, ~{
     .x$dat$start.yr
@@ -50,17 +55,30 @@ plot_biomass_mpd <- function(models,
   }) %>%
     bind_rows
 
-  sbt <- start_year:end_year %>%
+  val <- start_year:end_year %>%
     as_tibble() %>%
     `names<-`("year") %>%
     bind_cols(sbt) %>% tidyr::pivot_longer(cols = -year, names_to = "model", values_to = "sbt") %>%
     mutate(model = fct_relevel(model, levels(model_names)))
 
-  ggplot(sbt, aes(x = year, y = sbt, color = model)) +
+  # Get initial estimate, ro, sbo
+  init_type <- switch(type,
+                      "sbt" = "sbo",
+                      "rt" = "ro")
+  init <- map(mpd, ~{.x[[init_type]]})
+  init_df <- tibble(year = min(val$year) - 1,
+                    model = names(init),
+                    sbt = map_dbl(init, ~{.x}))
+
+  y_label <- switch(type,
+                    "sbt" = "Spawning biomass (thousand tonnes",
+                    "rt" = "Recruitment (millions)")
+
+  ggplot(val, aes(x = year, y = sbt, color = model)) +
     xlab("Year") +
-    ylab("Spawning biomass (thousand tonnes") +
+    ylab(y_label) +
     geom_line(size = 1.5) +
-    scale_color_viridis_d()
+    geom_point(data = init_df, size = 2)
 }
 
 #' Plot the biomass trajectories for iscam models
