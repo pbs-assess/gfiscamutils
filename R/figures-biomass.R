@@ -3,11 +3,13 @@
 #' @param models Model list as output by [model_setup()]
 #' @param model_names A vector of model names to show in plots of the same length as `model`
 #' @param type Which value to plot. sbt = spawning biomass (and sbo), rt = recruitment (and ro)
+#' @param rel If `TRUE`, plot relative to initial value
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom forcats fct_relevel
 #' @importFrom ggplot2 scale_color_viridis_d xlab ylab
 #' @importFrom purrr map_dbl
+#' @importFrom tidyr pivot_longer
 #' @export
 #'
 #' @examples
@@ -30,7 +32,8 @@
 #' plot_biomass_mpd(models$bridge_models, bridge_models_text)
 plot_ts_mpd <- function(models,
                         model_names = NULL,
-                        type = "sbt"){
+                        type = "sbt",
+                        rel = FALSE){
 
   if(!type %in% c("sbt", "rt")){
     stop("type '", type, "' is not one of the implemented time series", call. = FALSE)
@@ -55,30 +58,49 @@ plot_ts_mpd <- function(models,
   }) %>%
     bind_rows
 
-  val <- start_year:end_year %>%
-    as_tibble() %>%
-    `names<-`("year") %>%
-    bind_cols(sbt) %>% tidyr::pivot_longer(cols = -year, names_to = "model", values_to = "sbt") %>%
-    mutate(model = fct_relevel(model, levels(model_names)))
-
   # Get initial estimate, ro, sbo
   init_type <- switch(type,
                       "sbt" = "sbo",
                       "rt" = "ro")
   init <- map(mpd, ~{.x[[init_type]]})
-  init_df <- tibble(year = min(val$year) - 1,
+  init_df <- tibble(year = start_year - 1,
                     model = names(init),
                     sbt = map_dbl(init, ~{.x}))
 
-  y_label <- switch(type,
-                    "sbt" = "Spawning biomass (thousand tonnes",
-                    "rt" = "Recruitment (millions)")
+  init_vals <- init %>% as_tibble %>% t() %>% as_tibble(rownames = "model") %>% rename(sbt = V1)
 
-  ggplot(val, aes(x = year, y = sbt, color = model)) +
+  val <- start_year:end_year %>%
+    as_tibble() %>%
+    `names<-`("year") %>%
+    bind_cols(sbt) %>% pivot_longer(cols = -year, names_to = "model", values_to = "sbt")
+
+  if(rel){
+    val <- val %>% left_join(init_vals, by = "model") %>%
+      mutate(sbt = sbt.x / sbt.y) %>%
+      select(-sbt.x, -sbt.y)
+  }
+  val <- val %>%
+    mutate(model = fct_relevel(model, levels(model_names)))
+
+  if(rel){
+    y_label <- switch(type,
+                      "sbt" = "Relative Spawning biomass",
+                      "rt" = "Relative Recruitment")
+  }else{
+    y_label <- switch(type,
+                      "sbt" = "Spawning biomass (thousand tonnes)",
+                      "rt" = "Recruitment (millions)")
+  }
+
+  g <- ggplot(val, aes(x = year, y = sbt, color = model)) +
     xlab("Year") +
     ylab(y_label) +
-    geom_line(size = 1.5) +
-    geom_point(data = init_df, size = 2)
+    geom_line(size = 1.5)
+
+  if(!rel){
+    g <- g + geom_point(data = init_df, size = 2)
+  }
+  g
 }
 
 #' Plot the biomass trajectories for iscam models
