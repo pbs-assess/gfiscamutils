@@ -1,3 +1,78 @@
+plot_index_fit_mpd <- function(models,
+                               surv_index,
+                               start_year = 1996,
+                               end_year = 2019){
+                               #surv_abbrev = c("SYN QCS", "OTHER HS MSA", "SYN HS", "SYN WCVI", "DCPUE")){
+
+  # surv_abbrev will be in order of the gears in the models
+  surv_abbrevs <- map(models, ~{
+    .x$dat$index_abbrevs
+  })
+
+  surv_abbrev <- surv_abbrevs %>%
+    flatten() %>%
+    map_chr(~{.x}) %>%
+    unique()
+
+  surv_index <- surv_index %>%
+    filter(year %in% start_year:end_year) %>%
+    filter(survey_abbrev %in% surv_abbrev)
+
+  surv_indices <- map_df(surv_abbrev, ~{
+    surv_index %>%
+      filter(survey_abbrev == .x) %>%
+      select(year, biomass, lowerci, upperci, survey_abbrev)
+  })
+
+  model_names <- names(surv_abbrevs)
+
+  fits <- map2(seq_along(models), surv_abbrevs, ~{
+    x <- t(models[[.x]]$mpd$it_hat) %>% as_tibble()
+    k <- map2(x, .y, ~{
+      j <- .x %>% as_tibble() %>% filter(!is.na(value))
+      yrs <- surv_indices %>% filter(survey_abbrev == .y) %>% pull(year)
+      length(yrs) <- nrow(j)
+      as_tibble(yrs) %>%
+        bind_cols(j) %>%
+        `names<-`(c("year", "biomass")) %>%
+        mutate(survey_abbrev = .y)
+    }) %>%
+      map_df(~{.x}) %>%
+      mutate(model = model_names[.x]) %>%
+      mutate(biomass = ifelse(survey_abbrev == "DCPUE", biomass, biomass * 1e6))
+    k
+  }) %>%
+    map_df(~{.x})
+
+  # Re-order the legend
+  model_names <- factor(model_names, levels = model_names)
+  surv_abbrev <- factor(surv_abbrev, levels = surv_abbrev)
+  fits <- fits %>%
+    mutate(model = fct_relevel(model, levels(!!model_names))) %>%
+    mutate(survey_abbrev = fct_relevel(survey_abbrev, levels(!!surv_abbrev)))
+
+  surv_indices <- surv_indices %>%
+    mutate(survey_abbrev = fct_relevel(survey_abbrev, levels(!!surv_abbrev)))
+
+  # Rescale values
+  surv_indices <- surv_indices %>%
+    mutate_at(vars(biomass, lowerci, upperci),
+              function(x){
+                ifelse(.$survey_abbrev == "DCPUE", x,  x / 1e6)
+              })
+  fits <- fits %>%
+    mutate(biomass = ifelse(survey_abbrev == "DCPUE", biomass, biomass / 1e6))
+
+  ggplot(surv_indices, aes(x = year, y = biomass)) +
+    geom_ribbon(aes(ymin = lowerci, ymax = upperci), fill = "red", alpha = 0.3) +
+    geom_line(size = 1.5, color = "red") +
+    geom_line(data = fits, aes(color = model), size = 1.25) +
+    geom_point(data = fits, aes(color = model), size = 2)+
+    facet_wrap(~survey_abbrev, scales = "free") +
+    xlab("Year") +
+    ylab("Index (thousand tonnes, DCPUE ~ kg/hr)")
+}
+
 #' Plot the index fits for MPD runs only
 #'
 #' @param models A list of iscam model objects
