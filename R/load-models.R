@@ -806,35 +806,46 @@ read.data.file <- function(file = NULL,
 
   # Get the element number for the "Gears" names if present
   dat <- grep("^#.*Gears:.+", data)
-  tmp$has.gear.names <- FALSE
+  tmp$has_gear_names <- FALSE
   if(length(dat > 0)){
-    gear.names.str <- gsub("^#.*Gears:(.+)", "\\1", data[dat])
-    gear.names <- strsplit(gear.names.str, ",")[[1]]
-    tmp$gear.names <- gsub("^[[:blank:]]+", "", gear.names)
-    tmp$has.gear.names <- TRUE
+    gear_names_str <- gsub("^#.*Gears:(.+)", "\\1", data[dat])
+    gear_names <- strsplit(gear_names_str, ",")[[1]]
+    tmp$gear_names <- gsub("^[[:blank:]]+", "", gear_names)
+    tmp$has_gear_names <- TRUE
   }
 
   ## Get the element number for the "IndexGears" names if present
-  ## dat <- grep("^#.*IndexGears:.+",data)
-  ## tmp$hasIndexGearNames <- FALSE
-  ## if(length(dat >0)){
-  ##   # The gear names were in the file
-  ##   indexGearNamesStr <- gsub("^#.*IndexGears:(.+)","\\1",data[dat])
-  ##   indexGearNames <- strsplit(indexGearNamesStr,",")[[1]]
-  ##   tmp$indexGearNames <- gsub("^[[:blank:]]+","",indexGearNames)
-  ##   tmp$hasIndexGearNames <- TRUE
-  ## }
+  dat <- grep("^#.*IndexGears:.+",data)
+  tmp$has_index_gear_names <- FALSE
+  if(length(dat >0)){
+    # The gear names were in the file
+    index_gear_names_str <- gsub("^#.*IndexGears:(.+)", "\\1", data[dat])
+    index_gear_names <- strsplit(index_gear_names_str, ",")[[1]]
+    tmp$index_gear_names <- gsub("^[[:blank:]]+", "", index_gear_names)
+    tmp$has_index_gear_names <- TRUE
+  }
+
+  ## Get the element number for the "IndexAbbrevs" names if present
+  dat <- grep("^#.*IndexAbbrevs:.+", data)
+  tmp$has_index_abbrevs <- FALSE
+  if(length(dat > 0)){
+    # The gear abbreviations were in the file. These are the survey_abbrev column in the survey index data
+    index_abbrevs_str <- gsub("^#.*IndexAbbrevs:(.+)", "\\1", data[dat])
+    index_abbrevs <- strsplit(index_abbrevs_str, ",")[[1]]
+    tmp$index_abbrevs <- gsub("^[[:blank:]]+", "", index_abbrevs)
+    tmp$has_index_abbrevs <- TRUE
+  }
 
   ## # Get the element number for the "AgeGears" names if present (gears with age comp data)
-  ## dat <- grep("^#.*AgeGears:.+",data)
-  ## tmp$hasAgeGearNames <- FALSE
-  ## if(length(dat >0)){
-  ##   # The gear names were in the file
-  ##   ageGearNamesStr <- gsub("^#.*AgeGears:(.+)","\\1",data[dat])
-  ##   ageGearNames <- strsplit(ageGearNamesStr,",")[[1]]
-  ##   tmp$ageGearNames <- gsub("^[[:blank:]]+","",ageGearNames)
-  ##   tmp$hasAgeGearNames <- TRUE
-  ## }
+  dat <- grep("^#.*AgeGears:.+",data)
+  tmp$has_age_gear_names <- FALSE
+  if(length(dat >0)){
+    # The gear names were in the file
+    age_gear_names_str <- gsub("^#.*AgeGears:(.+)", "\\1", data[dat])
+    age_gear_names <- strsplit(age_gear_names_str, ",")[[1]]
+    tmp$age_gear_names <- gsub("^[[:blank:]]+", "", age_gear_names)
+    tmp$has_age_gear_names <- TRUE
+  }
 
   ## Get the element number for the "CatchUnits" if present
   dat <- grep("^#.*CatchUnits:.+", data)
@@ -894,8 +905,8 @@ read.data.file <- function(file = NULL,
 
   ## Gear allocation
   tmp$gear.alloc  <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
-  if(!tmp$has.gear.names){
-    tmp$gear.names <- 1:length(tmp$gear.alloc)
+  if(!tmp$has_gear_names){
+    tmp$gear_names <- 1:length(tmp$gear.alloc)
   }
 
   ## Age-schedule and population parameters
