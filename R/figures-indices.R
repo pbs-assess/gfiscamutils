@@ -1,8 +1,18 @@
+#' Plot index fits for multiple models and indices, for iSCAM MPD models
+#'
+#' @param models A list of iSCAM models, as output by [arrowtooth::model_setup()]
+#' @param surv_index Output from [gfdata::get_survey_index()]
+#' @param start_year First year in plot
+#' @param end_year Last year in plot
+#' @param legend_title Title to use for the legend
+#'
+#' @return A [ggplot2::ggplot()] object
+#' @export
 plot_index_fit_mpd <- function(models,
                                surv_index,
                                start_year = 1996,
-                               end_year = 2019){
-                               #surv_abbrev = c("SYN QCS", "OTHER HS MSA", "SYN HS", "SYN WCVI", "DCPUE")){
+                               end_year = 2019,
+                               legend_title = "Bridge model"){
 
   # surv_abbrev will be in order of the gears in the models
   surv_abbrevs <- map(models, ~{
@@ -44,13 +54,12 @@ plot_index_fit_mpd <- function(models,
   }) %>%
     map_df(~{.x})
 
-  # Re-order the legend
+  # Re-order the legend and facets
   model_names <- factor(model_names, levels = model_names)
   surv_abbrev <- factor(surv_abbrev, levels = surv_abbrev)
   fits <- fits %>%
     mutate(model = fct_relevel(model, levels(!!model_names))) %>%
     mutate(survey_abbrev = fct_relevel(survey_abbrev, levels(!!surv_abbrev)))
-
   surv_indices <- surv_indices %>%
     mutate(survey_abbrev = fct_relevel(survey_abbrev, levels(!!surv_abbrev)))
 
@@ -70,7 +79,8 @@ plot_index_fit_mpd <- function(models,
     geom_point(data = fits, aes(color = model), size = 2)+
     facet_wrap(~survey_abbrev, scales = "free") +
     xlab("Year") +
-    ylab("Index (thousand tonnes, DCPUE ~ kg/hr)")
+    ylab("Index (thousand tonnes, DCPUE ~ kg/hr)") +
+    guides(color = guide_legend(title = legend_title))
 }
 
 #' Plot the index fits for MPD runs only
