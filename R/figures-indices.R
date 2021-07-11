@@ -7,6 +7,9 @@
 #' @param legend_title Title to use for the legend
 #'
 #' @return A [ggplot2::ggplot()] object
+#' @importFrom purrr flatten map_chr map_df map2
+#' @importFrom dplyr mutate_at
+#' @importFrom ggplot2 geom_ribbon facet_wrap
 #' @export
 plot_index_fit_mpd <- function(models,
                                surv_index,

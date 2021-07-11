@@ -13,7 +13,7 @@
 #' @export
 #'
 #' @examples
-#' \dontrun
+#' \dontrun{
 #' library(here)
 #' library(gfiscamutils)
 #' bridge_models_text <- c("2015 Base model",
@@ -30,6 +30,7 @@
 #'                                   bridge_models_text = bridge_models_text,
 #'                                   overwrite_rds_files = TRUE)
 #' plot_biomass_mpd(models$bridge_models, bridge_models_text)
+#' }
 plot_ts_mpd <- function(models,
                         model_names = NULL,
                         type = "sbt",

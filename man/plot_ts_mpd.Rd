@@ -22,7 +22,7 @@ A [ggplot2::ggplot()] object
 Plot biomass for MPD models against each other. Typically used for bridge models
 }
 \examples{
-\dontrun
+\dontrun{
 library(here)
 library(gfiscamutils)
 bridge_models_text <- c("2015 Base model",
@@ -39,4 +39,5 @@ models <- arrowtooth::model_setup(main_dirs = drs,
                                   bridge_models_text = bridge_models_text,
                                   overwrite_rds_files = TRUE)
 plot_biomass_mpd(models$bridge_models, bridge_models_text)
+}
 }
