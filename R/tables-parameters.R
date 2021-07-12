@@ -393,28 +393,22 @@ make.catchability.parameters.table <- function(am1.lst,
 
 #' Make a table of parameter estimate comparisons for MPD models
 #'
-#' @param models
-#' @param digits
-#' @param xcaption
-#' @param xlabel
-#' @param font.size
-#' @param space.size
-#' @param placement
-#' @param french
+#' @param models A list of output models from [arrowtooth::model_setup()]
+#' @param digits Numebr of digits to show
+#' @param french If `TRUE` translate to French
+#' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
 #' @rdname make.parameters.table
 #'
 #' @return an [xtable::xtable()]
 #' @importFrom stringr str_detect
+#' @importFrom kableExtra column_spec linebreak
 #' @export
 param_est_mpd_table <- function(models,
                                 digits = 3,
-                                xcaption = "default",
-                                xlabel   = "default",
-                                font.size = 9,
-                                space.size = 10,
-                                placement = "H",
-                                french = FALSE){
+                                french = FALSE,
+                                model_col_widths = "5em",
+                                ...){
 
   ctrls <- map(models, ~{
     .x$ctl
@@ -482,8 +476,8 @@ param_est_mpd_table <- function(models,
   param_latex_col <- param_latex_col %>%
     mutate(param = case_when(param == "ro" ~ "$R_0$",
                              param == "steepness" ~ "$h$",
-                             param == "m_male" ~ "$M_male$",
-                             param == "m_female" ~ "$M_female$",
+                             param == "m_male" ~ "$M_{male}$",
+                             param == "m_female" ~ "$M_{female}$",
                              param == "rbar" ~ "$\\overline{R}$",
                              param == "rinit" ~ "$\\overline{R}_{\\mli{init}}$",
                              param == "rho" ~ "$\\rho$",
@@ -492,6 +486,22 @@ param_est_mpd_table <- function(models,
                              param == "sigma" ~ "$\\sigma$",
                              stringr::str_detect(param, "^q - ") ~ gsub("q - ((\\w+\\s*)+)$", "$q_{\\1}$", param),
                              TRUE ~ param))
+
+  param_ests <- param_ests %>%
+    select(-param) %>%
+    bind_cols(param_latex_col) %>%
+    rename(Parameter = param) %>%
+    select(Parameter, everything())
+
+  tab <- csas_table(param_ests,
+                    col.names = names(param_ests),
+                    ...)
+
+  if(!is.null(model_col_widths)){
+    tab <- tab %>%
+      column_spec(2:ncol(param_ests), width = model_col_widths)
+  }
+  tab
 }
 
 #' Make a table of parameter estimates and priors

@@ -15,6 +15,7 @@ Imports:
   furrr,
   future,
   grDevices,
+  kableExtra,
   stats,
   gfutilities,
   xtable,

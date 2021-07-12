@@ -3,6 +3,7 @@
 \name{make.parameters.table}
 \alias{make.parameters.table}
 \alias{make.catchability.parameters.table}
+\alias{param_est_mpd_table}
 \alias{make.parameters.est.table}
 \alias{make.ref.points.table}
 \alias{make.value.table}
@@ -31,6 +32,14 @@ make.catchability.parameters.table(
   font.size = 9,
   space.size = 10,
   placement = "H"
+)
+
+param_est_mpd_table(
+  models,
+  digits = 3,
+  french = FALSE,
+  model_col_widths = "5em",
+  ...
 )
 
 make.parameters.est.table(
@@ -142,7 +151,13 @@ make.catchability.parameters.table.q.sens(
 
 \item{am2.lst}{A list of the AM2 iscam model objects}
 
-\item{digits}{Number of decimal points to show}
+\item{digits}{Numebr of digits to show}
+
+\item{models}{A list of output models from [arrowtooth::model_setup()]}
+
+\item{french}{If `TRUE` translate to French}
+
+\item{...}{Arguments to pass to [csasdown::csas_table()]}
 
 \item{translate}{Logical. Translate to french if TRUE}
 
@@ -155,8 +170,6 @@ make.catchability.parameters.table.q.sens(
 \item{tabular.environment}{latex tabular environment value}
 
 \item{tab}{the contents of the csv file as read in nby [readr::read_csv()]}
-
-\item{models}{a list of iscam model objects}
 
 \item{model.names}{a vector of names of the models}
 
@@ -172,6 +185,8 @@ variance-parameter-results.csv}
 \item{qc.lst}{List of AM1 models for q sensitivities}
 }
 \value{
+an [xtable::xtable()]
+
 an xtable
 
 an xtable
@@ -192,6 +207,8 @@ an xtable
 Make an xtable in the proper format for parameter estimates and priors
 
 Make a tbale of the catchability parameters - Herring specific
+
+Make a table of parameter estimate comparisons for MPD models
 
 Make a table of parameter estimates and priors
 
