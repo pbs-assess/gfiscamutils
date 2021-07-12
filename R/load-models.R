@@ -894,14 +894,15 @@ read.data.file <- function(file = NULL,
   ## Here we parse them into a list structure
   ## This is dependent on the current format of the DAT file and needs to
   ##  be updated whenever the DAT file changes format
-  tmp$num.areas  <- as.numeric(dat[ind <- ind + 1])
+  tmp$num.areas <- as.numeric(dat[ind <- ind + 1])
   tmp$num.groups <- as.numeric(dat[ind <- ind + 1])
-  tmp$num.sex    <- as.numeric(dat[ind <- ind + 1])
-  tmp$start.yr   <- as.numeric(dat[ind <- ind + 1])
-  tmp$end.yr     <- as.numeric(dat[ind <- ind + 1])
-  tmp$start.age  <- as.numeric(dat[ind <- ind + 1])
-  tmp$end.age    <- as.numeric(dat[ind <- ind + 1])
-  tmp$num.gears  <- as.numeric(dat[ind <- ind + 1])
+  tmp$num.sex <- as.numeric(dat[ind <- ind + 1])
+  tmp$start.yr <- as.numeric(dat[ind <- ind + 1])
+  tmp$end.yr <- as.numeric(dat[ind <- ind + 1])
+  tmp$start.age <- as.numeric(dat[ind <- ind + 1])
+  tmp$end.age <- as.numeric(dat[ind <- ind + 1])
+  tmp$num.gears <- as.numeric(dat[ind <- ind + 1])
+  tmp$prop.female <- as.numeric(dat[ind <- ind + 1])
 
   ## Gear allocation
   tmp$gear.alloc  <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
@@ -934,6 +935,7 @@ read.data.file <- function(file = NULL,
     tmp$catch[row,] <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
   }
   colnames(tmp$catch) <- c("year", "gear", "area", "group", "sex", "type", "value")
+
   ## Abundance indices are a ragged object and are stored as a list of matrices
   tmp$num.indices     <- as.numeric(dat[ind <- ind + 1])
   tmp$num.index.obs   <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
@@ -1111,6 +1113,9 @@ read.control.file <- function(file = NULL,
   colnames(tmp$params) <- c("ival","lb","ub","phz","prior","p1","p2")
   ## param.names is retreived at the beginning of this function
   rownames(tmp$params) <- param.names
+
+  ## Female initial M value
+  tmp$m.female.init <- as.numeric(dat[ind <- ind + 1])
 
   ## Age and size composition control parameters and likelihood types
   nrows <- 8

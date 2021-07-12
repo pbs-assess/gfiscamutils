@@ -391,6 +391,109 @@ make.catchability.parameters.table <- function(am1.lst,
         booktabs = TRUE)
 }
 
+#' Make a table of parameter estimate comparisons for MPD models
+#'
+#' @param models
+#' @param digits
+#' @param xcaption
+#' @param xlabel
+#' @param font.size
+#' @param space.size
+#' @param placement
+#' @param french
+#'
+#' @rdname make.parameters.table
+#'
+#' @return an [xtable::xtable()]
+#' @importFrom stringr str_detect
+#' @export
+param_est_mpd_table <- function(models,
+                                digits = 3,
+                                xcaption = "default",
+                                xlabel   = "default",
+                                font.size = 9,
+                                space.size = 10,
+                                placement = "H",
+                                french = FALSE){
+
+  ctrls <- map(models, ~{
+    .x$ctl
+  })
+  # Assume all models have the same primary parameters
+  params <- ctrls[[1]]$params
+  param_names <- rownames(params)
+  mpds <- map(models, ~{
+    .x$mpd
+  })
+  # Get catchability names so that we can add the extra rows for models with fewer indices,
+  # so that binding the data frames together by column later works
+  q_names <- map(models, ~{
+    .x$dat$index_abbrevs
+  }) %>%
+    flatten %>%
+    map_chr(~{.x}) %>%
+    unique()
+
+  # Extract parameter estimates
+  param_names[param_names == "h"] <- "steepness"
+  param_inds <- match(param_names, names(mpds[[1]]))
+  param_ests <- map2(mpds, seq_along(mpds), ~{
+    x <- .x[param_inds] %>% as.data.frame() %>% t() %>% as_tibble(rownames = "param")
+    x <- x %>% select(1:2) %>% `names<-`(c("param", "value"))
+    if(length(.x[param_inds]$log_m) == 2){
+      m_female <- .x[param_inds]$log_m[2]
+    }else{
+      m_female <- NA
+    }
+    m_rowind <- which(x$param == "log_m")
+    pre <- x[1:m_rowind, ] %>% mutate(param = ifelse(param == "log_m", "log_m_male", param))
+    log_m_female <- tibble(param = "log_m_female", value = m_female)
+    pre <- pre %>% bind_rows(log_m_female)
+    post <- x[(m_rowind + 1):nrow(x), ]
+    x <- bind_rows(pre, post)
+    # Remove logs
+    log_inds <- which(grepl("^log_", x$param))
+    x$value[log_inds] <- exp(x$value[log_inds])
+    x$param[log_inds] <- gsub("log_", "", x$param[log_inds])
+    # Add q estimates
+    catchability <- .x$q
+    names(catchability) <- paste0("q - ", models[[.y]]$dat$index_abbrevs)
+    catchability <- catchability %>% as_tibble(rownames = "param")
+    x <- x %>% bind_rows(catchability)
+    indices_not_incl <- q_names[!q_names %in% models[[.y]]$dat$index_abbrevs]
+    if(length(indices_not_incl)){
+      indices_not_incl <- tibble(param = paste0("q - ", indices_not_incl), value = NA)
+      x <- x %>% bind_rows(indices_not_incl)
+    }
+    # Only keep param names in first data frame so when bound together they don't repeat
+    if(.y != 1){
+      x <- x %>% select(value)
+    }
+    x
+  }) %>% bind_cols()
+  names(param_ests)[-1] <- names(models)
+
+  param_ests <- param_ests %>%
+    mutate_at(vars(-param), function(x){format(round(x, digits), digits = 3, nsmall = 3)}) %>%
+    mutate_at(vars(-param), function(x){ifelse(grepl(" +NA", x), "--", x)})
+
+  # Rename the parameters with their latex values (where possible)
+  param_latex_col <- param_ests %>% select(param)
+  param_latex_col <- param_latex_col %>%
+    mutate(param = case_when(param == "ro" ~ "$R_0$",
+                             param == "steepness" ~ "$h$",
+                             param == "m_male" ~ "$M_male$",
+                             param == "m_female" ~ "$M_female$",
+                             param == "rbar" ~ "$\\overline{R}$",
+                             param == "rinit" ~ "$\\overline{R}_{\\mli{init}}$",
+                             param == "rho" ~ "$\\rho$",
+                             param == "vartheta" ~ "$\\vartheta$",
+                             param == "tau" ~ "$\\tau$",
+                             param == "sigma" ~ "$\\sigma$",
+                             stringr::str_detect(param, "^q - ") ~ gsub("q - ((\\w+\\s*)+)$", "$q_{\\1}$", param),
+                             TRUE ~ param))
+}
+
 #' Make a table of parameter estimates and priors
 #'
 #' @rdname make.parameters.table
