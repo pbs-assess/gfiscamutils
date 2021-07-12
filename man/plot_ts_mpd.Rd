@@ -4,7 +4,13 @@
 \alias{plot_ts_mpd}
 \title{Plot biomass for MPD models against each other. Typically used for bridge models}
 \usage{
-plot_ts_mpd(models, model_names = NULL, type = "sbt", rel = FALSE)
+plot_ts_mpd(
+  models,
+  model_names = NULL,
+  type = "sbt",
+  rel = FALSE,
+  legend_title = "Bridge model"
+)
 }
 \arguments{
 \item{models}{Model list as output by [model_setup()]}
@@ -14,6 +20,8 @@ plot_ts_mpd(models, model_names = NULL, type = "sbt", rel = FALSE)
 \item{type}{Which value to plot. sbt = spawning biomass (and sbo), rt = recruitment (and ro)}
 
 \item{rel}{If `TRUE`, plot relative to initial value}
+
+\item{legend_title}{Title to use for the legend}
 }
 \value{
 A [ggplot2::ggplot()] object

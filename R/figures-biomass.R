@@ -4,7 +4,8 @@
 #' @param model_names A vector of model names to show in plots of the same length as `model`
 #' @param type Which value to plot. sbt = spawning biomass (and sbo), rt = recruitment (and ro)
 #' @param rel If `TRUE`, plot relative to initial value
-#'
+#' @param legend_title Title to use for the legend
+
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom forcats fct_relevel
 #' @importFrom ggplot2 scale_color_viridis_d xlab ylab
@@ -34,7 +35,8 @@
 plot_ts_mpd <- function(models,
                         model_names = NULL,
                         type = "sbt",
-                        rel = FALSE){
+                        rel = FALSE,
+                        legend_title = "Bridge model"){
 
   if(!type %in% c("sbt", "rt")){
     stop("type '", type, "' is not one of the implemented time series", call. = FALSE)
@@ -89,14 +91,15 @@ plot_ts_mpd <- function(models,
                       "rt" = "Relative Recruitment")
   }else{
     y_label <- switch(type,
-                      "sbt" = "Spawning biomass (thousand tonnes)",
+                      "sbt" = "Spawning biomass ('000 tonnes)",
                       "rt" = "Recruitment (millions)")
   }
 
   g <- ggplot(val, aes(x = year, y = sbt, color = model)) +
     xlab("Year") +
     ylab(y_label) +
-    geom_line(size = 1.5)
+    geom_line(size = 1.5) +
+    guides(color = guide_legend(title = legend_title))
 
   if(!rel){
     g <- g + geom_point(data = init_df, size = 2)
