@@ -185,7 +185,7 @@ variance-parameter-results.csv}
 \item{qc.lst}{List of AM1 models for q sensitivities}
 }
 \value{
-an [xtable::xtable()]
+an [csasdown::csas_table()]
 
 an xtable
 

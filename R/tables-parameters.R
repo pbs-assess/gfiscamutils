@@ -400,9 +400,9 @@ make.catchability.parameters.table <- function(am1.lst,
 #'
 #' @rdname make.parameters.table
 #'
-#' @return an [xtable::xtable()]
+#' @return an [csasdown::csas_table()]
 #' @importFrom stringr str_detect
-#' @importFrom kableExtra column_spec linebreak
+#' @importFrom kableExtra column_spec linebreak row_spec
 #' @export
 param_est_mpd_table <- function(models,
                                 digits = 3,

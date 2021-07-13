@@ -12,6 +12,7 @@ License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 2.10)
 Imports:
+  csasdown,
   furrr,
   future,
   grDevices,
@@ -39,7 +40,10 @@ Imports:
   stringr,
   tibble,
   forcats
-Remotes: pbs-assess/gfutilities, pbs-assess/rosettafish
+Remotes:
+  pbs-assess/csasdown,
+  pbs-assess/gfutilities,
+  pbs-assess/rosettafish
 Suggests:
   boot
 LazyData: true
