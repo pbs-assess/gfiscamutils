@@ -814,7 +814,17 @@ read.data.file <- function(file = NULL,
     tmp$has_gear_names <- TRUE
   }
 
-  ## Get the element number for the "IndexGears" names if present
+  # Get the element number for the "GearAbbrevs" names if present
+  dat <- grep("^#.*GearAbbrevs:.+", data)
+  tmp$has_gear_abbrevs <- FALSE
+  if(length(dat > 0)){
+    gear_abbrevs_str <- gsub("^#.*GearAbbrevs:(.+)", "\\1", data[dat])
+    gear_abbrevs <- strsplit(gear_abbrevs_str, ",")[[1]]
+    tmp$gear_abbrevs <- gsub("^[[:blank:]]+", "", gear_abbrevs)
+    tmp$has_gear_abbrevs <- TRUE
+  }
+
+  # Get the element number for the "IndexGears" names if present
   dat <- grep("^#.*IndexGears:.+",data)
   tmp$has_index_gear_names <- FALSE
   if(length(dat >0)){
@@ -825,7 +835,7 @@ read.data.file <- function(file = NULL,
     tmp$has_index_gear_names <- TRUE
   }
 
-  ## Get the element number for the "IndexAbbrevs" names if present
+  # Get the element number for the "IndexAbbrevs" names if present
   dat <- grep("^#.*IndexAbbrevs:.+", data)
   tmp$has_index_abbrevs <- FALSE
   if(length(dat > 0)){
@@ -836,7 +846,7 @@ read.data.file <- function(file = NULL,
     tmp$has_index_abbrevs <- TRUE
   }
 
-  ## # Get the element number for the "AgeGears" names if present (gears with age comp data)
+  # Get the element number for the "AgeGears" names if present (gears with age comp data)
   dat <- grep("^#.*AgeGears:.+",data)
   tmp$has_age_gear_names <- FALSE
   if(length(dat >0)){
@@ -845,6 +855,17 @@ read.data.file <- function(file = NULL,
     age_gear_names <- strsplit(age_gear_names_str, ",")[[1]]
     tmp$age_gear_names <- gsub("^[[:blank:]]+", "", age_gear_names)
     tmp$has_age_gear_names <- TRUE
+  }
+
+  # Get the element number for the "AgeAbbrevs" names if present (gears with age comp data)
+  dat <- grep("^#.*AgeAbbrevs:.+",data)
+  tmp$has_age_gear_names <- FALSE
+  if(length(dat >0)){
+    # The gear names were in the file
+    age_gear_abbrevs_str <- gsub("^#.*AgeAbbrevs:(.+)", "\\1", data[dat])
+    age_gear_abbrevs <- strsplit(age_gear_abbrevs_str, ",")[[1]]
+    tmp$age_gear_abbrevs <- gsub("^[[:blank:]]+", "", age_gear_abbrevs)
+    tmp$has_age_gear_abbrevs <- TRUE
   }
 
   ## Get the element number for the "CatchUnits" if present
