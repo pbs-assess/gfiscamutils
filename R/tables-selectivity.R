@@ -27,15 +27,18 @@ sel_param_est_mpd_table <- function(models,
       mutate(gear = gear_names) %>%
       select(gear, everything()) %>%
       mutate(Type = sel_set$iseltype,
-             Type = case_when(Type == 1 ~ "Logistic",
-                              Type == 2 ~ "Selectivity coefficients",
-                              Type == 3 ~ "Cubic spline with age-nodes",
-                              Type == 4 ~ "Time-varying cubic spline with age-nodes",
-                              Type == 5 ~ "Time-varying bicubic spline with age & year nodes",
-                              Type == 6 ~ "Logistic",
-                              Type == 7 ~ "Logistic function of body weight",
-                              TRUE ~ "NA"),
-             Fixed = ifelse(sel_set$estphase < 0, "Yes", ""))
+             Fixed = sel_set$estphase,
+             Fixed = ifelse(Type == 6 & Fixed == -row_number(), "Yes",
+                            ifelse(Fixed < 0, paste0("Mirror ", gear_names_all[abs(sel_set$estphase)]),
+                                   ifelse(Fixed > 0, "", Fixed))),
+             Type = case_when(Type == 1 ~ "Logistic (1)",
+                              Type == 2 ~ "Selectivity coefficients (2)",
+                              Type == 3 ~ "Cubic spline with age-nodes (3)",
+                              Type == 4 ~ "Time-varying cubic spline with age-nodes (4)",
+                              Type == 5 ~ "Time-varying bicubic spline with age & year nodes (5)",
+                              Type == 6 ~ "Logistic (6)",
+                              Type == 7 ~ "Logistic function of body weight (7)",
+                              TRUE ~ "NA"))
 
     if(!all(gear_names_all %in% gear_names)){
       missing_gears <- gear_names_all[!gear_names_all %in% gear_names]
