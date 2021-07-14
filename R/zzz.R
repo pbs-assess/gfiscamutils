@@ -153,6 +153,7 @@ globalVariables(c(
 "V2",
 "V3",
 "V4",
+"numest",
 "param",
 "Param 1",
 "Param 2",

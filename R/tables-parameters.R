@@ -4,11 +4,10 @@
 #' @param models A list of output models from [arrowtooth::model_setup()]
 #' @param digits Number of digits to show
 #' @param french If `TRUE` translate to French
+#' @param model_col_widths Widths for columns, except the Parameter column
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
-#' @rdname make.parameters.table
-#'
-#' @return an [csasdown::csas_table()]
+#' @return An [csasdown::csas_table()]
 #' @importFrom stringr str_detect
 #' @importFrom kableExtra column_spec linebreak row_spec
 #' @export
@@ -134,12 +133,153 @@ param_est_mpd_table <- function(models,
   tab
 }
 
-#' Make an xtable in the proper format for parameter estimates and priors
+#' Make a table showing number of parameters estimated and prior parameterizations
+#'
+#' @param model A single output model from [arrowtooth::model_setup()]
+#' @param french If `TRUE` translate to French
+#' @param ... Arguments to pass to [csasdown::csas_table()]
+#'
+#' @export
+#' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align
+#' @importFrom purrr pmap_dfr
+#' @importFrom dplyr add_row
+param_settings_table <- function(model,
+                                 french = FALSE,
+                                 ...){
+
+  params <- model$ctl$params %>% as_tibble(rownames = "param")
+  params_out <- params %>%
+    mutate(param = case_when(param == "log_ro" ~ "Log recruitment [$ln(R0)$]",
+                             param == "h" ~ "Steepness [$h$]",
+                             param == "log_m" ~ "Log natural mortality [$ln(M)$]",
+                             param == "log_m_male" ~ "Log natural mortality (male) [$ln(M_{male})$]",
+                             param == "log_m_female" ~ "Log natural mortality (female) [$ln(M_{female})$]",
+                             param == "log_rbar" ~ "Log mean recruitment [$ln(\\overline{R})$]",
+                             param == "log_rinit" ~ "Log initial recruitment [$\\overline{R}_{\\mli{init}}$]",
+                             param == "rho" ~ "Variance ratio, rho [$\\rho$]",
+                             param == "vartheta" ~ "Inverse total variance, kappa [$\\kappa$]",
+                             TRUE ~ "")) %>%
+    select(param)
+
+  # Row-by-row loop
+  j <- params %>%
+    pmap_dfr(function(...) {
+      current <- tibble(...)
+      row <- current
+      if(row$phz < 1){
+        tibble(numest = 0,
+               bounds = "Fixed",
+               prior = paste0("$", f(row$ival, 3), "$"))
+      }else if(row$prior == 0){
+        tibble(numest = 1,
+               bounds = paste0("[", row$lb, ", ", row$ub, "]"),
+               prior = "Uniform")
+      }else if(row$prior == 1){
+        tibble(numest = 1,
+               bounds = paste0("[", row$lb, ", ", row$ub, "]"),
+               prior = paste0("Normal($\\mu=\\ln(", round(exp(row$p1), 1), "), \\sigma=", row$p2, "$)"))
+      }else if(row$prior == 2){
+        tibble(numest = 1,
+               bounds = paste0("[", row$lb, ", ", row$ub, "]"),
+               prior = paste0("Lognormal($\\ln(", row$p1, "), ", row$p2, "$)"))
+      }else if(row$prior == 3){
+        tibble(numest = 1,
+               bounds = paste0("[", row$lb, ", ", row$ub, "]"),
+               prior = paste0("Beta($\\alpha=", row$p1, ", \\beta=", row$p2, "$)"))
+      }else if(row$prior == 4){
+        tibble(numest = 1,
+               bounds = paste0("[", row$lb, ", ", row$ub, "]"),
+               prior = paste0("Gamma($k=", row$p1, ", \\theta=", row$p2, "$)"))
+      }
+    })
+  params_out <- params_out %>%
+    bind_cols(j) %>%
+    mutate(numest = ifelse(param == "Log natural mortality [$ln(M)$]" & numest != 0, model$dat$num.sex, numest))
+
+  sel <- model$ctl$sel %>% as_tibble(rownames = "param")
+  indices <- model$dat$indices %>%
+    map(~{as_tibble(.x)}) %>%
+    bind_rows()
+
+  index_gear_nums <- unique(indices$gear) + 1
+  cols <- 2:(ncol(sel))
+  fish_gear_nums <- cols[!cols %in% index_gear_nums]
+  index_sel <- sel %>%
+    select(param, index_gear_nums)
+  fish_sel <- sel %>%
+    select(param, fish_gear_nums)
+  # Get number estimated by looking at the phase row in the index_sel and fish_sel data frames
+  surv_est <- index_sel %>% filter(param == "estphase") %>% select(-param) %>% `>`(0) %>% sum
+  fish_est <- fish_sel %>% filter(param == "estphase") %>% select(-param) %>% `>`(0) %>% sum
+  # Hardwired bounds of 0,1 for age-at-50% and 0,Inf for age-at-50% SD
+  params_out <- params_out %>%
+    add_row(param = "Fishery age at 50\\% logistic selectivity ($\\hat{a}_k$)",
+            numest = fish_est,
+            bounds = "[0, 1]",
+            prior = "None") %>%
+    add_row(param = "Fishery SD of logistic selectivity ($\\hat{\\gamma}_k$)",
+            numest = fish_est,
+            bounds = "[0, 1]",
+            prior = "None") %>%
+    add_row(param = "Survey age at 50\\% logistic selectivity ($\\hat{a}_k$)",
+            numest = surv_est,
+            bounds = "[0, 1]",
+            prior = "None") %>%
+    add_row(param = "Survey SD of logistic selectivity ($\\hat{\\gamma}_k$)",
+            numest = surv_est,
+            bounds = "[0, 1]",
+            prior = "None")
+
+  # Catchability
+  q <- model$ctl$surv.q
+  num_inds <- model$ctl$num.indices
+  params_out <- params_out %>%
+    add_row(param = "Survey catchability ($q_k$)",
+            numest = num_inds,
+            bounds = "[0, 1]",
+            prior = paste0("Normal($",  round(exp(q[2, 1]), 1), ", ", round(q[3, 1], 1) ,"$)"))
+
+  # Fishing mortality and recruitment parameters
+  par <- model$par
+  num_f_params <- length(par$log_ft_pars)
+  num_rec_params <- length(par$log_rec_devs)
+  num_init_rec_params <- length(par$init_log_rec_devs)
+  params_out <- params_out %>%
+    add_row(param = "Log fishing mortality values ($\\Gamma_{k,t}$)",
+            numest = num_f_params,
+            bounds = "[-30, 3]",
+            prior = "[-30, 3]") %>%
+    add_row(param = "Log recruitment deviations ($\\omega_t$)",
+            numest = num_rec_params,
+            bounds = "None",
+            prior = "Normal($0, \\tau$)") %>%
+    add_row(param = "Initial log recruitment deviations ($\\omega_{init,t}$)",
+            numest = num_init_rec_params,
+            bounds = "None",
+            prior = "Normal($0, \\tau$)")
+
+  names(params_out) <- c("Parameter",
+                         "Number estimated",
+                         "Bounds [low, high]",
+                         "Prior (mean, SD) (single value = fixed)")
+
+  tab <- csas_table(params_out,
+                    col.names = names(params_out),
+                    align = c("l", rep("r", ncol(params_out) - 1)),
+                    ...) %>%
+    column_spec(2, width = "5em") %>%
+    column_spec(3, width = "7em") %>%
+    column_spec(4, width = "15em")
+
+  tab
+}
+
+#' Make a table of the catchability parameters - Herring specific
 #'
 #' @param var the variance parameter results data as loaded from
 #' variance-parameter-results.csv
 #' @param which.model which model to make the table for, 1 = AM1, 2 = AM2
-#' @param tab the contents of the csv file as read in nby [readr::read_csv()]
+#' @param tab the contents of the csv file as read in by [readr::read_csv()]
 #' @param model an iscam model object
 #' @param model.am2 an iscam model object
 #' @param models a list of iscam model objects
@@ -157,216 +297,7 @@ param_est_mpd_table <- function(models,
 #' @param digits Number of decimal points to show
 #' @param qa.lst List of AM1 models for q sensitivities
 #' @param qb.lst List of AM1 models for q sensitivities
-#' @param qc.lst List of AM1 models for q sensitivities
-#'
-#' @export
-#' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align
-#' @importFrom xtable xtable
-make.parameters.table <- function(model,
-                                  xcaption = "default",
-                                  xlabel   = "default",
-                                  font.size = 9,
-                                  space.size = 10,
-                                  placement = "H"){
-
-  get.bounds <- function(ind){
-    ## Return the bounds string for row ind of the parameters
-    paste0("[",
-           params$lb[ind],
-           ", ",
-           params$ub[ind],
-           "]")
-  }
-
-  get.vals <- function(ind){
-    ## Return a 3-element vector for the number estimated, bounds, and prior
-    ##  dist mean and SD or "Uniform" for the row ind of the parameters
-    ##
-    ## vec is a vector of 4 values, the phase, prior type (0=uniform, 1=normal,
-    ##  2=lognormal, 3=beta, 4=gamma), the first and second parameter
-    ##  of the prior.
-    vec <- as.numeric(params[ind, 4:7])
-    if(vec[1] < 1){
-      return(c(0,
-               "Fixed",
-               paste0("$", f(params[ind, 1], 3), "$")))
-    }else if(vec[2] == 0){
-      return(c(1,
-               get.bounds(ind),
-               "Uniform"))
-    }else if(vec[2] == 1){
-      return(c(1,
-               get.bounds(ind),
-               paste0("Normal($\\ln(",
-                      vec[4],
-                      "), ",
-                      vec[4],
-                      "$)")))
-    }else if(vec[2] == 2){
-      return(c(1,
-               get.bounds(ind),
-               paste0("Lognormal($",
-                      vec[3],
-                      ", ",
-                      vec[4],
-                      "$)")))
-    }else if(vec[2] == 3){
-      return(c(1,
-               get.bounds(ind),
-               paste0("Beta($\\alpha = ",
-                      vec[3],
-                      ", \\beta = ",
-                      vec[4],
-                      "$)")))
-    }else if(vec[2] == 4){
-      return(c(1,
-               get.bounds(ind),
-               paste0("Gamma($k = ",
-                      vec[3],
-                      "), \\theta = ",
-                      vec[4],
-                      "$)")))
-    }
-    invisible()
-  }
-
-  if(class(model) == model.lst.class){
-    model <- model[[1]]
-    if(class(model) != model.class){
-      stop("The structure of the model list is incorrect.")
-    }
-  }
-
-  ctl <- model$ctl
-  params <- as.data.frame(ctl$params)
-
-  tab <- data.frame(param = character(),
-                    num.est = character(),
-                    bounds = character(),
-                    prior = character(),
-                    stringsAsFactors = FALSE)
-
-  param.text <- c("Log recruitment ($\\ln(R_0)$)",
-                  "Steepness ($h$)",
-                  "Log natural mortality ($\\ln(M)$)",
-                  "Log mean recruitment ($\\ln(\\overline{R})$)",
-                  "Log initial recruitment ($\\ln(\\overline{R}_{init})$)",
-                  "Variance ratio, rho ($\\rho$)",
-                  "Inverse total variance, kappa ($\\kappa$)")
-
-  param.vals <- do.call(rbind, lapply(1:nrow(params), get.vals))
-
-  ## Selectivity parameters
-  ## sel data frame has one column for each gear and 10 rows:
-  ## 1  - selectivity type:
-  ##       1) logistic selectivity parameters
-  ##       2) selectivity coefficients
-  ##       3) a constant cubic spline with age-nodes
-  ##       4) a time varying cubic spline with age-nodes
-  ##       5) a time varying bicubic spline with age & year nodes
-  ##       6) fixed logistic (set isel_type=6, and estimation phase to -1)
-  ##       7) logistic function of body weight.
-  ##       8) logistic with weight deviations (3 parameters)
-  ##       11) logistic selectivity with 2 parameters based on mean length
-  ##       12) length-based selectivity coefficients with spline interpolation
-  ## 2  - Age/length at 50% selectivity (logistic)
-  ## 3  - STD at 50% selectivity (logistic)
-  ## 4  - No. of age nodes for each gear (0=ignore)
-  ## 5  - No. of year nodes for 2d spline(0=ignore)
-  ## 6  - Phase of estimation (-1 for fixed) If neg number, it reflects a
-  ##       mirroring of another gear's selectivity.
-  ## 7  - Penalty wt for 2nd differences w=1/(2*sig^2)
-  ## 8  - Penalty wt for dome-shaped w=1/(2*sig^2)
-  ## 9  - Penalty wt for time-varying selectivity
-  ## 10 - n_sel_blocks (number of selex blocks)
-
-  sel <- ctl$sel
-  dat <- model$dat
-  indices <- dat$indices
-  indices.df <- as.data.frame(do.call(rbind, indices))
-  surv.gear.nums <- unique(indices.df$gear)
-  surv.sel <- as.data.frame(sel[,surv.gear.nums])
-  fish.sel <- as.data.frame(sel[,-surv.gear.nums])
-  ## Get number estimated by looking at the phase row in the sel data frame
-  surv.est <- surv.sel[6,]
-  surv.est <- sum(surv.est > 0)
-  fish.est <- fish.sel[6,]
-  fish.est <- sum(fish.est > 0)
-  ## Hardwired bounds of 0,1 for age-at-50% and 0,Inf for age-at-50% SD
-  param.vals <- rbind(param.vals,
-                      c(fish.est,
-                        "[0, 1]",
-                        "None"),
-                      c(fish.est,
-                        "[0, Inf)",
-                        "None"))
-
-  param.text <- c(param.text,
-                "Fishery age at 50\\% logistic selectivity ($\\hat{a}_k$)",
-                "Fishery SD of logistic selectivity ($\\hat{\\gamma}_k$)")
-
-  ## Catchability  parameters
-  ## q is a data frame with 1 column for each survey and 3 rows:
-  ## 1 - prior type:
-  ##      0) Uniformative prior
-  ##      1) normal prior density for log(q)
-  ##      2) random walk in q
-  ## 2 - prior log(mean)
-  ## 3 - prior SD
-
-  ## q <- ctl$surv.q
-  ## num.inds <- ctl$num.indices
-  ## param.vals <- rbind(param.vals,
-  ##                     c(num.inds,
-  ##                       "None",
-  ##                       "Normal($0.5, 1$)"))
-
-  ## param.text <- c(param.text,
-  ##                 "Survey catchability ($q_k$)")
-
-  ## Fishing mortality and recruitment parameters
-  ##
-  par <- model$par
-  num.f.params <- length(par$log_ft_pars)
-  num.rec.params <- length(par$log_rec_devs)
-  num.init.rec.params <- length(par$init_log_rec_devs)
-  param.vals <- rbind(param.vals,
-                      c(num.rec.params,
-                        "None",
-                        "Normal($0, \\tau$)"),
-                      c(num.init.rec.params,
-                        "None",
-                        "Normal($0, \\tau$)"))
-
-  param.text <- c(param.text,
-                  "Log recruitment deviations ($\\omega_t$)",
-                  "Initial log recruitment deviations ($\\omega_{init,t}$)")
-
-  tab <- cbind(param.text, param.vals)
-  colnames(tab) <- c(latex.bold("Parameter"),
-                     latex.mlc(c("Number",
-                                 "estimated")),
-                     latex.mlc(c("Bounds",
-                                 "[low, high")),
-                     latex.mlc(c("Prior (mean, SD)",
-                                 "(single value = fixed)")))
-
-  size.string <- latex.size.str(font.size, space.size)
-  print(xtable(tab,
-               caption = xcaption,
-               label = xlabel,
-               align = get.align(ncol(tab))),
-        caption.placement = "top",
-        include.rownames = FALSE,
-        sanitize.text.function = function(x){x},
-        size = size.string,
-        table.placement = placement)
-}
-
-#' Make a tbale of the catchability parameters - Herring specific
-#'
-#' @rdname make.parameters.table
-#'
+#' @param qc.lst List of AM1 models for q sensitivities#'
 #' @export
 #' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align
 #' @importFrom xtable xtable
