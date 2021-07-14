@@ -1,7 +1,8 @@
-#' Make a table of parameter estimate comparisons for MPD models
+#' Make a table of parameter estimate comparisons for MPD models.
+#' Also show B0, Fmsy. Bmsy, and msy
 #'
 #' @param models A list of output models from [arrowtooth::model_setup()]
-#' @param digits Numebr of digits to show
+#' @param digits Number of digits to show
 #' @param french If `TRUE` translate to French
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
@@ -56,6 +57,12 @@ param_est_mpd_table <- function(models,
     log_inds <- which(grepl("^log_", x$param))
     x$value[log_inds] <- exp(x$value[log_inds])
     x$param[log_inds] <- gsub("log_", "", x$param[log_inds])
+
+    # Add B0, SB0, and MSY-based reference points
+    y <- tibble(param = c("bo", "sbo", "msy", "fmsy", "bmsy"),
+                value = c(.x$bo, .x$sbo, .x$msy, .x$fmsy, .x$bmsy))
+    x <- x %>% bind_rows(y)
+
     # Add q estimates
     catchability <- .x$q
     names(catchability) <- paste0("q - ", models[[.y]]$dat$index_abbrevs)
@@ -91,7 +98,12 @@ param_est_mpd_table <- function(models,
                              param == "vartheta" ~ "$\\vartheta$",
                              param == "tau" ~ "$\\tau$",
                              param == "sigma" ~ "$\\sigma$",
-                             stringr::str_detect(param, "^q - ") ~ gsub("q - ((\\w+\\s*)+)$", "$q_{\\1}$", param),
+                             param == "bo" ~ "$B_0$",
+                             param == "sbo" ~ "$SB_0$",
+                             param == "msy" ~ "$MSY$",
+                             param == "fmsy" ~ "$F_{MSY}$",
+                             param == "bmsy" ~ "$B_{MSY}$",
+                             str_detect(param, "^q - ") ~ gsub("q - ((\\w+\\s*)+)$", "$q_{\\1}$", param),
                              TRUE ~ param))
 
   param_ests <- param_ests %>%
@@ -102,7 +114,18 @@ param_est_mpd_table <- function(models,
 
   tab <- csas_table(param_ests,
                     col.names = names(param_ests),
+                    align = c("l", rep("r", ncol(param_ests) - 1)),
                     ...)
+
+  # Add group separation lines
+  num_sex <- map_dbl(models, ~{
+    .x$dat$num.sex
+  })
+  any_two_sex <- any(num_sex > 1)
+  num_pars <- models[[1]]$ctl$num.params + ifelse(any_two_sex, 1, 0)
+  tab <- tab %>%
+    row_spec(num_pars, hline_after = TRUE) %>%
+    row_spec(num_pars + length(q_names), hline_after = TRUE)
 
   if(!is.null(model_col_widths)){
     tab <- tab %>%
