@@ -33,7 +33,7 @@
 #' plot_biomass_mpd(models$bridge_models, bridge_models_text)
 #' }
 plot_ts_mpd <- function(models,
-                        model_names = NULL,
+                        model_names = factor(names(models), levels = names(models)),
                         type = "sbt",
                         rel = FALSE,
                         legend_title = "Bridge model"){
@@ -82,6 +82,10 @@ plot_ts_mpd <- function(models,
       mutate(sbt = sbt.x / sbt.y) %>%
       select(-sbt.x, -sbt.y)
   }
+  if(is.null(model_names)){
+    model_names <- paste0("model ", seq_along(models))
+    model_names <- factor(model_names, levels = model_names)
+  }
   val <- val %>%
     mutate(model = fct_relevel(model, levels(model_names)))
 
@@ -98,11 +102,14 @@ plot_ts_mpd <- function(models,
   g <- ggplot(val, aes(x = year, y = sbt, color = model)) +
     xlab("Year") +
     ylab(y_label) +
-    geom_line(size = 1.5) +
+    geom_line(size = 1) +
+    scale_color_brewer(palette = "Set3") +
     guides(color = guide_legend(title = legend_title))
 
   if(!rel){
-    g <- g + geom_point(data = init_df, size = 2)
+    g <- g +
+      geom_point(data = init_df, size = 2) +
+      scale_color_brewer(palette = "Set3")
   }
   g
 }

@@ -1,6 +1,7 @@
 #' Plot index fits for multiple models and indices, for iSCAM MPD models
 #'
 #' @param models A list of iSCAM models, as output by [arrowtooth::model_setup()]
+#' @param model_names A vector of model names to show in plots of the same length as `model`
 #' @param surv_index Output from [gfdata::get_survey_index()]
 #' @param start_year First year in plot
 #' @param end_year Last year in plot
@@ -12,6 +13,7 @@
 #' @importFrom ggplot2 geom_ribbon facet_wrap
 #' @export
 plot_index_fit_mpd <- function(models,
+                               model_names = factor(names(models), levels = names(models)),
                                surv_index,
                                start_year = 1996,
                                end_year = 2019,
@@ -37,7 +39,10 @@ plot_index_fit_mpd <- function(models,
       select(year, biomass, lowerci, upperci, survey_abbrev)
   })
 
-  model_names <- names(surv_abbrevs)
+  if(is.null(model_names)){
+    model_names <- paste0("model ", seq_along(models))
+    model_names <- factor(model_names, levels = model_names)
+  }
 
   fits <- map2(seq_along(models), surv_abbrevs, ~{
     x <- t(models[[.x]]$mpd$it_hat) %>% as_tibble()
