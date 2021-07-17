@@ -50,8 +50,8 @@ sel_param_est_mpd_table <- function(models,
     x <- x %>% mutate(model = .y) %>%
       select(model, everything())
     # Remove model names for all but first row
+    x <- arrange(x, match(gear, gear_names_all))
     x <- x %>% mutate(model = ifelse(row_number() == 1, model, ""))
-    arrange(x, match(gear, gear_names_all))
   }) %>%
     bind_rows() %>%
     select(-V1, -V2) %>%
