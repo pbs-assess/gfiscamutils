@@ -35,6 +35,13 @@ param_est_mpd_table <- function(models,
     map_chr(~{.x}) %>%
     unique()
 
+  # Maximum number of fleets. All models with less will have blank rows added for the missing gears
+  num_fleets <- map_int(models, ~{
+    length(.x$mpd$msy)
+  }) %>%
+    max
+  fleet_nums <- seq_len(num_fleets)[-1]
+
   # Extract parameter estimates
   param_names[param_names == "h"] <- "steepness"
   param_inds <- match(param_names, names(mpds[[1]]))
@@ -57,11 +64,28 @@ param_est_mpd_table <- function(models,
     x$value[log_inds] <- exp(x$value[log_inds])
     x$param[log_inds] <- gsub("log_", "", x$param[log_inds])
 
-    # Add B0, SB0, and MSY-based reference points
-    y <- tibble(param = c("bo", "sbo", "msy", "fmsy", "bmsy"),
-                value = c(.x$bo, .x$sbo, .x$msy, .x$fmsy, .x$bmsy))
+    # Add B0, SB0
+    y <- tibble(param = c("bo", "sbo", "bmsy"),
+                value = c(.x$bo, .x$sbo, .x$bmsy))
     x <- x %>% bind_rows(y)
 
+    # Add MSY-based reference points
+    y <- tibble(param = c("msy", "fmsy"),
+                value = c(.x$msy[1], .x$fmsy[1]))
+    x <- x %>% bind_rows(y)
+    # Multiple fishing fleets some blank
+    if(length(fleet_nums)){
+      for(i in fleet_nums){
+        new_fleet_msy <- y %>%
+          mutate(value = case_when(param == "msy" ~ .x$msy[i],
+                                   param == "fmsy" ~ .x$fmsy[i],
+                                   TRUE ~ NA_real_),
+                 param = case_when(param == "msy" ~ paste0("msy", i),
+                                   param == "fmsy" ~ paste0("fmsy", i),
+                                   TRUE ~ ""))
+        x <- x %>% bind_rows(new_fleet_msy)
+      }
+    }
     # Add q estimates
     catchability <- .x$q
     names(catchability) <- paste0("q - ", models[[.y]]$dat$index_abbrevs)
@@ -101,6 +125,8 @@ param_est_mpd_table <- function(models,
                              param == "sbo" ~ "$SB_0$",
                              param == "msy" ~ "$MSY$",
                              param == "fmsy" ~ "$F_{MSY}$",
+                             param == "msy2" ~ "$MSY_{fleet2}$",
+                             param == "fmsy2" ~ "$F_{MSY_{fleet2}}$",
                              param == "bmsy" ~ "$B_{MSY}$",
                              str_detect(param, "^q - ") ~ gsub("q - ((\\w+\\s*)+)$", "$q_{\\1}$", param),
                              TRUE ~ param))
@@ -124,7 +150,7 @@ param_est_mpd_table <- function(models,
   num_pars <- models[[1]]$ctl$num.params + ifelse(any_two_sex, 1, 0)
   tab <- tab %>%
     row_spec(num_pars, hline_after = TRUE) %>%
-    row_spec(num_pars + length(q_names), hline_after = TRUE)
+    row_spec(num_pars + 5 + 2 * (num_fleets - 1), hline_after = TRUE)
 
   if(!is.null(model_col_widths)){
     tab <- tab %>%
