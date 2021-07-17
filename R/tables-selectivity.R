@@ -18,11 +18,9 @@ sel_param_est_mpd_table <- function(models,
     flatten %>%
     map_chr(~{.x}) %>%
     unique()
-
   sels <- map2(models, names(models), ~{
     gear_names <- .x$dat$gear_abbrevs
     sel_set <- .x$ctl$sel %>% t() %>% as_tibble()
-
     x <- .x$mpd$sel_par %>% as_tibble() %>%
       mutate(gear = gear_names) %>%
       select(gear, everything()) %>%
@@ -51,8 +49,9 @@ sel_param_est_mpd_table <- function(models,
     }
     x <- x %>% mutate(model = .y) %>%
       select(model, everything())
-    # Remove model names fror all but first row
-    x %>% mutate(model = ifelse(row_number() == 1, model, ""))
+    # Remove model names for all but first row
+    x <- x %>% mutate(model = ifelse(row_number() == 1, model, ""))
+    arrange(x, match(gear, gear_names_all))
   }) %>%
     bind_rows() %>%
     select(-V1, -V2) %>%

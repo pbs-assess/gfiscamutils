@@ -1,3 +1,25 @@
+likelihood_table <- function(models,
+                             digits = 3,
+                             french = FALSE,
+                             model_col_widths = NULL,
+                             ...){
+  like <- map(models, ~{
+    x <- .x$mpd$nlvec %>% as_tibble() %>%
+      mutate(comp = c("Catch",
+                      "Indices",
+                      "Age-compositions",
+                      "Stock-recruitment",
+                      "Selectivity curvature", # Not used for type 1, 7, 8, 11
+                      "Selectivity dome-shapedness", # Not used for type 1, 7, 8, 11
+                      "Selectivity first-differences", # Not used for type 1, 7, 8, 11 and then only used for type 4, 5, or if number sel. blocks > 1
+                      "Mean weight")) #
+
+    #x <- x[!is.na(x)]
+    #x[x != 0]
+  })
+#browser()
+}
+
 #' Make an xtable of likelihood values - Herring specific
 #'
 #' @param models an iscam model object
