@@ -6,6 +6,9 @@
 #' @param start_year First year in plot
 #' @param end_year Last year in plot
 #' @param legend_title Title to use for the legend
+#' @param palette The [RColorBrewer::brewer.pal.info] palette to use for line and point color
+#' @param line_width The width of the lines
+#' @param point_size The size of the points
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom purrr flatten map_chr map_df map2
@@ -17,7 +20,10 @@ plot_index_fit_mpd <- function(models,
                                surv_index,
                                start_year = 1996,
                                end_year = 2019,
-                               legend_title = "Bridge model"){
+                               legend_title = "Bridge model",
+                               palette = "Set3",
+                               line_width = 0.5,
+                               point_size = 2){
 
   # surv_abbrev will be in order of the gears in the models
   surv_abbrevs <- map(models, ~{
@@ -82,12 +88,13 @@ plot_index_fit_mpd <- function(models,
 
   ggplot(surv_indices, aes(x = year, y = biomass)) +
     geom_ribbon(aes(ymin = lowerci, ymax = upperci), fill = "red", alpha = 0.3) +
-    geom_line(size = 1.5, color = "red") +
-    geom_line(data = fits, aes(color = model), size = 1.25) +
-    geom_point(data = fits, aes(color = model), size = 2)+
+    geom_line(size = line_width, color = "red") +
+    geom_line(data = fits, aes(color = model), size = line_width) +
+    geom_point(data = fits, aes(color = model), size = point_size)+
     facet_wrap(~survey_abbrev, scales = "free") +
     xlab("Year") +
     ylab("Index (thousand tonnes, DCPUE ~ kg/hr)") +
+    scale_color_brewer(palette = palette) +
     guides(color = guide_legend(title = legend_title))
 }
 

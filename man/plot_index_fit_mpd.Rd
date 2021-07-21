@@ -6,14 +6,20 @@
 \usage{
 plot_index_fit_mpd(
   models,
+  model_names = factor(names(models), levels = names(models)),
   surv_index,
   start_year = 1996,
   end_year = 2019,
-  legend_title = "Bridge model"
+  legend_title = "Bridge model",
+  palette = "Set3",
+  line_width = 0.5,
+  point_size = 2
 )
 }
 \arguments{
 \item{models}{A list of iSCAM models, as output by [arrowtooth::model_setup()]}
+
+\item{model_names}{A vector of model names to show in plots of the same length as `model`}
 
 \item{surv_index}{Output from [gfdata::get_survey_index()]}
 
@@ -22,6 +28,12 @@ plot_index_fit_mpd(
 \item{end_year}{Last year in plot}
 
 \item{legend_title}{Title to use for the legend}
+
+\item{palette}{The [RColorBrewer::brewer.pal.info] palette to use for line and point color}
+
+\item{line_width}{The width of the lines}
+
+\item{point_size}{The size of the points}
 }
 \value{
 A [ggplot2::ggplot()] object

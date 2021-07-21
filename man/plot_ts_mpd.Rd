@@ -6,10 +6,13 @@
 \usage{
 plot_ts_mpd(
   models,
-  model_names = NULL,
+  model_names = factor(names(models), levels = names(models)),
   type = "sbt",
   rel = FALSE,
-  legend_title = "Bridge model"
+  legend_title = "Bridge model",
+  palette = "Set3",
+  line_width = 0.5,
+  point_size = 2
 )
 }
 \arguments{
@@ -22,6 +25,12 @@ plot_ts_mpd(
 \item{rel}{If `TRUE`, plot relative to initial value}
 
 \item{legend_title}{Title to use for the legend}
+
+\item{palette}{The [RColorBrewer::brewer.pal.info] palette to use for line and point color}
+
+\item{line_width}{The width of the lines}
+
+\item{point_size}{The size of the points}
 }
 \value{
 A [ggplot2::ggplot()] object
