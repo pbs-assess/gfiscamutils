@@ -88,14 +88,15 @@ param_est_mpd_table <- function(models,
     }
     # Add q estimates
     catchability <- .x$q
-    names(catchability) <- paste0("q - ", models[[.y]]$dat$index_abbrevs)
-    catchability <- catchability %>% as_tibble(rownames = "param")
+    names(catchability) <- models[[.y]]$dat$index_abbrevs
+    inds <- match(names(catchability), q_names)
+    tmp <- rep(NA, length(q_names))
+    tmp[inds] <- catchability
+    names(tmp) <- q_names
+    catchability <- tmp %>%
+      as_tibble(rownames = "param") %>%
+      mutate(param = paste0("$q_{", param, "}$"))
     x <- x %>% bind_rows(catchability)
-    indices_not_incl <- q_names[!q_names %in% models[[.y]]$dat$index_abbrevs]
-    if(length(indices_not_incl)){
-      indices_not_incl <- tibble(param = paste0("q - ", indices_not_incl), value = NA)
-      x <- x %>% bind_rows(indices_not_incl)
-    }
     # Only keep param names in first data frame so when bound together they don't repeat
     if(.y != 1){
       x <- x %>% select(value)

@@ -37,7 +37,7 @@ variance-parameter-results.csv}
 
 \item{which.model}{which model to make the table for, 1 = AM1, 2 = AM2}
 
-\item{tab}{the contents of the csv file as read in nby [readr::read_csv()]}
+\item{tab}{the contents of the csv file as read in by [readr::read_csv()]}
 
 \item{model}{an iscam model object}
 

@@ -12,13 +12,10 @@ sel_param_est_mpd_table <- function(models,
                                     model_col_widths = NULL,
                                     ...){
 
-  gear_names_all <- map(models, ~{
+  gear_names_lst <- map(models, ~{
     .x$dat$gear_abbrevs
-  }) %>%
-    flatten %>%
-    map_chr(~{.x}) %>%
-    unique()
-  sels <- map2(models, names(models), ~{
+  })
+  sels <- map2(models, seq_along(models), ~{
     gear_names <- .x$dat$gear_abbrevs
     sel_set <- .x$ctl$sel %>% t() %>% as_tibble()
     x <- .x$mpd$sel_par %>% as_tibble() %>%
@@ -27,7 +24,7 @@ sel_param_est_mpd_table <- function(models,
       mutate(Type = sel_set$iseltype,
              Fixed = sel_set$estphase,
              Fixed = ifelse(Type == 6 & Fixed == -row_number(), "Yes",
-                            ifelse(Fixed < 0, paste0("Mirror ", gear_names_all[abs(sel_set$estphase)]),
+                            ifelse(Fixed < 0, paste0("Mirror ", gear_names_lst[[.y]][abs(sel_set$estphase)]),
                                    ifelse(Fixed > 0, "", Fixed))),
              Type = case_when(Type == 1 ~ "Logistic (1)",
                               Type == 2 ~ "Selectivity coefficients (2)",
@@ -38,8 +35,8 @@ sel_param_est_mpd_table <- function(models,
                               Type == 7 ~ "Logistic function of body weight (7)",
                               TRUE ~ "NA"))
 
-    if(!all(gear_names_all %in% gear_names)){
-      missing_gears <- gear_names_all[!gear_names_all %in% gear_names]
+    if(!all(gear_names_lst[[.y]] %in% gear_names)){
+      missing_gears <- gear_names_lst[[.y]][!gear_names_lst[[.y]] %in% gear_names]
       for(i in missing_gears){
         new_row <- x[1,]
         new_row$gear <- i
@@ -47,10 +44,11 @@ sel_param_est_mpd_table <- function(models,
         x <- x %>% bind_rows(new_row)
       }
     }
-    x <- x %>% mutate(model = .y) %>%
+
+    x <- x %>% mutate(model = names(models)[.y]) %>%
       select(model, everything())
     # Remove model names for all but first row
-    x <- arrange(x, match(gear, gear_names_all))
+    x <- arrange(x, match(gear, gear_names_lst[[.y]]))
     x <- x %>% mutate(model = ifelse(row_number() == 1, model, ""))
   }) %>%
     bind_rows() %>%
@@ -70,15 +68,12 @@ sel_param_est_mpd_table <- function(models,
                     col.names = names(sels),
                     ...)
 
-  group_sep <- length(gear_names_all)
-
   # Add group separation lines
-  for(i in 1:nrow(sels)){
-    if(i %% group_sep == 0){
-      tab <- tab %>%
-        row_spec(i, hline_after = TRUE)
-    }
-  }
+  gear_names_lst_cumu <- cumsum(map_int(gear_names_lst, ~{length(.x)}))
+  map(gear_names_lst_cumu, ~{
+    tab <<- tab %>%
+      row_spec(.x, hline_after = TRUE)
+  })
 
   if(!is.null(model_col_widths)){
     tab <- tab %>%
