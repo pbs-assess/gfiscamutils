@@ -54,9 +54,16 @@ param_est_mpd_table <- function(models,
       m_female <- NA
     }
     m_rowind <- which(x$param == "log_m")
+    tmp_m <- x %>% filter(param == "log_m") %>% pull(value)
     pre <- x[1:m_rowind, ] %>% mutate(param = ifelse(param == "log_m", "log_m_male", param))
     log_m_female <- tibble(param = "log_m_female", value = m_female)
     pre <- pre %>% bind_rows(log_m_female)
+    if(is.na(m_female)){
+      pre <- pre %>%
+        mutate(value = case_when(param == "log_m_male" ~ NA_real_,
+                                 param == "log_m_female" ~ tmp_m,
+                                 TRUE ~ value))
+    }
     post <- x[(m_rowind + 1):nrow(x), ]
     x <- bind_rows(pre, post)
     # Remove logs
