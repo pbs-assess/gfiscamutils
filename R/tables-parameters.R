@@ -10,6 +10,7 @@
 #' @return An [csasdown::csas_table()]
 #' @importFrom stringr str_detect
 #' @importFrom kableExtra column_spec linebreak row_spec
+#' @importFrom purrr map_int
 #' @export
 param_est_mpd_table <- function(models,
                                 digits = 3,

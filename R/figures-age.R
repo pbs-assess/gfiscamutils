@@ -5,6 +5,7 @@
 #' @param gear The gear number to plot
 #'
 #' @return a [ggplot2::ggplot()] object
+#' @importFrom ggplot2 geom_linerange facet_grid
 #' @export
 plot_agecomp_fits_splitsex <- function(model, gear){
 

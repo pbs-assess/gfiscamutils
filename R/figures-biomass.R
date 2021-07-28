@@ -11,7 +11,7 @@
 
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom forcats fct_relevel
-#' @importFrom ggplot2 scale_color_viridis_d xlab ylab
+#' @importFrom ggplot2 scale_color_viridis_d xlab ylab ylim
 #' @importFrom purrr map_dbl
 #' @importFrom tidyr pivot_longer
 #' @export
