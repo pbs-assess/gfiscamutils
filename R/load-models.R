@@ -165,6 +165,9 @@ calc.mcmc <- function(model,
   mc <- model$mcmc
   mpd <- model$mpd
   params.dat <- mc$params
+  if(is.null(params.dat)){
+    stop("There is no MCMC output for the model in ", model$path, call. = FALSE)
+  }
   params.dat <- strip.areas.groups(params.dat)
   params.dat <- strip.static.params(model, params.dat)
   nm <- names(params.dat)
