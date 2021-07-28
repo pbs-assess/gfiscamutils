@@ -1,3 +1,56 @@
+#' Plot MPD age comp data along with the model fits for models
+#' with both sexes
+#'
+#' @param model Model list as output by [model_setup()]
+#' @param gear The gear number to plot
+#'
+#' @return a [ggplot2::ggplot()] object
+#' @export
+plot_agecomp_fits_splitsex <- function(model, gear){
+
+  fit <- model$mpd$A_hat %>%
+    as.data.frame() %>%
+    as_tibble() %>%
+    `names<-`(1:20)
+  comp <- model$mpd$d3_A %>%
+    as.data.frame() %>%
+    as_tibble() %>%
+    `names<-`(c("year", "gear", "area", "group", "sex", 1:20))
+
+  # fit has unlabelled rows, which need to be extracted
+  # correctly based on the values in the comp data.frame
+  gear_rows <- which(comp$gear == gear)
+  comp <- comp[gear_rows, ]
+  year_sex <- comp %>% select(year, sex)
+  comp <- comp %>%
+    select(-c(year, gear, area, group, sex))
+  comp <- comp %>%
+    as.matrix %>%
+    prop.table(1) %>%
+    as_tibble()
+  comp <- bind_cols(year_sex, comp)
+  fit <- fit[gear_rows, ] %>%
+    as.matrix %>%
+    prop.table(1) %>%
+    as_tibble()
+  fit <- bind_cols(year_sex, fit)
+
+  # Make long versions of the data frames
+  comp <- comp %>% pivot_longer(!c(year, sex), names_to = "Age", values_to = "Proportion") %>%
+    mutate(sex = factor(ifelse(sex == 1, "Male", "Female"), levels = c("Male", "Female")),
+           Age = factor(as.numeric(Age)))
+  fit <- fit %>% pivot_longer(!c(year, sex), names_to = "Age", values_to = "Proportion") %>%
+    mutate(sex = factor(ifelse(sex == 1, "Male", "Female"), levels = c("Male", "Female")),
+           Age = factor(as.numeric(Age)))
+
+  g <- ggplot(comp, aes(x = Age, ymax = Proportion, ymin = 0)) +
+    geom_linerange() +
+    facet_grid(year ~ sex) +
+    geom_line(data = fit, aes(x = Age, y = Proportion, group = 1), color = "red")
+
+  g
+}
+
 #' Plot age comp estimates
 #'
 #' @param model An iscam model object
