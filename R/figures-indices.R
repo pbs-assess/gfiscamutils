@@ -91,7 +91,7 @@ plot_index_fit_mpd <- function(models,
     geom_line(size = line_width, color = "red") +
     geom_line(data = fits, aes(color = model), size = line_width) +
     geom_point(data = fits, aes(color = model), size = point_size)+
-    facet_wrap(~survey_abbrev, scales = "free") +
+    facet_wrap(~survey_abbrev, scales = "free_y") +
     xlab("Year") +
     ylab("Index (thousand tonnes, DCPUE ~ kg/hr)") +
     scale_color_brewer(palette = palette) +
