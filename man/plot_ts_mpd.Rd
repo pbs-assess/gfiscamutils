@@ -11,7 +11,7 @@ plot_ts_mpd(
   rel = FALSE,
   legend_title = "Bridge model",
   palette = "Set3",
-  line_width = 0.5,
+  line_width = 1,
   point_size = 2
 )
 }

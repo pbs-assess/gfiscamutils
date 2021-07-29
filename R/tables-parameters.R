@@ -152,11 +152,7 @@ param_est_mpd_table <- function(models,
                     ...)
 
   # Add group separation lines
-  num_sex <- map_dbl(models, ~{
-    .x$dat$num.sex
-  })
-  any_two_sex <- any(num_sex > 1)
-  num_pars <- models[[1]]$ctl$num.params + ifelse(any_two_sex, 1, 0)
+  num_pars <- models[[1]]$ctl$num.params + 1
   tab <- tab %>%
     row_spec(num_pars, hline_after = TRUE) %>%
     row_spec(num_pars + 5 + 2 * (num_fleets - 1), hline_after = TRUE)

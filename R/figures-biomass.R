@@ -41,7 +41,7 @@ plot_ts_mpd <- function(models,
                         rel = FALSE,
                         legend_title = "Bridge model",
                         palette = "Set3",
-                        line_width = 0.5,
+                        line_width = 1,
                         point_size = 2){
 
   if(!type %in% c("sbt", "rt")){
@@ -109,6 +109,7 @@ plot_ts_mpd <- function(models,
     xlab("Year") +
     ylab(y_label) +
     geom_line(size = line_width) +
+    geom_point(size = point_size) +
     scale_color_brewer(palette = "Set3") +
     guides(color = guide_legend(title = legend_title))
 
