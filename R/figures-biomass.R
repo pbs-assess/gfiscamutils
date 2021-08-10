@@ -265,15 +265,15 @@ biomass.plot.mpd <- function(model,
 
   yrs <- lapply(models,
                 function(x){
-                  x$mpd$syr:(x$mpd$nyr + 1)})
+                  x$mpd$syr:x$mpd$nyr})
   if(depl){
     bt <- lapply(models,
                  function(x){
-                   x$mpd$sbt / x$mpd$sbo })
+                   head(x$mpd$sbt, -1) / x$mpd$sbo })
   }else{
     bt <- lapply(models,
                  function(x){
-                   x$mpd$sbt})
+                   head(x$mpd$sbt, -1)})
   }
   bt <- lapply(1:length(bt),
                function(x){
