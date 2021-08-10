@@ -296,7 +296,6 @@ biomass.plot.mpd <- function(model,
     mutate(Sensitivity = fct_relevel(Sensitivity,
                                      models.names,
                                      after = 0))
-
   bo <- lapply(models,
                function(x){
                  x$mpd$sbo
@@ -309,6 +308,11 @@ biomass.plot.mpd <- function(model,
     as.tibble() %>%
     mutate(`Biomass (t)` = as.numeric(`Biomass (t)`),
            Year = as.numeric(Year))
+
+  if(!all(is.na(xlim))){
+    bt <- bt %>%
+      filter(Year %in% xlim[1]:xlim[2])
+  }
 
   p <- ggplot(bt, aes(x = Year,
                       y = `Biomass (t)`,
@@ -323,12 +327,11 @@ biomass.plot.mpd <- function(model,
     theme(legend.position = "top",
           #legend.justification = c(1, 1),
           legend.title = element_blank()) +
-    guides(fill = guide_legend(nrow = 2)) +
+    guides(colour = guide_legend(ncol = 5)) +
     labs( x=en2fr("Year", translate, case="sentence"),
           y=paste( en2fr("Biomass", translate, case="sentence"), "(t)") ) +
-    scale_y_continuous(labels = comma,
-                       limits = c(0, NA)) +
-    coord_cartesian(expand = TRUE) +
+    scale_y_continuous(labels = comma) +
+    expand_limits(y = 0) +
     scale_x_continuous(breaks = seq(0, 3000, 5))
 
   if(!is.na(xlim[1])){
