@@ -11,6 +11,8 @@ biomass.plot.mpd(
   offset = 0.7,
   leg = TRUE,
   a_trans = 0.75,
+  abund = TRUE,
+  df,
   translate = FALSE
 )
 }
@@ -26,6 +28,10 @@ biomass.plot.mpd(
 \item{leg}{show the legend? Logical}
 
 \item{a_trans}{transparency for lines and points}
+
+\item{abund}{logical; plot scaled abundance (points)}
+
+\item{df}{Data frame of the survey estimates, as constructed by [get_surv_ind()]}
 
 \item{translate}{logical; translate labels}
 }

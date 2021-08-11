@@ -233,6 +233,8 @@ make.depletion.mcmc.plot <- function(models,
 #' @param offset horizontal offset for B0 points in depletion plot
 #' @param leg show the legend? Logical
 #' @param a_trans transparency for lines and points
+#' @param abund logical; plot scaled abundance (points)
+#' @param df Data frame of the survey estimates, as constructed by [get_surv_ind()]
 #' @param translate logical; translate labels
 #'
 #' @return a ggplot object
@@ -251,6 +253,8 @@ biomass.plot.mpd <- function(model,
                              offset = 0.7,
                              leg = TRUE,
                              a_trans = 0.75,
+                             abund = TRUE,
+                             df,
                              translate = FALSE){
 
   if(class(model) == model.lst.class){
@@ -359,6 +363,30 @@ biomass.plot.mpd <- function(model,
 
   if(length(models) == 1){
     p <- p + theme(legend.position = "none")
+  }
+
+  if(abund) {
+    pars <- model$mcmccalcs$p.quants[2, ]
+    qs <- pars[grep("^q[0-9]$", names(pars))]
+    names(qs) <- gsub("q", "", names(qs))
+    qs <- qs %>%
+      melt(qs) %>%
+      as_tibble(rownames = "qind") %>%
+      mutate(qind = as.numeric(qind))
+    dfm <- full_join(df, qs, by = "qind") %>%
+      rename(
+        qmedian = value.y,
+        spawn = value.x,
+        Year = year
+      ) %>%
+      mutate(Biomass = spawn / qmedian,
+             Sensitivity = 1)
+    if(!all(is.na(xlim))){
+      dfm <- dfm %>%
+        filter(Year %in% xlim[1]:xlim[2])
+    }
+    p <- p +
+      geom_point(data = dfm, shape = 2)
   }
 
   p
