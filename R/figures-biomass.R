@@ -278,7 +278,7 @@ biomass.plot.mpd <- function(model,
   bt <- lapply(1:length(bt),
                function(x){
                  tmp <- as.data.frame(t(bt[[x]]))
-                 rownames(tmp) <- "Biomass (t)"
+                 rownames(tmp) <- "Spawning biomass (1,000 t)"
                  colnames(tmp) <-  yrs[[x]]
                  tmp})
   models.names <- paste0("-", 1:(length(bt) - 1), " ",
@@ -290,7 +290,7 @@ biomass.plot.mpd <- function(model,
   bt <- bind_rows(bt, .id = "Sensitivity") %>%
     melt() %>%
     as.tibble() %>%
-    mutate(Year = variable, `Biomass (t)` = value) %>%
+    mutate(Year = variable, `Spawning biomass (1,000 t)` = value) %>%
     select(-c(variable, value)) %>%
     mutate(Year = as.numeric(as.character(Year))) %>%
     mutate(Sensitivity = fct_relevel(Sensitivity,
@@ -303,10 +303,10 @@ biomass.plot.mpd <- function(model,
   names(bo) <- models.names
   bo <- t(bind_cols(bo))
   bo <- cbind(rownames(bo), bo, min(bt$Year))
-  colnames(bo) <- c("Sensitivity", "Biomass (t)", "Year")
+  colnames(bo) <- c("Sensitivity", "Spawning biomass (1,000 t)", "Year")
   bo <- bo %>%
     as.tibble() %>%
-    mutate(`Biomass (t)` = as.numeric(`Biomass (t)`),
+    mutate(`Spawning biomass (1,000 t)` = as.numeric(`Spawning biomass (1,000 t)`),
            Year = as.numeric(Year))
 
   if(!all(is.na(xlim))){
@@ -315,9 +315,9 @@ biomass.plot.mpd <- function(model,
   }
 
   p <- ggplot(bt, aes(x = Year,
-                      y = `Biomass (t)`,
+                      y = `Spawning biomass (1,000 t)`,
                       #ymin = 0,
-                      #ymax = max(`Biomass (t)`),
+                      #ymax = max(`Spawning biomass (1,000 t)`),
                       group = Sensitivity)) +
     geom_line(aes(color = Sensitivity),
               size = 1,
@@ -329,7 +329,7 @@ biomass.plot.mpd <- function(model,
           legend.title = element_blank()) +
     guides(colour = guide_legend(ncol = 5)) +
     labs( x=en2fr("Year", translate, case="sentence"),
-          y=paste( en2fr("Biomass", translate, case="sentence"), "(t)") ) +
+          y=paste( en2fr("Spawning biomass", translate, case="sentence"), "(1 000 t)") ) +
     scale_y_continuous(labels = comma) +
     expand_limits(y = 0) +
     scale_x_continuous(breaks = seq(0, 3000, 5))
