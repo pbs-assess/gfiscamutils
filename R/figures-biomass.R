@@ -233,6 +233,8 @@ make.depletion.mcmc.plot <- function(models,
 #' @param offset horizontal offset for B0 points in depletion plot
 #' @param leg show the legend? Logical
 #' @param a_trans transparency for lines and points
+#' @param abund logical; plot scaled abundance (points)
+#' @param df Data frame of the survey estimates, as constructed by [get_surv_ind()]
 #' @param translate logical; translate labels
 #'
 #' @return a ggplot object
@@ -251,6 +253,8 @@ biomass.plot.mpd <- function(model,
                              offset = 0.7,
                              leg = TRUE,
                              a_trans = 0.75,
+                             abund = TRUE,
+                             df,
                              translate = FALSE){
 
   if(class(model) == model.lst.class){
@@ -265,20 +269,20 @@ biomass.plot.mpd <- function(model,
 
   yrs <- lapply(models,
                 function(x){
-                  x$mpd$syr:(x$mpd$nyr + 1)})
+                  x$mpd$syr:x$mpd$nyr})
   if(depl){
     bt <- lapply(models,
                  function(x){
-                   x$mpd$sbt / x$mpd$sbo })
+                   head(x$mpd$sbt, -1) / x$mpd$sbo })
   }else{
     bt <- lapply(models,
                  function(x){
-                   x$mpd$sbt})
+                   head(x$mpd$sbt, -1)})
   }
   bt <- lapply(1:length(bt),
                function(x){
                  tmp <- as.data.frame(t(bt[[x]]))
-                 rownames(tmp) <- "Biomass (t)"
+                 rownames(tmp) <- "Biomass"
                  colnames(tmp) <-  yrs[[x]]
                  tmp})
   models.names <- paste0("-", 1:(length(bt) - 1), " ",
@@ -290,13 +294,12 @@ biomass.plot.mpd <- function(model,
   bt <- bind_rows(bt, .id = "Sensitivity") %>%
     melt() %>%
     as.tibble() %>%
-    mutate(Year = variable, `Biomass (t)` = value) %>%
+    mutate(Year = variable, Biomass = value) %>%
     select(-c(variable, value)) %>%
     mutate(Year = as.numeric(as.character(Year))) %>%
     mutate(Sensitivity = fct_relevel(Sensitivity,
                                      models.names,
                                      after = 0))
-
   bo <- lapply(models,
                function(x){
                  x$mpd$sbo
@@ -304,16 +307,20 @@ biomass.plot.mpd <- function(model,
   names(bo) <- models.names
   bo <- t(bind_cols(bo))
   bo <- cbind(rownames(bo), bo, min(bt$Year))
-  colnames(bo) <- c("Sensitivity", "Biomass (t)", "Year")
+  colnames(bo) <- c("Sensitivity", "Biomass", "Year")
   bo <- bo %>%
     as.tibble() %>%
-    mutate(`Biomass (t)` = as.numeric(`Biomass (t)`),
-           Year = as.numeric(Year))
+    mutate(Biomass = as.numeric(Biomass), Year = as.numeric(Year))
+
+  if(!all(is.na(xlim))){
+    bt <- bt %>%
+      filter(Year %in% xlim[1]:xlim[2])
+  }
 
   p <- ggplot(bt, aes(x = Year,
-                      y = `Biomass (t)`,
+                      y = Biomass,
                       #ymin = 0,
-                      #ymax = max(`Biomass (t)`),
+                      #ymax = max(Biomass),
                       group = Sensitivity)) +
     geom_line(aes(color = Sensitivity),
               size = 1,
@@ -323,12 +330,13 @@ biomass.plot.mpd <- function(model,
     theme(legend.position = "top",
           #legend.justification = c(1, 1),
           legend.title = element_blank()) +
-    guides(fill = guide_legend(nrow = 2)) +
+    guides(colour = guide_legend(ncol = 5)) +
     labs( x=en2fr("Year", translate, case="sentence"),
-          y=paste( en2fr("Biomass", translate, case="sentence"), "(t)") ) +
-    scale_y_continuous(labels = comma,
-                       limits = c(0, NA)) +
-    coord_cartesian(expand = TRUE) +
+          y=paste(
+            en2fr("Spawning biomass", translate, case="sentence"), "(1,000 t)"
+            ) ) +
+    scale_y_continuous(labels = comma) +
+    expand_limits(y = 0) +
     scale_x_continuous(breaks = seq(0, 3000, 5))
 
   if(!is.na(xlim[1])){
@@ -355,6 +363,30 @@ biomass.plot.mpd <- function(model,
 
   if(length(models) == 1){
     p <- p + theme(legend.position = "none")
+  }
+
+  if(abund) {
+    pars <- model$mcmccalcs$p.quants[2, ]
+    qs <- pars[grep("^q[0-9]$", names(pars))]
+    names(qs) <- gsub("q", "", names(qs))
+    qs <- qs %>%
+      melt(qs) %>%
+      as_tibble(rownames = "qind") %>%
+      mutate(qind = as.numeric(qind))
+    dfm <- full_join(df, qs, by = "qind") %>%
+      rename(
+        qmedian = value.y,
+        spawn = value.x,
+        Year = year
+      ) %>%
+      mutate(Biomass = spawn / qmedian,
+             Sensitivity = 1)
+    if(!all(is.na(xlim))){
+      dfm <- dfm %>%
+        filter(Year %in% xlim[1]:xlim[2])
+    }
+    p <- p +
+      geom_point(data = dfm, shape = 2)
   }
 
   p
