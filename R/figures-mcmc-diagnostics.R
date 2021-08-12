@@ -215,6 +215,7 @@ plot_marg <- function(xx,
 #'
 #' @export
 make.traces.plot <- function(model,
+                             burnin = 1000,
                              axis.lab.freq = 200){
 
   if(class(model) == model.lst.class){
@@ -231,7 +232,7 @@ make.traces.plot <- function(model,
       mai = c(0.2, 0.4, 0.3, 0.2))
 
   for(param in 1:ncol(mc)){
-    mcmc.trace <- as.matrix(mc[,param])
+    mcmc.trace <- as.matrix(mc[burnin:(length(mc[,1])-1),param])
     name <- colnames(mc)[param]
     name <- get.latex.name(name)
     plot(mcmc.trace,
