@@ -215,7 +215,7 @@ plot_marg <- function(xx,
 #'
 #' @export
 make.traces.plot <- function(model,
-                             burnin = 1000,
+                             mcmc_burnin = 1000,
                              axis.lab.freq = 200){
 
   if(class(model) == model.lst.class){
@@ -232,7 +232,7 @@ make.traces.plot <- function(model,
       mai = c(0.2, 0.4, 0.3, 0.2))
 
   for(param in 1:ncol(mc)){
-    mcmc.trace <- as.matrix(mc[burnin:(length(mc[,1])-1),param])
+    mcmc.trace <- as.matrix(mc[mcmc_burnin:(length(mc[,1])-1),param])
     name <- colnames(mc)[param]
     name <- get.latex.name(name)
     plot(mcmc.trace,
@@ -258,7 +258,8 @@ make.traces.plot <- function(model,
 #'
 #' @return Nothing
 #' @export
-make.autocor.plot <- function(model){
+make.autocor.plot <- function(model,
+                              mcmc_burnin = 1000){
 
   if(class(model) == model.lst.class){
     model <- model[[1]]
@@ -274,7 +275,7 @@ make.autocor.plot <- function(model){
       mai = c(0.2, 0.4, 0.3, 0.2))
 
   for(param in 1:ncol(mc)){
-    mcmc.autocor <- as.matrix(mc[,param])
+    mcmc.autocor <- as.matrix(mc[mcmc_burnin:(length(mc[,1])-1),param])
     name <- colnames(mc)[param]
     name <- get.latex.name(name)
     autocorr.plot(mcmc.autocor,
