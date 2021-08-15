@@ -45,8 +45,9 @@ param_est_mpd_table <- function(models,
 
   # Extract parameter estimates
   param_names[param_names == "h"] <- "steepness"
-  param_inds <- match(param_names, names(mpds[[1]]))
+
   param_ests <- map2(mpds, seq_along(mpds), ~{
+    param_inds <- match(param_names, names(.x))
     x <- .x[param_inds] %>% as.data.frame() %>% t() %>% as_tibble(rownames = "param")
     x <- x %>% select(1:2) %>% `names<-`(c("param", "value"))
     if(length(.x[param_inds]$log_m) == 2){
@@ -65,6 +66,7 @@ param_est_mpd_table <- function(models,
                                  param == "log_m_female" ~ tmp_m,
                                  TRUE ~ value))
     }
+
     post <- x[(m_rowind + 1):nrow(x), ]
     x <- bind_rows(pre, post)
     # Remove logs
@@ -106,6 +108,7 @@ param_est_mpd_table <- function(models,
       mutate(param = paste0("$q_{", param, "}$"))
     x <- x %>% bind_rows(catchability)
     # Only keep param names in first data frame so when bound together they don't repeat
+
     if(.y != 1){
       x <- x %>% select(value)
     }

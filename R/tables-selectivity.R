@@ -15,12 +15,35 @@ sel_param_est_mpd_table <- function(models,
   gear_names_lst <- map(models, ~{
     .x$dat$gear_abbrevs
   })
+
   sels <- map2(models, seq_along(models), ~{
     gear_names <- .x$dat$gear_abbrevs
     sel_set <- .x$ctl$sel %>% t() %>% as_tibble()
-    x <- .x$mpd$sel_par %>% as_tibble() %>%
-      mutate(gear = gear_names) %>%
-      select(gear, everything()) %>%
+    x <- .x$mpd$sel_par
+    if(is.null(x)){
+      x <- .x$mpd$sel_par_f
+    }
+
+    selex <- x %>% as_tibble()
+    if(.x$dat$num.sex == 2){
+      selex_m <- .x$mpd$sel_par_m %>% as_tibble() %>%
+        mutate(V2 = 2)
+      selex <- selex %>% bind_rows(selex_m)
+    }
+    names(selex) <- c("Gear", "Sex", "Female_P1", "Female_P2")
+    selex_lst <- selex %>% group_by(Sex) %>% group_split() %>% as.list()
+    if(length(selex_lst) == 2){
+      selex_lst[[2]] <- selex_lst[[2]] %>% transmute(Male_P1 = Female_P1,
+                                                     Male_P2 = Female_P2)
+      selex <- selex_lst %>% bind_cols()
+    }else{
+      selex <- selex_lst[[1]] %>%
+      mutate(Male_P1 = NA,
+             Male_P2 = NA)
+    }
+
+    x <- selex %>% as_tibble() %>%
+      mutate(Gear = gear_names) %>%
       mutate(Type = sel_set$iseltype,
              Fixed = sel_set$estphase,
              Fixed = ifelse(Type == 6 & Fixed == -row_number(), "Yes",
@@ -45,22 +68,29 @@ sel_param_est_mpd_table <- function(models,
       }
     }
 
-    x <- x %>% mutate(model = names(models)[.y]) %>%
-      select(model, everything())
+    x <- x %>% mutate(Model = names(models)[.y]) %>%
+      select(Model, everything())
     # Remove model names for all but first row
-    x <- arrange(x, match(gear, gear_names_lst[[.y]]))
-    x <- x %>% mutate(model = ifelse(row_number() == 1, model, ""))
+    x <- arrange(x, match(Gear, gear_names_lst[[.y]]))
+    x <- x %>% mutate(Model = ifelse(row_number() == 1, Model, ""))
   }) %>%
     bind_rows() %>%
-    select(-V1, -V2) %>%
-    rename(`Param 1` = V3,
-           `Param 2` = V4,
-           Model = model,
-           Gear = gear)
+    rename(`Female Age50` = Female_P1,
+           `Female SD50` = Female_P2,
+           `Male Age50` = Male_P1,
+           `Male SD50` = Male_P2)
 
   sels <- sels %>%
-    mutate_at(vars(`Param 1`, `Param 2`), function(x){format(round(x, digits), digits = 3, nsmall = 3)}) %>%
-    mutate_at(vars(`Param 1`, `Param 2`), function(x){ifelse(grepl(" +NA", x), "--", x)}) %>%
+    mutate_at(vars(`Female Age50`,
+                   `Female SD50`,
+                   `Male Age50`,
+                   `Male SD50`),
+              function(x){format(round(x, digits), digits = 3, nsmall = 3)}) %>%
+    mutate_at(vars(`Female Age50`,
+                   `Female SD50`,
+                   `Male Age50`,
+                   `Male SD50`),
+              function(x){ifelse(grepl(" *NA", x), "--", x)}) %>%
     mutate(Type = ifelse(is.na(Type), "--", Type)) %>%
     mutate(Fixed = ifelse(is.na(Fixed), "--", Fixed))
 

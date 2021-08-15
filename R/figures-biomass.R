@@ -40,7 +40,7 @@ plot_ts_mpd <- function(models,
                         type = "sbt",
                         rel = FALSE,
                         legend_title = "Bridge model",
-                        palette = "Set3",
+                        palette = "Dark2",
                         line_width = 1,
                         point_size = 2){
 
@@ -111,12 +111,12 @@ plot_ts_mpd <- function(models,
     geom_line(size = line_width) +
     geom_point(size = point_size) +
     scale_color_brewer(palette = "Set3") +
-    guides(color = guide_legend(title = legend_title))
+    guides(color = guide_legend(title = legend_title)) +
+    scale_color_brewer(palette = palette)
 
   if(!rel){
     g <- g +
-      geom_point(data = init_df, size = point_size) +
-      scale_color_brewer(palette = palette)
+      geom_point(data = init_df, size = point_size)
   }
   g <- g +
     ylim(0, NA)

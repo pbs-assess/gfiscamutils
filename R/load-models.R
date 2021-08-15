@@ -1072,6 +1072,7 @@ read.control.file <- function(file = NULL,
                               num.gears = NULL,
                               num.age.gears = NULL,
                               verbose = FALSE){
+  message("File = ", file)
 
   if(is.null(num.gears)){
     stop("You must supply the total number of gears (num.gears).")
@@ -1145,6 +1146,7 @@ read.control.file <- function(file = NULL,
   nrows <- 8
   ncols <- num.age.gears
   tmp$age.size <- matrix(NA, nrow = nrows, ncol = ncols)
+
   for(row in 1:nrows){
     tmp$age.size[row,] <-
       as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
@@ -1161,7 +1163,7 @@ read.control.file <- function(file = NULL,
                               "degfreephase")
 
   ## Selectivity parameters for all gears
-  nrows <- 10
+  nrows <- 12
   ncols <- num.gears
   tmp$sel <- matrix(NA, nrow = nrows, ncol = ncols)
   for(row in 1:nrows){
@@ -1171,8 +1173,10 @@ read.control.file <- function(file = NULL,
   ## Rownames here are hardwired, so if you add a new row you must add a name
   ##  for it here
   rownames(tmp$sel) <- c("iseltype",
-                         "agelen50log",
-                         "std50log",
+                         "agelen50log_f",
+                         "std50log_f",
+                         "agelen50log_m",
+                         "std50log_m",
                          "nagenodes",
                          "nyearnodes",
                          "estphase",
@@ -1182,7 +1186,7 @@ read.control.file <- function(file = NULL,
                          "nselblocks")
 
   ## Start year for time blocks, one for each gear
-  max.block <- max(tmp$sel[10,])
+  max.block <- max(tmp$sel[12,])
   tmp$start.yr.time.block <- matrix(nrow = num.gears, ncol = max.block)
   for(ng in 1:num.gears){
     ## Pad the vector with NA's to make it the right size if it isn't

@@ -29,34 +29,58 @@ plot_selex <- function(model,
     mutate(index = ifelse(estphase < 0, paste(index, "(Fixed)"), index))
 
   # Selex
-  selex <- model$mpd$sel %>% as_tibble()
+  # selex <- model$mpd$sel_par_f %>% as_tibble()
+  # if(!is.null(model$mpd$sel_par_m)){
+  #   selex_m <- model$mpd$sel_par_m %>% as_tibble() %>%
+  #     mutate(V2 = 2)
+  #   selex <- selex %>% bind_rows(selex_m)
+  # }
+  # names(selex) <- c("Gear", "Sex", "P1", "P2")
   age <- model$mpd$age
   log_sel <- model$mpd$log_sel %>% as_tibble() %>%
     `names<-`(c("gear", "type", "year", age)) %>%
     select(year, gear, as.character(age)) %>%
     mutate_at(vars(-c("year", "gear")), function(x){exp(x)})
 
+  # Add sex column
+  if(model$dat$num.sex == 2){
+    log_sel <- log_sel %>%
+      group_by(year, gear) %>%
+      mutate(sex = c("F", "M")) %>%
+      ungroup() %>%
+      select(year, gear, sex, everything())
+  }else{
+    log_sel <- log_sel %>%
+      mutate(sex = "F") %>%
+      select(year, gear, sex, everything())
+  }
+
   # Make long
   ls <- log_sel %>%
-    pivot_longer(!c(year, gear), names_to = "Age", values_to = "value") %>%
+    pivot_longer(!c(year, gear, sex), names_to = "Age", values_to = "value") %>%
     mutate(Year = year,
            Proportion = value,
+           Sex = factor(sex),
            Age = factor(as.numeric(Age)),
            Gear = factor(gear)) %>%
-    select(-year, -gear, -value) %>%
-    mutate(Gear = factor(model$dat$gear_abbrevs[Gear], levels = model$dat$gear_abbrevs))
+    select(-year, -gear, -value, -sex) %>%
+    mutate(Gear = factor(model$dat$gear_abbrevs[Gear], levels = model$dat$gear_abbrevs)) %>%
+    select(Year, Gear, Sex, Age, Proportion)
 
   if(last_year_only){
     ls <- ls %>%
       filter(Year == max(Year))
   }
 
-  g <- ggplot(ls, aes(x = Age, y = Proportion, group = 1)) +
-    geom_line(size = 0.5, color = "forestgreen") +
-    geom_point(size = 1, color = "forestgreen") +
+  g <- ggplot(ls, aes(x = Age, y = Proportion, group = Sex, color = Sex)) +
+    #geom_line(size = 0.5, color = "forestgreen") +
+    #geom_point(size = 1, color = "forestgreen") +
+    geom_line(size = 0.5) +
+    geom_point(size = 1) +
     facet_grid(Year ~ Gear) +
     scale_x_discrete(breaks = seq(0, max(age), 5)) +
-    labs(title = title)
+    labs(title = title) +
+    scale_color_manual(values = c("red", "blue"))
 
   if(show_maturity){
     # Add maturity ogive to selectivity plot
@@ -67,13 +91,17 @@ plot_selex <- function(model,
       a50_female <- model$dat$age.at.50.mat[2]
       sigma_a50_female <- model$dat$sd.at.50.mat[2]
       g <- g +
-        geom_function(fun = function(x){1 / (1 + exp(-(x - a50_male) / sigma_a50_male))}, color = "blue")
+        geom_function(fun = function(x){1 / (1 + exp(-(x - a50_male) / sigma_a50_male))},
+                      color = "blue",
+                      linetype = "dashed")
     }else{
       a50_female <- model$dat$age.at.50.mat[1]
       sigma_a50_female <- model$dat$sd.at.50.mat[1]
     }
     g <- g +
-      geom_function(fun = function(x){1 / (1 + exp(-(x - a50_female) / sigma_a50_female))}, color = "red")
+      geom_function(fun = function(x){1 / (1 + exp(-(x - a50_female) / sigma_a50_female))},
+                    color = "red",
+                    linetype = "dashed")
   }
   g
 }

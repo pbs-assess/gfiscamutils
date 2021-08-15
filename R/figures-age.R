@@ -38,16 +38,16 @@ plot_agecomp_fits_splitsex <- function(model, gear){
 
   # Make long versions of the data frames
   comp <- comp %>% pivot_longer(!c(year, sex), names_to = "Age", values_to = "Proportion") %>%
-    mutate(sex = factor(ifelse(sex == 1, "Male", "Female"), levels = c("Male", "Female")),
+    mutate(sex = factor(ifelse(sex == 1, "Female", "Male"), levels = c("Female", "Male")),
            Age = factor(as.numeric(Age)))
   fit <- fit %>% pivot_longer(!c(year, sex), names_to = "Age", values_to = "Proportion") %>%
-    mutate(sex = factor(ifelse(sex == 1, "Male", "Female"), levels = c("Male", "Female")),
+    mutate(sex = factor(ifelse(sex == 1, "Female", "Male"), levels = c("Female", "Male")),
            Age = factor(as.numeric(Age)))
 
   g <- ggplot(comp, aes(x = Age, ymax = Proportion, ymin = 0)) +
     geom_linerange() +
     facet_grid(year ~ sex) +
-    geom_line(data = fit, aes(x = Age, y = Proportion, group = 1), color = "red")
+    geom_line(data = fit, aes(x = Age, y = Proportion, group = 1), color = "blue")
 
   g
 }

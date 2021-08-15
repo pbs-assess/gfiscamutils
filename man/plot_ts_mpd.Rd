@@ -10,7 +10,7 @@ plot_ts_mpd(
   type = "sbt",
   rel = FALSE,
   legend_title = "Bridge model",
-  palette = "Set3",
+  palette = "Dark2",
   line_width = 1,
   point_size = 2
 )

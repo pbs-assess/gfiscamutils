@@ -11,9 +11,9 @@ plot_index_fit_mpd(
   start_year = 1996,
   end_year = 2021,
   legend_title = "Bridge model",
-  palette = "Set3",
+  palette = "Dark2",
   line_width = 0.5,
-  point_size = 2
+  point_size = 1
 )
 }
 \arguments{
