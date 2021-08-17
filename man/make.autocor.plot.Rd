@@ -4,7 +4,7 @@
 \alias{make.autocor.plot}
 \title{Plot the autocorrelation of estimated parameters}
 \usage{
-make.autocor.plot(model)
+make.autocor.plot(model, mcmc_burnin = 1000)
 }
 \arguments{
 \item{model}{An iscam model object}

@@ -4,7 +4,7 @@
 \alias{make.traces.plot}
 \title{Make trace plots for all paramaters from the mcmc output}
 \usage{
-make.traces.plot(model, burnin = 1000, axis.lab.freq = 200)
+make.traces.plot(model, mcmc_burnin = 1000, axis.lab.freq = 200)
 }
 \arguments{
 \item{model}{An iscam model object}
