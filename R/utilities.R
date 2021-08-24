@@ -99,7 +99,8 @@ get.latex.name <- function(name, addToQ = 0){
   if(name == "msy") return(expression("MSY"))
   if(name == "fmsy") return(expression("F"[MSY]))
   if(name == "umsy") return(expression("U"[MSY]))
-  if(name == "ssb") return(expression("SSB"))
+  # TODO: Changing SSB to SB is an ugly cludge and should be fixed properly
+  if(name == "ssb") return(expression("SB"))
   if(name == "sel1") return(expression(hat(a)[1]))
   if(name == "selsd1") return(expression(hat(gamma)[1]))
   if(name == "sel2") return(expression(hat(a)[2]))
