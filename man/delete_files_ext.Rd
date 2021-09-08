@@ -14,3 +14,8 @@ delete_files_ext(path = NULL, ext = "rds")
 \description{
 Delete all files with a specific extension recursively. By default, .rds files
 }
+\examples{
+\dontrun{
+delete_files_ext(file.path(drs$models_dir, "001-bridge-models"))
+}
+}

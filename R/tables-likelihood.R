@@ -3,21 +3,66 @@ likelihood_table <- function(models,
                              french = FALSE,
                              model_col_widths = NULL,
                              ...){
-  like <- map(models, ~{
-    x <- .x$mpd$nlvec %>% as_tibble() %>%
-      mutate(comp = c("Catch",
-                      "Indices",
-                      "Age-compositions",
-                      "Stock-recruitment",
-                      "Selectivity curvature", # Not used for type 1, 7, 8, 11
-                      "Selectivity dome-shapedness", # Not used for type 1, 7, 8, 11
-                      "Selectivity first-differences", # Not used for type 1, 7, 8, 11 and then only used for type 4, 5, or if number sel. blocks > 1
-                      "Mean weight")) #
 
-    #x <- x[!is.na(x)]
-    #x[x != 0]
+  # Likelihood for catch
+  like_catch <- map(models, ~{
+    x <- .x$mpd$like_catch %>% as_tibble()
   })
-#browser()
+  model_nms <- names(like_catch)
+  like_catch <- like_catch %>%
+    map_dfr(~{.x}) %>%
+    transmute(model = model_nms,
+              catch = value)
+
+  # Likelihood for survey indices
+  like_index <- map(models, ~{
+    x <- .x$mpd$like_survey_index
+    names(x) <- .x$dat$index_abbrevs
+    x
+  }) %>%
+    map_dfr(~{.x}) %>%
+    mutate(model = names(models)) %>%
+    select(model, contains("COMM"), everything())
+  names(like_index)[-1] = paste0(names(like_index)[-1], " index")
+
+  # Likelihood age comps
+  like_age <- map(models, ~{
+    x <- .x$mpd$like_age_comps
+    names(x) <- .x$dat$age_gear_abbrevs
+    x
+  }) %>%
+    map_dfr(~{.x}) %>%
+    mutate(model = names(models)) %>%
+    select(model, contains("COMM"), everything())
+  names(like_age)[-1] = paste0(names(like_age)[-1], " age")
+
+  # Likelihood for stock recruit function
+  like_sr <- map(models, ~{
+    x <- .x$mpd$like_stock_recruit %>% as_tibble()
+  })
+  model_nms <- names(like_sr)
+  like_sr <- like_sr %>%
+    map_dfr(~{.x}) %>%
+    transmute(model = model_nms,
+              sr = value)
+
+  out <- left_join(like_catch, like_index, by = "model") %>%
+    left_join(like_age, by = "model") %>%
+    left_join(like_sr, by = "model") %>%
+    mutate_at(vars(-model), ~{round(.x, 2)}) %>%
+    mutate_all(~{ifelse(is.na(.x), "--", .x)}) %>%
+    rename(Catch = catch,
+           `Stock Recruit` = sr)
+
+  tab <- csas_table(out,
+                    col.names = names(out),
+                    ...)
+
+  if(!is.null(model_col_widths)){
+    tab <- tab %>%
+      column_spec(2:ncol(out), width = model_col_widths)
+  }
+  tab
 }
 
 #' Make an xtable of likelihood values - Herring specific
