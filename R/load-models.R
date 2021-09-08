@@ -609,6 +609,10 @@ calc.probabilities <- function(model,
 #' @param path The directory to start in.
 #' @param ext The extension of files to include for deletion
 #' @export
+#' @examples
+#' \dontrun{
+#' delete_files_ext(file.path(drs$models_dir, "001-bridge-models"))
+#' }
 delete_files_ext <- function(path = NULL, ext = "rds"){
   stopifnot(!is.null(path))
   ext_full <- paste0(".", ext, "$")
@@ -625,46 +629,6 @@ delete_files_ext <- function(path = NULL, ext = "rds"){
   })
   message("Deleted all ", ext, " files.")
   invisible()
-}
-
-#' Delete .Rdata files from all model directories and the retrospective subdirectories.
-#'   Herring has AM2 as a subdirectory of each model
-#'
-#' @param path path for the models directory
-#' @param subdir an optional subdirectory in each model directory to descend into
-#'
-#' @return Nothing
-#' @export
-delete.rdata.files <- function(path = NA, subdir = "AM2"){
-  stopifnot(!is.na(path))
-  dirs <- file.path(list.dirs(path, recursive = FALSE), subdir)
-  for(i in dirs){
-    if(file.exists(file.path(i, rdata.file))){
-      unlink(file.path(i, rdata.file), force = TRUE)
-      cat(paste0("Deleted ", file.path(i, rdata.file), "\n"))
-    }
-    if(dir.exists(file.path(i, retro.dir))){
-      delete.rdata.files(file.path(i, retro.dir), subdir = "")
-    }
-  }
-  invisible()
-}
-
-#' Delete all directories and files in a directory
-#'
-#' @param models.dir Directory name for all models location
-#' @param sub.dir The subdirectory to delete recursively from
-#'
-#' @return Nothing
-#' @export
-delete.dirs <- function(models.dir = model.dir,
-                        sub.dir = NULL){
-
-  dirs <- dir(models.dir)
-  files <- file.path(models.dir, dirs, sub.dir)
-  unlink(files, recursive = TRUE, force = TRUE)
-  message("All files and directories were deleted from the ",
-      sub.dir, " directory in each model directory.\n")
 }
 
 #' Read the iscam starter file to get the iscam input file names
@@ -825,6 +789,28 @@ read.data.file <- function(file = NULL,
     gear_abbrevs <- strsplit(gear_abbrevs_str, ",")[[1]]
     tmp$gear_abbrevs <- gsub("^[[:blank:]]+", "", gear_abbrevs)
     tmp$has_gear_abbrevs <- TRUE
+  }
+
+  # Get the element number for the "FleetGears" names if present
+  dat <- grep("^#.*FleetGears:.+",data)
+  tmp$has_fleet_gear_names <- FALSE
+  if(length(dat >0)){
+    # The gear names were in the file
+    fleet_gear_names_str <- gsub("^#.*FleetGears:(.+)", "\\1", data[dat])
+    fleet_gear_names <- strsplit(fleet_gear_names_str, ",")[[1]]
+    tmp$fleet_gear_names <- gsub("^[[:blank:]]+", "", fleet_gear_names)
+    tmp$has_fleet_gear_names <- TRUE
+  }
+
+  # Get the element number for the "FleetAbbrevs" names if present
+  dat <- grep("^#.*FleetAbbrevs:.+", data)
+  tmp$has_fleet_abbrevs <- FALSE
+  if(length(dat > 0)){
+    # The gear abbreviations were in the file. These are the survey_abbrev column in the survey index data
+    fleet_abbrevs_str <- gsub("^#.*FleetAbbrevs:(.+)", "\\1", data[dat])
+    fleet_abbrevs <- strsplit(fleet_abbrevs_str, ",")[[1]]
+    tmp$fleet_abbrevs <- gsub("^[[:blank:]]+", "", fleet_abbrevs)
+    tmp$has_fleet_abbrevs <- TRUE
   }
 
   # Get the element number for the "IndexGears" names if present
