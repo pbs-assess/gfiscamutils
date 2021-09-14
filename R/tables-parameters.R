@@ -1,3 +1,73 @@
+#' Make a table of comparisons of estimates of the phi parameter for the Dirichlet Multinomial
+#' for MPD models.
+#'
+#' @param models A list of output models from [arrowtooth::model_setup()]
+#' @param digits Number of digits to show
+#' @param french If `TRUE` translate to French
+#' @param model_col_widths Widths for columns, except the Parameter column
+#' @param neff if `TRUE` convert values to effective sample sizes
+#' @param which_model Which model index in the list of `models` to create the table for
+#' @param ... Arguments to pass to [csasdown::csas_table()]
+#'
+#' @return An [csasdown::csas_table()]
+param_phi_mpd_table <- function(models,
+                                digits = 2,
+                                french = FALSE,
+                                model_col_widths = "5em",
+                                neff = FALSE,
+                                which_model = 1,
+                                ...){
+
+  out <- map(models, ~{
+    gear_names <- .x$dat$age_gear_abbrevs
+    # Split matrix into aa list of the rows
+    lp <- .x$mpd$log_phi %>% split(seq(nrow(.))) %>% `names<-`(gear_names)
+    age_comps <- .x$dat$age.comps
+    # Strip year and sex cols from the age comps data input matrices
+    yr_sex <- map(age_comps, ~{
+      as_tibble(.x) %>% select(year, sex)
+    })
+    # Make a list of data frames containing the log_phi estimates by gear
+    lp <- lp %>% map2(yr_sex, ~{
+      .x <- .x[!is.na(.x)]
+      .x <- as_tibble(.x)
+      .x <- bind_cols(.y, .x)
+    })
+    # Rename the value column the gear name
+    lp <- lp %>% map2(gear_names, ~{
+      .x <- .x %>% rename(!!sym(.y) := value)
+    })
+    # Join all the data frames in the list into one data frame
+    xx <- lp[[1]]
+    for(df in lp[seq_along(lp)[-1]]){
+      xx <- full_join(xx, df, by = c("year", "sex"))
+    }
+    xx <- xx[order(c(xx$year, xx$sex)),] %>%
+      filter(!is.na(year))
+    if(neff){
+      xx <- xx %>%
+        mutate_at(.vars = vars(-c(year, sex)), ~{(200 + 200 * exp(.x)) / (200 + exp(.x))})
+    }
+    xx %>%
+      mutate_at(vars(-c(year, sex)), ~{format(round(.x, digits), digits = digits, nsmall = digits)}) %>%
+      mutate_at(vars(-c(year, sex)), ~{ifelse(grepl(" +NA", .x), "--", .x)}) %>%
+      mutate(sex = ifelse(sex == 0, "Female", ifelse(sex == 1, "Female", "Male")))
+  })
+
+  out <- out[[which_model]]
+
+  tab <- csas_table(out,
+                    col.names = names(out),
+                    align = c("l", rep("r", ncol(out) - 1)),
+                    ...)
+
+  if(!is.null(model_col_widths)){
+    tab <- tab %>%
+      column_spec(2:ncol(out), width = model_col_widths)
+  }
+  tab
+}
+
 #' Make a table of parameter estimate comparisons for MPD models.
 #' Also show B0, Fmsy. Bmsy, and msy
 #'

@@ -1,3 +1,14 @@
+#' Create a table of likelihood outputs
+#'
+#' @param models an iscam model object
+#' @param digits number of decimal places for the values
+#' @param french If `TRUE` translate to French
+#' @param model_col_widths Widths for columns, except the Parameter column
+#' @param ... Arguments to pass to [csasdown::csas_table()]
+#'
+#' @return An [csasdown::csas_table()]
+#' @importFrom kableExtra column_spec
+#' @export
 likelihood_table <- function(models,
                              digits = 3,
                              french = FALSE,
