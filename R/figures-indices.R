@@ -21,7 +21,7 @@ plot_index_fit_mpd <- function(models,
                                start_year = 1996,
                                end_year = 2021,
                                legend_title = "Bridge model",
-                               palette = "Dark2",
+                               palette = "Paired",
                                line_width = 0.5,
                                point_size = 1){
 
