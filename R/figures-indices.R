@@ -49,9 +49,15 @@ plot_index_fit_mpd <- function(models,
     model_names <- paste0("model ", seq_along(models))
     model_names <- factor(model_names, levels = model_names)
   }
-
+  i <- 0
   fits <- map2(seq_along(models), surv_abbrevs, ~{
+    i <<- i + 1
     x <- t(models[[.x]]$mpd$it_hat) %>% as_tibble()
+    if(length(x) != length(.y)){
+      stop("Did you forget to add a gear name name in the IndexGears entry in your dat file for model '",
+           names(models)[5], "'?",
+           call. = FALSE)
+    }
     k <- map2(x, .y, ~{
       j <- .x %>% as_tibble() %>% filter(!is.na(value))
       yrs <- surv_indices %>% filter(survey_abbrev == .y) %>% pull(year)
@@ -87,9 +93,9 @@ plot_index_fit_mpd <- function(models,
     mutate(biomass = ifelse(survey_abbrev == "DCPUE", biomass, biomass / 1e6))
 
   ggplot(surv_indices, aes(x = year, y = biomass)) +
-    #geom_ribbon(aes(ymin = lowerci, ymax = upperci), fill = "red", alpha = 0.3) +
-    #geom_line(size = line_width, color = "red") +
-    geom_errorbar(aes(ymin = lowerci, ymax = upperci), alpha = 0.3) +
+    geom_ribbon(aes(ymin = lowerci, ymax = upperci), fill = "red", alpha = 0.3) +
+    geom_line(size = line_width, color = "red") +
+    #geom_errorbar(aes(ymin = lowerci, ymax = upperci), alpha = 0.3) +
     geom_point() +
     geom_line(data = fits, aes(color = model), size = line_width) +
     geom_point(data = fits, aes(color = model), size = point_size)+
@@ -97,7 +103,8 @@ plot_index_fit_mpd <- function(models,
     xlab("Year") +
     ylab("Index (thousand tonnes, DCPUE ~ kg/hr)") +
     scale_color_brewer(palette = palette) +
-    guides(color = guide_legend(title = legend_title))
+    guides(color = guide_legend(title = legend_title)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
 }
 
 #' Plot the index fits for MPD runs only
