@@ -93,9 +93,9 @@ plot_index_fit_mpd <- function(models,
     mutate(biomass = ifelse(survey_abbrev == "DCPUE", biomass, biomass / 1e6))
 
   ggplot(surv_indices, aes(x = year, y = biomass)) +
-    geom_ribbon(aes(ymin = lowerci, ymax = upperci), fill = "red", alpha = 0.3) +
-    geom_line(size = line_width, color = "red") +
-    #geom_errorbar(aes(ymin = lowerci, ymax = upperci), alpha = 0.3) +
+    #geom_ribbon(aes(ymin = lowerci, ymax = upperci), fill = "red", alpha = 0.3) +
+    #geom_line(size = line_width, color = "red") +
+    geom_errorbar(aes(ymin = lowerci, ymax = upperci), alpha = 0.3) +
     geom_point() +
     geom_line(data = fits, aes(color = model), size = line_width) +
     geom_point(data = fits, aes(color = model), size = point_size)+
