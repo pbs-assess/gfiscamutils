@@ -219,6 +219,10 @@ c.model.list <- function(...){
 
 #' Calculation of sigma and tau from rho and vartheta
 #'
+#' @description Total variance is given by ϑ (`vartheta`) and the proportion of the total variance that is
+#' associated with observation errors is given by ρ (`rho`), the variance is partitioned into
+#' observation errors (σ^2) (`sigma`^2) and process errors (τ^2) (`tau`^2)
+#'
 #' @param rho parameter rho from iscam model
 #' @param vartheta parameter vartheta from iscam model
 #'
