@@ -1129,7 +1129,7 @@ read.control.file <- function(file = NULL,
   tmp$m.female.init <- as.numeric(dat[ind <- ind + 1])
 
   ## Age and size composition control parameters and likelihood types
-  nrows <- 8
+  nrows <- 9
   ncols <- num.age.gears
   tmp$age.size <- matrix(NA, nrow = nrows, ncol = ncols)
 
@@ -1143,6 +1143,7 @@ read.control.file <- function(file = NULL,
                               "likelihoodtype",
                               "minprop",
                               "comprenorm",
+                              "logphiphase",
                               "logagetau2phase",
                               "phi1phase",
                               "phi2phase",
