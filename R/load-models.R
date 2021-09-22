@@ -972,6 +972,7 @@ read.data.file <- function(file = NULL,
   tmp$num.age.gears.end.age   <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$eff                     <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$age.comp.flag           <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  tmp$dm_neff                 <- as.numeric(dat[ind <- ind + 1])
   tmp$age.comps <- NULL
   ## One list element for each gear (tmp$nagears)
   ## Check to see if there are age comp data
