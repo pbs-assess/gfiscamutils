@@ -54,8 +54,8 @@ plot_index_fit_mpd <- function(models,
     i <<- i + 1
     x <- t(models[[.x]]$mpd$it_hat) %>% as_tibble()
     if(length(x) != length(.y)){
-      stop("Did you forget to add a gear name name in the IndexGears entry in your dat file for model '",
-           names(models)[5], "'?",
+      stop("Did you forget to modify gear name names in the IndexGears entry in your dat file for model '",
+           names(models)[.x], "'?",
            call. = FALSE)
     }
     k <- map2(x, .y, ~{
