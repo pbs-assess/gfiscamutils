@@ -78,7 +78,12 @@ plot_ts_mpd <- function(models,
 
   init_vals <- init %>% as_tibble %>% t() %>% as_tibble(rownames = "model") %>% rename(sbt = V1)
 
-  val <- start_year:end_year %>%
+  if(type == "sbt"){
+    bind_yrs <- start_year:end_year
+  }else if(type == "rt"){
+    bind_yrs <- (start_year + 1):(end_year + 1)
+  }
+  val <- bind_yrs %>%
     as_tibble() %>%
     `names<-`("year") %>%
     bind_cols(sbt) %>% pivot_longer(cols = -year, names_to = "model", values_to = "sbt")
@@ -110,9 +115,9 @@ plot_ts_mpd <- function(models,
     ylab(y_label) +
     geom_line(size = line_width) +
     geom_point(size = point_size) +
-    scale_color_brewer(palette = palette) +
     guides(color = guide_legend(title = legend_title)) +
-    scale_color_brewer(palette = palette)
+    scale_color_brewer(palette = palette) +
+    scale_x_continuous(breaks = seq(min(bind_yrs), max(bind_yrs), 5))
 
   if(!rel){
     g <- g +
