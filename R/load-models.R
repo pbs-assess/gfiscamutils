@@ -1577,36 +1577,16 @@ calc.ahat <- function(model){
   if(is.na(mpd[1])){
     return(NA)
   }
-  ahat <- mpd$A_hat
   sage <- mpd$n_A_sage[1]
   nage <- mpd$n_A_nage[1]
   num.ages <- nage - sage + 1
-  nagv <- model$dat$num.age.gears.vec
-  age.comps <- model$dat$age.comps
 
-  ## Break up the ahat vector into its correct dimensions
-  gears <- list()
-  ind <- 1
-  for(i in 1:length(nagv)){
-    ext <- ahat[ind:(ind + nagv[i] * num.ages - 1)]
-    ind <- ind + nagv[i] * num.ages
-    ind.byage <- 1
-    gears[[i]] <- list()
-    for(j in 1:(length(ext) / num.ages)){
-      ext.byage <- ext[ind.byage:(ind.byage + num.ages - 1)]
-      ind.byage <- ind.byage + num.ages
-      gears[[i]][[j]] <- ext.byage
-    }
-    gears[[i]] <- do.call(rbind, gears[[i]])
-  }
+  a_hat_names <- grep("A_hat", names(mpd), value = TRUE)
 
-  ## Now gears is a list of dataframes, 1 for each gear
-  ## Add years and sex columns and age to column names
-  map(seq_along(nagv), ~{
-    k <- gears[[.x]] %>% as.data.frame %>% as_tibble
-    names(k) <- sage:nage
-    yr_sex <- age.comps[[.x]] %>% as.data.frame %>% as_tibble %>% select(year, sex)
-    yr_sex %>% bind_cols(k)
+  map(a_hat_names, ~{
+    .x <- mpd[[.x]] %>% as_tibble
+    names(.x) <- c("year", "gear", "sex", "type", sage:nage)
+    .x
   })
 }
 
