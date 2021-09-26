@@ -74,7 +74,9 @@ load.iscam.files <- function(model.dir, mcmc.subdir = "mcmc", ...){
   model$mpd <- read.report.file(file.path(model.dir, rep.file))
   ## Unflatten A_hat so there are nice dataframes of estimated
   ##  numbers-at-age for each gear
-  model$mpd$ahat <- calc.ahat(model)
+  model$mpd$a_obs <- extract_age_output(model, type = "obs")
+  model$mpd$a_hat <- extract_age_output(model, type = "est")
+  model$mpd$a_nu <- extract_age_output(model, type = "resid")
   ## Add sigma and tau
   sigtau <- calc.sig.tau(model$mpd$rho, model$mpd$vartheta)
   model$mpd$tau <- sigtau[[1]]
@@ -1560,35 +1562,46 @@ mcmc.thin <- function(mcmc.dat,
   mcmc.window
 }
 
-#' Calculate the estimated numbers-at-age for an iscam MCMC model
+#' Extract an age structure MPD object from iSCAM output (.rep file)
 #'
 #' @param model An iscam model object
+#' @param type One of 'obs', 'est', 'resid'
 #'
 #' @return A list of data frames, one for each gear
 #' @export
-calc.ahat <- function(model){
+extract_age_output <- function(model,
+                               type = "obs"){
   if(class(model) == model.lst.class){
     model <- model[[1]]
     if(class(model) != model.class){
       stop("The structure of the model list is incorrect.")
     }
   }
+
+  if(!type %in% c("obs", "est", "resid")){
+    stop("'type' must be one of 'obs', 'est', or 'resid'",
+         call. = FALSE)
+  }
+  type <- switch(type,
+                 "obs" = "d3_A",
+                 "est" = "A_hat",
+                 "resid" = "A_nu")
   mpd <- model$mpd
   if(is.na(mpd[1])){
     return(NA)
   }
   sage <- mpd$n_A_sage[1]
   nage <- mpd$n_A_nage[1]
-  num.ages <- nage - sage + 1
 
-  a_hat_names <- grep("A_hat", names(mpd), value = TRUE)
+  a_names <- grep(type, names(mpd), value = TRUE)
 
-  map(a_hat_names, ~{
+  map(a_names, ~{
     .x <- mpd[[.x]] %>% as_tibble
-    names(.x) <- c("year", "gear", "sex", "type", sage:nage)
+    names(.x) <- c("year", "gear", "area", "group", "sex", sage:nage)
     .x
   })
 }
+
 
 #' Fetch a data frame of the estimated MCMC parameters only
 #'

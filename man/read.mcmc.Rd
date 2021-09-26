@@ -4,7 +4,7 @@
 \alias{read.mcmc}
 \title{Read in the MCMC results from an iscam model}
 \usage{
-read.mcmc(model.dir = NULL, verbose = TRUE)
+read.mcmc(model.dir = NULL)
 }
 \arguments{
 \item{model.dir}{Directory in which the model output resides}
@@ -13,7 +13,7 @@ read.mcmc(model.dir = NULL, verbose = TRUE)
 }
 \value{
 A list representing the MCMC output of the iscam model,
-  or NULL if there was a problem or there werer no MCMC output files
+  or NULL if there was a problem or there were no MCMC output files
 }
 \description{
 Read in the MCMC results from an iscam model

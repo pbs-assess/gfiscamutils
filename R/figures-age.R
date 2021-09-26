@@ -3,52 +3,105 @@
 #'
 #' @param model Model list as output by [model_setup()]
 #' @param gear The gear number to plot
+#' @param type One of 'bars' or 'pearson'
+#' @param pearson_type One of 'age', 'year', or 'birthyear'
 #'
 #' @return a [ggplot2::ggplot()] object
 #' @importFrom ggplot2 geom_linerange facet_grid
 #' @export
-plot_agecomp_fits_splitsex <- function(model, gear){
+plot_agecomp_fits_splitsex <- function(model,
+                                       gear,
+                                       model_name = "",
+                                       type = "bars",
+                                       pearson_type = "age"){
 
-  fit <- model$mpd$A_hat %>%
-    as.data.frame() %>%
-    as_tibble() %>%
-    `names<-`(1:20)
-  comp <- model$mpd$d3_A %>%
-    as.data.frame() %>%
-    as_tibble() %>%
-    `names<-`(c("year", "gear", "area", "group", "sex", 1:20))
+  if(!type %in% c("bars", "pearson")){
+    stop("type must be one of 'bars' or 'pearson'",
+         call. = FALSE)
+  }
+  if(!pearson_type %in% c("age", "year", "birthyear")){
+    stop("pearson_type must be one of 'age', 'year', or 'birthyear'",
+         call. = FALSE)
+  }
+  if(gear < 0 || gear > length(model$mpd$a_obs)){
+    stop("gear must be between 1 and ", length(model$mpd$a_obs),
+         call. = FALSE)
+  }
+  nsex <- model$dat$num.sex
+  ages <- as.character(model$dat$start.age:model$dat$end.age)
+  if(type == "bars"){
+    fit <- model$mpd$a_hat[[gear]] %>%
+      select(ages) %>%
+      as.matrix() %>%
+      prop.table(1) %>%
+      as_tibble()
+    comp <- model$mpd$a_obs[[gear]] %>%
+      select(ages) %>%
+      as.matrix() %>%
+      prop.table(1) %>%
+      as_tibble()
+    year_sex <- model$mpd$a_obs[[gear]] %>% select(year, sex)
+    comp <- bind_cols(year_sex, comp)
+    fit <- bind_cols(year_sex, fit)
 
-  # fit has unlabelled rows, which need to be extracted
-  # correctly based on the values in the comp data.frame
-  gear_rows <- which(comp$gear == gear)
-  comp <- comp[gear_rows, ]
-  year_sex <- comp %>% select(year, sex)
-  comp <- comp %>%
-    select(-c(year, gear, area, group, sex))
-  comp <- comp %>%
-    as.matrix %>%
-    prop.table(1) %>%
-    as_tibble()
-  comp <- bind_cols(year_sex, comp)
-  fit <- fit[gear_rows, ] %>%
-    as.matrix %>%
-    prop.table(1) %>%
-    as_tibble()
-  fit <- bind_cols(year_sex, fit)
+    # Make long versions of the data frames
+    comp <- comp %>% pivot_longer(!c(year, sex), names_to = "Age", values_to = "Proportion") %>%
+      mutate(sex = factor(ifelse(sex == 1, "Female", "Male"), levels = c("Female", "Male")),
+             Age = factor(as.numeric(Age)))
+    fit <- fit %>% pivot_longer(!c(year, sex), names_to = "Age", values_to = "Proportion") %>%
+      mutate(sex = factor(ifelse(sex == 1, "Female", "Male"), levels = c("Female", "Male")),
+             Age = factor(as.numeric(Age)))
 
-  # Make long versions of the data frames
-  comp <- comp %>% pivot_longer(!c(year, sex), names_to = "Age", values_to = "Proportion") %>%
-    mutate(sex = factor(ifelse(sex == 1, "Female", "Male"), levels = c("Female", "Male")),
-           Age = factor(as.numeric(Age)))
-  fit <- fit %>% pivot_longer(!c(year, sex), names_to = "Age", values_to = "Proportion") %>%
-    mutate(sex = factor(ifelse(sex == 1, "Female", "Male"), levels = c("Female", "Male")),
-           Age = factor(as.numeric(Age)))
+    g <- ggplot(comp, aes(x = Age, ymax = Proportion, ymin = 0)) +
+      geom_linerange() +
+      facet_grid(year ~ sex) +
+      geom_line(data = fit, aes(x = Age, y = Proportion, group = 1), color = "blue")
+  }else if(type == "pearson"){
+    resids <- model$mpd$a_nu[[gear]] %>% select(!c(gear, area, group))
+    resids <- resids %>% pivot_longer(!c(year, sex), names_to = "Age", values_to = "Proportion") %>%
+      mutate(Sex = factor(ifelse(sex == 1, "Female", "Male"), levels = c("Female", "Male")),
+             Age = factor(as.numeric(Age)),
+             Year = factor(year)) %>%
+      select(-c(sex, year)) %>%
+      rename(`Standardized Residuals` = Proportion)
 
-  g <- ggplot(comp, aes(x = Age, ymax = Proportion, ymin = 0)) +
-    geom_linerange() +
-    facet_grid(year ~ sex) +
-    geom_line(data = fit, aes(x = Age, y = Proportion, group = 1), color = "blue")
-
+    if(pearson_type == "age"){
+      g <- ggplot(resids, aes(Age, `Standardized Residuals`, fill = Sex)) +
+        stat_boxplot(geom = "errorbar") +
+        geom_boxplot(outlier.colour = "black",
+                     outlier.shape = 3,
+                     outlier.size = 0.5) +
+        geom_hline(aes(yintercept = 0), color = "red", linetype = "dashed", size = 0.3) +
+        theme(axis.text.x = element_text(angle = 45, hjust = 0.55, vjust = 0.5),
+              plot.title = element_text(size = 14, face = "bold")) +
+        ggtitle(model_name) +
+        ylab("")
+    }else if(pearson_type == "year"){
+      g <- ggplot(resids, aes(Year, `Standardized Residuals`, fill = Sex)) +
+        stat_boxplot(geom = "errorbar") +
+        geom_boxplot(outlier.colour = "black",
+                     outlier.shape = 3,
+                     outlier.size = 0.5) +
+        geom_hline(aes(yintercept = 0), color = "red", linetype = "dashed", size = 0.3) +
+        theme(axis.text.x = element_text(angle = 45, hjust = 0.55, vjust = 0.5),
+              plot.title = element_text(size = 14, face = "bold")) +
+        ggtitle(model_name) +
+        ylab("")
+    }else if(pearson_type == "birthyear"){
+      resids <- resids %>% mutate(`Year of birth` = factor(as.numeric(as.character(Year)) - as.numeric(as.character(Age)))) %>%
+        select(-Year)
+      g <- ggplot(resids, aes(`Year of birth`, `Standardized Residuals`, fill = Sex)) +
+        stat_boxplot(geom = "errorbar") +
+        geom_boxplot(outlier.colour = "black",
+                     outlier.shape = 3,
+                     outlier.size = 0.5) +
+        geom_hline(aes(yintercept = 0), color = "red", linetype = "dashed", size = 0.3) +
+        theme(axis.text.x = element_text(angle = 45, hjust = 0.55, vjust = 0.5),
+              plot.title = element_text(size = 14, face = "bold")) +
+        ggtitle(model_name) +
+        ylab("")
+    }
+  }
   g
 }
 

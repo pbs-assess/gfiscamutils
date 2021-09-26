@@ -5,12 +5,22 @@
 \title{Plot MPD age comp data along with the model fits for models
 with both sexes}
 \usage{
-plot_agecomp_fits_splitsex(model, gear)
+plot_agecomp_fits_splitsex(
+  model,
+  gear,
+  model_name = "",
+  type = "bars",
+  pearson_type = "age"
+)
 }
 \arguments{
 \item{model}{Model list as output by [model_setup()]}
 
 \item{gear}{The gear number to plot}
+
+\item{type}{One of 'bars' or 'pearson'}
+
+\item{pearson_type}{One of 'age', 'year', or 'birthyear'}
 }
 \value{
 a [ggplot2::ggplot()] object
