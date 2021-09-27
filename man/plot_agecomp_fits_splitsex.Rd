@@ -10,7 +10,8 @@ plot_agecomp_fits_splitsex(
   gear,
   model_name = "",
   type = "bars",
-  pearson_type = "age"
+  pearson_type = "age",
+  angle_x_labels = FALSE
 )
 }
 \arguments{
@@ -21,6 +22,8 @@ plot_agecomp_fits_splitsex(
 \item{type}{One of 'bars' or 'pearson'}
 
 \item{pearson_type}{One of 'age', 'year', or 'birthyear'}
+
+\item{angle_x_labels}{If `TRUE` put 45 degree angle on x-axis tick labels}
 }
 \value{
 a [ggplot2::ggplot()] object
