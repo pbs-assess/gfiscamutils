@@ -1,3 +1,55 @@
+#' Plot the residuals for multiple models
+#'
+#' @param models A list of iSCAM models
+#' @param gear One of "SYN QCS", "SYN HS", "SYN WCVI", "SYN WCHG", "DCPUE"
+#'
+#' @return A [ggplot2::ggplot()] object
+#' @export
+ plot_index_resids_mpd <- function(models,
+                                   gear = "SYN QCS"){
+
+  surv_abbrevs <- map(models, ~{
+    .x$dat$index_abbrevs
+  })
+
+  model_names <- names(models)
+  model_names <- factor(model_names, levels = model_names)
+
+  resids <- map2(seq_along(models), surv_abbrevs, ~{
+    model_name <- model_names[.x]
+    gr <- match(.y, gear)
+    gr <- gr[!is.na(gr)]
+    if(!length(gr)){
+      return(NA)
+    }
+    fit <- models[[.x]]$mpd$it_hat[gr, ]
+    fit <- fit[!is.na(fit)] %>% as_tibble()
+    names(fit) <- "est"
+    sds <- models[[.x]]$mpd$it_wt[gr, ]
+    sds <- sds[!is.na(sds)] %>% as_tibble()
+    names(sds) <- "est_sd"
+    obs <- models[[.x]]$dat$indices[[gr]] %>% as_tibble()
+    df <- obs %>%
+      transmute(year = iyr, obs = it, model = model_name) %>%
+      bind_cols(fit) %>%
+      bind_cols(sds) %>%
+      mutate(value = (obs - est) / (1 / est_sd))%>%
+      select(year, model, value)
+    df
+  })
+  resids <- resids[!is.na(resids)]
+  resids <- resids %>% bind_rows()
+  resids <- resids %>%
+    rename(Year = year, Model = model, `Standardized residual` = value)
+
+  g <- ggplot(resids, aes(Year, `Standardized residual`, color = Model)) +
+    geom_point(shape = 19, size = 3) +
+    geom_hline(aes(yintercept = 0), color = "red", linetype = "dashed", size = 0.3) +
+    theme(plot.title = element_text(size = 14, face = "bold")) +
+    scale_x_continuous(breaks = resids$Year, labels = as.character(resids$Year))
+  g
+}
+
 #' Plot index fits for multiple models and indices, for iSCAM MPD models
 #'
 #' @param models A list of iSCAM models, as output by [arrowtooth::model_setup()]
