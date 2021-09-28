@@ -45,8 +45,9 @@ param_phi_mpd_table <- function(models,
     xx <- xx[order(c(xx$year, xx$sex)),] %>%
       filter(!is.na(year))
     if(neff){
+      dm_neff <- .x$dat$dm_neff
       xx <- xx %>%
-        mutate_at(.vars = vars(-c(year, sex)), ~{(200 + 200 * exp(.x)) / (200 + exp(.x))})
+        mutate_at(.vars = vars(-c(year, sex)), ~{(dm_neff + dm_neff * exp(.x)) / (dm_neff + exp(.x))})
     }
     xx %>%
       mutate_at(vars(-c(year, sex)), ~{format(round(.x, digits), digits = digits, nsmall = digits)}) %>%
