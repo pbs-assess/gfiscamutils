@@ -14,7 +14,7 @@ plot_age_year_birthyear_residuals(
   ylim_birthyear = c(-1, -1),
   legend_pos = c(0.05, 0.15),
   show_title = TRUE,
-  sngle_x_labels = C(FALSE, FALSE, TRUE)
+  angle_x_labels = c(FALSE, FALSE, TRUE)
 )
 }
 \arguments{
