@@ -2,15 +2,26 @@
 #'
 #' @param models A list of iSCAM models
 #' @param gear One of "SYN QCS", "SYN HS", "SYN WCVI", "SYN WCHG", "DCPUE"
+#' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
 #'
 #' @return A [ggplot2::ggplot()] object
+#' @importFrom ggplot2 element_text geom_boxplot geom_errorbar geom_hline stat_boxplot
+#' @importFrom ggplot2 ggtitle scale_color_manual scale_fill_manual aes_string scale_x_discrete
+#' @importFrom dplyr group_by mutate_all slice ungroup
+#' @importFrom purrr map_dfr
 #' @export
  plot_index_resids_mpd <- function(models,
-                                   gear = "SYN QCS"){
+                                   gear = "SYN QCS",
+                                   angle_x_labels = FALSE){
 
   surv_abbrevs <- map(models, ~{
     .x$dat$index_abbrevs
   })
+  gear_vec <- unique(unlist(surv_abbrevs))
+  if(!gear %in% gear_vec){
+    stop("gear ", gear, " is not in the list of available gears: ",
+         paste(gear_vec, collapse = ", "), call. = FALSE)
+  }
 
   model_names <- names(models)
   model_names <- factor(model_names, levels = model_names)
@@ -18,35 +29,37 @@
   resids <- map2(seq_along(models), surv_abbrevs, ~{
     model_name <- model_names[.x]
     gr <- match(.y, gear)
-    gr <- gr[!is.na(gr)]
-    if(!length(gr)){
+    gear_ind <- which(!is.na(match(.y, gear)))
+    if(!length(gear_ind)){
       return(NA)
     }
-    fit <- models[[.x]]$mpd$it_hat[gr, ]
-    fit <- fit[!is.na(fit)] %>% as_tibble()
-    names(fit) <- "est"
-    sds <- models[[.x]]$mpd$it_wt[gr, ]
-    sds <- sds[!is.na(sds)] %>% as_tibble()
-    names(sds) <- "est_sd"
-    obs <- models[[.x]]$dat$indices[[gr]] %>% as_tibble()
-    df <- obs %>%
-      transmute(year = iyr, obs = it, model = model_name) %>%
-      bind_cols(fit) %>%
-      bind_cols(sds) %>%
-      mutate(value = (obs - est) / (1 / est_sd))%>%
-      select(year, model, value)
-    df
+    resid <- models[[.x]]$mpd$epsilon[gear_ind, ]
+    resid <- resid[!is.na(resid)] %>% as_tibble()
+    names(resid) <- "value"
+
+    yrs <- as_tibble(models[[.x]]$dat$indices[[gear_ind]]) %>% select(iyr)
+    resid <- bind_cols(yrs, resid) %>%
+      rename(year = iyr) %>%
+      mutate(model = model_name)
+    resid
   })
+  names(resids) <- names(models)
   resids <- resids[!is.na(resids)]
   resids <- resids %>% bind_rows()
   resids <- resids %>%
-    rename(Year = year, Model = model, `Standardized residual` = value)
+    rename(Year = year, Model = model, `Log standardized residual` = value)
 
-  g <- ggplot(resids, aes(Year, `Standardized residual`, color = Model)) +
+  g <- ggplot(resids, aes(Year, `Log standardized residual`, color = Model)) +
     geom_point(shape = 19, size = 3) +
+    geom_line() +
     geom_hline(aes(yintercept = 0), color = "red", linetype = "dashed", size = 0.3) +
     theme(plot.title = element_text(size = 14, face = "bold")) +
     scale_x_continuous(breaks = resids$Year, labels = as.character(resids$Year))
+
+  if(angle_x_labels){
+    g <- g + theme(axis.text.x = element_text(angle = 45, hjust = 0.55, vjust = 0.5))
+  }
+
   g
 }
 

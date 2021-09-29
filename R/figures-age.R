@@ -57,7 +57,8 @@ plot_agecomp_fits_splitsex <- function(model,
     g <- ggplot(comp, aes(x = Age, ymax = Proportion, ymin = 0)) +
       geom_linerange() +
       facet_grid(year ~ sex) +
-      geom_line(data = fit, aes(x = Age, y = Proportion, group = 1), color = "blue")
+      geom_line(data = fit, aes(x = Age, y = Proportion, group = 1, color = sex)) +
+      scale_color_manual(values = c("red", "blue"))
   }else if(type == "pearson"){
     resids <- model$mpd$a_nu[[gear]] %>% select(!c(gear, area, group))
     resids <- resids %>% pivot_longer(!c(year, sex), names_to = "Age", values_to = "Proportion") %>%

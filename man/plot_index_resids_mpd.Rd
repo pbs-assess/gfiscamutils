@@ -4,12 +4,14 @@
 \alias{plot_index_resids_mpd}
 \title{Plot the residuals for multiple models}
 \usage{
-plot_index_resids_mpd(models, gear = "SYN QCS")
+plot_index_resids_mpd(models, gear = "SYN QCS", angle_x_labels = FALSE)
 }
 \arguments{
 \item{models}{A list of iSCAM models}
 
 \item{gear}{One of "SYN QCS", "SYN HS", "SYN WCVI", "SYN WCHG", "DCPUE"}
+
+\item{angle_x_labels}{If `TRUE` put 45 degree angle on x-axis tick labels}
 }
 \value{
 A [ggplot2::ggplot()] object
