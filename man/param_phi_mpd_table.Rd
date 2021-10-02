@@ -5,28 +5,16 @@
 \title{Make a table of comparisons of estimates of the phi parameter for the Dirichlet Multinomial
 for MPD models.}
 \usage{
-param_phi_mpd_table(
-  models,
-  digits = 2,
-  french = FALSE,
-  model_col_widths = "5em",
-  neff = FALSE,
-  which_model = 1,
-  ...
-)
+param_phi_mpd_table(model, digits = 2, french = FALSE, col_widths = "5em", ...)
 }
 \arguments{
-\item{models}{A list of output models from [arrowtooth::model_setup()]}
+\item{model}{An iSCAM model as output from [load.iscam.files()]}
 
 \item{digits}{Number of digits to show}
 
 \item{french}{If `TRUE` translate to French}
 
-\item{model_col_widths}{Widths for columns, except the Parameter column}
-
-\item{neff}{if `TRUE` convert values to effective sample sizes}
-
-\item{which_model}{Which model index in the list of `models` to create the table for}
+\item{col_widths}{Widths for columns, except the Parameter column}
 
 \item{...}{Arguments to pass to [csasdown::csas_table()]}
 }

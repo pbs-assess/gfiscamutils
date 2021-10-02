@@ -899,12 +899,6 @@ read.data.file <- function(file = NULL,
   tmp$use.mat   <- as.numeric(dat[ind <- ind + 1])
   tmp$mat.vec   <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+|,")[[1]])
 
-  ## Delay-difference options
-  tmp$dd.k.age   <- as.numeric(str_split(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
-  tmp$dd.alpha.g <- as.numeric(str_split(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
-  tmp$dd.rho.g   <- as.numeric(str_split(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
-  tmp$dd.wk      <- as.numeric(str_split(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
-
   ## Catch data
   tmp$num.catch.obs <- as.numeric(dat[ind <- ind + 1])
   tmp$catch         <- matrix(NA, nrow = tmp$num.catch.obs, ncol = 7)
@@ -940,7 +934,8 @@ read.data.file <- function(file = NULL,
   tmp$num.age.gears.end.age   <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$eff                     <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$age.comp.flag           <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
-  tmp$dm_neff                 <- as.numeric(dat[ind <- ind + 1])
+  tmp$dm_num_samp             <- as.numeric(dat[ind <- ind + 1])
+  tmp$dm_use_single_num_samp  <- as.logical(dat[ind <- ind + 1])
   tmp$age.comps <- NULL
   ## One list element for each gear (tmp$nagears)
   ## Check to see if there are age comp data
@@ -949,12 +944,13 @@ read.data.file <- function(file = NULL,
    for(gear in 1:tmp$num.age.gears){
      nrows <- tmp$num.age.gears.vec[gear]
      ## 5 of the 6 here is for the header columns
-     ncols <- tmp$num.age.gears.end.age[gear] - tmp$num.age.gears.start.age[gear] + 6
+     ncols <- tmp$num.age.gears.end.age[gear] - tmp$num.age.gears.start.age[gear] + 7
      tmp$age.comps[[gear]] <- matrix(NA, nrow = nrows, ncol = ncols)
      for(row in 1:nrows){
        tmp$age.comps[[gear]][row,] <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
      }
      colnames(tmp$age.comps[[gear]]) <- c("year",
+                                          "sample_size",
                                           "gear",
                                           "area",
                                           "group",
@@ -1093,9 +1089,6 @@ read.control.file <- function(file = NULL,
   colnames(tmp$params) <- c("ival","lb","ub","phz","prior","p1","p2")
   ## param.names is retreived at the beginning of this function
   rownames(tmp$params) <- param.names
-
-  ## Female initial M value
-  tmp$m.female.init <- as.numeric(dat[ind <- ind + 1])
 
   ## Age and size composition control parameters and likelihood types
   nrows <- 9
