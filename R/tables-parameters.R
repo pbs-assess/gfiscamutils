@@ -105,6 +105,7 @@ param_est_mpd_table <- function(models,
   # Assume all models have the same primary parameters
   params <- ctrls[[1]]$params
   param_names <- rownames(params)
+
   mpds <- map(models, ~{
     .x$mpd
   })
@@ -128,28 +129,20 @@ param_est_mpd_table <- function(models,
   param_names[param_names == "h"] <- "steepness"
 
   param_ests <- map2(mpds, seq_along(mpds), ~{
+    log_m_ind <- which(names(.x) == "log_m")
+    # Test for single M, uncomment this
+    #.x[log_m_ind][[1]] <- .x[log_m_ind][[1]][1]
+    .x$log_m_female = .x[log_m_ind][[1]][1]
+    if(length(.x[log_m_ind][[1]]) == 2){
+      .x$log_m_male = .x[log_m_ind][[1]][2]
+    }else{
+      .x$log_m_male = NA_real_
+    }
     param_inds <- match(param_names, names(.x))
+    param_inds <- param_inds[!is.na(param_inds)]
     x <- .x[param_inds] %>% as.data.frame() %>% t() %>% as_tibble(rownames = "param")
     x <- x %>% select(1:2) %>% `names<-`(c("param", "value"))
-    if(length(.x[param_inds]$log_m) == 2){
-      m_female <- .x[param_inds]$log_m[2]
-    }else{
-      m_female <- NA
-    }
-    m_rowind <- which(x$param == "log_m")
-    tmp_m <- x %>% filter(param == "log_m") %>% pull(value)
-    pre <- x[1:m_rowind, ] %>% mutate(param = ifelse(param == "log_m", "log_m_male", param))
-    log_m_female <- tibble(param = "log_m_female", value = m_female)
-    pre <- pre %>% bind_rows(log_m_female)
-    if(is.na(m_female)){
-      pre <- pre %>%
-        mutate(value = case_when(param == "log_m_male" ~ NA_real_,
-                                 param == "log_m_female" ~ tmp_m,
-                                 TRUE ~ value))
-    }
 
-    post <- x[(m_rowind + 1):nrow(x), ]
-    x <- bind_rows(pre, post)
     # Remove logs
     log_inds <- which(grepl("^log_", x$param))
     x$value[log_inds] <- exp(x$value[log_inds])
@@ -204,6 +197,8 @@ param_est_mpd_table <- function(models,
     mutate_at(vars(-param), function(x){ifelse(grepl(" +NA", x), "--", x)})
 
   # Rename the parameters with their latex values (where possible)
+  fleet1 <- models[[1]]$dat$gear_abbrevs[1]
+  fleet2 <- models[[1]]$dat$gear_abbrevs[2]
   param_latex_col <- param_ests %>% select(param)
   param_latex_col <- param_latex_col %>%
     mutate(param = case_when(param == "ro" ~ "$R_0$",
@@ -218,10 +213,10 @@ param_est_mpd_table <- function(models,
                              param == "sigma" ~ "$\\sigma$",
                              param == "bo" ~ "$B_0$",
                              param == "sbo" ~ "$SB_0$",
-                             param == "msy" ~ "$MSY$",
-                             param == "fmsy" ~ "$F_{MSY}$",
-                             param == "msy2" ~ "$MSY_{fleet2}$",
-                             param == "fmsy2" ~ "$F_{MSY_{fleet2}}$",
+                             param == "msy" ~ paste0("$MSY_{", fleet1, "}$"),
+                             param == "fmsy" ~ paste0("$F_{MSY_{", fleet1, "}}$"),
+                             param == "msy2" ~ paste0("$MSY_{", fleet2, "}$"),
+                             param == "fmsy2" ~ paste0("$F_{MSY_{", fleet2, "}}$"),
                              param == "bmsy" ~ "$B_{MSY}$",
                              str_detect(param, "^q - ") ~ gsub("q - ((\\w+\\s*)+)$", "$q_{\\1}$", param),
                              TRUE ~ param))
@@ -238,7 +233,7 @@ param_est_mpd_table <- function(models,
                     ...)
 
   # Add group separation lines
-  num_pars <- models[[1]]$ctl$num.params + 1
+  num_pars <- models[[1]]$ctl$num.params
   tab <- tab %>%
     row_spec(num_pars, hline_after = TRUE) %>%
     row_spec(num_pars + 5 + 2 * (num_fleets - 1), hline_after = TRUE)
