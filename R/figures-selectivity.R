@@ -1,7 +1,15 @@
+#' Plot selectivities for a gear which has time-varying selectivity blocks (MPD)
+#'
+#' @param model An iscam model object as output by [arrowtooth::model_setup()]
+#' @param gear The gear number
+#' @param title The plot title. NULL means no title
+#'
+#' @return A [ggplot2::ggplot()] object
+#' @importFrom dplyr group_split
+#' @importFrom stats setNames
+#' @export
 plot_tv_selex <- function(model,
                           gear = NULL,
-                          show_maturity = FALSE,
-                          last_year_only = TRUE,
                           title = NULL){
 
   if(is.null(gear)){
