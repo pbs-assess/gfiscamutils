@@ -100,6 +100,8 @@ sel_param_est_mpd_table <- function(models,
 
   # Add group separation lines
   gear_names_lst_cumu <- cumsum(map_int(gear_names_lst, ~{length(.x)}))
+  # Remove last line as it is the bottom of the table anyway
+  gear_names_lst_cumu <- gear_names_lst_cumu[-length(gear_names_lst_cumu)]
   map(gear_names_lst_cumu, ~{
     tab <<- tab %>%
       row_spec(.x, hline_after = TRUE)

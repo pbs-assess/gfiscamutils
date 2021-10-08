@@ -8,6 +8,8 @@
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
 #' @return An [csasdown::csas_table()]
+#' @importFrom kableExtra add_header_above
+#' @export
 param_phi_mpd_table <- function(model,
                                 digits = 2,
                                 french = FALSE,
@@ -15,7 +17,7 @@ param_phi_mpd_table <- function(model,
                                 ...){
 
   gear_names <- model$dat$age_gear_abbrevs
-  # Split matrix into aa list of the rows
+  # Split matrix into a list of the rows
   lp <- model$mpd$log_phi %>% split(seq(nrow(.))) %>% `names<-`(gear_names)
   samp_size <- model$mpd$dm_sample_sizes %>% split(seq(nrow(.))) %>% `names<-`(gear_names)
   age_comps <- model$dat$age.comps
@@ -27,6 +29,7 @@ param_phi_mpd_table <- function(model,
   })
   # Make a list of data frames containing the input sample sizes, log_phi, and Neff estimates by gear
   lp_samp <- map(seq_along(yr_sex), ~{
+    lp[[.x]] <- rep(lp[[.x]], length(samp_size[[.x]]))
     lp[[.x]] <- as_tibble(lp[[.x]])
     samp_size[[.x]] <- as_tibble(samp_size[[.x]])
     out <- bind_cols(yr_sex[[.x]],
@@ -38,16 +41,10 @@ param_phi_mpd_table <- function(model,
                     "n",
                     "neff",
                     "log_phi")
-                    #paste(gear_names[.x], "$N$"),
-                    #paste(gear_names[.x], "$N_{eff}$"),
-                    #paste(gear_names[.x], "$log(\\phi)$"))
-
-
-    out <- out %>%
+    out %>%
       mutate(Sex = ifelse(Sex == 0, "Female", ifelse(Sex == 1, "Female", "Male")))%>%
       mutate_at(vars(4:5), ~{format(round(., digits), digits = digits, nsmall = digits)}) %>%
       mutate_at(vars(3), ~{format(., digits = 0, nsmall = 0)})
-    out
   })
   # Join all the data frames in the list into one data frame
   xx <- lp_samp[[1]]
@@ -59,22 +56,20 @@ param_phi_mpd_table <- function(model,
 
   out <- xx %>%
     mutate_at(vars(-c(Year, Sex)), ~replace(., is.na(.), "--"))
-  col_names <- c("$Year$", "$Sex$")
+
+  # Construct extra group headers for gears
+  col_names <- c("Year", "Sex")
+  header_above <- c(" " = 2)
   for(i in seq_along(gear_names)){
     col_names <- c(col_names, "$N$", "$N_{eff}$", "$log(\\phi)$")
+    header_above <- c(header_above, setNames(3, gear_names[i]))
   }
   names(out) <- col_names
 
   tab <- csas_table(out,
                     col.names = names(out),
                     align = c("l", rep("r", ncol(out) - 1)),
-                    ...)
-
-  header_above <- c(" " = 2)
-  for(i in seq_along(gear_names)){
-    header_above <- c(header_above, setNames(3, gear_names[i]))
-  }
-  tab <- tab %>%
+                    ...) %>%
     add_header_above(header_above)
 
   if(!is.null(col_widths)){
@@ -87,7 +82,7 @@ param_phi_mpd_table <- function(model,
 #' Make a table of parameter estimate comparisons for MPD models.
 #' Also show B0, Fmsy. Bmsy, and msy
 #'
-#' @param models A list of output models from [arrowtooth::model_setup()]
+#' @param models A list of iSCAM models as output from [load.iscam.files()]
 #' @param digits Number of digits to show
 #' @param french If `TRUE` translate to French
 #' @param model_col_widths Widths for columns, except the Parameter column

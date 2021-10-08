@@ -23,7 +23,7 @@ sel_param_est_mpd_table(
 )
 }
 \arguments{
-\item{models}{A list of output models from [arrowtooth::model_setup()]}
+\item{models}{A list of iSCAM models as output from [load.iscam.files()]}
 
 \item{digits}{Number of digits to show}
 

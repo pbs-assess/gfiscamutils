@@ -1,3 +1,104 @@
+plot_tv_selex <- function(model,
+                          gear = NULL,
+                          show_maturity = FALSE,
+                          last_year_only = TRUE,
+                          title = NULL){
+
+  if(is.null(gear)){
+    stop("You must specify a gear to plot", call. = FALSE)
+  }
+  est_phz <- model$ctl$sel %>%
+    as_tibble(rownames = "x") %>%
+    `names<-`(c("sel_setting", model$dat$gear_abbrevs))
+
+  est_phz <- as_tibble(cbind(nms = names(est_phz), t(est_phz)))
+  nms <- est_phz %>% slice(1) %>% unlist(., use.names = FALSE)
+  nms[1] <- "index"
+  names(est_phz) <- nms
+  est_phz <- est_phz[-1,]
+  est_phz <- est_phz %>% mutate_at(vars(-index), function(x)as.numeric(x))
+
+  # Append " (Fixed)" to indices which have a negative phase
+  est_phz <- est_phz %>%
+    mutate(index = ifelse(estphase < 0, paste(index, "(Fixed)"), index))
+
+  age <- model$mpd$age
+
+  # Extract selectivity parameters
+  sel_par <- model$mpd$sel_par_f %>% as_tibble() %>%
+    `names<-`(c("gear", "block", "p1", "p2")) %>% mutate(Sex = "Female")
+  if(model$dat$num.sex == 2){
+    sel_par_m <- model$mpd$sel_par_m %>% as_tibble() %>%
+      `names<-`(c("gear", "block", "p1", "p2")) %>% mutate(Sex = "Male")
+    sel_par <- sel_par %>%
+      bind_rows(sel_par_m)
+  }
+
+  sel_par <- sel_par %>% filter(gear %in% !!gear)
+
+  nblocks <- sel_par %>%
+    group_by(gear, Sex) %>%
+    group_split() %>%
+    map_int(~{nrow(.x)})
+  if(length(which(nblocks < 2))){
+    stop("The gear you selected does not have time-varying selectivity", call. = FALSE)
+  }
+
+  yrs <- model$ctl$start.yr.time.block[gear, ]
+  sel_par <- sel_par %>%
+    group_by(Sex) %>%
+    mutate(Year = yrs) %>%
+    ungroup() %>%
+    select(-c(gear, block)) %>%
+    mutate(Year = factor(Year),
+           Sex = factor(Sex)) %>%
+    select(Year, Sex, p1, p2) %>%
+    group_by(Sex) %>%
+    group_split()
+
+  ages <- model$dat$start.age:model$dat$end.age
+
+  sel_par <- map(sel_par, ~{
+    x <- .x %>%
+      group_by(Year) %>%
+      group_split()
+    k <- map(x, ~{
+      row <- .x
+      j <- map_dfr(ages, ~{
+        row %>%
+          mutate(Age = .x) %>%
+          mutate(y = 1 / (1 + exp(-(Age - p1) / p2)))
+      })
+    }) %>%
+      bind_rows()
+  }) %>%
+    bind_rows() %>%
+    mutate(Age = factor(Age))
+
+  # Make year block labels
+  unq_years <- c(as.numeric(as.character(sort(unique(sel_par$Year)))), model$dat$end.yr)
+  sel_par <- sel_par %>%
+    mutate(year_ind = match(Year, unq_years))
+  offset_years <- unq_years[-1] - 1
+  offset_years[length(offset_years)] <- offset_years[length(offset_years)] + 1
+  blocked_years <- paste0(unq_years[-length(unq_years)], "-", offset_years)
+  sel_par <- sel_par %>%
+    mutate(Year = blocked_years[year_ind]) %>%
+    select(-year_ind) %>%
+    mutate(Year = factor(Year))
+
+  g <- ggplot(sel_par, aes(x = Age, y = y, group = Sex, color = Sex)) +
+    geom_line() +
+    geom_line(size = 0.5) +
+    geom_point(size = 1) +
+    facet_wrap(~Year) +
+    scale_x_discrete(breaks = seq(0, max(ages), 5)) +
+    labs(title = title) +
+    scale_color_manual(values = c("red", "blue"))
+
+  g
+}
+
 #' Plot the selectivity for all gears in the iscam model
 #'
 #' @param model An iscam model object as output by [arrowtooth::model_setup()]
@@ -28,57 +129,70 @@ plot_selex <- function(model,
   est_phz <- est_phz %>%
     mutate(index = ifelse(estphase < 0, paste(index, "(Fixed)"), index))
 
-  # Selex
-  # selex <- model$mpd$sel_par_f %>% as_tibble()
-  # if(!is.null(model$mpd$sel_par_m)){
-  #   selex_m <- model$mpd$sel_par_m %>% as_tibble() %>%
-  #     mutate(V2 = 2)
-  #   selex <- selex %>% bind_rows(selex_m)
-  # }
-  # names(selex) <- c("Gear", "Sex", "P1", "P2")
-  age <- model$mpd$age
-  log_sel <- model$mpd$log_sel %>% as_tibble() %>%
-    `names<-`(c("gear", "type", "year", age)) %>%
-    select(year, gear, as.character(age)) %>%
-    mutate_at(vars(-c("year", "gear")), function(x){exp(x)})
-
-  # Add sex column
+  # Extract selectivity parameters
+  sel_par <- model$mpd$sel_par_f %>% as_tibble() %>%
+    `names<-`(c("gear", "block", "p1", "p2")) %>% mutate(Sex = "Female")
   if(model$dat$num.sex == 2){
-    log_sel <- log_sel %>%
-      group_by(year, gear) %>%
-      mutate(sex = c("F", "M")) %>%
-      ungroup() %>%
-      select(year, gear, sex, everything())
-  }else{
-    log_sel <- log_sel %>%
-      mutate(sex = "F") %>%
-      select(year, gear, sex, everything())
+    sel_par_m <- model$mpd$sel_par_m %>% as_tibble() %>%
+      `names<-`(c("gear", "block", "p1", "p2")) %>% mutate(Sex = "Male")
+    sel_par <- sel_par %>%
+      bind_rows(sel_par_m)
   }
 
-  # Make long
-  ls <- log_sel %>%
-    pivot_longer(!c(year, gear, sex), names_to = "Age", values_to = "value") %>%
-    mutate(Year = year,
-           Proportion = value,
-           Sex = factor(sex),
-           Age = factor(as.numeric(Age)),
-           Gear = factor(gear)) %>%
-    select(-year, -gear, -value, -sex) %>%
+  sel_par_lstsex <- sel_par %>%
+    group_by(Sex) %>%
+    group_split()
+
+  sel_par_lstsex <- sel_par_lstsex %>%
+    map(~{
+      x <- .x %>%
+        group_by(gear) %>%
+        group_split() %>%
+        map_int(~{nrow(.x)})
+      which(x > 1)
+    })
+
+  # sel_par_lstsex contains list of sexes with the gear numbers that are TV selectivity, and must be removed
+  if(length(sel_par_lstsex) == 2 && !identical(sel_par_lstsex[[1]], sel_par_lstsex[[2]])){
+    stop("The two sexes seem to have different gears with TV selectivity.", call. = FALSE)
+  }
+  sel_par_lstsex <- sel_par_lstsex[[1]]
+  sel_par <- sel_par %>%
+    filter(!gear %in% sel_par_lstsex) %>%
+    select(-block)
+
+  ages <- model$dat$start.age:model$dat$end.age
+
+  sel_par <- sel_par %>%
+    group_by(gear) %>%
+    group_split() %>%
+    map(~{
+      x <- .x %>%
+        group_by(Sex) %>%
+        group_split()
+      k <- map(x, ~{
+        row <- .x
+        j <- map_dfr(ages, ~{
+          row %>%
+            mutate(Age = .x) %>%
+            mutate(y = 1 / (1 + exp(-(Age - p1) / p2)))
+        })
+      }) %>%
+        bind_rows()
+    }) %>%
+    bind_rows() %>%
+    mutate(Age = factor(Age)) %>%
+    rename(Gear = gear) %>%
     mutate(Gear = factor(model$dat$gear_abbrevs[Gear], levels = model$dat$gear_abbrevs)) %>%
-    select(Year, Gear, Sex, Age, Proportion)
+    mutate(Sex = factor(Sex))
 
-  if(last_year_only){
-    ls <- ls %>%
-      filter(Year == max(Year))
-  }
-
-  g <- ggplot(ls, aes(x = Age, y = Proportion, group = Sex, color = Sex)) +
+  g <- ggplot(sel_par, aes(x = Age, y = y, group = Sex, color = Sex)) +
     #geom_line(size = 0.5, color = "forestgreen") +
     #geom_point(size = 1, color = "forestgreen") +
     geom_line(size = 0.5) +
     geom_point(size = 1) +
-    facet_grid(Year ~ Gear) +
-    scale_x_discrete(breaks = seq(0, max(age), 5)) +
+    facet_wrap(~ Gear) +
+    scale_x_discrete(breaks = seq(0, max(ages), 5)) +
     labs(title = title) +
     scale_color_manual(values = c("red", "blue"))
 
