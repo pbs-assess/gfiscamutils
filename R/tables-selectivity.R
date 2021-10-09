@@ -23,56 +23,80 @@ sel_param_est_mpd_table <- function(models,
     if(is.null(x)){
       x <- .x$mpd$sel_par_f
     }
-
-    selex <- x %>% as_tibble()
+    selex <- x %>%
+      as_tibble() %>%
+      mutate(Sex = "Female")
     if(.x$dat$num.sex == 2){
-      selex_m <- .x$mpd$sel_par_m %>% as_tibble() %>%
-        mutate(V2 = 2)
+      selex_m <- .x$mpd$sel_par_m %>%
+        as_tibble() %>%
+        mutate(Sex = "Male")
       selex <- selex %>% bind_rows(selex_m)
     }
-    names(selex) <- c("Gear", "Sex", "Female_P1", "Female_P2")
-    selex_lst <- selex %>% group_by(Sex) %>% group_split() %>% as.list()
-    if(length(selex_lst) == 2){
-      selex_lst[[2]] <- selex_lst[[2]] %>% transmute(Male_P1 = Female_P1,
-                                                     Male_P2 = Female_P2)
-      selex <- selex_lst %>% bind_cols()
-    }else{
-      selex <- selex_lst[[1]] %>%
-      mutate(Male_P1 = NA,
-             Male_P2 = NA)
-    }
+    names(selex) <- c("gear", "year_ind", "p1", "p2", "sex")
 
-    x <- selex %>% as_tibble() %>%
-      mutate(Gear = gear_names) %>%
-      mutate(Type = sel_set$iseltype,
-             Fixed = sel_set$estphase,
-             Fixed = ifelse(Type == 6 & Fixed == -row_number(), "Yes",
-                            ifelse(Fixed < 0, paste0("Mirror ", gear_names_lst[[.y]][abs(sel_set$estphase)]),
-                                   ifelse(Fixed > 0, "", Fixed))),
-             Type = case_when(Type == 1 ~ "Logistic (1)",
-                              Type == 2 ~ "Selectivity coefficients (2)",
-                              Type == 3 ~ "Cubic spline with age-nodes (3)",
-                              Type == 4 ~ "Time-varying cubic spline with age-nodes (4)",
-                              Type == 5 ~ "Time-varying bicubic spline with age & year nodes (5)",
-                              Type == 6 ~ "Logistic (6)",
-                              Type == 7 ~ "Logistic function of body weight (7)",
-                              TRUE ~ "NA"))
+    selex_lst <- selex %>%
+      group_by(sex) %>%
+      group_split() %>%
+      as.list()
+    selex_lst[[1]] <- selex_lst[[1]] %>%
+      rename(Female_P1 = p1, Female_P2 = p2)
+    if(length(selex_lst) == 2){
+      selex_lst[[2]] <- selex_lst[[2]] %>%
+        transmute(Male_P1 = p1, Male_P2 = p2)
+      selex <- selex_lst %>% bind_cols()
+    }
+    selex <- selex %>% select(-sex)
+    # Check for TV selectivity
+    selex_lst <- selex %>% group_by(gear) %>% group_split()
+    model <- .x
+    selex <- map2(selex_lst, seq_along(selex_lst), ~{
+      if(nrow(.x) == 1){
+        out <- .x %>% mutate(year_ind = "All")
+      }else{
+        # TV selectivity, need to replace year indices with year ranges
+        years <- c(model$ctl$start.yr.time.block[.x$gear[1], ], model$dat$end.yr)
+        offset_years <- years[-1] - 1
+        offset_years[length(offset_years)] <- offset_years[length(offset_years)] + 1
+        blocked_years <- paste0(years[-length(years)], "-", offset_years)
+        out <- .x <- .x %>%
+          mutate(year_ind = blocked_years[year_ind])
+      }
+      out <- out %>%
+        rename(Year = year_ind) %>%
+        mutate(Year = factor(Year)) %>%
+        mutate(Gear = gear_names[.y]) %>%
+        select(-gear) %>%
+        mutate(Type = sel_set$iseltype[.y],
+               Fixed = sel_set$estphase[.y],
+               Fixed = ifelse(Type == 6, "Yes", "--"),
+               Type = case_when(Type == 1 ~ "Logistic (1)",
+                                Type == 2 ~ "Selectivity coefficients (2)",
+                                Type == 3 ~ "Cubic spline with age-nodes (3)",
+                                Type == 4 ~ "Time-varying cubic spline with age-nodes (4)",
+                                Type == 5 ~ "Time-varying bicubic spline with age & year nodes (5)",
+                                Type == 6 ~ "Logistic (6)",
+                                Type == 7 ~ "Logistic function of body weight (7)",
+                                TRUE ~ "NA")) %>%
+        select(Gear, Year, everything())
+
+      out
+    }) %>% map_dfr(~{.x})
 
     if(!all(gear_names_lst[[.y]] %in% gear_names)){
       missing_gears <- gear_names_lst[[.y]][!gear_names_lst[[.y]] %in% gear_names]
       for(i in missing_gears){
-        new_row <- x[1,]
+        new_row <- selex[1,]
         new_row$gear <- i
         new_row <- new_row %>% mutate_at(vars(-gear), ~{NA})
-        x <- x %>% bind_rows(new_row)
+        selex <- selex %>% bind_rows(new_row)
       }
     }
 
-    x <- x %>% mutate(Model = names(models)[.y]) %>%
+    selex <- selex %>% mutate(Model = names(models)[.y]) %>%
       select(Model, everything())
     # Remove model names for all but first row
-    x <- arrange(x, match(Gear, gear_names_lst[[.y]]))
-    x <- x %>% mutate(Model = ifelse(row_number() == 1, Model, ""))
+    selex <- arrange(selex, match(Gear, gear_names_lst[[.y]]))
+    selex <- selex %>% mutate(Model = ifelse(row_number() == 1, Model, ""))
   }) %>%
     bind_rows() %>%
     rename(`Female Age50` = Female_P1,
