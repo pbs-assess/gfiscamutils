@@ -62,8 +62,8 @@ sel_param_est_mpd_table <- function(models,
           mutate(year_ind = blocked_years[year_ind])
       }
       out <- out %>%
-        rename(Year = year_ind) %>%
-        mutate(Year = factor(Year)) %>%
+        rename(Years = year_ind) %>%
+        mutate(Years = factor(Years)) %>%
         mutate(Gear = gear_names[.y]) %>%
         select(-gear) %>%
         mutate(Type = sel_set$iseltype[.y],
@@ -77,7 +77,7 @@ sel_param_est_mpd_table <- function(models,
                                 Type == 6 ~ "Logistic (6)",
                                 Type == 7 ~ "Logistic function of body weight (7)",
                                 TRUE ~ "NA")) %>%
-        select(Gear, Year, everything())
+        select(Gear, Years, everything())
 
       out
     }) %>% map_dfr(~{.x})
