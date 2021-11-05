@@ -474,7 +474,7 @@ make.parameters.est.table <- function(model,
                "$\\tau$",
                "$\\sigma$")
   col.names <- colnames(tab)
-  col.names <- latex.bold(latex.perc(col.names))
+  col.names <- latex.bold(latex.perc(col.names, translate))
   col.names <- c(latex.bold(en2fr("Parameter", translate)), col.names)
   tab <- cbind(new.col, tab)
   colnames(tab) <- col.names
@@ -619,7 +619,7 @@ make.value.table <- function(model,
   tab <- tab[tab[,1] >= syr,]
   col.names <- en2fr(colnames(tab), translate, allow_missing = TRUE)
   col.names[1] <- en2fr("Year", translate)
-  col.names <- latex.bold(latex.perc(col.names))
+  col.names <- latex.bold(latex.perc(col.names, translate))
   colnames(tab) <- col.names
 
   size.string <- latex.size.str(font.size, space.size)
@@ -675,7 +675,7 @@ make.biomass.depletion.table <- function(model,
 
   col.names <- en2fr(colnames(tab), translate, allow_missing = TRUE )
   col.names[1] <- en2fr("Year", translate)
-  col.names <- latex.bold(latex.perc(col.names))
+  col.names <- latex.bold(latex.perc(col.names, translate))
   colnames(tab) <- col.names
 
   addtorow <- list()
