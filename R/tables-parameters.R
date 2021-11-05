@@ -551,7 +551,13 @@ make.ref.points.table <- function(model.am2,
   tab <- cbind(row.names,
                as.data.frame(tab.am2))
 
-  colnames(tab) <- col.names.am2
+  if (translate) {
+    colnames(tab) <- gsub(
+      pattern = "\\\\%", replacement = " \\\\%", x = col.names.am2
+    )
+  } else {
+    colnames(tab) <- col.names.am2
+  }
 
   addtorow <- list()
   addtorow$pos <- list(-1, nrow(tab))
