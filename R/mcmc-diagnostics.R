@@ -59,36 +59,28 @@ strip.static.params <- function(model, dat){
   ## There will be either one "m" or "m1" and "m2" in pnames.
   ## If "m" is in snames, remove the "m1", and "m2" from pnames as well if they
   ##  exist
-  if("m" %in% snames){
-    ms <- c("m1", "m2")
-    snames <- c(snames, "m1", "m2")
-  }
-  ## The following also removes "m" in a combined sex model
-  dat <- dat[,!(pnames %in% snames)]
 
   ## Remove static selectivity params
   sel.params <- as.data.frame(model$ctl$sel)
   est.phase <- sel.params["estphase",]
   static.sel <- est.phase < 1
-  sel.post.names <- names(dat)[grep("sel[0-9]+",
-                                    names(dat))]
-  sel.post.names <- sel.post.names[static.sel]
-  sel.sd.post.names <- names(dat)[grep("selsd[0-9]+",
-                                       names(dat))]
-  sel.sd.post.names <- sel.sd.post.names[static.sel]
-  dat.names <- names(dat)
-  static.sel.inds <- NULL
-  if(length(sel.post.names) > 0){
-    ## If there are static parameters, remove them
-    for(static.sel in 1:length(sel.post.names)){
-      static.sel.inds <- c(static.sel.inds,
-                           grep(sel.post.names[static.sel],
-                              dat.names))
-      static.sel.inds <- c(static.sel.inds,
-                           grep(sel.sd.post.names[static.sel],
-                              dat.names))
-    }
-    dat <- dat[,-static.sel.inds]
+  sel.post.names <- names(dat)[grep("sel_age50.*", names(dat))]
+  gear_nums <- map_dbl(sel.post.names, ~{
+    as.numeric(gsub(".*([0-9]+)", "\\1", .x))
+  })
+  static.sel.1 <- gear_nums %in% which(static.sel)
+  if(sum(static.sel)){
+    snames <- c(snames, sel.post.names[static.sel.1])
   }
-  dat
+
+  sel.sd.post.names <- names(dat)[grep("sel_sd50.*", names(dat))]
+  gear_nums <- map_dbl(sel.sd.post.names, ~{
+    as.numeric(gsub(".*([0-9]+)", "\\1", .x))
+  })
+  static.sel.2 <- gear_nums %in% which(static.sel)
+  if(sum(static.sel)){
+    snames <- c(snames, sel.sd.post.names[static.sel.2])
+  }
+
+  dat[, !names(dat) %in% snames]
 }

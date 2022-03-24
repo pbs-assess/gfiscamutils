@@ -11,7 +11,7 @@ create.rdata.file(model.dir, ovwrt.rdata = FALSE, ...)
 
 \item{ovwrt.rdata}{overwrite the RData file if it exists? TRUE/FALSE}
 
-\item{...}{arguments to pass to [load.iscam.files()]}
+\item{...}{arguments to pass to [load_iscam_files()]}
 }
 \value{
 Nothing

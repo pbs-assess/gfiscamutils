@@ -228,7 +228,7 @@ c.model.list <- function(...){
 #'
 #' @return a list of length 2, the calculated tau and sigma parameters
 #' @export
-calc.sig.tau <- function(rho, vartheta){
+calc_sig_tau <- function(rho, vartheta){
 
   tau <- sqrt((1 - rho) / vartheta)
   sigma <- sqrt(rho / vartheta)

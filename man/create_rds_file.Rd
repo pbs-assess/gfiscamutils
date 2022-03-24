@@ -11,7 +11,7 @@ create_rds_file(model_dir = NULL, overwrite = FALSE, ...)
 
 \item{overwrite}{Logical. If TRUE, overwrite the RDS file if it exists}
 
-\item{...}{Parameters passed to [load.iscam.files()]}
+\item{...}{Parameters passed to [load_iscam_files()]}
 }
 \value{
 [base::invisible()]

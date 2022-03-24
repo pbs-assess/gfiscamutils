@@ -2,7 +2,7 @@
 #'
 #' @param model.dir Directory name for all models location
 #' @param ovwrt.rdata overwrite the RData file if it exists? TRUE/FALSE
-#' @param ... arguments to pass to [load.iscam.files()]
+#' @param ... arguments to pass to [load_iscam_files()]
 #'
 #' @details If an RData file exists, and overwrite is FALSE, return immediately.
 #'   If no RData file exists, the model will be loaded from outputs into
@@ -36,17 +36,17 @@ create.rdata.file <- function(model.dir,
 
   ## If this point is reached, no RData file exists so it
   ##  has to be built from scratch
-  model <- load.iscam.files(model.dir, ...)
+  model <- load_iscam_files(model.dir, ...)
   save(model, file = rdata.file)
   invisible()
 }
 
 #' Construct an iscam model object from its input and output files
 #'
-#' @param model.dir The directory the model is in
-#' @param mcmc.subdir subdirectory in which mcmc results for models are stored.
+#' @param model_dir The directory the model is in
+#' @param mcmc_subdir subdirectory in which mcmc results for models are stored.
 #'  Can be the empty string in which case they will be in the model's root directory
-#' @param ... arguments to pass to [calc.mcmc()]
+#' @param ... arguments to pass to [calc_mcmc()]
 #'
 #' @details Load all the iscam files for output and input, and return the model object
 #'   If MCMC directory is present, load that and perform calculations for mcmc
@@ -54,50 +54,62 @@ create.rdata.file <- function(model.dir,
 #'
 #' @return An iscam model object
 #' @export
-load.iscam.files <- function(model.dir, mcmc.subdir = "mcmc", ...){
-  model <- list()
-  model$path <- model.dir
-  ## Get the names of the input files
-  inp.files <- fetch.file.names(model.dir, iscam.starter.file)
-  model$dat.file <- inp.files[[1]]
-  model$ctl.file <- inp.files[[2]]
-  model$proj.file <- inp.files[[3]]
+load_iscam_files <- function(model_dir, mcmc_subdir = "mcmc", ...){
 
-  ## Load the input files
-  model$dat <- read.data.file(model$dat.file)
-  model$ctl <- read.control.file(model$ctl.file,
+  model <- list()
+  model$path <- model_dir
+  # Get the names of the input files
+  inp_files <- fetch_file_names(model_dir, iscam.starter.file)
+  model$dat.file <- inp_files[[1]]
+  model$ctl.file <- inp_files[[2]]
+  model$proj.file <- inp_files[[3]]
+
+  # Load the input files
+  model$dat <- read_data_file(model$dat.file)
+  model$ctl <- read_control_file(model$ctl.file,
                                  model$dat$num.gears,
                                  model$dat$num.age.gears)
-  model$proj <- read.projection.file(model$proj.file)
-  model$par <- read.par.file(file.path(model.dir, par.file))
-  ## Load MPD results
-  model$mpd <- read.report.file(file.path(model.dir, rep.file))
-  ## Unflatten A_hat so there are nice dataframes of estimated
-  ##  numbers-at-age for each gear
+  model$proj <- read_projection_file(model$proj.file)
+  model$par <- read_par_file(file.path(model_dir, par.file))
+  # Load MPD results
+  model$mpd <- read_report_file(file.path(model_dir, rep.file))
+  # Unflatten A_hat so there are nice dataframes of estimated
+  #  numbers-at-age for each gear
   model$mpd$a_obs <- extract_age_output(model, type = "obs")
   model$mpd$a_hat <- extract_age_output(model, type = "est")
   model$mpd$a_nu <- extract_age_output(model, type = "resid")
-  ## Add sigma and tau
-  sigtau <- calc.sig.tau(model$mpd$rho, model$mpd$vartheta)
+
+  # Add sigma and tau
+  sigtau <- calc_sig_tau(model$mpd$rho, model$mpd$vartheta)
   model$mpd$tau <- sigtau[[1]]
   model$mpd$sigma <- sigtau[[2]]
 
-  ## Some of the parameters need to be logged
-  model$mpd <- calc.mpd.logs(model$mpd)
-  model.dir.listing <- dir(model.dir)
-  ## Set default mcmc members to NA. Later code depends on this.
-  model$mcmc <- NA
-  ## Set the mcmc path. This doesn't mean it exists.
-  model$mcmcpath <- file.path(model.dir, mcmc.subdir)
+  # Some of the parameters need to be logged
+  model$mpd <- calc_mpd_logs(model$mpd)
 
-  ## If it has an 'mcmc' sub-directory, load it
+  # Some parameters need to be split by gears into a list of vectors
+  vbt_mpd <- as.data.frame(model$mpd$vbt)
+  names(vbt_mpd) <- c("gear", "group", "year", "biomass")
+  # Split data frame into list of biomass vectors, one for each gear
+  vbt_mpd <- split(vbt_mpd, vbt_mpd$gear)
+  model$vbt$mpd$vbt <- map(seq_along(vbt_mpd), ~{
+    vbt_mpd[[.x]]$biomass
+  })
+
+  # Set default mcmc members to NA. Later code depends on this.
+  model$mcmc <- NA
+  # Set the mcmc path. This doesn't mean it exists.
+  model$mcmcpath <- file.path(model_dir, mcmc_subdir)
+
+  # If the directory 'mcmc' exists, load the mcmc output
   if(dir.exists(model$mcmcpath)){
-    model$mcmc <- read.mcmc(model$mcmcpath)
-    model$mcmccalcs <- calc.mcmc(model, ...)
-    model$mcmc$params <- strip.areas.groups(model$mcmc$params)
-    model$mcmc$params <- fix.m(model$mcmc$params)
-    model$mcmc$params.est <- get.estimated.params(model$mcmc$params)
-    model$mcmc$params.est.log <- calc.logs(model$mcmc$params.est)
+    message("MCMC output found in ", model$mcmcpath, ". Loading...")
+    model$mcmc <- read_mcmc(model, ...)
+    model$mcmccalcs <- calc_mcmc(model, ...)
+    model$mcmc$params <- strip_areas_groups(model$mcmc$params)
+    model$mcmc$params <- fix_m(model$mcmc$params)
+    model$mcmc$params.est <- get_estimated_params(model$mcmc$params)
+    model$mcmc$params.est.log <- calc_logs(model$mcmc$params.est)
   }
   class(model) <- model.class
   model
@@ -105,140 +117,109 @@ load.iscam.files <- function(model.dir, mcmc.subdir = "mcmc", ...){
 
 #' Perform some quantile calculations on the MCMC posteriors
 #'
-#' @param model An iscam model object
-#' @param burnin The number of samples to burn away from the beginning of the MCMC
-#' @param thin The thinning to apply to the MCMC posterior samples
-#' @param lower Lower quantile value to apply to MCMC samples
-#' @param upper Upper quantile value to apply to MCMC samples
-#' @param load.proj Load the projections from the MCMC and do the calculations
-#' @param ... arguments to pass to [calc.probabilities()]
+#' @param model An iSCAM model object as created in [load_iscam_files()]
+#' @param burnin The number of MCMC records to remove for burnin period
+#' @param thin Remove every nth record for thinning of MCMC output
+#' @param probs The probabilities to use for `quantile()` calculations
+#' @param load_proj Load the projections from the MCMC and do the calculations
+#' @param ... arguments to pass to [calc_probabilities()]
 #'   to construct the decision tables
 #'
 #' @return A list of each parameter for which quantiles were calculated
 #' @export
-calc.mcmc <- function(model,
+calc_mcmc <- function(model,
                       burnin = 1000,
                       thin = 1,
-                      lower = 0.025,
-                      upper = 0.975,
-                      load.proj = TRUE,
+                      probs = c(0.025, 0.5, 0.975),
+                      load_proj = TRUE,
                       ...){
+
   if(is.null(model$mcmc)){
-    stop("The mcmc list was null. Check read.mcmc() function.", call. = FALSE)
+    stop("The mcmc list was null. Check read_mcmc() function.")
   }
 
-  probs <- c(lower, 0.5, upper)
+  # Create output list
+  out <- list()
 
-  ## Parameters
+  # Parameters
   mc <- model$mcmc
   mpd <- model$mpd
-  params.dat <- mc$params
-  if(is.null(params.dat)){
-    stop("There is no MCMC output for the model in ", model$path, call. = FALSE)
+  out$params <- mc$params
+  if(is.null(out$params)){
+    stop("There is no MCMC output for the model in ", model$mcmcpath)
   }
-  params.dat <- strip.areas.groups(params.dat)
-  params.dat <- strip.static.params(model, params.dat)
-  nm <- names(params.dat)
-
-  p.dat <- params.dat[ , -which(nm %in% c("msy",
-                                          "fmsy",
-                                          "bmsy",
-                                          "umsy",
-                                          "ssb"))]
-  p.dat <- fix.m(p.dat)
-  ## TODO: Update model output by running iscam again
-
-  p.dat <- mcmc.thin(p.dat, burnin, thin)
-  ## Calculate sigma and tau and add to p.dat
-  if("rho" %in% names(p.dat) && "vartheta" %in% names(p.dat)){
-    sigtau <- calc.sig.tau(p.dat$rho, p.dat$vartheta)
-    p.dat$tau <- sigtau[[1]]
-    p.dat$sigma <- sigtau[[2]]
+  out$params <- strip_static_params(model, out$params)
+  nm <- names(out$params)
+  if(nrow(out$params) <= burnin){
+    stop("burnin ", burnin, " is as large or larger than the number ",
+         " of rows in the MCMC data (", nrow(out$params), ")")
   }
-  p.dat.log <- calc.logs(p.dat)
-  p.quants <- apply(p.dat, 2, quantile, prob = probs)
-  p.quants.log <- apply(p.dat.log, 2, quantile, prob = probs)
+  out$params <- mcmc.thin(out$params, burnin, thin)
+  # Remove non-parameters
+  out$params <- out$params[, -grep("msy|SSB|f", nm)]
+  # Calculate sigma and tau and add to p_dat
+  if("rho" %in% names(out$params) && "vartheta" %in% names(out$params)){
+    sigtau <- calc_sig_tau(out$params$rho, out$params$vartheta)
+    out$params$tau <- sigtau[[1]]
+    out$params$sigma <- sigtau[[2]]
+  }
 
-  ## Reference points
-  r.dat <- NULL
-  tryCatch({
-    r.dat <- as.data.frame(params.dat[ , which(nm %in% c("sbo"))])
-    r.dat <- mcmc.thin(r.dat, burnin, thin)
-    colnames(r.dat) <- "sbo"
-  }, warning = function(war){
-  }, error = function(err){
-    warning("MCMC calculations for SB0 failed.\n")
-  })
+  out$params_log <- calc_logs(out$params)
+  out$params_quants <- apply(out$params, 2, quantile, prob = probs)
+  out$params_quants_log <- apply(out$params_quants, c(1, 2), log)
 
-  ## Spawning biomass
-  sbt.dat <- mcmc.thin(mc$sbt[[1]], burnin, thin)
-  sbt.quants <- apply(sbt.dat,
-                      2,
-                      quantile,
-                      prob = probs)
-  sbt.quants <- rbind(sbt.quants, mpd$sbt)
-  rownames(sbt.quants)[4] <- "MPD"
+  quantify <- function(mc_d, mpd_d){
+    j <- apply(mc_d, 2, quantile, prob = probs)
+    j <- rbind(j, mpd_d)
+    rownames(j)[4] <- "MPD"
+    j
+  }
+  # Spawning biomass
+  out$sbt <- mc$sbt
+  out$sbt_quants <- quantify(out$sbt, mpd$sbt)
 
-  ## Depletion
-  depl.dat <- NULL
-  depl.quants <- NULL
+  # Depletion
+  out$depl <- apply(out$sbt, 2, function(x){x / out$params$sbo})
+  out$depl_quants <- quantify(out$depl, mpd$sbt / mpd$sbo)
 
-  tryCatch({
-    depl.dat <- apply(sbt.dat,
-                      2,
-                      function(x){x / r.dat$sbo})
-    depl.quants <- apply(sbt.dat / r.dat$sbo,
-                         2,
-                         quantile,
-                         prob = probs)
-    depl.quants <- rbind(depl.quants, mpd$sbt / mpd$sbo)
-    rownames(depl.quants)[4] <- "MPD"
-  }, warning = function(war){
-  }, error = function(err){
-  })
+  # Natural mortality (possible list)
+  out$m_female <- mc$m[[1]]
+  out$m_female_quants <- apply(out$m_female, 2, quantile, prob = probs)
+  out$m_female_quants <- rbind(out$m_female_quants, mpd$m[1])
+  rownames(out$m_female_quants)[4] <- "MPD"
+  if(length(mc$m) == 2){
+    out$m_male <- mc$m[[2]]
+    out$m_male_quants <- apply(out$m_male, 2, quantile, prob = probs)
+    out$m_male_quants <- rbind(out$m_male_quants, mpd$m[2])
+    rownames(out$m_male_quants)[4] <- "MPD"
+  }
 
-  ## Natural mortality
-  nat.mort.dat <- mcmc.thin(mc$m, burnin, thin)
-  colnames(nat.mort.dat) <- gsub("m_age2_", "", colnames(nat.mort.dat))
-  nat.mort.quants <- apply(nat.mort.dat,
-                           2,
-                           quantile,
-                           prob = probs)
-
-  ## Recruitment
-  recr.dat <- mcmc.thin(mc$rt[[1]], burnin, thin)
-  recr.mean <- apply(recr.dat,
-                     2,
-                     mean)
-  recr.quants <- apply(recr.dat,
-                       2,
-                       quantile,
-                       prob = probs)
-  recr.quants <- rbind(recr.quants, mpd$rt)
-  rownames(recr.quants)[4] <- "MPD"
+  # Recruitment
+  out$rt <- mc$rt
+  out$rt_quants <- quantify(out$rt, mpd$rt)
 
   ## Recruitment deviations
-  recr.devs.dat <- mcmc.thin(mc$rdev[[1]], burnin, thin)
-  recr.devs.quants <- apply(recr.devs.dat,
-                            2,
-                            quantile,
-                            prob = probs)
+  out$rdev <- mc$rdev
+  out$rdev_quants <- apply(out$rdev, 2, quantile, prob = probs)
 
   ## Q for the survey indices
-  q.dat <- p.dat[, grep("^q[[:digit:]]+$", colnames(p.dat))]
-  num.indices <- ncol(q.dat)
-  g.nms <- model$dat$gear.names
-  colnames(q.dat) <- g.nms[(length(g.nms) - num.indices + 1):
-                             length(g.nms)]
-  q.quants <- apply(q.dat,
-                    2,
-                    quantile,
-                    prob = probs)
+  out$q <- out$params %>% select(matches("^q_gear[[:digit:]]+$"))
+  num_inds <- ncol(out$q)
+  if(num_inds != length(model$dat$index_abbrevs)){
+    stop("The number of `q` outputs from the model does not match the names ",
+         "entered in the data file. See model$dat$index_abbrevs")
+  }
+  colnames(out$q) <- model$dat$index_abbrevs
+  out$q_quants <- quantify(out$q, exp(model$mpd$log_q))
 
-  build.quant.list <- function(mc.dat, mpd.dat){
-    ## Run quantiles on each dataframe in a list of dataframes and append
-    ##  the MPD values as well. Returns a list of dataframes
-    quants <- lapply(mc.dat,
+  build_quant_list <- function(mc_dat, mpd_dat){
+    # Run quantiles on each data frame in a list of dataframes and append
+    #  the MPD values as well. Returns a list of dataframes
+    mc_dat <- mc_dat[, colSums(is.na(mc_dat)) != nrow(mc_dat)]
+    quants <- map(mc_dat, ~{
+      quantile(.x, prob = probs, na.rm = TRUE)
+    })
+    quants <- lapply(mc_dat,
                      function(x){
                        apply(x,
                              2,
@@ -247,31 +228,38 @@ calc.mcmc <- function(model,
                              na.rm = TRUE)})
     lapply(1:length(quants),
            function(x){
-             quants[[x]] <- rbind(quants[[x]], mpd.dat[x,])
+             quants[[x]] <- rbind(quants[[x]], mpd_dat[x,])
              rownames(quants[[x]])[4] <- "MPD"
-             c.names <- colnames(quants[[x]])
+             c_names <- colnames(quants[[x]])
              colnames(quants[[x]]) <-
-               gsub("^.*_([[:digit:]]+$)", "\\1", c.names)
+               gsub("^.*_([[:digit:]]+$)", "\\1", c_names)
              quants[[x]]
            })
   }
-  ## Vulnerable biomass by gear (list of data frames)
-  vuln.dat <- lapply(mc$vbt[[1]], mcmc.thin, burnin, thin)
-  ## Reshape the vulnerable biomass output from the MPD
-  vbt <- as.data.frame(mpd$vbt)
-  vbt <- split(vbt, vbt[,1])
-  vbt <- lapply(1:length(vbt),
-                function(x){
-                  vbt[[x]][,4]})
-  vbt <- do.call(rbind, vbt)
-  vuln.quants <- build.quant.list(vuln.dat, vbt)
 
-  ## Fishing mortalities by gear (list of data frames)
+  #TODO continue here
+  browser()
+
+  # Reshape MCMC Vulnerable biomass (list of data frames by gear)
+  ngear <- model$dat$num.gears
+  # Reshape MPD vulnerable biomass (list of data frames by gear)
+  vbt_mpd <- as.data.frame(mpd$vbt)
+  names(vbt_mpd) <- c("gear", "group", "year", "biomass")
+  # Split data frame into list of data frames, one for each gear
+  vbt_mpd <- split(vbt_mpd, vbt$gear)
+  vbt_mpd <- map(seq_along(vbt_mpd), ~{
+    vbt[[.x]]$biomass
+  })
+  vbt <- do.call(rbind, vbt)
+  out$vbt <- mc$vbt
+  out$vbt <- build_quant_list(out$vbt, vbt)
+
+  # Fishing mortalities by gear (list of data frames)
   f.mort.dat <- lapply(mc$ft[[1]], mcmc.thin, burnin, thin)
-  f.mort.quants <- build.quant.list(f.mort.dat, mpd$ft)
+  f.mort.quants <- build_quant_list(f.mort.dat, mpd$ft)
 
   u.mort.dat <- lapply(mc$ut[[1]], mcmc.thin, burnin, thin)
-  u.mort.quants <- build.quant.list(u.mort.dat, mpd$ut)
+  u.mort.quants <- build_quant_list(u.mort.dat, mpd$ut)
 
   ## Add calculated reference points - these have already been thinned
   ##  and burned in
@@ -295,7 +283,7 @@ calc.mcmc <- function(model,
   nonproj.sbt <- NULL
   nonproj.sbt.quants <- NULL
   if(load.proj){
-    proj.dat <- calc.probabilities(model,
+    proj.dat <- calc_probabilities(model,
                                    burnin,
                                    thin,
                                    ...)
@@ -384,9 +372,9 @@ calc.mcmc <- function(model,
   col.names[1] <- latex.bold("Reference point")
   colnames(r.quants) <- col.names
 
-  sapply(c("p.dat",
+  sapply(c("p_dat",
            "p.quants",
-           "p.dat.log",
+           "p_dat.log",
            "p.quants.log",
            "r.dat",
            "r.quants",
@@ -431,7 +419,7 @@ calc.mcmc <- function(model,
 #'
 #' @return A data frame which has its names formatted for latex
 #' @export
-calc.probabilities <- function(model,
+calc_probabilities <- function(model,
                                burnin,
                                thin,
                                which.stock = NULL,
@@ -610,7 +598,7 @@ delete_files_ext <- function(path = NULL, ext = "rds"){
 #'   3. Projection file name
 #'
 #' @export
-fetch.file.names <- function(path, filename){
+fetch_file_names <- function(path, filename){
 
   fn <- file.path(path, filename)
   if(!file.exists(fn)){
@@ -650,10 +638,10 @@ fetch.file.names <- function(path, filename){
 #'
 #'   A label must start with an alphabetic character followed by
 #'   any number of alphanumeric characters (includes underscore and .)
-read.report.file <- function(fn){
+read_report_file <- function(fn){
 
   if(!file.exists(fn)){
-    warning("Report file ", basename(fn)," not found in ", dirname(fn), ". Setting data to NA.")
+    warning("Report file ", basename(fn)," not found in ", dirname(fn), ". Setting MPD output to NA.")
     return(NA)
   }
 
@@ -666,13 +654,13 @@ read.report.file <- function(fn){
   # Find the line indices of the labels
   # Labels start with an alphabetic character followed by
   # zero or more alphanumeric characters
-  idx  <- grep("^[[:alpha:]]+[[:alnum:]]*", dat)
-  objs <- dat[idx]     # A vector of the object names
-  nobj <- length(objs) # Number of objects
+  # A vector of the object names
+  objs  <- grep("^[[:alpha:]]+[[:alnum:]]*", dat, value = TRUE)
+  nobj <- length(objs)
   ret  <- list()
   indname <- 0
 
-  for(obj in 1:nobj){
+  for(obj in seq_len(nobj)){
     indname <- match(objs[obj], dat)
     if(obj != nobj){ # If this is the last object
       inddata <- match(objs[obj + 1], dat)
@@ -688,7 +676,7 @@ read.report.file <- function(fn){
       if(inddiff == 2){
         # Create and populate a vector
         vecdat <- dat[(indname + 1) : (inddata - 1)]
-        vecdat <- strsplit(vecdat,"[[:blank:]]+")[[1]]
+        vecdat <- strsplit(vecdat, "[[:blank:]]+")[[1]]
         vecnum <- as.numeric(vecdat)
         ret[[objs[obj]]] <- vecnum
       }else if(inddiff > 2){
@@ -701,7 +689,7 @@ read.report.file <- function(fn){
         nrow <- max(rowlengths)
         ncol <- length(rowlengths)
         # Create a new list with elements padded out by NAs
-        matdat <- lapply(matdat, function(.ele){c(.ele, rep(NA, nrow))[1:nrow]})
+        matdat <- lapply(matdat, function(x){c(x, rep(NA, nrow))[1:nrow]})
         matnum <- do.call(rbind, matdat)
         mode(matnum) <- "numeric"
         ret[[objs[obj]]] <- matnum
@@ -710,7 +698,7 @@ read.report.file <- function(fn){
       # Throw away this label since it has no associated data.
     }
   }
-  return(ret)
+  ret
 }
 
 #' Read in the iscam data file
@@ -721,7 +709,7 @@ read.report.file <- function(fn){
 #' @return A list representing the contents of the iscam data file
 #' @importFrom stringr str_split
 #' @export
-read.data.file <- function(file = NULL,
+read_data_file <- function(file = NULL,
                            verbose = FALSE){
 
   if(!file.exists(file)){
@@ -946,6 +934,7 @@ read.data.file <- function(file = NULL,
      ## 5 of the 6 here is for the header columns
      ncols <- tmp$num.age.gears.end.age[gear] - tmp$num.age.gears.start.age[gear] + 7
      tmp$age.comps[[gear]] <- matrix(NA, nrow = nrows, ncol = ncols)
+
      for(row in 1:nrows){
        tmp$age.comps[[gear]][row,] <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
      }
@@ -1019,7 +1008,7 @@ read.data.file <- function(file = NULL,
 #'
 #' @return A list representing the contents on the iscam control file
 #' @export
-read.control.file <- function(file = NULL,
+read_control_file <- function(file = NULL,
                               num.gears = NULL,
                               num.age.gears = NULL,
                               verbose = FALSE){
@@ -1060,7 +1049,7 @@ read.control.file <- function(file = NULL,
   n.par <- as.numeric(dat1)
   param.names <- vector()
   ## Lazy matching with # so that the first instance matches, not any other
-  pattern <- "^.*?#([[:alnum:]]+_*[[:alnum:]]*).*"
+  pattern <- "^.*?# *([[:alnum:]]+_*[[:alnum:]]*_*[[:alnum:]]*).*"
   for(param.name in 1:n.par){
     ## Each parameter line in dat which starts at index 2,
     ##  retrieve the parameter name for that line
@@ -1211,7 +1200,7 @@ read.control.file <- function(file = NULL,
 #'
 #' @return A list representing the contents of the iscam projection file
 #' @export
-read.projection.file <- function(file = NULL){
+read_projection_file <- function(file = NULL){
 
   if(!file.exists(file)){
     warning("Projection file ", basename(file)," not found in ", dirname(file), ". Is your ",
@@ -1286,7 +1275,7 @@ read.projection.file <- function(file = NULL){
 #'
 #' @return A list representing the contents of the iscam par file
 #' @export
-read.par.file <- function(file = NULL){
+read_par_file <- function(file = NULL){
 
   if(!file.exists(file)){
     warning("Par file ", basename(file)," not found in ", dirname(file), ". Setting data to NA.")
@@ -1295,128 +1284,119 @@ read.par.file <- function(file = NULL){
 
   data <- readLines(file, warn = FALSE)
   tmp <- list()
-  ind <- 0
 
-  ## Remove preceeding #
-  conv.check <- gsub("^#[[:blank:]]*", "", data[1])
-  ## Remove all letters, except 'e'
-  ##convCheck <- gsub("[[:alpha:]]+","",convCheck)
-  convCheck <- gsub("[abcdfghijklmnopqrstuvwxyz]",
-                    "",
-                    conv.check,
-                    ignore.case = TRUE)
-  ## Remove the equals signs
-  conv.check <- gsub("=", "", conv.check)
-  ## Remove all preceeding and trailing whitespace
-  conv.check <- gsub("^[[:blank:]]+", "", conv.check)
-  conv.check <- gsub("[[:blank:]]+$", "", conv.check)
-  ## Remove the non-numeric parts
-  conv.check <- strsplit(conv.check, " +")[[1]]
-  conv.check <- conv.check[grep("^-?[[:digit:]]", conv.check)]
-  ## The following values are saved for appending to the tmp list later
+  conv_check <- as.numeric(unlist(regmatches(data[1], gregexpr("[[:digit:]]+\\.*[[:digit:]]*", data[1]))))
 
-  num.params   <- conv.check[1]
-  obj.fun.val <-  format(conv.check[2], digits = 6, scientific = FALSE)
-  max.gradient <-  format(conv.check[3], digits = 8, scientific = FALSE)
-
-  ##Remove the first line from the par data since we already parsed it and saved the values
+  # Remove the first line from the par data since we already parsed it and saved the values
   data <- data[-1]
 
-  ## At this point, every odd line is a comment and every even line is the value.
-  ## Parse the names from the odd lines (oddData) and parse the
-  ## values from the even lines (evenData)
-  odd.elem <- seq(1, length(data), 2)
-  even.elem <- seq(2, length(data), 2)
-  odd.data <- data[odd.elem]
-  even.data <- data[even.elem]
+  # Commented lines signify that the following lines (until another commented line)
+  # are parameter estimates for the parameter named in the comment
+  param_nm_inds <- grep("^#", data)
+  param_start_inds <- param_nm_inds + 1
+  param_end_inds <- c(param_nm_inds[-1] - 1, length(data))
+  tmp <- map(seq_along(param_nm_inds), ~{
+    data[param_start_inds[.x]:param_end_inds[.x]]
+  })
+  names(tmp) <- gsub("# +", "", data[param_nm_inds])
 
-  ## Remove preceeding and trailing whitespace if it exists from both
-  ##  names and values.
-  names <- gsub("^[[:blank:]]+", "", odd.data)
-  names <- gsub("[[:blank:]]+$", "", names)
-  values <- gsub("^[[:blank:]]+", "", even.data)
-  values <- gsub("[[:blank:]]+$", "", values)
-
-  ## Remove the preceeding # and whitespace and the trailing : from the names
-  pattern <- "^#[[:blank:]]*(.*)[[:blank:]]*:"
-  names <- sub(pattern, "\\1", names)
-
-  ## Remove any square brackets from the names
-  names <- gsub("\\[|\\]", "", names)
-
-  data.length <- length(names)
-  for(item in 1:(data.length)){
-    tmp[[item]] <-
-      as.numeric(strsplit(values[ind <- ind + 1], "[[:blank:]]+")[[1]])
-  }
-
-  names(tmp) <- names
-  tmp$num.params <- num.params
-  tmp$obj.fun.val <- as.numeric(obj.fun.val)
-  tmp$max.gradient <- as.numeric(max.gradient)
+  tmp$num_params <- format(conv_check[1], digits = 0, scientific = FALSE)
+  tmp$obj_fun_val <- format(conv_check[2], digits = 6, scientific = FALSE)
+  tmp$max_gradient <- format(conv_check[3], digits = 8, scientific = FALSE)
   tmp
 }
 
-#' Read in the MCMC results from an iscam model
+#' Read in the MCMC results from an iscam model, reformat them, and
+#' remove some records as defined by `burnin` and `thin`
 #'
-#' @param model.dir Directory in which the model output resides
-#' @param verbose Say more
+#' @param model An iSCAM model object as created in [load_iscam_files()]
+#' @param burnin The number of MCMC records to remove for burnin period
+#' @param thin Remove every nth record for thinning of MCMC output
+#' @param ... Extra arguments
 #'
 #' @return A list representing the MCMC output of the iscam model,
-#'   or NULL if there was a problem or there werer no MCMC output files
+#'   or NULL if there was a problem or there were no MCMC output files
+#' @importFrom stringr str_extract
+#' @importFrom purrr imap
 #' @export
-read.mcmc <- function(model.dir = NULL,
-                      verbose = TRUE){
+read_mcmc <- function(model,
+                      burnin = 1000,
+                      thin = 1,
+                      ...){
 
-  if(is.null(model.dir)){
-    stop("You must supply a directory name (model.dir).")
-  }
-  mcmcfn     <- file.path(model.dir, mcmc.file)
-  mcmcsbtfn  <- file.path(model.dir, mcmc.biomass.file)
-  mcmcrtfn   <- file.path(model.dir, mcmc.recr.file)
-  mcmcrdevfn <- file.path(model.dir, mcmc.recr.devs.file)
-  mcmcftfn   <- file.path(model.dir, mcmc.fishing.mort.file)
-  mcmcmfn    <- file.path(model.dir, mcmc.natural.mort.file)
-  mcmcutfn   <- file.path(model.dir, mcmc.fishing.mort.u.file)
-  mcmcvbtfn  <- file.path(model.dir, mcmc.vuln.biomass.file)
-  mcmcprojfn <- file.path(model.dir, mcmc.proj.file)
+  mcmc_dir <- model$mcmcpath
 
-  tmp        <- list()
-  if(file.exists(mcmcfn)){
-    tmp$params <- read.csv(mcmcfn)
+  if(is.null(mcmc_dir)){
+    stop("`model` does not have `mcmcpath` set (model$mcmcpath is NULL)")
   }
-  if(file.exists(mcmcsbtfn)){
-    sbt        <- read.csv(mcmcsbtfn)
-    tmp$sbt    <- extract.group.matrices(sbt, prefix = "sbt")
+
+  list_by <- function(d, by = "fleet"){
+    mc <- mcmc.thin(d, burnin, thin)
+    ngear <- model$dat$num.gears
+    tmp <- map(seq_len(ngear), ~{
+      mc %>% select(contains(paste0(by, .x)))
+    }) %>%
+      map(~{if(ncol(.x)) .x else NULL})
+    tmp <- tmp %>%
+      map(~{
+        if(all(is.na(.x))) NULL else .x
+      })
+    tmp[sapply(tmp, is.null)] <- NULL
+    # Make column names years only
+    tmp <- tmp %>% map(~{
+      names(.x) <- str_extract(names(.x), "[0-9]+$")
+      .x
+    })
+    tmp
   }
-  if(file.exists(mcmcrtfn)){
-    rt         <- read.csv(mcmcrtfn)
-    tmp$rt     <- extract.group.matrices(rt, prefix = "rt")
+
+  # list of files to load in, with associated type of data:
+  # "default" means no extra processing is done
+  # "single" means column names are converted to years, output is a data frame
+  # "list" means the data frame is broken into a list by the third item in the list
+  # which is sent to `list_by()` to extract by column names
+  fn_lst <- list(list(mcmc.file, "default"),
+                 list(mcmc.biomass.file, "single"),
+                 list(mcmc.recr.file, "single"),
+                 list(mcmc.recr.devs.file, "single"),
+                 list(mcmc.fishing.mort.file, "single"),
+                 list(mcmc.natural.mort.file, "list", "sex"),
+                 list(mcmc.fishing.mort.u.file, "list", "fleet"),
+                 list(mcmc.vuln.biomass.file, "list", "fleet"),
+                 list(mcmc.proj.file, "default"))
+
+  # Names given to the return list elements. Must be same length as `fn_lst`
+  nms <- c("params", "sbt", "rt", "rdev", "ft",
+           "m", "ut", "vbt", "proj")
+
+  if(length(nms) != length(fn_lst)){
+    stop("Length of `fn_lst` must be the same as the length of `nms`")
   }
-  if(file.exists(mcmcftfn)){
-    ft         <- read.csv(mcmcftfn)
-    tmp$ft     <- extract.area.sex.matrices(ft, prefix = "ft")
-  }
-  if(file.exists(mcmcmfn)){
-    tmp$m         <- read.csv(mcmcmfn)
-  }
-  if(file.exists(mcmcutfn)){
-    ut         <- read.csv(mcmcutfn)
-    tmp$ut     <- extract.area.sex.matrices(ut, prefix = "ut")
-  }
-  if(file.exists(mcmcrdevfn)){
-    rdev       <- read.csv(mcmcrdevfn)
-    tmp$rdev   <- extract.group.matrices(rdev, prefix = "rdev")
-  }
-  if(file.exists(mcmcvbtfn)){
-    vbt        <- read.csv(mcmcvbtfn)
-    tmp$vbt    <- extract.area.sex.matrices(vbt, prefix = "vbt")
-  }
-  tmp$proj <- NULL
-  if(file.exists(mcmcprojfn)){
-    tmp$proj   <- read.csv(mcmcprojfn)
-  }
-  tmp
+
+  imap(fn_lst, ~{
+    d <- NULL
+    fn <- file.path(mcmc_dir, .x[1])
+    if(file.exists(fn)){
+      d <- read.csv(fn)
+      if(.x[[2]] == "default"){
+
+      }else if(.x[[2]] == "single"){
+        names(d) <- str_extract(names(d), "[0-9]+$")
+        d <- mcmc.thin(d, burnin, thin)
+      }else if(.x[[2]] == "list"){
+        if(length(.x) < 3){
+          stop("sublist ", .y, " does not have a third element which is ",
+               "required when using 'list' for the second item")
+        }
+        d <- list_by(d, by = .x[[3]])
+      }else{
+        stop("Sublist ", .y, " of fn_lst has an unimplmented value for its second element (", .x[[2]], ")")
+      }
+    }else{
+      warning("File ", fn, " does not exist")
+    }
+    d
+  }) %>% `names<-`(nms)
 }
 
 #' Extract the given data frame into a list of matrices by iscam 'group'
@@ -1575,10 +1555,10 @@ extract_age_output <- function(model,
     stop("'type' must be one of 'obs', 'est', or 'resid'",
          call. = FALSE)
   }
-  type <- switch(type,
-                 "obs" = "d3_A",
-                 "est" = "A_hat",
-                 "resid" = "A_nu")
+  data_type <- switch(type,
+                      "obs" = "d3_A",
+                      "est" = "A_hat",
+                      "resid" = "A_nu")
   mpd <- model$mpd
   if(is.na(mpd[1])){
     return(NA)
@@ -1586,13 +1566,18 @@ extract_age_output <- function(model,
   sage <- mpd$n_A_sage[1]
   nage <- mpd$n_A_nage[1]
 
-  a_names <- grep(type, names(mpd), value = TRUE)
+  a_names <- grep(data_type, names(mpd), value = TRUE)
 
-  map(a_names, ~{
-    .x <- mpd[[.x]] %>% as_tibble
-    names(.x) <- c("year", "gear", "area", "group", "sex", sage:nage)
-    .x
+  j <- map(a_names, ~{
+    x <- mpd[[.x]] %>% as_tibble
+    if(type %in% c("est", "resid")){
+      names(x) <- c("year", "gear", "area", "group", "sex", sage:nage)
+    }else if(type == "obs"){
+      names(x) <- c("year", "sample_size", "gear", "area", "group", "sex", sage:nage)
+    }
+    x
   })
+  j
 }
 
 
@@ -1605,7 +1590,7 @@ extract_age_output <- function(model,
 #'
 #' @return A data frame of estimated parameters
 #' @export
-get.estimated.params <- function(mc){
+get_estimated_params <- function(mc){
 
   posts <- apply(mc,
                  2,
@@ -1629,7 +1614,7 @@ get.estimated.params <- function(mc){
 #'
 #' @return a data frame (mc with the log columns appended)
 #' @export
-calc.logs <- function(mc,
+calc_logs <- function(mc,
                       log.params = c("^ro$",
                                      "^m$",
                                      "^m1$",
@@ -1663,7 +1648,7 @@ calc.logs <- function(mc,
 #'
 #' @return A data frame the same as mc but with modifications (see details)
 #' @export
-fix.m <- function(mc){
+fix_m <- function(mc){
 
   grp <- grep("m[12]", colnames(mc))
   if(length(grp) == 1){
@@ -1675,34 +1660,33 @@ fix.m <- function(mc){
 #' Calculate logs for several parameters using MPD
 #'
 #' @param mpd A list of MPD outputs
-#' @param log.params The names of the parameters to log
-#'
+#' @param log._
 #' @details The new list elements will have the same names but have 'log_' appended
 #'
 #' @return  a list (mpd with some new elements appended, the log-applied elements)
 #' @export
-calc.mpd.logs <- function(mpd,
-                          log.params = c("^ro$",
+calc_mpd_logs <- function(mpd,
+                          log_params = c("^ro$",
                                          "^m$",
-                                         "^m1$",
-                                         "^m2$",
                                          "^rbar$",
                                          "^rinit$",
                                          "^q$")){
 
-  grp <- lapply(log.params,
-                function(x){
-                  grep(x, names(mpd))})
-  inds.lst <- grp[sapply(grp,
-                         function(x){
-                           length(x) > 0})]
-  inds <- unique(do.call(c, inds.lst))
-  log.names <- paste0("log_", names(mpd)[inds])
-  vals <- lapply(mpd[inds], log)
-  if(!length(vals)){
-    return(NA)
+  inds <- map(log_params, ~{
+    grp <- grep(.x, names(mpd))
+    if(!length(grp)){
+      return(NULL)
+    }
+    grp
+  })
+  inds[sapply(inds, is.null)] <- NULL
+  if(!length(inds)){
+    return(mpd)
   }
-  names(vals) <- log.names
+  inds <- inds %>% map_dbl(~{.x})
+  log_names <- paste0("log_", names(mpd)[inds])
+  vals <- map(mpd[inds], log)
+  names(vals) <- log_names
   c(mpd, vals)
 }
 

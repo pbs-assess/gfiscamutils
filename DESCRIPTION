@@ -35,6 +35,7 @@ Imports:
   here,
   rosettafish,
   scales,
+  stringr,
   purrr,
   reshape2,
   zoo,

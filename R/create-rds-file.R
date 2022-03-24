@@ -2,7 +2,7 @@
 #'
 #' @param model_dir Directory name of model to be loaded
 #' @param overwrite Logical. If TRUE, overwrite the RDS file if it exists
-#' @param ... Parameters passed to [load.iscam.files()]
+#' @param ... Parameters passed to [load_iscam_files()]
 #'
 #' @return [base::invisible()]
 #' @export
@@ -30,7 +30,7 @@ create_rds_file <- function(model_dir = NULL,
   }
 
   # If this point is reached, no RData file exists so it has to be built from scratch
-  model <- load.iscam.files(model_dir, ...)
+  model <- load_iscam_files(model_dir, ...)
 
   # Load retrospectives. If none are found or there is a problem, model$retros will be NA
   # model$retropath <- file.path(model_dir, retro.dir)

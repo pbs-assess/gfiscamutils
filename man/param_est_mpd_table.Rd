@@ -23,7 +23,7 @@ sel_param_est_mpd_table(
 )
 }
 \arguments{
-\item{models}{A list of iSCAM models as output from [load.iscam.files()]}
+\item{models}{A list of iSCAM models as output from [load_iscam_files()]}
 
 \item{digits}{Number of digits to show}
 

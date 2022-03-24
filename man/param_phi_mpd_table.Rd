@@ -8,7 +8,7 @@ for MPD models.}
 param_phi_mpd_table(model, digits = 2, french = FALSE, col_widths = "5em", ...)
 }
 \arguments{
-\item{model}{An iSCAM model as output from [load.iscam.files()]}
+\item{model}{An iSCAM model as output from [load_iscam_files()]}
 
 \item{digits}{Number of digits to show}
 

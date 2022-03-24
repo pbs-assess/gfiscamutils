@@ -1,7 +1,7 @@
 #' Make a table of comparisons of estimates of the phi parameter for the Dirichlet Multinomial
 #' for MPD models.
 #'
-#' @param model An iSCAM model as output from [load.iscam.files()]
+#' @param model An iSCAM model as output from [load_iscam_files()]
 #' @param digits Number of digits to show
 #' @param french If `TRUE` translate to French
 #' @param col_widths Widths for columns, except the Parameter column
@@ -82,7 +82,7 @@ param_phi_mpd_table <- function(model,
 #' Make a table of parameter estimate comparisons for MPD models.
 #' Also show B0, Fmsy. Bmsy, and msy
 #'
-#' @param models A list of iSCAM models as output from [load.iscam.files()]
+#' @param models A list of iSCAM models as output from [load_iscam_files()]
 #' @param digits Number of digits to show
 #' @param french If `TRUE` translate to French
 #' @param model_col_widths Widths for columns, except the Parameter column
