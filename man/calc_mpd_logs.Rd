@@ -4,15 +4,12 @@
 \alias{calc_mpd_logs}
 \title{Calculate logs for several parameters using MPD}
 \usage{
-calc_mpd_logs(
-  mpd,
-  log.params = c("^ro$", "^m$", "^m1$", "^m2$", "^rbar$", "^rinit$", "^q$")
-)
+calc_mpd_logs(mpd, log_params = c("^ro$", "^m$", "^rbar$", "^rinit$", "^q$"))
 }
 \arguments{
 \item{mpd}{A list of MPD outputs}
 
-\item{log.params}{The names of the parameters to log}
+\item{log_params}{Patterns to match for parameter names that need to be logged}
 }
 \value{
 a list (mpd with some new elements appended, the log-applied elements)

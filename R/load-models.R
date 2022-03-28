@@ -106,10 +106,10 @@ load_iscam_files <- function(model_dir, mcmc_subdir = "mcmc", ...){
     message("MCMC output found in ", model$mcmcpath, ". Loading...")
     model$mcmc <- read_mcmc(model, ...)
     model$mcmccalcs <- calc_mcmc(model, ...)
-    model$mcmc$params <- strip_areas_groups(model$mcmc$params)
+    model$mcmc$params <- simplify_names(model$mcmc$params)
     model$mcmc$params <- fix_m(model$mcmc$params)
-    model$mcmc$params.est <- get_estimated_params(model$mcmc$params)
-    model$mcmc$params.est.log <- calc_logs(model$mcmc$params.est)
+    model$mcmc$params_est <- get_estimated_params(model$mcmc$params)
+    model$mcmc$params_est_log <- calc_logs(model$mcmc$params_est)
   }
   class(model) <- model.class
   model
@@ -122,8 +122,8 @@ load_iscam_files <- function(model_dir, mcmc_subdir = "mcmc", ...){
 #' @param thin Remove every nth record for thinning of MCMC output
 #' @param probs The probabilities to use for `quantile()` calculations
 #' @param load_proj Load the projections from the MCMC and do the calculations
-#' @param ... arguments to pass to [calc_probabilities()]
-#'   to construct the decision tables
+#' @param ... arguments to pass to [calc_proj_probs()] to construct the
+#' decision tables
 #'
 #' @return A list of each parameter for which quantiles were calculated
 #' @export
@@ -169,9 +169,11 @@ calc_mcmc <- function(model,
   out$params_quants_log <- apply(out$params_quants, c(1, 2), log)
 
   quantify <- function(mc_d, mpd_d){
+    # Apply the quantile function to all columns in a data frame and bind
+    # the MPD value
     j <- apply(mc_d, 2, quantile, prob = probs)
     j <- rbind(j, mpd_d)
-    rownames(j)[4] <- "MPD"
+    rownames(j)[length(probs) + 1] <- "MPD"
     j
   }
   # Spawning biomass
@@ -215,192 +217,51 @@ calc_mcmc <- function(model,
   build_quant_list <- function(mc_dat, mpd_dat){
     # Run quantiles on each data frame in a list of dataframes and append
     #  the MPD values as well. Returns a list of dataframes
-    mc_dat <- mc_dat[, colSums(is.na(mc_dat)) != nrow(mc_dat)]
-    quants <- map(mc_dat, ~{
-      quantile(.x, prob = probs, na.rm = TRUE)
+    mc_dat_q <- imap(mc_dat, ~{
+      # Remove columns with all NAs
+      .x <- .x[, colSums(is.na(.x)) != nrow(.x)]
+      q <- apply(.x, 2, quantile, prob = probs, na.rm = TRUE)
+      # Suppress warning that the MPD is longer than the MCMC, this happens when
+      # there are NAs in the final years in the MCMC
+      suppressWarnings(q <- rbind(q, mpd_dat[.y, ]))
+      rownames(q)[length(probs) + 1] <- "MPD"
+      q
     })
-    quants <- lapply(mc_dat,
-                     function(x){
-                       apply(x,
-                             2,
-                             quantile,
-                             prob = probs,
-                             na.rm = TRUE)})
-    lapply(1:length(quants),
-           function(x){
-             quants[[x]] <- rbind(quants[[x]], mpd_dat[x,])
-             rownames(quants[[x]])[4] <- "MPD"
-             c_names <- colnames(quants[[x]])
-             colnames(quants[[x]]) <-
-               gsub("^.*_([[:digit:]]+$)", "\\1", c_names)
-             quants[[x]]
-           })
   }
 
-  #TODO continue here
-  browser()
-
-  # Reshape MCMC Vulnerable biomass (list of data frames by gear)
-  ngear <- model$dat$num.gears
   # Reshape MPD vulnerable biomass (list of data frames by gear)
+  # vbt output is special for some reason
   vbt_mpd <- as.data.frame(mpd$vbt)
   names(vbt_mpd) <- c("gear", "group", "year", "biomass")
   # Split data frame into list of data frames, one for each gear
-  vbt_mpd <- split(vbt_mpd, vbt$gear)
-  vbt_mpd <- map(seq_along(vbt_mpd), ~{
-    vbt[[.x]]$biomass
+  vbt_mpd <- split(vbt_mpd, vbt_mpd$gear)
+  vbt_mpd <- map(vbt_mpd, ~{
+    .x$biomass
   })
-  vbt <- do.call(rbind, vbt)
+  vbt_mpd <- do.call(rbind, vbt_mpd)
   out$vbt <- mc$vbt
-  out$vbt <- build_quant_list(out$vbt, vbt)
+  out$vbt_quants <- build_quant_list(mc$vbt, vbt_mpd)
 
   # Fishing mortalities by gear (list of data frames)
-  f.mort.dat <- lapply(mc$ft[[1]], mcmc.thin, burnin, thin)
-  f.mort.quants <- build_quant_list(f.mort.dat, mpd$ft)
+  out$ft <- mc$ft
+  out$ft_quants <- build_quant_list(mc$ft, mpd$ft)
+  out$ut <- mc$ut
+  out$ut_quants <- build_quant_list(mc$ut, mpd$ut)
 
-  u.mort.dat <- lapply(mc$ut[[1]], mcmc.thin, burnin, thin)
-  u.mort.quants <- build_quant_list(u.mort.dat, mpd$ut)
+  if(load_proj){
+    proj_dat <- calc_proj_probs(model, burnin, thin, ...)
 
-  ## Add calculated reference points - these have already been thinned
-  ##  and burned in
-  sbt.yrs <- names(sbt.dat)
-  sbt.init <- sbt.dat[,1]
-  sbt.end <- sbt.dat[,ncol(sbt.dat)]
-  sbt.end.1 <- sbt.dat[,ncol(sbt.dat) - 1]
-  yr.sbt.init <- sbt.yrs[1]
-  yr.sbt.end <- as.numeric(sbt.yrs[length(sbt.yrs)])
-  yr.sbt.end.1 <- yr.sbt.end - 1
-
-  f.yrs <- names(f.mort.dat[[1]])
-  f.yrs <- gsub(".*_([[:digit:]]+)",
-                "\\1",
-                f.yrs)
-  f.end <- f.mort.dat[[1]][,ncol(f.mort.dat[[1]])]
-  yr.f.end <- f.yrs[length(f.yrs)]
-
-  proj.dat <- NULL
-  proj.quants <- NULL
-  nonproj.sbt <- NULL
-  nonproj.sbt.quants <- NULL
-  if(load.proj){
-    proj.dat <- calc_probabilities(model,
-                                   burnin,
-                                   thin,
-                                   ...)
-
-    proj <- mcmc.thin(mc$proj[mc$proj$TAC == 0,], burnin, thin)
-    proj.quants <- apply(proj,
-                         2,
-                         quantile,
-                         prob = probs,
-                         na.rm = TRUE)
-    ## Replace the final year of the sbt with the values obtained from the projections
-    ## and include the model-estimated values and quantiles in case needed as 'nonproj' objects
-    nonproj.sbt <- sbt.dat[,ncol(sbt.dat)]
-    nonproj.sbt.quants <- quantile(nonproj.sbt, probs = probs)
-    sbt.dat[,ncol(sbt.dat)] <- proj[,2]
-    sbt.quants <- apply(sbt.dat,
-                        2,
-                        quantile,
-                        prob = probs)
-    sbt.quants <- rbind(sbt.quants, mpd$sbt)
-    rownames(sbt.quants)[4] <- "MPD"
+    out$proj <- mcmc.thin(mc$proj[mc$proj$TAC == 0,], burnin, thin)
+    out$proj_quants <- apply(proj, 2, quantile, prob = probs, na.rm = TRUE)
+    # Replace the final year of the sbt with the values obtained from the projections
+    # and include the model-estimated values and quantiles in case needed as 'nonproj' objects
+    out$nonproj_sbt <- out$sbt[, ncol(out$sbt)]
+    out$nonproj_sbt_quants <- quantile(out$nonproj_sbt, probs = probs, na.rm = TRUE)
+    out$sbt[, ncol(out$sbt)] <- out$proj[, 2]
+    out$sbt_quants <- quantify(out$sbt, mpd$sbt)
   }
-  r.quants <- NULL
-  last.yr.sbt <- sbt.dat[,ncol(sbt.dat)]
-  r.dat <- cbind(r.dat,
-                 0.3 * r.dat$sbo,
-                 sbt.end.1,
-                 sbt.end.1 / r.dat$sbo,
-                 sbt.end.1 / (0.3 * r.dat$sbo),
-                 sum(sbt.end.1 < (0.3 * r.dat$sbo)) / nrow(r.dat),
-                 last.yr.sbt,
-                 last.yr.sbt / r.dat$sbo,
-                 last.yr.sbt / (0.3 * r.dat$sbo),
-                 sum(last.yr.sbt < (0.3 * r.dat$sbo)) / nrow(r.dat),
-                 sum(last.yr.sbt < (0.6 * r.dat$sbo)) / nrow(r.dat),
-                 proj$PropAge3,
-                 proj$PropAge4to10)
-  names(r.dat) <- c("sbo",
-                    paste0("0.3sbo"),
-                    paste0("sb", yr.sbt.end.1),
-                    paste0("sb", yr.sbt.end.1, "/sbo"),
-                    paste0("sb", yr.sbt.end.1, "/0.3sbo"),
-                    paste0("psb", yr.sbt.end.1, "/0.3sbo"),
-                    paste0("sb", yr.sbt.end),
-                    paste0("sb", yr.sbt.end, "/sbo"),
-                    paste0("sb", yr.sbt.end, "/0.3sbo"),
-                    paste0("psb", yr.sbt.end, "/0.3sbo"),
-                    paste0("psb", yr.sbt.end, "/0.6sbo"),
-                    "PropAge3",
-                    "PropAge4to10")
 
-  r.quants <- apply(r.dat, 2, quantile, prob = probs)
-
-  desc.col <- c("$\\mli{SB}_0$",
-                "$0.3\\mli{SB}_0$",
-                paste0("$\\mli{SB}_{", yr.sbt.end.1, "}$"),
-                paste0("$\\mli{SB}_{", yr.sbt.end.1,
-                       "} / ",
-                       "\\mli{SB}_0$"),
-                paste0("$\\mli{SB}_{", yr.sbt.end.1,
-                       "} / ",
-                       "0.3\\mli{SB}_0$"),
-                paste0("$P~(\\mli{SB}_{", yr.sbt.end.1,
-                       "}<",
-                       "0.3\\mli{SB}_0)$"),
-                paste0("$\\mli{SB}_{", yr.sbt.end, "}$"),
-                paste0("$\\mli{SB}_{", yr.sbt.end,
-                       "} / ",
-                       "\\mli{SB}_0$"),
-                paste0("$\\mli{SB}_{", yr.sbt.end,
-                       "} / ",
-                       "0.3\\mli{SB}_0$"),
-                paste0("$P~(\\mli{SB}_{", yr.sbt.end,
-                       "}<",
-                       "0.3\\mli{SB}_0)$"),
-                paste0("$P~(\\mli{SB}_{", yr.sbt.end,
-                       "}<",
-                       "0.6\\mli{SB}_0)$"),
-                "$\\text{Proportion aged 3}$",
-                "$\\text{Proportion aged 4 - 10}$")
-
-  r.quants <- t(r.quants)
-  r.quants <- cbind.data.frame(desc.col, r.quants)
-  col.names <- colnames(r.quants)
-  col.names <- latex.bold(latex.perc(col.names))
-  col.names[1] <- latex.bold("Reference point")
-  colnames(r.quants) <- col.names
-
-  sapply(c("p_dat",
-           "p.quants",
-           "p_dat.log",
-           "p.quants.log",
-           "r.dat",
-           "r.quants",
-           "sbt.dat",
-           "sbt.quants",
-           "depl.dat",
-           "depl.quants",
-           "nat.mort.dat",
-           "nat.mort.quants",
-           "recr.dat",
-           "recr.quants",
-           "recr.devs.dat",
-           "recr.devs.quants",
-           "q.dat",
-           "q.quants",
-           "vuln.dat",
-           "vuln.quants",
-           "f.mort.dat",
-           "f.mort.quants",
-           "u.mort.dat",
-           "u.mort.quants",
-           "proj.dat",
-           "proj.quants",
-           "nonproj.sbt",
-           "nonproj.sbt.quants"),
-         function(x){get(x)})
+  out
 }
 
 #' Extract and calculate probabilities from the iscam projection model
@@ -419,12 +280,12 @@ calc_mcmc <- function(model,
 #'
 #' @return A data frame which has its names formatted for latex
 #' @export
-calc_probabilities <- function(model,
-                               burnin,
-                               thin,
-                               which.stock = NULL,
-                               which.model = NULL,
-                               fixed.cutoffs){
+calc_proj_probs <- function(model,
+                            burnin,
+                            thin,
+                            which.stock = NULL,
+                            which.model = NULL,
+                            fixed.cutoffs){
 
   if(is.null(which.stock)){
     warning("which.stock must be between 1 and 5.")
@@ -1312,16 +1173,19 @@ read_par_file <- function(file = NULL){
 #' @param model An iSCAM model object as created in [load_iscam_files()]
 #' @param burnin The number of MCMC records to remove for burnin period
 #' @param thin Remove every nth record for thinning of MCMC output
+#' @param load_proj Load projection output
 #' @param ... Extra arguments
 #'
-#' @return A list representing the MCMC output of the iscam model,
-#'   or NULL if there was a problem or there were no MCMC output files
+#' @return A list of data frames representing the MCMC output of the
+#' iscam model, or NULL if there was a problem or there were no MCMC
+#' output files
 #' @importFrom stringr str_extract
 #' @importFrom purrr imap
 #' @export
 read_mcmc <- function(model,
                       burnin = 1000,
                       thin = 1,
+                      load_proj = TRUE,
                       ...){
 
   mcmc_dir <- model$mcmcpath
@@ -1359,7 +1223,7 @@ read_mcmc <- function(model,
                  list(mcmc.biomass.file, "single"),
                  list(mcmc.recr.file, "single"),
                  list(mcmc.recr.devs.file, "single"),
-                 list(mcmc.fishing.mort.file, "single"),
+                 list(mcmc.fishing.mort.file, "list", "fleet"),
                  list(mcmc.natural.mort.file, "list", "sex"),
                  list(mcmc.fishing.mort.u.file, "list", "fleet"),
                  list(mcmc.vuln.biomass.file, "list", "fleet"),
@@ -1580,7 +1444,6 @@ extract_age_output <- function(model,
   j
 }
 
-
 #' Fetch a data frame of the estimated MCMC parameters only
 #'
 #' @param mc A data frame of posteriors as seen in the MCMC output csv files
@@ -1598,9 +1461,9 @@ get_estimated_params <- function(mc){
                    if(length(unique(x)) > 1)
                      return(x)
                  })
-  ## Remove NULL list elements (fixed parameters)
-  posts.lst <- posts[!sapply(posts, is.null)]
-  do.call(cbind, posts.lst)
+  # Remove NULL list elements (fixed parameters)
+  posts_lst <- posts[!sapply(posts, is.null)]
+  do.call(cbind, posts_lst)
 }
 
 #' Calculate logs for several parameters using MCMC
@@ -1660,7 +1523,7 @@ fix_m <- function(mc){
 #' Calculate logs for several parameters using MPD
 #'
 #' @param mpd A list of MPD outputs
-#' @param log._
+#' @param log_params Patterns to match for parameter names that need to be logged
 #' @details The new list elements will have the same names but have 'log_' appended
 #'
 #' @return  a list (mpd with some new elements appended, the log-applied elements)

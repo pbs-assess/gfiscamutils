@@ -4,12 +4,12 @@
 \alias{load_iscam_files}
 \title{Construct an iscam model object from its input and output files}
 \usage{
-load_iscam_files(model.dir, mcmc.subdir = "mcmc", ...)
+load_iscam_files(model_dir, mcmc_subdir = "mcmc", ...)
 }
 \arguments{
-\item{model.dir}{The directory the model is in}
+\item{model_dir}{The directory the model is in}
 
-\item{mcmc.subdir}{subdirectory in which mcmc results for models are stored.
+\item{mcmc_subdir}{subdirectory in which mcmc results for models are stored.
 Can be the empty string in which case they will be in the model's root directory}
 
 \item{...}{arguments to pass to [calc_mcmc()]}

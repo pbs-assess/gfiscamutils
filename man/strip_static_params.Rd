@@ -7,9 +7,9 @@
 strip_static_params(model, dat)
 }
 \arguments{
-\item{model}{An iSCAM model object as created in [load_iscam_files()]}
+\item{model}{An iscam model object}
 
-\item{dat}{A vector of the parameter names to remove}
+\item{dat}{A data frame of the MCMC parameter estimates}
 }
 \value{
 The parameters data frame for the model given with static parameters removed

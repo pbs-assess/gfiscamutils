@@ -5,7 +5,7 @@
 \title{Read in the MCMC results from an iscam model, reformat them, and
 remove some records as defined by `burnin` and `thin`}
 \usage{
-read_mcmc(model, burnin = 1000, thin = 1, ...)
+read_mcmc(model, burnin = 1000, thin = 1, load_proj = TRUE, ...)
 }
 \arguments{
 \item{model}{An iSCAM model object as created in [load_iscam_files()]}
@@ -14,11 +14,14 @@ read_mcmc(model, burnin = 1000, thin = 1, ...)
 
 \item{thin}{Remove every nth record for thinning of MCMC output}
 
+\item{load_proj}{Load projection output}
+
 \item{...}{Extra arguments}
 }
 \value{
-A list representing the MCMC output of the iscam model,
-  or NULL if there was a problem or there were no MCMC output files
+A list of data frames representing the MCMC output of the
+iscam model, or NULL if there was a problem or there were no MCMC
+output files
 }
 \description{
 Read in the MCMC results from an iscam model, reformat them, and

@@ -4,17 +4,28 @@
 \alias{calc_mcmc}
 \title{Perform some quantile calculations on the MCMC posteriors}
 \usage{
-calc_mcmc(model, probs = c(0.025, 0.5, 0.975), load_proj = TRUE, ...)
+calc_mcmc(
+  model,
+  burnin = 1000,
+  thin = 1,
+  probs = c(0.025, 0.5, 0.975),
+  load_proj = TRUE,
+  ...
+)
 }
 \arguments{
 \item{model}{An iSCAM model object as created in [load_iscam_files()]}
+
+\item{burnin}{The number of MCMC records to remove for burnin period}
+
+\item{thin}{Remove every nth record for thinning of MCMC output}
 
 \item{probs}{The probabilities to use for `quantile()` calculations}
 
 \item{load_proj}{Load the projections from the MCMC and do the calculations}
 
-\item{...}{arguments to pass to [calc_probabilities()]
-to construct the decision tables}
+\item{...}{arguments to pass to [calc_proj_probs()] to construct the
+decision tables}
 }
 \value{
 A list of each parameter for which quantiles were calculated

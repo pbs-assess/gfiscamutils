@@ -13,9 +13,7 @@ create_rds_file <- function(model_dir = NULL,
   stopifnot(!is.null(model_dir))
 
   if(!dir.exists(model_dir)){
-    stop("Error - the directory ", model_dir, " does not exist.\n",
-         "Fix the problem and try again.",
-         call. = FALSE)
+    stop("The directory ", model_dir, " does not exist")
   }
 
   # The RDS file will have the same name as the directory it is in
@@ -29,7 +27,7 @@ create_rds_file <- function(model_dir = NULL,
     }
   }
 
-  # If this point is reached, no RData file exists so it has to be built from scratch
+  # If this point is reached, no RDs file exists so it has to be built from scratch
   model <- load_iscam_files(model_dir, ...)
 
   # Load retrospectives. If none are found or there is a problem, model$retros will be NA
