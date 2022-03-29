@@ -10,8 +10,8 @@ verify_models <- function(models,
     stop("models_names must be the same length as models.", call. = FALSE)
   }
   for(i in seq_along(models)){
-    if(class(models[[i]]) != model.class){
-      stop("Model ", i, " in the list is not of the type ", model.class, call. = FALSE)
+    if(class(models[[i]]) != mdl_cls){
+      stop("Model ", i, " in the list is not of the type ", mdl_cls, call. = FALSE)
     }
   }
 }
@@ -201,19 +201,19 @@ c.model.list <- function(...){
   ret.lst <- NULL
   ind <- 1
   for(i in 1:length(lst)){
-    if(class(lst[[i]]) != model.lst.class){
-      stop("List element ", i, " is not of the class '", model.lst.class, "'.")
+    if(class(lst[[i]]) != mdl_lst_cls){
+      stop("List element ", i, " is not of the class '", mdl_lst_cls, "'.")
     }
     for(j in 1:length(lst[[i]])){
-      if(class(lst[[i]][[j]]) != model.class){
+      if(class(lst[[i]][[j]]) != mdl_cls){
         stop("Sublist element ", j, " of list element ", i,
-             " is not of the class '", model.class, "'.")
+             " is not of the class '", mdl_cls, "'.")
       }
       ret.lst[[ind]] <- lst[[i]][[j]]
       ind <- ind + 1
     }
   }
-  class(ret.lst) <- model.lst.class
+  class(ret.lst) <- mdl_lst_cls
   ret.lst
 }
 

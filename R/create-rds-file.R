@@ -1,13 +1,13 @@
 #' Create an rds file to hold the model's data and outputs.
 #'
 #' @param model_dir Directory name of model to be loaded
-#' @param overwrite Logical. If TRUE, overwrite the RDS file if it exists
+#' @param overwrite_rds_files Logical. If TRUE, overwrite the RDS file if it exists
 #' @param ... Parameters passed to [load_iscam_files()]
 #'
 #' @return [base::invisible()]
 #' @export
 create_rds_file <- function(model_dir = NULL,
-                            overwrite = FALSE,
+                            overwrite_rds_files = FALSE,
                             ...){
 
   stopifnot(!is.null(model_dir))
@@ -19,7 +19,7 @@ create_rds_file <- function(model_dir = NULL,
   # The RDS file will have the same name as the directory it is in
   rds_file <- file.path(model_dir, paste0(basename(model_dir), ".rds"))
   if(file.exists(rds_file)){
-    if(overwrite){
+    if(overwrite_rds_files){
       unlink(rds_file, force = TRUE)
     }else{
       message("Skipping ", rds_file, ". To overwrite it, set overwrite = TRUE")
@@ -64,7 +64,7 @@ load_rds_file <- function(model_dir = NULL){
     return(readRDS(rds_file))
   }else{
     message("File `", rds_file, "` does not exist.\n",
-            "Run gfiscamutils::create_rds_file(", model_dir, ") and try again.",
+            "Run create_rds_file(", model_dir, ") and try again.",
             call. = FALSE)
     return(NULL)
   }

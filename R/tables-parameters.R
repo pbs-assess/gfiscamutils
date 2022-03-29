@@ -588,9 +588,9 @@ make.parameters.est.table <- function(model,
                                       placement = "H",
                                       translate = FALSE){
 
-  if(class(model) == model.lst.class){
+  if(class(model) == mdl_lst_cls){
     model <- model[[1]]
-    if(class(model) != model.class){
+    if(class(model) != msl_cls){
       stop("The structure of the model list is incorrect.")
     }
   }
@@ -690,9 +690,9 @@ make.ref.points.table <- function(model.am2,
                                   placement = "H",
                                   translate = FALSE){
 
-  if(class(model.am2) == model.lst.class){
+  if(class(model.am2) == mdl_lst_cls){
     model <- model[[1]]
-    if(class(model) != model.class){
+    if(class(model) != msl_cls){
       stop("The structure of the model.am2 list is incorrect.")
     }
   }
@@ -772,9 +772,9 @@ make.value.table <- function(model,
                              tabular.environment = "tabular",
                              translate = FALSE){
 
-  if(class(model) == model.lst.class){
+  if(class(model) == mdl_lst_cls){
     model <- model[[1]]
-    if(class(model) != model.class){
+    if(class(model) != msl_cls){
       stop("The structure of the model list is incorrect.")
     }
   }
@@ -836,9 +836,9 @@ make.biomass.depletion.table <- function(model,
                                          tabular.environment = "tabular",
                                          translate = FALSE){
 
-  if(class(model) == model.lst.class){
+  if(class(model) == mdl_lst_cls){
     model <- model[[1]]
-    if(class(model) != model.class){
+    if(class(model) != msl_cls){
       stop("The structure of the model list is incorrect.")
     }
   }

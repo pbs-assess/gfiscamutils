@@ -1,11 +1,8 @@
-## Custom class types
-model.class <- "model"
-model.lst.class <- "model.list"
+# Custom class types
+mdl_cls <- "iscam_model"
+mdl_lst_cls <- "iscam_model_list"
 
-## RData file name for model storage
-rdata.file <- "aaa_gfiscam.RData"
-
-## iscam files with names that don't change depending on model
+# iscam files with names that don't change depending on model
 rep.file <- "iscam.rep"
 par.file <- "iscam.par"
 mcmc.file <- "iscam_mcmc.csv"
@@ -60,9 +57,8 @@ linux.append.to.log <- paste(.dos.append.stdout, log.file, .linux.append.stderr)
 dos.pipe.to.log <- paste(.dos.pipe.stdout, log.file, .dos.pipe.stderr)
 dos.append.to.log <- paste(.dos.append.stdout, log.file, .dos.append.stderr)
 
-use_data(model.class, overwrite = TRUE)
-use_data(model.lst.class, overwrite = TRUE)
-use_data(rdata.file, overwrite = TRUE)
+use_data(mdl_cls, overwrite = TRUE)
+use_data(mdl_lst_cls, overwrite = TRUE)
 use_data(rep.file, overwrite = TRUE)
 use_data(par.file, overwrite = TRUE)
 use_data(mcmc.file, overwrite = TRUE)
@@ -86,4 +82,3 @@ use_data(linux.pipe.to.log, overwrite = TRUE)
 use_data(linux.append.to.log, overwrite = TRUE)
 use_data(dos.pipe.to.log, overwrite = TRUE)
 use_data(dos.append.to.log, overwrite = TRUE)
-#use_data(, overwrite = TRUE)

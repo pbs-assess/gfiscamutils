@@ -7,14 +7,14 @@
 \usage{
 make.biomass.mcmc.plot(
   models,
-  model.names = NULL,
+  model_names = NULL,
   ylim,
   opacity = 75,
   offset = 0.1,
-  append.base.txt = NULL,
-  show.bmsy.line = FALSE,
-  show.bo.line = FALSE,
-  ind.letter = NULL,
+  append_base_txt = NULL,
+  show_bmsy_line = FALSE,
+  show_bo_line = FALSE,
+  ind_letter = NULL,
   leg = NULL,
   ...
 )
@@ -33,8 +33,6 @@ make.depletion.mcmc.plot(
 \arguments{
 \item{models}{A list of iscam model objects}
 
-\item{model.names}{A vector of names to show on the legend}
-
 \item{ylim}{The y limits for the plot}
 
 \item{opacity}{How opaque the credibility envelopes are}
@@ -42,17 +40,19 @@ make.depletion.mcmc.plot(
 \item{offset}{The amount on the x-axis to offset each point and line for
 multiple models}
 
+\item{leg}{Position of the legend. NULL means no legend is shown}
+
+\item{...}{Other graphical arguments}
+
+\item{model.names}{A vector of names to show on the legend}
+
 \item{append.base.txt}{Text to append to the name of the first model}
+
+\item{ind.letter}{A letter to show on the plot (for panel plots)}
 
 \item{show.bmsy.line}{Show the reference lines 0.4 and 0.8bmsy}
 
 \item{show.bo.line}{Show the reference lines 0.2 and 0.4bo}
-
-\item{ind.letter}{A letter to show on the plot (for panel plots)}
-
-\item{leg}{Position of the legend. NULL means no legend is shown}
-
-\item{...}{Other graphical arguments}
 }
 \value{
 Nothing

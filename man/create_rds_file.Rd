@@ -4,12 +4,12 @@
 \alias{create_rds_file}
 \title{Create an rds file to hold the model's data and outputs.}
 \usage{
-create_rds_file(model_dir = NULL, overwrite = FALSE, ...)
+create_rds_file(model_dir = NULL, overwrite_rds_files = FALSE, ...)
 }
 \arguments{
 \item{model_dir}{Directory name of model to be loaded}
 
-\item{overwrite}{Logical. If TRUE, overwrite the RDS file if it exists}
+\item{overwrite_rds_files}{Logical. If TRUE, overwrite the RDS file if it exists}
 
 \item{...}{Parameters passed to [load_iscam_files()]}
 }

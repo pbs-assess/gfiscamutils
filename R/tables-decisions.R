@@ -20,9 +20,9 @@ make.decision.table <- function(model,
                                 space.size = 11,
                                 placement = "H"){
 
-  if(class(model) == model.lst.class){
+  if(class(model) == mdl_lst_cls){
     model <- model[[1]]
-    if(class(model) != model.class){
+    if(class(model) != mdl_cls){
       stop("The structure of the model list is incorrect.")
     }
   }

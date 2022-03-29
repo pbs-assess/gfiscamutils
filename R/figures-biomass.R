@@ -149,92 +149,84 @@ plot_ts_mpd <- function(models,
 #' @return Nothing
 #' @export
 make.biomass.mcmc.plot <- function(models,
-                                   model.names = NULL,
+                                   model_names = NULL,
                                    ylim,
                                    opacity = 75,
                                    offset = 0.1,
-                                   append.base.txt = NULL,
-                                   show.bmsy.line = FALSE,
-                                   show.bo.line = FALSE,
-                                   ind.letter = NULL,
+                                   append_base_txt = NULL,
+                                   show_bmsy_line = FALSE,
+                                   show_bo_line = FALSE,
+                                   ind_letter = NULL,
                                    leg = NULL,
                                    ...){
 
-  par(mar = c(5.1, 5.1, 4.1, 3.1))
+  #par(mar = c(5.1, 5.1, 4.1, 3.1))
 
-  sbt.quants <- lapply(models,
-                       function(x){
-                         x$mcmccalcs$sbt.quants})
-  r.quants <- lapply(models,
-                     function(x){
-                       x$mcmccalcs$r.quants})
-  sbo.raw <- lapply(r.quants,
-                    function(x){
-                      x[rownames(x) == "sbo", ]})
-  sbo <- lapply(sbo.raw,
-                function(x){
-                  as.numeric(x[,2:4])})
-  yrs <- lapply(sbt.quants,
-                function(x){
-                  as.numeric(colnames(x))})
-  xlim <- lapply(1:length(yrs),
-                 function(x){
-                   c(min(yrs[[x]]), max(yrs[[x]]))})
+  if(!is.null(models$path)){
+    # Single model, not in a list
+    models <- list(models)
+  }
+  sbt_quants <- map(models, ~{.x$mcmccalcs$sbt_quants})
+  ro_quants <- map(models, ~{.x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "ro"]})
+  sbo <- map(models, ~{.x$mcmccalcs$params[, colnames(.x$mcmccalcs$params) == "sbo"]})
+  sbo_quants <- map(models, ~{.x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "sbo"]})
+  yrs <- map(sbt_quants, ~{as.numeric(colnames(.x))})
+
+  xlim <- map(seq_along(yrs), ~{c(min(yrs[[.x]]), max(yrs[[.x]]))})
   xlim <- do.call(rbind, xlim)
   xlim <- c(min(xlim), max(xlim))
 
   if(is.null(dev.list())){
-    ## If layout() is used outside this function,
-    ##  it calls plot.new and will mess up the figures
-    ##  if we call it again
+    # If layout() is used outside this function,
+    #  it calls plot.new and will mess up the figures
+    #  if we call it again
     plot.new()
   }
-  plot.window(xlim = xlim,
-              ylim = ylim,
-              xlab = "",
-              ylab = "")
+  plot.window(xlim = xlim, ylim = ylim, xlab = "", ylab = "")
 
-  lapply(1:length(yrs),
-         function(x){
-           draw.envelope(yrs[[x]],
-                         sbt.quants[[x]],
-                         xlab = "",
-                         ylab = "",
-                         col = x,
-                         las = 1,
-                         xlim = xlim,
-                         ylim = ylim,
-                         opacity = opacity,
-                         first = ifelse(x == 1, TRUE, FALSE),
-                         ...)})
-  ## Add sbo points and ci bars
-  lapply(1:length(yrs),
-         function(x){
-           points(yrs[[x]][1] - (x - 1) * offset,
-                  sbo[[x]][2],
-                  pch = 19,
-                  col = x)
-           arrows(yrs[[x]][1] - (x - 1) * offset,
-                  sbo[[x]][1],
-                  yrs[[x]][1] - (x - 1) * offset,
-                  sbo[[x]][3],
-                  lwd = 2,
-                  code = 0,
-                  col = x)})
+  nul <- imap(yrs, ~{
+    draw.envelope(yrs[[.y]],
+                  sbt_quants[[.y]],
+                  xlab = "",
+                  ylab = "",
+                  col = x,
+                  las = 1,
+                  xlim = xlim,
+                  ylim = ylim,
+                  opacity = opacity,
+                  first = ifelse(x == 1, TRUE, FALSE),
+                  ...)
+    }, ...)
+  # Add sbo points and ci bars
+  nul <- imap(yrs, ~{
+    points(yrs[[.y]][1] - (x - 1) * offset,
+           sbo[[.y]][2],
+           pch = 19,
+           col = .y)
+    arrows(yrs[[.y]][1] - (.y - 1) * offset,
+           sbo[[.y]][1],
+           yrs[[.y]][1] - (.y - 1) * offset,
+           sbo[[.y]][3],
+           lwd = 2,
+           code = 0,
+           col = .y)
+  })
 
-  if(show.bo.line){
-    abline(h = 0.3 * sbo[[1]][2],
+  if(show_bo_line){
+    abline(h = 0.4 * sbo[[1]][2],
            col = "red",
            lty = 1,
            lwd = 2)
-    mtext(expression("0.3SB"[0]),
+    mtext(expression("0.4SB"[0]),
           4,
-          at = 0.3 * sbo[[1]][2],
+          at = 0.4 * sbo[[1]][2],
           col = "red",
           las = 1)
   }
-  if(show.bmsy.line){
-    sbmsy.raw <- r.quants[[1]][rownames(r.quants[[1]]) == "bmsy", ]
+
+  #TODO - continue here
+  if(show_bmsy_line){
+    sbmsy_raw <- r.quants[[1]][rownames(r.quants[[1]]) == "bmsy", ]
     sbmsy <- as.numeric(sbmsy.raw[2:4])
     abline(h = 0.4 * sbmsy[2],
            col = "red",
@@ -383,14 +375,14 @@ biomass.plot.mpd <- function(model,
                              a_trans = 0.75,
                              translate = FALSE){
 
-  if(class(model) == model.lst.class){
+  if(class(model) == mdl_lst_cls){
     model <- model[[1]]
-    if(class(model) != model.class){
+    if(class(model) != mdl_cls){
       stop("The structure of the model list is incorrect.")
     }
   }
   base_model_lst <- list(model)
-  class(base_model_lst) <- model.lst.class
+  class(base_model_lst) <- mdl_lst_cls
   models <- c(base_model_lst, model$retro)
 
   yrs <- lapply(models,

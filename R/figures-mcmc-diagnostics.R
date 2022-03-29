@@ -25,9 +25,9 @@
 make.priors.posts.plot <- function(model,
                                    priors.only = TRUE){
 
-  if(class(model) == model.lst.class){
+  if(class(model) == mdl_lst_cls){
     model <- model[[1]]
-    if(class(model) != model.class){
+    if(class(model) != mdl_cls){
       stop("The structure of the model list is incorrect.")
     }
   }
@@ -217,9 +217,9 @@ plot_marg <- function(xx,
 make.traces.plot <- function(model,
                              axis.lab.freq = 200){
 
-  if(class(model) == model.lst.class){
+  if(class(model) == mdl_lst_cls){
     model <- model[[1]]
-    if(class(model) != model.class){
+    if(class(model) != mdl_cls){
       stop("The structure of the model list is incorrect.")
     }
   }
@@ -259,9 +259,9 @@ make.traces.plot <- function(model,
 #' @export
 make.autocor.plot <- function(model){
 
-  if(class(model) == model.lst.class){
+  if(class(model) == mdl_lst_cls){
     model <- model[[1]]
-    if(class(model) != model.class){
+    if(class(model) != mdl_cls){
       stop("The structure of the model list is incorrect.")
     }
   }
@@ -388,9 +388,9 @@ make.pairs.plot <- function(model,
                                        "sel5",
                                        "selsd5")){
 
-  if(class(model) == model.lst.class){
+  if(class(model) == mdl_lst_cls){
     model <- model[[1]]
-    if(class(model) != model.class){
+    if(class(model) != mdl_cls){
       stop("The structure of the model list is incorrect.")
     }
   }

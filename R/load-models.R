@@ -68,7 +68,7 @@ load_iscam_files <- function(model_dir, mcmc_subdir = "mcmc", ...){
     model$mcmc$params_est <- get_estimated_params(model$mcmc$params)
     model$mcmc$params_est_log <- calc_logs(model$mcmc$params_est)
   }
-  class(model) <- model.class
+  class(model) <- mdl_cls
   model
 }
 
@@ -1348,9 +1348,9 @@ mcmc_thin <- function(mcmc_dat,
 #' @export
 extract_age_output <- function(model,
                                type = "obs"){
-  if(class(model) == model.lst.class){
+  if(class(model) == mdl_lst_cls){
     model <- model[[1]]
-    if(class(model) != model.class){
+    if(class(model) != mdl_cls){
       stop("The structure of the model list is incorrect.")
     }
   }
@@ -1491,34 +1491,4 @@ calc_mpd_logs <- function(mpd,
   vals <- map(mpd[inds], log)
   names(vals) <- log_names
   c(mpd, vals)
-}
-
-#' Load iscam models found in the given directory and return as a list of iscam model objects
-#'
-#' @param path_names a vector of the directory names for the models
-#' @param inc_retro recursively load the retrospectives directory
-#'
-#' @return A list of iscam model objects
-#' @export
-load.models <- function(path_names, inc_retro = FALSE){
-   rdata_files <- file.path(path_names, rdata.file)
-   retro_dirs <- file.path(path_names, retro.dir)
-
-  out <- lapply(seq_along(rdata_files),
-                function(x){
-                  load(rdata_files[[x]])
-                  if(class(model) != model.class){
-                    model <- list(model)
-                  }
-                  if(inc_retro){
-                    model$retro <- NA
-                    if(dir.exists(retro_dirs[x])){
-                      model$retro <- load.models(file.path(retro_dirs[x], dir(retro_dirs[x])))
-                    }
-                  }
-                  model
-                })
-
-  class(out) <- model.lst.class
-  out
 }
