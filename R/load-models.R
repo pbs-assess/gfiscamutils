@@ -1,46 +1,3 @@
-#' Create a .RData file to hold the model's data and outputs.
-#'
-#' @param model.dir Directory name for all models location
-#' @param ovwrt.rdata overwrite the RData file if it exists? TRUE/FALSE
-#' @param ... arguments to pass to [load_iscam_files()]
-#'
-#' @details If an RData file exists, and overwrite is FALSE, return immediately.
-#'   If no RData file exists, the model will be loaded from outputs into
-#'   an R list and saved as a .RData file in the correct directory.
-#'   When this function exits, a .RData file will be located in the
-#'   directory given by model.name.
-#'   Assumes the files model-setup.r and utilities.r has been sourced.
-#'
-#' @return Nothing
-#' @export
-create.rdata.file <- function(model.dir,
-                              ovwrt.rdata = FALSE,
-                              ...){
-  if(!dir.exists(model.dir)){
-    stop(curr.func.name,"Error - the directory ", model.dir,
-         " does not exist. Fix the problem and try again.\n", call. = FALSE)
-  }
-  rdata.file <- file.path(model.dir, rdata.file)
-  if(file.exists(rdata.file)){
-    if(ovwrt.rdata){
-      ## Delete the RData file
-      message("RData file found in ", model.dir, ". Replacing it...\n")
-      unlink(rdata.file, force = TRUE)
-    }else{
-      message("RData file found in ", model.dir, ". Leaving it...\n")
-      return(invisible())
-    }
-  }else{
-    message("No RData file found in ", model.dir, ". Creating it...\n")
-  }
-
-  ## If this point is reached, no RData file exists so it
-  ##  has to be built from scratch
-  model <- load_iscam_files(model.dir, ...)
-  save(model, file = rdata.file)
-  invisible()
-}
-
 #' Construct an iscam model object from its input and output files
 #'
 #' @param model_dir The directory the model is in
@@ -154,7 +111,7 @@ calc_mcmc <- function(model,
     stop("burnin ", burnin, " is as large or larger than the number ",
          " of rows in the MCMC data (", nrow(out$params), ")")
   }
-  out$params <- mcmc.thin(out$params, burnin, thin)
+  out$params <- mcmc_thin(out$params, burnin, thin)
   # Remove non-parameters
   out$params <- out$params[, -grep("msy|SSB|f", nm)]
   # Calculate sigma and tau and add to p_dat
@@ -168,12 +125,14 @@ calc_mcmc <- function(model,
   out$params_quants <- apply(out$params, 2, quantile, prob = probs)
   out$params_quants_log <- apply(out$params_quants, c(1, 2), log)
 
-  quantify <- function(mc_d, mpd_d){
+  quantify <- function(mc_d, mpd_d = NULL){
     # Apply the quantile function to all columns in a data frame and bind
     # the MPD value
     j <- apply(mc_d, 2, quantile, prob = probs)
-    j <- rbind(j, mpd_d)
-    rownames(j)[length(probs) + 1] <- "MPD"
+    if(!is.null(mpd_d)){
+      j <- rbind(j, mpd_d)
+      rownames(j)[length(probs) + 1] <- "MPD"
+    }
     j
   }
   # Spawning biomass
@@ -249,14 +208,14 @@ calc_mcmc <- function(model,
   out$ut_quants <- build_quant_list(mc$ut, mpd$ut)
 
   if(load_proj){
-    proj_dat <- calc_proj_probs(model, burnin, thin, ...)
+    # Burn in and calculate quantiles for each TAC level
+    out$proj <- mc$proj %>%
+      split(~TAC) %>%
+      map(~{mcmc_thin(.x, burnin = burnin, thin = thin)})
+    out$proj_quants <- out$proj %>%
+      map(quantify)
 
-    out$proj <- mcmc.thin(mc$proj[mc$proj$TAC == 0,], burnin, thin)
-    out$proj_quants <- apply(proj, 2, quantile, prob = probs, na.rm = TRUE)
     # Replace the final year of the sbt with the values obtained from the projections
-    # and include the model-estimated values and quantiles in case needed as 'nonproj' objects
-    out$nonproj_sbt <- out$sbt[, ncol(out$sbt)]
-    out$nonproj_sbt_quants <- quantile(out$nonproj_sbt, probs = probs, na.rm = TRUE)
     out$sbt[, ncol(out$sbt)] <- out$proj[, 2]
     out$sbt_quants <- quantify(out$sbt, mpd$sbt)
   }
@@ -269,10 +228,8 @@ calc_mcmc <- function(model,
 #' @param model An iscam model object
 #' @param burnin The number of samples to burn away from the beginning of the MCMC
 #' @param thin The thinning to apply to the MCMC posterior samples
-#' @param which.stock 1-5 for the five herring stocks: 1=HG, 2=PRD, 3=CC,
-#'   4=SOG, 5=WCVI
-#' @param which.model 1 = AM1 or 2 = AM2 for herring
-#' @param fixed.cutoffs A vector of catch cutoffs to use in decision tables
+#' @param fixed_cutoffs A vector of catch cutoffs to use in decision tables
+#' @param ... Extra arguments
 #'
 #' @details Extract and calculate probabilities from the projection model.
 #'   Used for decision tables in the document (see make.decision.table())
@@ -283,80 +240,63 @@ calc_mcmc <- function(model,
 calc_proj_probs <- function(model,
                             burnin,
                             thin,
-                            which.stock = NULL,
-                            which.model = NULL,
-                            fixed.cutoffs){
+                            fixed_cutoffs,
+                            ... ){
 
-  if(is.null(which.stock)){
-    warning("which.stock must be between 1 and 5.")
-    return(NULL)
-  }
-  if(which.stock < 1 | which.stock > 5){
-    warning("which.stock must be between 1 and 5.")
-    return(NULL)
-  }
-  if(is.null(which.model)){
-    warning("which.model must be 1 or 2, it is NULL.")
-    return(NULL)
-  }
-  if(which.model != 1 & which.model != 2){
-    warning("which.model must be 1 or 2, not ", which.model, ".")
-    return(NULL)
-  }
   mc <- model$mcmc
   proj <- mc$proj
   tac <- sort(unique(proj$TAC))
   p <- model$proj$ctl.options
-  s.yr <- p[rownames(p) == "syrmeanm", 1]
-  e.yr <- p[rownames(p) == "nyrmeanm", 1] + 2
-  e.yr.1 <- e.yr - 1
-  e.yr.2 <- e.yr - 2
-  fc <- fixed.cutoffs
-  proj.dat <- data.frame()
+  s_yr <- p[rownames(p) == "syrmeanm", 1]
+  e_yr <- p[rownames(p) == "nyrmeanm", 1] + 2
+  e_yr_1 <- e_yr - 1
+  e_yr_2 <- e_yr - 2
+  fc <- fixed_cutoffs
+  proj_dat <- data.frame()
   for(t in 1:length(tac)){
-    d <- proj[proj$TAC == tac[t],]
-    d <- mcmc.thin(d, burnin, thin)
+    d <- proj[proj$TAC == tac[t], ]
+    d <- mcmc_thin(d, burnin, thin)
     n.row <- nrow(d)
     k <- c(tac[t] * 1000,
-           length(which(d[,paste0("B", e.yr.1)] < d$X03B0)) / n.row,
-           median(d[,paste0("B", e.yr.1)] / d$X03B0),
-           length(which(d[,paste0("B", e.yr.1)] < (0.6 * d$B0))) / n.row)
-    #length(which(d[,paste0("B", e.yr.1)] < d$X09B0)) / n.row,
-    #median(d[,paste0("B", e.yr.1)] / d$X09B0))
+           length(which(d[,paste0("B", e_yr_1)] < d$X03B0)) / n.row,
+           median(d[,paste0("B", e_yr_1)] / d$X03B0),
+           length(which(d[,paste0("B", e_yr_1)] < (0.6 * d$B0))) / n.row)
+    #length(which(d[,paste0("B", e_yr_1)] < d$X09B0)) / n.row,
+    #median(d[,paste0("B", e_yr_1)] / d$X09B0))
 
     if(t == 1){
-      col.names <- c(latex.mlc(c(e.yr.1,
+      col_names <- c(latex.mlc(c(e_yr_1,
                                  "TAC (t)")),
                      latex.mlc(c(paste0("P(SB_{",
-                                        e.yr.1,
+                                        e_yr_1,
                                         "}<"),
                                  "0.3SB_0)"),
                                math.bold = TRUE),
                      latex.mlc(c(paste0("Med(SB_{",
-                                        e.yr.1,
+                                        e_yr_1,
                                         "}/"),
                                  "0.3SB_0)"),
                                math.bold = TRUE),
                      latex.mlc(c(paste0("P(SB_{",
-                                        e.yr.1,
+                                        e_yr_1,
                                         "}<"),
                                  "0.6SB_0)"),
                                math.bold = TRUE))
     }
     if(which.model == 2){
       k <- c(k,
-             length(which(d[,paste0("B", e.yr.1)] < fc[which.stock])) / n.row,
-             median(d[,paste0("B", e.yr.1)] / fc[which.stock]))
+             length(which(d[,paste0("B", e_yr_1)] < fc[which.stock])) / n.row,
+             median(d[,paste0("B", e_yr_1)] / fc[which.stock]))
       if(t == 1){
-        col.names <- c(col.names,
+        col_names <- c(col_names,
                        latex.mlc(c(paste0("P(SB_{",
-                                          e.yr.1,
+                                          e_yr_1,
                                           "} <"),
                                    paste0(f(fc[which.stock] * 1000),
                                           "~t)")),
                                  math.bold = TRUE),
                        latex.mlc(c(paste0("Med(SB_{",
-                                          e.yr.1,
+                                          e_yr_1,
                                           "} /"),
                                    paste0(f(fc[which.stock] * 1000),
                                           "~t)")),
@@ -374,51 +314,51 @@ calc_proj_probs <- function(model,
            # length(which(d$UT > 0.09)) / n.row,
            median(d$UT))
     if(t == 1){
-      col.names <- c(col.names,
+      col_names <- c(col_names,
                      latex.mlc(c(paste0("P(U_{",
-                                        e.yr.1,
+                                        e_yr_1,
                                         "}>"),
                                  "20\\%)"),
                                math.bold = TRUE),
                      latex.mlc(c(paste0("P(U_{",
-                                        e.yr.1,
+                                        e_yr_1,
                                         "}>"),
                                  "10\\%)"),
                                math.bold = TRUE),
                      #  latex.mlc(c(paste0("P(U_{",
-                     #                   e.yr.1,
+                     #                   e_yr_1,
                      #                  "}>"),
                      #         "5\\%)"),
                      #   math.bold = TRUE),
                      # latex.mlc(c(paste0("P(U_{",
-                     #                    e.yr.1,
+                     #                    e_yr_1,
                      #                  "}>"),
                      #        "3\\%)"),
                      #  math.bold = TRUE),
                      #latex.mlc(c(paste0("P(U_{",
-                     #                e.yr.1,
+                     #                e_yr_1,
                      #              "}>"),
                      #   "7\\%)"),
                      # math.bold = TRUE),
                      # latex.mlc(c(paste0("P(U_{",
-                     #                 e.yr.1,
+                     #                 e_yr_1,
                      #                "}>"),
                      #        "8\\%)"),
                      #     math.bold = TRUE),
                      #latex.mlc(c(paste0("P(U_{",
-                     #        e.yr.1,
+                     #        e_yr_1,
                      #          "}>"),
                      #  "9\\%)"),
                      #  math.bold = TRUE),
                      latex.math.bold(paste0("Med(U_{",
-                                            e.yr.1,
+                                            e_yr_1,
                                             "})")))
     }
-    proj.dat <- rbind(proj.dat, k)
+    proj_dat <- rbind(proj_dat, k)
   }
-  colnames(proj.dat) <- col.names
+  colnames(proj_dat) <- col_names
 
-  proj.dat
+  proj_dat
 }
 
 #' Delete all files with a specific extension recursively. By default, .rds files
@@ -1195,7 +1135,7 @@ read_mcmc <- function(model,
   }
 
   list_by <- function(d, by = "fleet"){
-    mc <- mcmc.thin(d, burnin, thin)
+    mc <- mcmc_thin(d, burnin, thin)
     ngear <- model$dat$num.gears
     tmp <- map(seq_len(ngear), ~{
       mc %>% select(contains(paste0(by, .x)))
@@ -1246,7 +1186,7 @@ read_mcmc <- function(model,
 
       }else if(.x[[2]] == "single"){
         names(d) <- str_extract(names(d), "[0-9]+$")
-        d <- mcmc.thin(d, burnin, thin)
+        d <- mcmc_thin(d, burnin, thin)
       }else if(.x[[2]] == "list"){
         if(length(.x) < 3){
           stop("sublist ", .y, " does not have a third element which is ",
@@ -1276,7 +1216,7 @@ read_mcmc <- function(model,
 #'
 #' @return A list of matrices, one element per group
 #' @export
-extract.group.matrices <- function(data = NULL,
+extract_group_matrices <- function(data = NULL,
                                    prefix = NULL){
 
   if(is.null(data) || is.null(prefix)){
@@ -1287,23 +1227,23 @@ extract.group.matrices <- function(data = NULL,
   names <- names(data)
   pattern <- paste0(prefix, "([[:digit:]]+)_[[:digit:]]+")
   groups  <- sub(pattern, "\\1", names)
-  unique.groups <- unique(as.numeric(groups))
-  tmp <- vector("list", length = length(unique.groups))
-  ## This code assumes that the groups are numbered sequentially from 1,2,3...N
-  for(group in 1:length(unique.groups)){
-    ## Get all the column names (group.names) for this group by making a specific
-    ##  pattern for it
-    group.pattern <- paste0(prefix, group, "_[[:digit:]]+")
-    group.names   <- names[grep(group.pattern, names)]
-    ## Remove the group number in the name, as it is not needed anymore
-    pattern      <- paste0(prefix, "[[:digit:]]+_([[:digit:]]+)")
-    group.names   <- sub(pattern, "\\1", group.names)
+  unique_groups <- unique(as.numeric(groups))
+  tmp <- vector("list", length = length(unique_groups))
+  # This code assumes that the groups are numbered sequentially from 1,2,3...N
+  for(group in 1:length(unique_groups)){
+    # Get all the column names (group_names) for this group by making a specific
+    #  pattern for it
+    group_pattern <- paste0(prefix, group, "_[[:digit:]]+")
+    group_names <- names[grep(group_pattern, names)]
+    # Remove the group number in the name, as it is not needed anymore
+    pattern <- paste0(prefix, "[[:digit:]]+_([[:digit:]]+)")
+    group_names <- sub(pattern, "\\1", group_names)
 
     # Now, the data must be extracted
     # Get the column numbers that this group are included in
-    dat <- data[,grep(group.pattern, names)]
-    colnames(dat) <- group.names
-    tmp[[group]]  <- dat
+    dat <- data[, grep(group_pattern, names)]
+    colnames(dat) <- group_names
+    tmp[[group]] <- dat
   }
   tmp
 }
@@ -1324,7 +1264,7 @@ extract.group.matrices <- function(data = NULL,
 #' @return a list (area-sex) of lists (gears) of matrices, one element
 #'  per group
 #' @export
-extract.area.sex.matrices <- function(data = NULL,
+extract_area_sex_matrices <- function(data = NULL,
                                       prefix = NULL){
 
   if(is.null(data) || is.null(prefix)){
@@ -1333,31 +1273,30 @@ extract.area.sex.matrices <- function(data = NULL,
 
   names <- names(data)
   pattern <- paste0(prefix, "([[:digit:]]+)_gear[[:digit:]]+_[[:digit:]]+")
-  groups  <- sub(pattern, "\\1", names)
-  unique.groups <- unique(as.numeric(groups))
-  tmp <- vector("list", length = length(unique.groups))
-  ## This code assumes that the groups are numbered sequentially from 1,2,3...N
-  for(group in 1:length(unique.groups)){
-    ## Get all the column names (group.names) for this group by making a
-    ##  specific pattern for it
-    group.pattern <- paste0(prefix, group, "_gear[[:digit:]]+_[[:digit:]]+")
-    group.names <- names[grep(group.pattern, names)]
-    ## Remove the group number in the name, as it is not needed anymore
+  groups <- sub(pattern, "\\1", names)
+  unique_groups <- unique(as.numeric(groups))
+  tmp <- vector("list", length = length(unique_groups))
+  # This code assumes that the groups are numbered sequentially from 1,2,3...N
+  for(group in 1:length(unique_groups)){
+    # Get all the column names (group_names) for this group by making a
+    #  specific pattern for it
+    group_pattern <- paste0(prefix, group, "_gear[[:digit:]]+_[[:digit:]]+")
+    group_names <- names[grep(group_pattern, names)]
+    # Remove the group number in the name, as it is not needed anymore
     pattern <- paste0(prefix, "[[:digit:]]+_gear([[:digit:]]+_[[:digit:]]+)")
-    group.names <- sub(pattern, "\\1", group.names)
-    ## At this point, group.names' elements look like this: 1_1963
-    ## The first value is the gear, and the second, the year.
-    ## Get the unique gears for this area-sex group
+    group_names <- sub(pattern, "\\1", group_names)
+    # At this point, group_names' elements look like this: 1_1963
+    # The first value is the gear, and the second, the year.
+    # Get the unique gears for this area-sex group
     pattern <- "([[:digit:]]+)_[[:digit:]]+"
-    gears <- sub(pattern, "\\1", group.names)
+    gears <- sub(pattern, "\\1", group_names)
     unique.gears <- unique(as.numeric(gears))
     tmp2 <- vector("list", length = length(unique.gears))
     for(gear in 1:length(unique.gears)){
       gear.pattern <- paste0(prefix, group,"_gear", gear, "_[[:digit:]]+")
-      ## Now, the data must be extracted
-      ## Get the column numbers that this group are included in
+      # Now, the data must be extracted
+      # Get the column numbers that this group are included in
       dat <- data[,grep(gear.pattern, names)]
-      ##colnames(dat) <- groupNames
       tmp2[[gear]] <- dat
     }
     tmp[[group]] <- tmp2
@@ -1367,36 +1306,37 @@ extract.area.sex.matrices <- function(data = NULL,
 
 #' Apply burnin and thinning to the MCMC posteriors
 #'
-#' @param mcmc.dat A data frame of the MCMC posteriors
+#' @param mcmc_dat A data frame of the MCMC posteriors
 #' @param burnin The number of samples to burn away from the beginning of the MCMC
 #' @param thin The thinning to apply to the MCMC posterior samples
 #'
-#' @return an mcmc.window object (CODA package)
+#' @return an mcmc window object (CODA package)
 #' @importFrom coda mcmc
 #' @export
-mcmc.thin <- function(mcmc.dat,
+mcmc_thin <- function(mcmc_dat,
                       burnin,
                       thin){
 
-  if(is.vector(mcmc.dat)){
-    mcmc.obj <- mcmc(mcmc.dat)
-    mcmc.window <- window(mcmc.obj,
+  if(is.vector(mcmc_dat)){
+    mcmc_obj <- mcmc(mcmc_dat)
+    mcmc_window <- window(mcmc_obj,
                           start = burnin + 1,
                           thin = thin)
-    return(mcmc.window)
+    return(mcmc_window)
   }
-  nm <- names(mcmc.dat)
-  mcmc.obj <- apply(mcmc.dat, 2, mcmc)
-  mcmc.window <- NULL
-  for(col in 1:ncol(mcmc.obj)){
-    tmp <- window(mcmc.obj[,col],
+  nm <- names(mcmc_dat)
+  mcmc_obj <- apply(mcmc_dat, 2, mcmc)
+  mcmc_window <- NULL
+  for(col in 1:ncol(mcmc_obj)){
+    tmp <- window(mcmc_obj[,col],
                   start = burnin + 1,
                   thin = thin)
-    mcmc.window <- cbind(mcmc.window, tmp)
+    mcmc_window <- cbind(mcmc_window, tmp)
   }
-  mcmc.window <- as.data.frame(mcmc.window)
-  names(mcmc.window) <- nm
-  mcmc.window
+  mcmc_window <- as.data.frame(mcmc_window)
+  names(mcmc_window) <- nm
+
+  mcmc_window
 }
 
 #' Extract an age structure MPD object from iSCAM output (.rep file)

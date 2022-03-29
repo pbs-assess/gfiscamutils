@@ -16,8 +16,8 @@ mcmc.fishing.mort.file <- "iscam_ft_mcmc.csv"
 mcmc.natural.mort.file <- "iscam_m_mcmc.csv"
 mcmc.fishing.mort.u.file <- "iscam_ut_mcmc.csv"
 mcmc.vuln.biomass.file <- "iscam_vbt_mcmc.csv"
-mcmc.proj.file <- "iscammcmc_proj_Gear1.csv"
-mpd.proj.file <- "iscammpd_proj_Gear1.csv"
+mcmc.proj.file <- "iscam_mcmc_proj.csv"
+mpd.proj.file <- "iscam_mpd_proj.csv"
 output.files <- c(rep.file,
                   par.file,
                   "admb_runtime.log",

@@ -4,14 +4,7 @@
 \alias{calc_proj_probs}
 \title{Extract and calculate probabilities from the iscam projection model}
 \usage{
-calc_proj_probs(
-  model,
-  burnin,
-  thin,
-  which.stock = NULL,
-  which.model = NULL,
-  fixed.cutoffs
-)
+calc_proj_probs(model, burnin, thin, fixed_cutoffs, ...)
 }
 \arguments{
 \item{model}{An iscam model object}
@@ -20,12 +13,9 @@ calc_proj_probs(
 
 \item{thin}{The thinning to apply to the MCMC posterior samples}
 
-\item{which.stock}{1-5 for the five herring stocks: 1=HG, 2=PRD, 3=CC,
-4=SOG, 5=WCVI}
+\item{fixed_cutoffs}{A vector of catch cutoffs to use in decision tables}
 
-\item{which.model}{1 = AM1 or 2 = AM2 for herring}
-
-\item{fixed.cutoffs}{A vector of catch cutoffs to use in decision tables}
+\item{...}{Extra arguments}
 }
 \value{
 A data frame which has its names formatted for latex
