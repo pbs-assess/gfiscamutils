@@ -215,8 +215,8 @@ calc_mcmc <- function(model,
     out$proj_quants <- out$proj %>%
       map(quantify)
 
-    # Replace the final year of the sbt with the values obtained from the projections
-    out$sbt[, ncol(out$sbt)] <- out$proj[, 2]
+    # Replace the final year of the sbt with the values obtained from the TAC 0 projection
+    out$sbt[, ncol(out$sbt)] <- out$proj$`0`[, 2]
     out$sbt_quants <- quantify(out$sbt, mpd$sbt)
   }
 
