@@ -2,7 +2,8 @@
 % Please edit documentation in R/model-setup.R
 \name{model_setup}
 \alias{model_setup}
-\title{Load models and set up the directory names}
+\title{Load models and set up lists and classes for the base model, bridge model groups, and
+sensitivity model groups}
 \usage{
 model_setup(
   main_dirs = NULL,
@@ -23,24 +24,43 @@ model plots, one name for each model, where the list elements represent a group 
 \item{...}{Arguments to pass to [create_rds_file()]}
 }
 \value{
-A list of three items, the base_model, the list of bridge model groups, and
-the list of sensitivity model groups. The two lists are groups of models which are
-to be compared with each other in the document. This simplifies plotting and table functions.
+A list of three items, the base_model inside a single-element list, the list of
+bridge model groups, and the list of sensitivity model groups. `bridge_grp` and `sens_grp`
+are groups lists of models which are to be compared with each other in the document.
+This simplifies plotting and table functions
 }
 \description{
-Load models and set up the directory names
+Load models and set up lists and classes for the base model, bridge model groups, and
+sensitivity model groups
 }
 \examples{
 \dontrun{
 library(gfiscamutils)
-bridge_models_dirs <- c("01-base", "02-bridge-update-data")
-sens_models_dirs <- list(c("01-base", "02-bridge-update-data"),
-                         "01-base")
-main_dirs <- set_dirs(base_model_dir = "base",
-                      bridge_models_dirs = bridge_models_dirs,
-                      sens_models_dirs = sens_models_dirs)
-delete_files_ext(main_dirs$models, ext = "rds") # optional, shown for exposure
-model_setup <- function(main_dirs,
+bridge_models_dirs <- list(c("01-base",
+                             "02-bridge-update-data"),
+                           c("01-base",
+                             "03-bridge-update-survey"))
+bridge_models_text <- list(c("base model",
+                             "Add new data"),
+                           c("base model",
+                             "Add new survey index point"))
+sens_models_dirs <- list(c("01-base",
+                           "10-high-m",
+                           "11-low-m"),
+                         c("01-base",
+                           "12-high-sigma-r"))
+sens_models_text <- list(c("base model",
+                           "Increase prior for M",
+                           "Decrease prior for M"),
+                         c("base model",
+                           "Increase prior for sigma R"))
+drs <- set_dirs(base_model_dir = "base",
+                bridge_models_dirs = bridge_models_dirs,
+                sens_model_dirs = sens_model_dirs)
+delete_files_ext(drs$models, ext = "rds") # If you want to delete all rds files
+model_setup <- function(drs,
+                        bridge_models_text = bridge_models_text,
+                        sens_models_text = sens_models_text,
                         overwrite_rds_files = TRUE)
 }
 }

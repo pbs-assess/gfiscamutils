@@ -813,7 +813,6 @@ read_control_file <- function(file = NULL,
                               num.gears = NULL,
                               num.age.gears = NULL,
                               verbose = FALSE){
-  message("File = ", file)
 
   if(is.null(num.gears)){
     stop("You must supply the total number of gears (num.gears).")

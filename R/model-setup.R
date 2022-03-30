@@ -95,7 +95,8 @@ set_dirs <- function(nongit_dir = file.path(dirname(here()), paste0(basename(her
        sens_models_dirs = sens_models_dirs_full)
 }
 
-#' Load models and set up the directory names
+#' Load models and set up lists and classes for the base model, bridge model groups, and
+#' sensitivity model groups
 #'
 #' @param main_dirs Output list from [set_dirs()]
 #' @param bridge_models_text A list of vectors of text strings to show in the legends for bridge
@@ -104,22 +105,40 @@ set_dirs <- function(nongit_dir = file.path(dirname(here()), paste0(basename(her
 #' model plots, one name for each model, where the list elements represent a group of models
 #' @param ... Arguments to pass to [create_rds_file()]
 #'
-#' @return A list of three items, the base_model, the list of bridge model groups, and
-#' the list of sensitivity model groups. The two lists are groups of models which are
-#' to be compared with each other in the document. This simplifies plotting and table functions.
+#' @return A list of three items, the base_model inside a single-element list, the list of
+#' bridge model groups, and the list of sensitivity model groups. `bridge_grp` and `sens_grp`
+#' are groups lists of models which are to be compared with each other in the document.
+#' This simplifies plotting and table functions
 #' @importFrom purrr map_chr flatten
 #' @export
 #' @examples
 #' \dontrun{
 #' library(gfiscamutils)
-#' bridge_models_dirs <- c("01-base", "02-bridge-update-data")
-#' sens_models_dirs <- list(c("01-base", "02-bridge-update-data"),
-#'                          "01-base")
-#' main_dirs <- set_dirs(base_model_dir = "base",
-#'                       bridge_models_dirs = bridge_models_dirs,
-#'                       sens_models_dirs = sens_models_dirs)
-#' delete_files_ext(main_dirs$models, ext = "rds") # optional, shown for exposure
-#' model_setup <- function(main_dirs,
+#' bridge_models_dirs <- list(c("01-base",
+#'                              "02-bridge-update-data"),
+#'                            c("01-base",
+#'                              "03-bridge-update-survey"))
+#' bridge_models_text <- list(c("base model",
+#'                              "Add new data"),
+#'                            c("base model",
+#'                              "Add new survey index point"))
+#' sens_models_dirs <- list(c("01-base",
+#'                            "10-high-m",
+#'                            "11-low-m"),
+#'                          c("01-base",
+#'                            "12-high-sigma-r"))
+#' sens_models_text <- list(c("base model",
+#'                            "Increase prior for M",
+#'                            "Decrease prior for M"),
+#'                          c("base model",
+#'                            "Increase prior for sigma R"))
+#' drs <- set_dirs(base_model_dir = "base",
+#'                 bridge_models_dirs = bridge_models_dirs,
+#'                 sens_model_dirs = sens_model_dirs)
+#' delete_files_ext(drs$models, ext = "rds") # If you want to delete all rds files
+#' model_setup <- function(drs,
+#'                         bridge_models_text = bridge_models_text,
+#'                         sens_models_text = sens_models_text,
 #'                         overwrite_rds_files = TRUE)
 #' }
 model_setup <- function(main_dirs = NULL,
@@ -164,7 +183,6 @@ model_setup <- function(main_dirs = NULL,
       unique_models <- map(unique_models_dirs, ~{load_rds_file(.x)}) %>%
         set_names(unique_models_dirs)
 
-      #base_model <- unique_models[[match(base_model_dir, unique_models_dirs)]]
       # sens_models is a list of lists of sensitivities of the same structure as sens_models_dirs.
       # the base_model is first in each sensitivity group list
       models <- map(.x, ~{
@@ -175,26 +193,27 @@ model_setup <- function(main_dirs = NULL,
     }
   }, ...)
 
-  if(length(main_dirs$base_model_dir) == 1){
-    base_model <- j[[1]][[1]][[1]]
-  }else{
-    base_model <- j[[1]][[1]]
-  }
-  bridge_models <- j[[2]]
-  sens_models <- j[[3]]
+  base_model <- j[[1]][[1]]
+  names(base_model) <- "Base model"
+  class(base_model) <- mdl_lst_cls
 
-  bridge_models <- map2(bridge_models, bridge_models_text, ~{
+  bridge_grps <- j[[2]]
+  bridge_grps <- map2(bridge_grps, bridge_models_text, ~{
     names(.x) <- factor(.y)
+    class(.x) <- mdl_lst_cls
     .x
   })
-  class(bridge_models) <- mdl_lst_cls
-  sens_models <- map2(sens_models, sens_models_text, ~{
+  class(bridge_grps) <- mdl_grp_cls
+
+  sens_grps <- j[[3]]
+  sens_grps <- map2(sens_grps, sens_models_text, ~{
     names(.x) <- factor(.y)
+    class(.x) <- mdl_lst_cls
     .x
   })
-  class(sens_models) <- mdl_lst_cls
+  class(sens_grps) <- mdl_grp_cls
 
   list(base_model = base_model,
-       bridge_models = bridge_models,
-       sens_models = sens_models)
+       bridge_grps = bridge_grps,
+       sens_grps = sens_grps)
 }

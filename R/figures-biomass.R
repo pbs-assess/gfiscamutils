@@ -47,25 +47,23 @@ plot_ts_mpd <- function(models,
   if(!type %in% c("sbt", "rt")){
     stop("type '", type, "' is not one of the implemented time series", call. = FALSE)
   }
-  mpd <- map(models, ~{
-    .x$mpd
-  })
-  sbt <- map(mpd, ~{
-    .x[[type]]
-  })
-  start_year <- map_dbl(models, ~{
-    .x$dat$start.yr
-  }) %>%
-    min
-  end_year <- map_dbl(models, ~{
-    .x$dat$end.yr
-  }) %>%
-    max
+
+  if(class(models) != mdl_lst_cls){
+    stop("The `models` list is not a gfiscamutils::mdl_lst_cls class. If you are trying to plot ",
+         "a single model, modify it like this first:\n\n",
+         "model <- list(model)\n",
+         "class(model) <- mdl_lst_cls\n")
+  }
+
+  mpd <- map(models, ~{.x$mpd})
+  sbt <- map(mpd, ~{.x[[type]]})
+  start_year <- map_dbl(models, ~{.x$dat$start.yr}) %>% min
+  end_year <- map_dbl(models, ~{.x$dat$end.yr}) %>% max
   sbt <- map(sbt, ~{
     length(.x) = end_year - start_year + 1
     .x
   }) %>%
-    bind_rows
+    do.call(rbind, .)
 
   # Get initial estimate, ro, sbo
   init_type <- switch(type,
@@ -75,9 +73,8 @@ plot_ts_mpd <- function(models,
   init_df <- tibble(year = start_year - 1,
                     model = names(init),
                     sbt = map_dbl(init, ~{.x}))
-
-  init_vals <- init %>% as_tibble %>% t() %>% as_tibble(rownames = "model") %>% rename(sbt = V1)
-
+  init_vals <- init_df %>% select(-year)
+browser()
   if(type == "sbt"){
     bind_yrs <- start_year:end_year
   }else if(type == "rt"){
@@ -86,7 +83,7 @@ plot_ts_mpd <- function(models,
   val <- bind_yrs %>%
     as_tibble() %>%
     `names<-`("year") %>%
-    bind_cols(sbt) %>% pivot_longer(cols = -year, names_to = "model", values_to = "sbt")
+    bind_cols(t(sbt)) %>% pivot_longer(cols = -year, names_to = "model", values_to = "sbt")
 
   if(rel){
     val <- val %>% left_join(init_vals, by = "model") %>%
@@ -147,337 +144,110 @@ plot_ts_mpd <- function(models,
 #' @param ... Other graphical arguments
 #'
 #' @return Nothing
+#' @importFrom ggdist geom_lineribbon
 #' @export
-make.biomass.mcmc.plot <- function(models,
-                                   model_names = NULL,
-                                   ylim,
-                                   opacity = 75,
-                                   offset = 0.1,
-                                   append_base_txt = NULL,
-                                   show_bmsy_line = FALSE,
-                                   show_bo_line = FALSE,
-                                   ind_letter = NULL,
-                                   leg = NULL,
-                                   ...){
+plot_ts_mcmc <- function(models,
+                         #model_names = factor(names(models), levels = names(models)),
+                         type = "sbt",
+                         rel = FALSE,
+                         legend_title = "Bridge model",
+                         palette = "Paired",
+                         line_width = 1,
+                         point_size = 2,
+                         lineribbon = FALSE,
+                         alpha = 0.5,
+                         offset = 0.1,
+                         append_base_txt = NULL,
+                         show_bmsy_line = FALSE,
+                         show_bo_line = FALSE,
+                         ind_letter = NULL,
+                         leg = NULL,
+                         ...){
 
-  #par(mar = c(5.1, 5.1, 4.1, 3.1))
-
-  if(!is.null(models$path)){
-    # Single model, not in a list
-    models <- list(models)
-  }
-  sbt_quants <- map(models, ~{.x$mcmccalcs$sbt_quants})
-  ro_quants <- map(models, ~{.x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "ro"]})
-  sbo <- map(models, ~{.x$mcmccalcs$params[, colnames(.x$mcmccalcs$params) == "sbo"]})
-  sbo_quants <- map(models, ~{.x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "sbo"]})
-  yrs <- map(sbt_quants, ~{as.numeric(colnames(.x))})
-
-  xlim <- map(seq_along(yrs), ~{c(min(yrs[[.x]]), max(yrs[[.x]]))})
-  xlim <- do.call(rbind, xlim)
-  xlim <- c(min(xlim), max(xlim))
-
-  if(is.null(dev.list())){
-    # If layout() is used outside this function,
-    #  it calls plot.new and will mess up the figures
-    #  if we call it again
-    plot.new()
-  }
-  plot.window(xlim = xlim, ylim = ylim, xlab = "", ylab = "")
-
-  nul <- imap(yrs, ~{
-    draw.envelope(yrs[[.y]],
-                  sbt_quants[[.y]],
-                  xlab = "",
-                  ylab = "",
-                  col = x,
-                  las = 1,
-                  xlim = xlim,
-                  ylim = ylim,
-                  opacity = opacity,
-                  first = ifelse(x == 1, TRUE, FALSE),
-                  ...)
-    }, ...)
-  # Add sbo points and ci bars
-  nul <- imap(yrs, ~{
-    points(yrs[[.y]][1] - (x - 1) * offset,
-           sbo[[.y]][2],
-           pch = 19,
-           col = .y)
-    arrows(yrs[[.y]][1] - (.y - 1) * offset,
-           sbo[[.y]][1],
-           yrs[[.y]][1] - (.y - 1) * offset,
-           sbo[[.y]][3],
-           lwd = 2,
-           code = 0,
-           col = .y)
-  })
-
-  if(show_bo_line){
-    abline(h = 0.4 * sbo[[1]][2],
-           col = "red",
-           lty = 1,
-           lwd = 2)
-    mtext(expression("0.4SB"[0]),
-          4,
-          at = 0.4 * sbo[[1]][2],
-          col = "red",
-          las = 1)
+  if(!type %in% c("sbt", "rt")){
+    stop("type '", type, "' is not one of the implemented time series", call. = FALSE)
   }
 
-  #TODO - continue here
-  if(show_bmsy_line){
-    sbmsy_raw <- r.quants[[1]][rownames(r.quants[[1]]) == "bmsy", ]
-    sbmsy <- as.numeric(sbmsy.raw[2:4])
-    abline(h = 0.4 * sbmsy[2],
-           col = "red",
-           lty = 1,
-           lwd = 2)
-    mtext(expression("0.4B"[MSY]),
-          4,
-          at = 0.4 * sbmsy[2],
-          col = "red",
-          las = 1)
-    abline(h = 0.8 * sbmsy[2],
-           col = "green",
-           lty = 1,
-           lwd = 2)
-    mtext(expression("0.8B"[MSY]),
-          4,
-          at = 0.8 * sbmsy[2],
-          col = "green",
-          las = 1)
-  }
-  mtext("Year", 1, line = 3)
-  mtext("Biomass (1000 mt)", 2, line = 3)
-
-  if(!is.null(model.names) & !is.null(leg)){
-    if(!is.null(append.base.txt)){
-      model.names[[1]] <- paste0(model.names[[1]],
-                                 append.base.txt)
-    }
-    legend(leg,
-           model.names,
-           bg = "transparent",
-           col = 1:length(models),
-           lty = 1,
-           lwd = 2)
+  if(class(models) != mdl_lst_cls){
+    stop("The `models` list is not a gfiscamutils::mdl_lst_cls class. If you are trying to plot ",
+         "a single model, modify it like this first:\n\n",
+         "model <- list(model)\n",
+         "class(model) <- mdl_lst_cls\n")
   }
 
-  if(!is.null(ind.letter)){
-    panel.letter(ind.letter)
-  }
-}
+  start_yr <- map_dbl(models, ~{.x$dat$start.yr}) %>% min
+  end_yr <- map_dbl(models, ~{.x$dat$end.yr}) %>% max
+  len <- end_yr - start_yr + 1
+  bind_yrs <- start_yr:end_yr
 
-#' Plot the relative biomass trajectories for iscam models
-#'
-#' Plot the relative biomass with credibility intervals for the mcmc
-#' cases of the models
-#'
-#' @rdname make.biomass.mcmc.plot
-#' @export
-make.depletion.mcmc.plot <- function(models,
-                                     model.names = NULL,
-                                     ylim = c(0, 1),
-                                     opacity = 75,
-                                     append.base.txt = NULL,
-                                     ind.letter = NULL,
-                                     leg = NULL,
-                                     ...
-                                     ){
-
-  par(mar = c(5.1, 5.1, 4.1, 3.1))
-
-  depl <- lapply(models,
-                 function(x){
-                   x$mcmccalcs$depl.quants})
-  yrs <- lapply(depl,
-                function(x){
-                  as.numeric(colnames(x))})
-  xlim <- lapply(1:length(yrs),
-                 function(x){
-                   c(min(yrs[[x]]), max(yrs[[x]]))})
-  xlim <- do.call(rbind, xlim)
-  xlim <- c(min(xlim), max(xlim))
-
-  if(is.null(dev.list())){
-    ## If layout() is used outside this function,
-    ##  it calls plot.new and will mess up the figures
-    ##  if we call it again
-    plot.new()
-  }
-  plot.window(xlim = xlim,
-              ylim = ylim,
-              xlab = "",
-              ylab = "")
-
-  lapply(1:length(yrs),
-         function(x){
-           draw.envelope(yrs[[x]],
-                         depl[[x]],
-                         ylab = "",
-                         xlab = "",
-                         col = x,
-                         las = 1,
-                         xlim = xlim,
-                         ylim = ylim,
-                         opacity = opacity,
-                         first = ifelse(x == 1, TRUE, FALSE),
-                         ...)})
-  mtext("Year", 1, line = 3)
-  mtext("Depletion", 2, line = 3)
-
-  if(!is.null(model.names) & !is.null(leg)){
-    if(!is.null(append.base.txt)){
-      model.names[[1]] <- paste0(model.names[[1]],
-                                 append.base.txt)
-    }
-    legend(leg,
-           model.names,
-           bg = "transparent",
-           col = 1:length(models),
-           lty = 1,
-           lwd = 2)
+  if(type == "sbt"){
+    ts_quants <- map(models, ~{
+      j <- .x$mcmccalcs$sbt_quants
+      if(len < ncol(j)){
+        j <- j[, 1:len]
+      }
+      j
+    })
+    tso_quants <- map(models, ~{.x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "sbo"]})
+  }else if(type == "rt"){
+    ts_quants <- map(models, ~{.x$mcmccalcs$rt_quants})
+    tso_quants <- map(models, ~{.x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "ro"]})
+    bind_yrs <- bind_yrs + 1
   }
 
-  if(!is.null(ind.letter)){
-    panel.letter(ind.letter)
-  }
-}
+  # TODO tso_quants muyst be same format as ts_quants
+  tso_quants <- tso_quants %>%
+    bind_rows() %>%
+    bind_cols(as_tibble(names(tso_quants))) %>%
+    select(value, everything()) %>%
+    rename(model = value) %>%
+    pivot_longer(!model, names_to = "quantile", values_to = "value") %>%
+    mutate(year = start_yr - 1) %>%
+    select(model, quantile, year, value)
 
-#' Plot the MPD biomass time series along with the associated retrospectives.
-#'
-#' Biomass can be absolute, or relative (i.e., depletion). Also plot estimated
-#' unfished spawning biomass as points.
-#'
-#' @param model an iscam model object
-#' @param depl logical; if TRUE, plot the depletion line(s)
-#' @param xlim numeric vector of length 2; trim the x-axis (default NA)
-#' @param offset horizontal offset for B0 points in depletion plot
-#' @param leg show the legend? Logical
-#' @param a_trans transparency for lines and points
-#' @param translate logical; translate labels
-#'
-#' @return a ggplot object
-#' @export
-#' @importFrom ggplot2 aes geom_line scale_y_continuous coord_cartesian
-#' scale_x_continuous geom_point position_dodge ylab labs scale_colour_viridis_d
-#' guides guide_legend
-#' @importFrom reshape2 melt
-#' @importFrom dplyr rename rename_at vars contains funs bind_cols
-#' @importFrom scales comma
-#' @importFrom tibble as.tibble
-#' @importFrom forcats fct_relevel
-biomass.plot.mpd <- function(model,
-                             depl = FALSE,
-                             xlim = NA,
-                             offset = 0.7,
-                             leg = TRUE,
-                             a_trans = 0.75,
-                             translate = FALSE){
+  ts_quants <- imap(ts_quants, ~{
+    .x %>%
+      t() %>%
+      as.data.frame %>%
+      add_rownames(var = "year") %>%
+      mutate(model = .y) %>%
+      select(model, year, everything()) %>%
+      mutate(year = as.numeric(year))
+    # .x %>%
+    #   as.data.frame %>%
+    #   add_rownames(var = "quantile") %>%
+    #   pivot_longer(!quantile, names_to = "year", values_to = "value") %>%
+    #   mutate(model = .y) %>%
+    #   select(model, quantile, year, value)
+  }) %>%
+    bind_rows
 
-  if(class(model) == mdl_lst_cls){
-    model <- model[[1]]
-    if(class(model) != mdl_cls){
-      stop("The structure of the model list is incorrect.")
-    }
-  }
-  base_model_lst <- list(model)
-  class(base_model_lst) <- mdl_lst_cls
-  models <- c(base_model_lst, model$retro)
-
-  yrs <- lapply(models,
-                function(x){
-                  x$mpd$syr:(x$mpd$nyr + 1)})
-  if(depl){
-    bt <- lapply(models,
-                 function(x){
-                   x$mpd$sbt / x$mpd$sbo })
+  if(rel){
+    y_label <- switch(type,
+                      "sbt" = "Relative Spawning biomass",
+                      "rt" = "Relative Recruitment")
   }else{
-    bt <- lapply(models,
-                 function(x){
-                   x$mpd$sbt})
+    y_label <- switch(type,
+                      "sbt" = "Spawning biomass ('000 tonnes)",
+                      "rt" = "Recruitment (millions)")
   }
-  bt <- lapply(1:length(bt),
-               function(x){
-                 tmp <- as.data.frame(t(bt[[x]]))
-                 rownames(tmp) <- "Biomass (t)"
-                 colnames(tmp) <-  yrs[[x]]
-                 tmp})
-  models.names <- paste0("-", 1:(length(bt) - 1), " ",
-                         en2fr("Years", translate, case="lower"))
-  models.names <- c(en2fr("Base model", translate, case="sentence"),
-                    models.names)
-  names(bt) <- models.names
+  browser()
 
-  bt <- bind_rows(bt, .id = "Sensitivity") %>%
-    melt() %>%
-    as.tibble() %>%
-    mutate(Year = variable, `Biomass (t)` = value) %>%
-    select(-c(variable, value)) %>%
-    mutate(Year = as.numeric(as.character(Year))) %>%
-    mutate(Sensitivity = fct_relevel(Sensitivity,
-                                     models.names,
-                                     after = 0))
+  g <- ts_quants %>%
+    ggplot(aes(x = year, y = `50%`, ymin = `2.5%`, ymax = `97.5%`, fill = model)) +
+    xlab("Year") +
+    ylab(y_label) +
+    scale_color_brewer(palette = palette)
 
-  bo <- lapply(models,
-               function(x){
-                 x$mpd$sbo
-               })
-  names(bo) <- models.names
-  bo <- t(bind_cols(bo))
-  bo <- cbind(rownames(bo), bo, min(bt$Year))
-  colnames(bo) <- c("Sensitivity", "Biomass (t)", "Year")
-  bo <- bo %>%
-    as.tibble() %>%
-    mutate(`Biomass (t)` = as.numeric(`Biomass (t)`),
-           Year = as.numeric(Year))
+  if(lineribbon){
+    g <- g + geom_lineribbon(alpha = 0.5)
+  }else{
+    g <- g +
+      geom_line(aes(color = model), size = line_width) +
+      geom_line(aes(y = `2.5%`, color = model), size = 0.5, lty = 2) +
+      geom_line(aes(y = `97.5%`, color = model), size = 0.5, lty = 2)
 
-  p <- ggplot(bt, aes(x = Year,
-                      y = `Biomass (t)`,
-                      #ymin = 0,
-                      #ymax = max(`Biomass (t)`),
-                      group = Sensitivity)) +
-    geom_line(aes(color = Sensitivity),
-              size = 1,
-              na.rm = TRUE,
-              alpha = a_trans) +
-    scale_colour_viridis_d( ) +
-    theme(legend.position = "top",
-          #legend.justification = c(1, 1),
-          legend.title = element_blank()) +
-    guides(fill = guide_legend(nrow = 2)) +
-    labs( x=en2fr("Year", translate, case="sentence"),
-          y=paste( en2fr("Biomass", translate, case="sentence"), "(t)") ) +
-    scale_y_continuous(labels = comma,
-                       limits = c(0, NA)) +
-    coord_cartesian(expand = TRUE) +
-    scale_x_continuous(breaks = seq(0, 3000, 5))
-
-  if(!is.na(xlim[1])){
-    p <- p +
-      xlim(xlim[1], xlim[2])
   }
+  browser()
 
-  if(!depl){
-    if(!is.na(xlim[1])){
-      bo$Year <- xlim[1]
-    }
-    p <- p + geom_point(data = bo,
-                        size = 2,
-                        position = position_dodge(width = offset),
-                        mapping = aes(color = Sensitivity),
-                        show.legend = FALSE,
-                        na.rm = TRUE,
-                        alpha = a_trans)
-  }
-
-  if(depl){
-    p <- p + ylab(en2fr("Relative biomass", translate, case="sentence"))
-  }
-
-  if(length(models) == 1){
-    p <- p + theme(legend.position = "none")
-  }
-
-  p
 }
