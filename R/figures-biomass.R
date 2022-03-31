@@ -349,6 +349,46 @@ plot_ts_mcmc <- function(models,
                                   "#FFFF99",
                                   "#B15928"))
 
+  if(show_bo_lines){
+    # Show the B0 lines for the first model with CI, behind model lines
+    tso_base <- tso_quants %>%
+      slice(1)
+    # Only two lines allowed, Limit Reference Point (LRP) and Upper Stock
+    # Reference (USR)
+    tso_multiples <- imap(c(0.2, 0.4), ~{
+      tso_base %>%
+        mutate(!!sym(quants[1]) := !!sym(quants[1]) * .x,
+               !!sym(quants[2]) := !!sym(quants[2]) * .x,
+               !!sym(quants[3]) := !!sym(quants[3]) * .x) %>%
+        mutate(multiplier = .x)
+    }) %>%
+      bind_rows
+    if(refpts_ribbon){
+      g <- g +
+        geom_rect(data = tso_multiples,
+                  aes(xmin = start_yr, xmax = end_yr),
+                  alpha = refpts_alpha,
+                  fill = c("red", "green")) +
+        geom_hline(data = tso_multiples,
+                   aes(yintercept = !!sym(quants[2])),
+                   color = c("red", "green"), lty = 1, lwd = 2)
+    }else{
+      g <- g +
+        geom_hline(data = tso_multiples,
+                   aes(yintercept = !!sym(quants[1])),
+                   color = c("red", "green"),
+                   lty = 4) +
+        geom_hline(data = tso_multiples,
+                   aes(yintercept = !!sym(quants[2])),
+                   color = c("red", "green"),
+                   lty = 1) +
+        geom_hline(data = tso_multiples,
+                   aes(yintercept = !!sym(quants[3])),
+                   color = c("red", "green"),
+                   lty = 4)
+    }
+  }
+
   if(rel){
     g <- g + scale_x_continuous(limits = c(xlim[1], xlim[2]),
                                 breaks = min(xlim):max(xlim),
@@ -411,45 +451,6 @@ plot_ts_mcmc <- function(models,
       geom_pointrange(data = tso_quants, aes(color = model))
   }
 
-  if(show_bo_lines){
-    # Show the B0 lines for the first model with CI
-    tso_base <- tso_quants %>%
-      slice(1)
-    # Only two lines allowed, Limit Reference Point (LRP) and Upper Stock
-    # Reference (USR)
-    tso_multiples <- imap(c(0.2, 0.4), ~{
-      tso_base %>%
-        mutate(!!sym(quants[1]) := !!sym(quants[1]) * .x,
-               !!sym(quants[2]) := !!sym(quants[2]) * .x,
-               !!sym(quants[3]) := !!sym(quants[3]) * .x) %>%
-        mutate(multiplier = .x)
-    }) %>%
-      bind_rows
-    if(refpts_ribbon){
-      g <- g +
-        geom_rect(data = tso_multiples,
-                  aes(xmin = start_yr, xmax = end_yr),
-                  alpha = refpts_alpha,
-                  fill = c("red", "green")) +
-        geom_hline(data = tso_multiples,
-                   aes(yintercept = !!sym(quants[2])),
-                   color = c("red", "green"), lty = 1, lwd = 3)
-    }else{
-      g <- g +
-        geom_hline(data = tso_multiples,
-                   aes(yintercept = !!sym(quants[1])),
-                   color = c("red", "green"),
-                   lty = 4) +
-        geom_hline(data = tso_multiples,
-                   aes(yintercept = !!sym(quants[2])),
-                   color = c("red", "green"),
-                   lty = 1) +
-        geom_hline(data = tso_multiples,
-                   aes(yintercept = !!sym(quants[3])),
-                   color = c("red", "green"),
-                   lty = 4)
-    }
-  }
 
   if(show_bmsy_lines){
 
