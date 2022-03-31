@@ -16,13 +16,16 @@ plot_ts_mcmc(
   ylim = NULL,
   line_width = 1,
   point_size = 2,
-  lineribbon = FALSE,
+  line_ribbon = FALSE,
+  refpts_ribbon = TRUE,
   alpha = 0.2,
+  refpts_alpha = alpha,
   offset = 0.1,
   bo_dodge = 0.1,
   x_space = 0.5,
   append_base_txt = NULL,
-  show_bmsy_line = FALSE,
+  show_bo_lines = FALSE,
+  show_bmsy_lines = FALSE,
   ind_letter = NULL,
   leg_loc = NULL,
   probs = c(0.025, 0.5, 0.975),
@@ -57,10 +60,17 @@ will be used}
 
 \item{point_size}{Point size for all median points on the plot}
 
-\item{lineribbon}{Logical. If `TRUE`, make the first model plotted an envelope
+\item{line_ribbon}{Logical. If `TRUE`, make the first model plotted an envelope
 of the credible interval, surrounding the median line}
 
-\item{alpha}{The opacity between 0 to 1 of the envelope shown when `lineribbon == TRUE`}
+\item{refpts_ribbon}{Logical. If `TRUE`, make the first model's reference points lines
+(`show_bo_lines` and/or `show_bmsy_lines` must be `TRUE`) plotted an envelope
+of the credible interval, surrounding the median lines for the reference points}
+
+\item{alpha}{The opacity between 0 to 1 of the envelope shown when `line_ribbon == TRUE`}
+
+\item{refpts_alpha}{The opacity between 0 to 1 of the envelope shown for referece points
+when `refpts_ribbon == TRUE` and `show_bo_lines` and/or `show_bmsy_lines` are `TRUE`}
 
 \item{offset}{The amount on the x-axis to offset each point and line for
 multiple models. Used for recruitment plots}
@@ -74,7 +84,9 @@ with. To remove all padding, make this 0}
 \item{append_base_txt}{Text to append to the first model's name for display on the
 plot legend}
 
-\item{show_bmsy_line}{Show the Bmsy lines (0.4 and 0.8 Bmsy)}
+\item{show_bo_lines}{Show the B0 lines (0.2 and 0.4 B0) for the first model}
+
+\item{show_bmsy_lines}{Show the Bmsy lines (0.4 and 0.8 Bmsy) for the first model}
 
 \item{ind_letter}{A letter to place in the upper left corner of the plot. If `NULL`,
 nothing will be shown}

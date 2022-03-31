@@ -145,9 +145,14 @@ plot_ts_mpd <- function(models,
 #' will be used
 #' @param line_width Width of all median lines on the plot
 #' @param point_size Point size for all median points on the plot
-#' @param lineribbon Logical. If `TRUE`, make the first model plotted an envelope
+#' @param line_ribbon Logical. If `TRUE`, make the first model plotted an envelope
 #' of the credible interval, surrounding the median line
-#' @param alpha The opacity between 0 to 1 of the envelope shown when `lineribbon == TRUE`
+#' @param refpts_ribbon Logical. If `TRUE`, make the first model's reference points lines
+#' (`show_bo_lines` and/or `show_bmsy_lines` must be `TRUE`) plotted an envelope
+#' of the credible interval, surrounding the median lines for the reference points
+#' @param alpha The opacity between 0 to 1 of the envelope shown when `line_ribbon == TRUE`
+#' @param refpts_alpha The opacity between 0 to 1 of the envelope shown for referece points
+#' when `refpts_ribbon == TRUE` and `show_bo_lines` and/or `show_bmsy_lines` are `TRUE`
 #' @param offset The amount on the x-axis to offset each point and line for
 #' multiple models. Used for recruitment plots
 #' @param bo_dodge The amount to offset the initial value (B0 or R0) values from each
@@ -156,7 +161,8 @@ plot_ts_mpd <- function(models,
 #' with. To remove all padding, make this 0
 #' @param append_base_txt Text to append to the first model's name for display on the
 #' plot legend
-#' @param show_bmsy_line Show the Bmsy lines (0.4 and 0.8 Bmsy)
+#' @param show_bo_lines Show the B0 lines (0.2 and 0.4 B0) for the first model
+#' @param show_bmsy_lines Show the Bmsy lines (0.4 and 0.8 Bmsy) for the first model
 #' @param ind_letter A letter to place in the upper left corner of the plot. If `NULL`,
 #' nothing will be shown
 #' @param leg A vector of two values representing the X/Y coordinates inside the plot to
@@ -177,13 +183,16 @@ plot_ts_mcmc <- function(models,
                          ylim = NULL,
                          line_width = 1,
                          point_size = 2,
-                         lineribbon = FALSE,
+                         line_ribbon = FALSE,
+                         refpts_ribbon = TRUE,
                          alpha = 0.2,
+                         refpts_alpha = alpha,
                          offset = 0.1,
                          bo_dodge = 0.1,
                          x_space = 0.5,
                          append_base_txt = NULL,
-                         show_bmsy_line = FALSE,
+                         show_bo_lines = FALSE,
+                         show_bmsy_lines = FALSE,
                          ind_letter = NULL,
                          leg_loc = NULL,
                          probs = c(0.025, 0.5, 0.975),
@@ -366,8 +375,8 @@ plot_ts_mcmc <- function(models,
   }
 
   if(type == "sbt"){
-    if(lineribbon){
-      first_model_nm <- names(ts_quants)[1]
+    if(line_ribbon){
+      first_model_nm <- as.character(ts_quants$model[1])
       ts_quants_first <- ts_quants %>%
         filter(model == first_model_nm)
       g <- g +
@@ -400,6 +409,50 @@ plot_ts_mcmc <- function(models,
   if(!rel && show_initial){
     g <- g +
       geom_pointrange(data = tso_quants, aes(color = model))
+  }
+
+  if(show_bo_lines){
+    # Show the B0 lines for the first model with CI
+    tso_base <- tso_quants %>%
+      slice(1)
+    # Only two lines allowed, Limit Reference Point (LRP) and Upper Stock
+    # Reference (USR)
+    tso_multiples <- imap(c(0.2, 0.4), ~{
+      tso_base %>%
+        mutate(!!sym(quants[1]) := !!sym(quants[1]) * .x,
+               !!sym(quants[2]) := !!sym(quants[2]) * .x,
+               !!sym(quants[3]) := !!sym(quants[3]) * .x) %>%
+        mutate(multiplier = .x)
+    }) %>%
+      bind_rows
+    if(refpts_ribbon){
+      g <- g +
+        geom_rect(data = tso_multiples,
+                  aes(xmin = start_yr, xmax = end_yr),
+                  alpha = refpts_alpha,
+                  fill = c("red", "green")) +
+        geom_hline(data = tso_multiples,
+                   aes(yintercept = !!sym(quants[2])),
+                   color = c("red", "green"), lty = 1, lwd = 3)
+    }else{
+      g <- g +
+        geom_hline(data = tso_multiples,
+                   aes(yintercept = !!sym(quants[1])),
+                   color = c("red", "green"),
+                   lty = 4) +
+        geom_hline(data = tso_multiples,
+                   aes(yintercept = !!sym(quants[2])),
+                   color = c("red", "green"),
+                   lty = 1) +
+        geom_hline(data = tso_multiples,
+                   aes(yintercept = !!sym(quants[3])),
+                   color = c("red", "green"),
+                   lty = 4)
+    }
+  }
+
+  if(show_bmsy_lines){
+
   }
 
   if(!is.null(leg_loc)){
