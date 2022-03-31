@@ -2,29 +2,28 @@
 % Please edit documentation in R/figures-biomass.R
 \name{plot_ts_mcmc}
 \alias{plot_ts_mcmc}
-\title{Plot the biomass trajectories for iscam models}
+\title{Plot the MCMC time series trajectories for iscam models, including spawning biomass
+and recruitment for both absolute and relative cases.}
 \usage{
 plot_ts_mcmc(
   models,
   model_names = NULL,
   type = "sbt",
   rel = FALSE,
-  legend_title = "Bridge model",
-  palette = "Paired",
+  legend_title = "Models",
   xlim = NULL,
   ylim = NULL,
   line_width = 1,
   point_size = 2,
   lineribbon = FALSE,
-  alpha = 0.5,
+  alpha = 0.2,
   offset = 0.1,
-  bo_dodge = 0.05,
+  bo_dodge = 0.1,
   x_space = 0.5,
   append_base_txt = NULL,
   show_bmsy_line = FALSE,
-  show_bo_line = TRUE,
   ind_letter = NULL,
-  leg = NULL,
+  leg_loc = NULL,
   probs = c(0.025, 0.5, 0.975),
   ...
 )
@@ -32,31 +31,62 @@ plot_ts_mcmc(
 \arguments{
 \item{models}{A list of iscam model objects}
 
-\item{ylim}{The y limits for the plot}
+\item{model_names}{Names to use for the models in the plots. The names of
+the list items in `models` will be used if they are present and this will
+be ignored. If the list item names are not defined, temporary names will be used
+(Temporary model 1, Temporary model 2, etc.)}
+
+\item{type}{Either 'sbt' for Spawning biomass or 'rt' for Recruitment}
+
+\item{rel}{Logical. Make plot relative to initial estimate (B0 or R0 depending
+on the choice for `type`}
+
+\item{legend_title}{Title for legend}
+
+\item{xlim}{The x limits for the plot. If `NULL`, the limits of the data
+will be used}
+
+\item{ylim}{The y limits for the plot. If `NULL`, the limits of the data
+will be used}
+
+\item{line_width}{Width of all median lines on the plot}
+
+\item{point_size}{Point size for all median points on the plot}
+
+\item{lineribbon}{Logical. If `TRUE`, make the first model plotted an envelope
+of the credible interval, surrounding the median line}
+
+\item{alpha}{The opacity between 0 to 1 of the envelope shown when `lineribbon == TRUE`}
 
 \item{offset}{The amount on the x-axis to offset each point and line for
-multiple models}
+multiple models. Used for recruitment plots}
 
-\item{leg}{Position of the legend. NULL means no legend is shown}
+\item{bo_dodge}{The amount to offset the initial value (B0 or R0) values from each
+other so the values and uncertainty can be easily seen for multiple models}
+
+\item{x_space}{The amount of x-interval space to pad the left and right of the plot
+with. To remove all padding, make this 0}
+
+\item{append_base_txt}{Text to append to the first model's name for display on the
+plot legend}
+
+\item{show_bmsy_line}{Show the Bmsy lines (0.4 and 0.8 Bmsy)}
+
+\item{ind_letter}{A letter to place in the upper left corner of the plot. If `NULL`,
+nothing will be shown}
+
+\item{probs}{A 3-element vector of probabilities that appear in the output data frames
+This is provided in case the data frames have more than three different quantile levels}
 
 \item{...}{Other graphical arguments}
 
-\item{model.names}{A vector of names to show on the legend}
-
-\item{opacity}{How opaque the credibility envelopes are}
-
-\item{append.base.txt}{Text to append to the name of the first model}
-
-\item{show.bmsy.line}{Show the reference lines 0.4 and 0.8bmsy}
-
-\item{show.bo.line}{Show the reference lines 0.2 and 0.4bo}
-
-\item{ind.letter}{A letter to show on the plot (for panel plots)}
+\item{leg}{A vector of two values representing the X/Y coordinates inside the plot to
+place the legend. If `NULL`, the default placement is used}
 }
 \value{
 Nothing
 }
 \description{
-Plot the biomass with credibility intervals for the mcmc
-cases of the models
+Plot the MCMC time series trajectories for iscam models, including spawning biomass
+and recruitment for both absolute and relative cases.
 }

@@ -125,47 +125,64 @@ plot_ts_mpd <- function(models,
   g
 }
 
-#' Plot the biomass trajectories for iscam models
-#'
-#' Plot the biomass with credibility intervals for the mcmc
-#' cases of the models
+#' Plot the MCMC time series trajectories for iscam models, including spawning biomass
+#' and recruitment for both absolute and relative cases.
 #'
 #' @param models A list of iscam model objects
-#' @param model.names A vector of names to show on the legend
-#' @param ylim The y limits for the plot
-#' @param opacity How opaque the credibility envelopes are
+#' @param model_names Names to use for the models in the plots. The names of
+#' the list items in `models` will be used if they are present and this will
+#' be ignored. If the list item names are not defined, temporary names will be used
+#' (Temporary model 1, Temporary model 2, etc.)
+#' @param type Either 'sbt' for Spawning biomass or 'rt' for Recruitment
+#' @param rel Logical. Make plot relative to initial estimate (B0 or R0 depending
+#' on the choice for `type`
+#' @param legend_title Title for legend
+#' @param xlim The x limits for the plot. If `NULL`, the limits of the data
+#' will be used
+#' @param ylim The y limits for the plot. If `NULL`, the limits of the data
+#' will be used
+#' @param line_width Width of all median lines on the plot
+#' @param point_size Point size for all median points on the plot
+#' @param lineribbon Logical. If `TRUE`, make the first model plotted an envelope
+#' of the credible interval, surrounding the median line
+#' @param alpha The opacity between 0 to 1 of the envelope shown when `lineribbon == TRUE`
 #' @param offset The amount on the x-axis to offset each point and line for
-#'   multiple models
-#' @param append.base.txt Text to append to the name of the first model
-#' @param show.bmsy.line Show the reference lines 0.4 and 0.8bmsy
-#' @param show.bo.line Show the reference lines 0.2 and 0.4bo
-#' @param ind.letter A letter to show on the plot (for panel plots)
-#' @param leg Position of the legend. NULL means no legend is shown
+#' multiple models. Used for recruitment plots
+#' @param bo_dodge The amount to offset the initial value (B0 or R0) values from each
+#' other so the values and uncertainty can be easily seen for multiple models
+#' @param x_space The amount of x-interval space to pad the left and right of the plot
+#' with. To remove all padding, make this 0
+#' @param append_base_txt Text to append to the first model's name for display on the
+#' plot legend
+#' @param show_bmsy_line Show the Bmsy lines (0.4 and 0.8 Bmsy)
+#' @param ind_letter A letter to place in the upper left corner of the plot. If `NULL`,
+#' nothing will be shown
+#' @param leg A vector of two values representing the X/Y coordinates inside the plot to
+#' place the legend. If `NULL`, the default placement is used
+#' @param probs A 3-element vector of probabilities that appear in the output data frames
+#' This is provided in case the data frames have more than three different quantile levels
 #' @param ... Other graphical arguments
 #'
 #' @return Nothing
-#' @importFrom ggdist geom_lineribbon
 #' @export
 plot_ts_mcmc <- function(models,
                          model_names = NULL,
                          type = "sbt",
                          rel = FALSE,
-                         legend_title = "Bridge model",
-                         palette = "Paired",
+                         legend_title = "Models",
                          xlim = NULL,
                          ylim = NULL,
                          line_width = 1,
                          point_size = 2,
                          lineribbon = FALSE,
-                         alpha = 0.5,
+                         alpha = 0.2,
                          offset = 0.1,
-                         bo_dodge = 0.05,
+                         bo_dodge = 0.1,
                          x_space = 0.5,
                          append_base_txt = NULL,
                          show_bmsy_line = FALSE,
-                         show_bo_line = TRUE,
                          ind_letter = NULL,
-                         leg = NULL,
+                         leg_loc = NULL,
                          probs = c(0.025, 0.5, 0.975),
                          ...){
 
@@ -183,6 +200,10 @@ plot_ts_mcmc <- function(models,
          "a single model, modify it like this first:\n\n",
          "model <- list(model)\n",
          "class(model) <- mdl_lst_cls\n")
+  }
+
+  if(length(models) > 13){
+    stop("Cannot plot more than 13 models due to palette restrictions (See RColorBrewer 'Paired' palette)")
   }
 
   if(length(probs) != 3){
@@ -214,16 +235,20 @@ plot_ts_mcmc <- function(models,
   nms <- names(ts_quants)
   if(is.null(nms)){
     if(is.null(model_names)){
-      nms <- paste0("Temporary model ", seq_len(length(ts_quants)))
+      nms <- paste0("Temporary model ", seq_len(length(ts_quants)), append_base_txt)
     }else{
       if(length(model_names) != length(ts_quants)){
         stop("`model_names` is not the same length as the number of models supplied in `models`")
       }else{
         nms <- model_names
+        nms[1] <- paste0(nms[1], append_base_txt)
       }
     }
     names(ts_quants) <- nms
     names(tso_quants) <- nms
+  }else{
+    names(ts_quants)[1] <- paste0(names(ts_quants)[1], append_base_txt)
+    names(tso_quants)[1] <- paste0(names(tso_quants)[1], append_base_txt)
   }
 
   nms <- names(ts_quants)
@@ -273,6 +298,8 @@ plot_ts_mcmc <- function(models,
     ts_quants <- ts_quants %>%
       filter(year %in% xlim[1]:xlim[2])
   }
+  ts_quants <- ts_quants %>%
+    mutate(model = fct_relevel(model, nms))
 
   # 'Dodge' B0 points manually
   if((nrow(tso_quants) - 1) * bo_dodge >= 1){
@@ -280,17 +307,30 @@ plot_ts_mcmc <- function(models,
             "This will cause overlapping in the plot with the main time series")
   }
   tso_quants <- tso_quants %>%
-    mutate(year = seq(from = first(year), by = bo_dodge, length.out = 3))
+    mutate(year = seq(from = first(year), by = bo_dodge, length.out = nrow(.)))
 
+  # Color values below came from:
+  # c("#000000", RColorBrewer::brewer.pal(name = "Paired", n = 12))
   g <- ts_quants %>%
     ggplot(aes(x = year,
                y = !!sym(quants[2]),
                ymin = !!sym(quants[1]),
-               ymax = !!sym(quants[3]),
-               fill = model)) +
+               ymax = !!sym(quants[3]))) +
     xlab("Year") +
     ylab(y_label) +
-    scale_color_brewer(palette = palette)
+    scale_color_manual(values = c("#000000",
+                                  "#A6CEE3",
+                                  "#1F78B4",
+                                  "#B2DF8A",
+                                  "#33A02C",
+                                  "#FB9A99",
+                                  "#E31A1C",
+                                  "#FDBF6F",
+                                  "#FF7F00",
+                                  "#CAB2D6",
+                                  "#6A3D9A",
+                                  "#FFFF99",
+                                  "#B15928"))
 
   if(rel){
     g <- g + scale_x_continuous(limits = c(xlim[1], xlim[2]),
@@ -311,7 +351,14 @@ plot_ts_mcmc <- function(models,
   }
 
   if(lineribbon){
-    g <- g + geom_lineribbon(aes(color = model), alpha = 0.5)
+    first_model_nm <- names(ts_quants)[1]
+    ts_quants_first <- ts_quants %>%
+      filter(model == first_model_nm)
+    g <- g +
+      geom_ribbon(data = ts_quants_first, alpha = alpha) +
+      geom_line(aes(color = model), size = line_width) +
+      geom_line(aes(y = !!sym(quants[1]), color = model), size = 0.5, lty = 2) +
+      geom_line(aes(y = !!sym(quants[3]), color = model), size = 0.5, lty = 2)
   }else{
     g <- g +
       geom_line(aes(color = model), size = line_width) +
@@ -322,6 +369,15 @@ plot_ts_mcmc <- function(models,
     g <- g +
       geom_pointrange(data = tso_quants, aes(color = model))
   }
+
+  if(!is.null(leg_loc)){
+    g <- g +
+      theme(legend.position = leg_loc,
+            legend.background = element_rect(fill = "white", color = "black"))
+
+  }
+
+  g <- g + labs(color = legend_title)
 
   g
 }
