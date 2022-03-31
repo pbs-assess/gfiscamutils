@@ -213,6 +213,13 @@ plot_ts_mcmc <- function(models,
 
   start_yr <- map_dbl(models, ~{.x$dat$start.yr}) %>% min
   end_yr <- map_dbl(models, ~{.x$dat$end.yr}) %>% max
+  if(is.null(xlim)){
+    if(type == "rt"){
+      start_yr <- start_yr + 1
+      end_yr <- end_yr + 1
+    }
+    xlim <- c(start_yr, end_yr)
+  }
   len <- end_yr - start_yr + 1
   bind_yrs <- start_yr:end_yr
 
@@ -289,9 +296,7 @@ plot_ts_mcmc <- function(models,
                       "rt" = "Recruitment (millions)")
   }
 
-  if(is.null(xlim)){
-    xlim <- c(start_yr, end_yr)
-  }else{
+  if(!is.null(xlim)){
     # Remove data prior to first year and change B0 to firs
     tso_quants <- tso_quants %>%
       mutate(year = xlim[1] - 1)
@@ -340,7 +345,7 @@ plot_ts_mcmc <- function(models,
   }else{
     g <- g + scale_x_continuous(limits = c(xlim[1] - 1, xlim[2]),
                                 breaks = (min(xlim) - 1):max(xlim),
-                                labels = c(expression(B[0]), xlim[1]:xlim[2]),
+                                labels = c(ifelse(type == "sbt", expression(B[0]), expression(R[0])), xlim[1]:xlim[2]),
                                 expand = expansion(add = x_space))
   }
 
@@ -350,21 +355,38 @@ plot_ts_mcmc <- function(models,
     g <- g + scale_y_continuous(limits = ylim, expand = c(0, 0))
   }
 
-  if(lineribbon){
-    first_model_nm <- names(ts_quants)[1]
-    ts_quants_first <- ts_quants %>%
-      filter(model == first_model_nm)
+  if(type == "sbt"){
+    if(lineribbon){
+      first_model_nm <- names(ts_quants)[1]
+      ts_quants_first <- ts_quants %>%
+        filter(model == first_model_nm)
+      g <- g +
+        geom_ribbon(data = ts_quants_first, alpha = alpha) +
+        geom_line(aes(color = model), size = line_width) +
+        geom_line(aes(y = !!sym(quants[1]), color = model), size = 0.5, lty = 2) +
+        geom_line(aes(y = !!sym(quants[3]), color = model), size = 0.5, lty = 2)
+    }else{
+      g <- g +
+        geom_line(aes(color = model), size = line_width) +
+        geom_line(aes(y = !!sym(quants[1]), color = model), size = 0.5, lty = 2) +
+        geom_line(aes(y = !!sym(quants[3]), color = model), size = 0.5, lty = 2)
+    }
+  }else if(type == "rt"){
+    # Must dodge values in the data frame, segments can't be dodged
+    dodge_val <- 0
+    ts_dodge <- ts_quants %>%
+      split(~model) %>%
+      map(~{
+        x <- .x %>% mutate(year = year + dodge_val)
+        dodge_val <<- dodge_val + 0.1
+        x
+      }) %>%
+      bind_rows
     g <- g +
-      geom_ribbon(data = ts_quants_first, alpha = alpha) +
-      geom_line(aes(color = model), size = line_width) +
-      geom_line(aes(y = !!sym(quants[1]), color = model), size = 0.5, lty = 2) +
-      geom_line(aes(y = !!sym(quants[3]), color = model), size = 0.5, lty = 2)
-  }else{
-    g <- g +
-      geom_line(aes(color = model), size = line_width) +
-      geom_line(aes(y = !!sym(quants[1]), color = model), size = 0.5, lty = 2) +
-      geom_line(aes(y = !!sym(quants[3]), color = model), size = 0.5, lty = 2)
+      geom_point(data = ts_dodge, aes(color = model), size = point_size) +
+      geom_segment(data = ts_dodge, aes(xend = year, y = !!sym(quants[1]), yend = !!sym(quants[3]), color = model), size = line_width)
   }
+
   if(!rel){
     g <- g +
       geom_pointrange(data = tso_quants, aes(color = model))
