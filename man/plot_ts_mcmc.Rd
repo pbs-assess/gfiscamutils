@@ -26,6 +26,7 @@ plot_ts_mcmc(
   append_base_txt = NULL,
   show_bo_lines = FALSE,
   show_bmsy_lines = FALSE,
+  refpt_colors = c("red", "green"),
   ind_letter = NULL,
   leg_loc = NULL,
   probs = c(0.025, 0.5, 0.975),
@@ -87,6 +88,9 @@ plot legend}
 \item{show_bo_lines}{Show the B0 lines (0.2 and 0.4 B0) for the first model}
 
 \item{show_bmsy_lines}{Show the Bmsy lines (0.4 and 0.8 Bmsy) for the first model}
+
+\item{refpt_colors}{A vector of two colors representing the LRP and USR. Used to
+display reference point lines if either `show_bo_lines` or `show_bmsy_lines` are `TRUE`}
 
 \item{ind_letter}{A letter to place in the upper left corner of the plot. If `NULL`,
 nothing will be shown}

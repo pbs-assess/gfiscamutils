@@ -163,6 +163,8 @@ plot_ts_mpd <- function(models,
 #' plot legend
 #' @param show_bo_lines Show the B0 lines (0.2 and 0.4 B0) for the first model
 #' @param show_bmsy_lines Show the Bmsy lines (0.4 and 0.8 Bmsy) for the first model
+#' @param refpt_colors A vector of two colors representing the LRP and USR. Used to
+#' display reference point lines if either `show_bo_lines` or `show_bmsy_lines` are `TRUE`
 #' @param ind_letter A letter to place in the upper left corner of the plot. If `NULL`,
 #' nothing will be shown
 #' @param leg A vector of two values representing the X/Y coordinates inside the plot to
@@ -193,6 +195,7 @@ plot_ts_mcmc <- function(models,
                          append_base_txt = NULL,
                          show_bo_lines = FALSE,
                          show_bmsy_lines = FALSE,
+                         refpt_colors = c("red", "green"),
                          ind_letter = NULL,
                          leg_loc = NULL,
                          probs = c(0.025, 0.5, 0.975),
@@ -369,25 +372,43 @@ plot_ts_mcmc <- function(models,
         geom_rect(data = tso_multiples,
                   aes(xmin = start_yr, xmax = end_yr),
                   alpha = refpts_alpha,
-                  fill = c("red", "green")) +
+                  fill = refpt_colors) +
         geom_hline(data = tso_multiples,
                    aes(yintercept = !!sym(quants[2])),
-                   color = c("red", "green"), lty = 1, lwd = 1)
+                   color = refpt_colors, lty = 1, lwd = 1)
     }else{
       g <- g +
         geom_hline(data = tso_multiples,
                    aes(yintercept = !!sym(quants[1])),
-                   color = c("red", "green"),
+                   color = refpt_colors,
                    lty = 4) +
         geom_hline(data = tso_multiples,
                    aes(yintercept = !!sym(quants[2])),
-                   color = c("red", "green"),
+                   color = refpt_colors,
                    lty = 1) +
         geom_hline(data = tso_multiples,
                    aes(yintercept = !!sym(quants[3])),
-                   color = c("red", "green"),
+                   color = refpt_colors,
                    lty = 4)
     }
+  }
+
+  if(show_bmsy_lines){
+    browser()
+    # Show the B0 lines for the first model with CI, behind model lines
+    tso_base <- tso_quants %>%
+      slice(1)
+    # Only two lines allowed, Limit Reference Point (LRP) and Upper Stock
+    # Reference (USR)
+    tso_multiples <- imap(c(0.2, 0.4), ~{
+      tso_base %>%
+        mutate(!!sym(quants[1]) := !!sym(quants[1]) * .x,
+               !!sym(quants[2]) := !!sym(quants[2]) * .x,
+               !!sym(quants[3]) := !!sym(quants[3]) * .x) %>%
+        mutate(multiplier = .x)
+    }) %>%
+      bind_rows
+
   }
 
   if(rel){
@@ -427,7 +448,7 @@ plot_ts_mcmc <- function(models,
       lbl[wch][1] <- as.expression(bquote(.(tso_multiples$multiplier[1]) ~ B[0]))
       lbl[wch][2] <- as.expression(bquote(.(tso_multiples$multiplier[2]) ~ B[0]))
       cols <- rep("black", length(brk))
-      cols[wch] <- c("red", "green")
+      cols[wch] <- refpt_colors
     }
     g <- g +
       scale_y_continuous(limits = c(0, NA),
@@ -475,11 +496,6 @@ plot_ts_mcmc <- function(models,
   if(!rel && show_initial){
     g <- g +
       geom_pointrange(data = tso_quants, aes(color = model))
-  }
-
-
-  if(show_bmsy_lines){
-
   }
 
   if(!is.null(leg_loc)){
