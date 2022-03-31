@@ -10,6 +10,7 @@ plot_ts_mcmc(
   model_names = NULL,
   type = "sbt",
   rel = FALSE,
+  show_initial = TRUE,
   legend_title = "Models",
   xlim = NULL,
   ylim = NULL,
@@ -40,6 +41,9 @@ be ignored. If the list item names are not defined, temporary names will be used
 
 \item{rel}{Logical. Make plot relative to initial estimate (B0 or R0 depending
 on the choice for `type`}
+
+\item{show_initial}{Logical. If `TRUE` and `rel == FALSE`, show the initial value
+on the plot (either B0 or R0)}
 
 \item{legend_title}{Title for legend}
 

@@ -136,6 +136,8 @@ plot_ts_mpd <- function(models,
 #' @param type Either 'sbt' for Spawning biomass or 'rt' for Recruitment
 #' @param rel Logical. Make plot relative to initial estimate (B0 or R0 depending
 #' on the choice for `type`
+#' @param show_initial Logical. If `TRUE` and `rel == FALSE`, show the initial value
+#' on the plot (either B0 or R0)
 #' @param legend_title Title for legend
 #' @param xlim The x limits for the plot. If `NULL`, the limits of the data
 #' will be used
@@ -169,6 +171,7 @@ plot_ts_mcmc <- function(models,
                          model_names = NULL,
                          type = "sbt",
                          rel = FALSE,
+                         show_initial = TRUE,
                          legend_title = "Models",
                          xlim = NULL,
                          ylim = NULL,
@@ -261,7 +264,7 @@ plot_ts_mcmc <- function(models,
   nms <- names(ts_quants)
   tso_quants <- tso_quants %>%
     bind_rows() %>%
-    mutate(model = nms, year = start_yr - 1) %>%
+    mutate(model = nms, year = ifelse(show_initial, start_yr - 1, start_yr)) %>%
     select(model, year, everything())
 
   ts_quants <- imap(ts_quants, ~{
@@ -297,9 +300,9 @@ plot_ts_mcmc <- function(models,
   }
 
   if(!is.null(xlim)){
-    # Remove data prior to first year and change B0 to firs
+    # Remove data prior to first year and change B0/R0 to first
     tso_quants <- tso_quants %>%
-      mutate(year = xlim[1] - 1)
+      mutate(year = ifelse(show_initial, xlim[1] - 1, xlim[1]))
     ts_quants <- ts_quants %>%
       filter(year %in% xlim[1]:xlim[2])
   }
@@ -343,10 +346,17 @@ plot_ts_mcmc <- function(models,
                                 labels = xlim[1]:xlim[2],
                                 expand = expansion(add = x_space))
   }else{
-    g <- g + scale_x_continuous(limits = c(xlim[1] - 1, xlim[2]),
-                                breaks = (min(xlim) - 1):max(xlim),
-                                labels = c(ifelse(type == "sbt", expression(B[0]), expression(R[0])), xlim[1]:xlim[2]),
-                                expand = expansion(add = x_space))
+    if(show_initial){
+      g <- g + scale_x_continuous(limits = c(xlim[1] - 1, xlim[2]),
+                                  breaks = (min(xlim) - 1):max(xlim),
+                                  labels = c(ifelse(type == "sbt", expression(B[0]), expression(R[0])), xlim[1]:xlim[2]),
+                                  expand = expansion(add = x_space))
+    }else{
+      g <- g + scale_x_continuous(limits = c(xlim[1], xlim[2]),
+                                  breaks = min(xlim):max(xlim),
+                                  labels = xlim[1]:xlim[2],
+                                  expand = expansion(add = x_space))
+    }
   }
 
   if(is.null(ylim)){
@@ -387,7 +397,7 @@ plot_ts_mcmc <- function(models,
       geom_segment(data = ts_dodge, aes(xend = year, y = !!sym(quants[1]), yend = !!sym(quants[3]), color = model), size = line_width)
   }
 
-  if(!rel){
+  if(!rel && show_initial){
     g <- g +
       geom_pointrange(data = tso_quants, aes(color = model))
   }
