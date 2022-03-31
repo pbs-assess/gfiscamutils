@@ -74,7 +74,7 @@ plot_ts_mpd <- function(models,
                     model = names(init),
                     sbt = map_dbl(init, ~{.x}))
   init_vals <- init_df %>% select(-year)
-browser()
+
   if(type == "sbt"){
     bind_yrs <- start_year:end_year
   }else if(type == "rt"){
@@ -147,25 +147,35 @@ browser()
 #' @importFrom ggdist geom_lineribbon
 #' @export
 plot_ts_mcmc <- function(models,
-                         #model_names = factor(names(models), levels = names(models)),
+                         model_names = NULL,
                          type = "sbt",
                          rel = FALSE,
                          legend_title = "Bridge model",
                          palette = "Paired",
+                         xlim = NULL,
+                         ylim = NULL,
                          line_width = 1,
                          point_size = 2,
                          lineribbon = FALSE,
                          alpha = 0.5,
                          offset = 0.1,
+                         bo_dodge = 0.05,
+                         x_space = 0.5,
                          append_base_txt = NULL,
                          show_bmsy_line = FALSE,
-                         show_bo_line = FALSE,
+                         show_bo_line = TRUE,
                          ind_letter = NULL,
                          leg = NULL,
+                         probs = c(0.025, 0.5, 0.975),
                          ...){
 
   if(!type %in% c("sbt", "rt")){
     stop("type '", type, "' is not one of the implemented time series", call. = FALSE)
+  }
+
+  if(class(models) == mdl_cls){
+    models <- list(models)
+    class(models) <- mdl_lst_cls
   }
 
   if(class(models) != mdl_lst_cls){
@@ -175,14 +185,20 @@ plot_ts_mcmc <- function(models,
          "class(model) <- mdl_lst_cls\n")
   }
 
+  if(length(probs) != 3){
+    stop("`probs` has length ", length(probs), " but must be a vector of three values ",
+         "representing lower CI, median, and upper CI")
+  }
+
   start_yr <- map_dbl(models, ~{.x$dat$start.yr}) %>% min
   end_yr <- map_dbl(models, ~{.x$dat$end.yr}) %>% max
   len <- end_yr - start_yr + 1
   bind_yrs <- start_yr:end_yr
 
   if(type == "sbt"){
+    val <- ifelse(rel, "depl_quants", "sbt_quants")
     ts_quants <- map(models, ~{
-      j <- .x$mcmccalcs$sbt_quants
+      j <- .x$mcmccalcs[[val]]
       if(len < ncol(j)){
         j <- j[, 1:len]
       }
@@ -195,15 +211,26 @@ plot_ts_mcmc <- function(models,
     bind_yrs <- bind_yrs + 1
   }
 
-  # TODO tso_quants muyst be same format as ts_quants
+  nms <- names(ts_quants)
+  if(is.null(nms)){
+    if(is.null(model_names)){
+      nms <- paste0("Temporary model ", seq_len(length(ts_quants)))
+    }else{
+      if(length(model_names) != length(ts_quants)){
+        stop("`model_names` is not the same length as the number of models supplied in `models`")
+      }else{
+        nms <- model_names
+      }
+    }
+    names(ts_quants) <- nms
+    names(tso_quants) <- nms
+  }
+
+  nms <- names(ts_quants)
   tso_quants <- tso_quants %>%
     bind_rows() %>%
-    bind_cols(as_tibble(names(tso_quants))) %>%
-    select(value, everything()) %>%
-    rename(model = value) %>%
-    pivot_longer(!model, names_to = "quantile", values_to = "value") %>%
-    mutate(year = start_yr - 1) %>%
-    select(model, quantile, year, value)
+    mutate(model = nms, year = start_yr - 1) %>%
+    select(model, year, everything())
 
   ts_quants <- imap(ts_quants, ~{
     .x %>%
@@ -213,14 +240,19 @@ plot_ts_mcmc <- function(models,
       mutate(model = .y) %>%
       select(model, year, everything()) %>%
       mutate(year = as.numeric(year))
-    # .x %>%
-    #   as.data.frame %>%
-    #   add_rownames(var = "quantile") %>%
-    #   pivot_longer(!quantile, names_to = "year", values_to = "value") %>%
-    #   mutate(model = .y) %>%
-    #   select(model, quantile, year, value)
   }) %>%
-    bind_rows
+    bind_rows %>%
+    select(-MPD)
+
+  # Match the given probs with their respective quant columns
+  prob_cols <- paste0(prettyNum(probs * 100), "%")
+  quants <- imap_chr(prob_cols, ~{
+    mtch <- grep(.x, names(ts_quants), value = TRUE)
+    if(!length(mtch)){
+      stop("One of the values in `probs` does not appear in the MCMC output data: ", .x)
+    }
+    mtch
+  })
 
   if(rel){
     y_label <- switch(type,
@@ -231,23 +263,65 @@ plot_ts_mcmc <- function(models,
                       "sbt" = "Spawning biomass ('000 tonnes)",
                       "rt" = "Recruitment (millions)")
   }
-  browser()
+
+  if(is.null(xlim)){
+    xlim <- c(start_yr, end_yr)
+  }else{
+    # Remove data prior to first year and change B0 to firs
+    tso_quants <- tso_quants %>%
+      mutate(year = xlim[1] - 1)
+    ts_quants <- ts_quants %>%
+      filter(year %in% xlim[1]:xlim[2])
+  }
+
+  # 'Dodge' B0 points manually
+  if((nrow(tso_quants) - 1) * bo_dodge >= 1){
+    warning("`bo_dodge` value of ", bo_dodge, " makes B0 values span a year or more. ",
+            "This will cause overlapping in the plot with the main time series")
+  }
+  tso_quants <- tso_quants %>%
+    mutate(year = seq(from = first(year), by = bo_dodge, length.out = 3))
 
   g <- ts_quants %>%
-    ggplot(aes(x = year, y = `50%`, ymin = `2.5%`, ymax = `97.5%`, fill = model)) +
+    ggplot(aes(x = year,
+               y = !!sym(quants[2]),
+               ymin = !!sym(quants[1]),
+               ymax = !!sym(quants[3]),
+               fill = model)) +
     xlab("Year") +
     ylab(y_label) +
     scale_color_brewer(palette = palette)
 
+  if(rel){
+    g <- g + scale_x_continuous(limits = c(xlim[1], xlim[2]),
+                                breaks = min(xlim):max(xlim),
+                                labels = xlim[1]:xlim[2],
+                                expand = expansion(add = x_space))
+  }else{
+    g <- g + scale_x_continuous(limits = c(xlim[1] - 1, xlim[2]),
+                                breaks = (min(xlim) - 1):max(xlim),
+                                labels = c(expression(B[0]), xlim[1]:xlim[2]),
+                                expand = expansion(add = x_space))
+  }
+
+  if(is.null(ylim)){
+    g <- g + scale_y_continuous(limits = c(0, NA), expand = c(0, 0))
+  }else{
+    g <- g + scale_y_continuous(limits = ylim, expand = c(0, 0))
+  }
+
   if(lineribbon){
-    g <- g + geom_lineribbon(alpha = 0.5)
+    g <- g + geom_lineribbon(aes(color = model), alpha = 0.5)
   }else{
     g <- g +
       geom_line(aes(color = model), size = line_width) +
-      geom_line(aes(y = `2.5%`, color = model), size = 0.5, lty = 2) +
-      geom_line(aes(y = `97.5%`, color = model), size = 0.5, lty = 2)
-
+      geom_line(aes(y = !!sym(quants[1]), color = model), size = 0.5, lty = 2) +
+      geom_line(aes(y = !!sym(quants[3]), color = model), size = 0.5, lty = 2)
   }
-  browser()
+  if(!rel){
+    g <- g +
+      geom_pointrange(data = tso_quants, aes(color = model))
+  }
 
+  g
 }

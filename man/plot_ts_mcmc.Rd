@@ -6,25 +6,33 @@
 \usage{
 plot_ts_mcmc(
   models,
+  model_names = NULL,
   type = "sbt",
   rel = FALSE,
   legend_title = "Bridge model",
   palette = "Paired",
+  xlim = NULL,
+  ylim = NULL,
   line_width = 1,
   point_size = 2,
   lineribbon = FALSE,
   alpha = 0.5,
   offset = 0.1,
+  bo_dodge = 0.05,
+  x_space = 0.5,
   append_base_txt = NULL,
   show_bmsy_line = FALSE,
-  show_bo_line = FALSE,
+  show_bo_line = TRUE,
   ind_letter = NULL,
   leg = NULL,
+  probs = c(0.025, 0.5, 0.975),
   ...
 )
 }
 \arguments{
 \item{models}{A list of iscam model objects}
+
+\item{ylim}{The y limits for the plot}
 
 \item{offset}{The amount on the x-axis to offset each point and line for
 multiple models}
@@ -34,8 +42,6 @@ multiple models}
 \item{...}{Other graphical arguments}
 
 \item{model.names}{A vector of names to show on the legend}
-
-\item{ylim}{The y limits for the plot}
 
 \item{opacity}{How opaque the credibility envelopes are}
 
