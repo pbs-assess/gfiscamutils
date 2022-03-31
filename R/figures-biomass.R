@@ -363,6 +363,7 @@ plot_ts_mcmc <- function(models,
         mutate(multiplier = .x)
     }) %>%
       bind_rows
+
     if(refpts_ribbon){
       g <- g +
         geom_rect(data = tso_multiples,
@@ -371,7 +372,7 @@ plot_ts_mcmc <- function(models,
                   fill = c("red", "green")) +
         geom_hline(data = tso_multiples,
                    aes(yintercept = !!sym(quants[2])),
-                   color = c("red", "green"), lty = 1, lwd = 2)
+                   color = c("red", "green"), lty = 1, lwd = 1)
     }else{
       g <- g +
         geom_hline(data = tso_multiples,
@@ -409,7 +410,32 @@ plot_ts_mcmc <- function(models,
   }
 
   if(is.null(ylim)){
-    g <- g + scale_y_continuous(limits = c(0, NA), expand = c(0, 0))
+    #browser()
+    ymax <- max(select(ts_quants, -c(model, year)),
+                select(tso_quants, -c(model, year)))
+    brk <- seq(0, ymax, 50)
+    lbl <- seq(0, ymax, 50)
+    cols <- rep("black", length(brk))
+    if(show_bo_lines){
+      # Add the text labels to the y-axis ticks for the reference point levels
+      brk <- sort(c(brk, tso_multiples[[quants[2]]]))
+      lbl <- brk
+      wch <- which(brk %in% tso_multiples[[quants[2]]])
+      if(length(wch) != 2){
+        stop("Could not find the B0 reference points in the tso_multiplier data frame. See function code")
+      }
+      lbl[wch][1] <- as.expression(bquote(.(tso_multiples$multiplier[1]) ~ B[0]))
+      lbl[wch][2] <- as.expression(bquote(.(tso_multiples$multiplier[2]) ~ B[0]))
+      cols <- rep("black", length(brk))
+      cols[wch] <- c("red", "green")
+    }
+    g <- g +
+      scale_y_continuous(limits = c(0, NA),
+                         breaks = brk,
+                         labels = lbl) +
+      theme(axis.text.y = element_text(color = cols),
+            axis.ticks.y = element_line(color = cols))
+    #g <- g + scale_y_continuous(limits = c(0, NA), expand = c(0, 0))
   }else{
     g <- g + scale_y_continuous(limits = ylim, expand = c(0, 0))
   }
