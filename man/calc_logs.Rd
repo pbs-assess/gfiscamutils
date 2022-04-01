@@ -6,7 +6,8 @@
 \usage{
 calc_logs(
   mc,
-  log.params = c("^ro$", "^m$", "^m1$", "^m2$", "^rbar$", "^rinit$", "^q[1-9]+$")
+  log.params = c("^ro$", "^m$", "^m_sex1$", "^m_sex2$", "^rbar$", "^rinit$",
+    "^q_gear[1-9]+$")
 )
 }
 \arguments{

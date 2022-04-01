@@ -252,7 +252,7 @@ make.age.comp.fit.plot <- function(model,
   obs.prop <- prop.table(comp.dat, 1)
 
   max.y <- max(fit.dat, obs.prop)
-  n.side <- get.rows.cols(length(yrs))
+  n.side <- get_rows_cols(length(yrs))
   par(mfrow = n.side,
       oma = c(2, 3, 1, 1),
       mai = c(0.2, 0.4, 0.3, 0.2))

@@ -85,7 +85,7 @@ get.age.prop <- function(vec, rank = 1){
 #'
 #' @return an R expression which represents the pretty version of the parameter name
 #' @export
-get.latex.name <- function(name, addToQ = 0){
+get_latex_name <- function(name, addToQ = 0){
 
   if(name == "ro") return(expression("R"[0]))
   if(name == "rbar") return(expression(bar("R")))
@@ -115,16 +115,18 @@ get.latex.name <- function(name, addToQ = 0){
   if(name == "m1") return(expression("M"[1]))
   if(name == "m2") return(expression("M"[2]))
   if(name == "log_m") return(expression("ln(M)"))
+  if(name == "log_m_sex1") return(expression("ln(M"[Male]*")"))
+  if(name == "log_m_sex2") return(expression("ln(M"[Female]*")"))
   if(name == "log_rbar") return(expression("ln("*bar("R")*")"))
   if(name == "log_rinit") return(expression("ln("*bar("R")[init]*")"))
 
-  if(length(grep("^q[1-9]+$", name))){
-    digit <- as.numeric(sub("^q([1-9]+)$", "\\1", name))
+  if(length(grep("^q_gear[1-9]+$", name))){
+    digit <- as.numeric(sub("^q_gear([1-9]+)$", "\\1", name))
     return(substitute("q"[digit], list(digit = digit)))
   }
 
-  if(length(grep("^log_q[1-9]+$", name))){
-    digit <- as.numeric(sub("^log_q([1-9]+)$", "\\1", name))
+  if(length(grep("^log_q_gear[1-9]+$", name))){
+    digit <- as.numeric(sub("^log_q_gear([1-9]+)$", "\\1", name))
     return(substitute("ln(q"[digit]*")", list(digit = digit)))
   }
   NULL
@@ -241,7 +243,7 @@ calc_sig_tau <- function(rho, vartheta){
 #'
 #' @return a vector of length 2 representing the number of rows and columns
 #' @export
-get.rows.cols <- function(num){
+get_rows_cols <- function(num){
   if(num <= 64 && num > 49){
     if(num <= 56){
       nside <- c(8,7)

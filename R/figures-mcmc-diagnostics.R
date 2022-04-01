@@ -22,111 +22,84 @@
 #'
 #' @return Nothing
 #' @export
-make.priors.posts.plot <- function(model,
-                                   priors.only = TRUE){
+plot_priors_posts_old <- function(model,
+                              priors_only = TRUE){
 
-  if(class(model) == mdl_lst_cls){
-    model <- model[[1]]
-    if(class(model) != mdl_cls){
-      stop("The structure of the model list is incorrect.")
-    }
+  if(class(model) != mdl_cls){
+    stop("The `model` argument is not a gfiscamutils::mdl_cls class")
   }
 
-  f.names <- c(dunif, dnorm, dlnorm, dbeta, dgamma)
+  f_nms <- c(dunif, dnorm, dlnorm, dbeta, dgamma)
 
-  mc <- model$mcmccalcs$p.dat.log
-  ## Remove selectivity parameters, bo, vartheta, sigma, tau from the posts
-  sel_ind <- grep("^sel.*", names(mc))
-  if(length(sel_ind)){
-    mc <- mc[, -sel_ind]
-  }
-  bo_ind <- grep("bo", names(mc))
-  if(length(bo_ind)){
-    mc <- mc[, -bo_ind]
-  }
-  vartheta_ind <- grep("vartheta", names(mc))
-  if(length(vartheta_ind)){
-    mc <- mc[, -vartheta_ind]
-  }
-  tau_ind <- grep("tau", names(mc))
-  if(length(tau_ind)){
-    mc <- mc[, -tau_ind]
-  }
-  sigma_ind <- grep("sigma", names(mc))
-  if(length(sigma_ind)){
-    mc <- mc[, -sigma_ind]
-  }
-  post.names <- names(mc)
+  mc <- model$mcmccalcs$params_log
+  # Remove selectivity parameters, bo, vartheta, sigma, tau, bmsy from the posteriors
+  mc <- mc %>%
+    select(-contains(c("sel", "bo", "vartheta", "tau", "sigma", "bmsy")))
+  post_nms <- names(mc)
 
-  prior.specs <- as.data.frame(model$ctl$params)
-  ## Remove fixed parameters
-  prior.specs <- prior.specs[prior.specs$phz > 0,]
-  ## Remove upper and lower bound, and phase information, but keep initial
-  ##  value
-  prior.specs <- prior.specs[, -c(2:4)]
-  ## Remove kappa
-  prior.specs <- prior.specs[rownames(prior.specs) != "kappa",]
-  prior.names <- rownames(prior.specs)
+  # Remove fixed parameters, and upper and lower bound, and phase information,
+  # but keep initial value. Remove kappa if present
+  prior_specs <- as_tibble(model$ctl$params, rownames = "param") %>%
+    filter(phz > 0) %>%
+    select(-c(lb, ub, phz)) %>%
+    filter(param != "kappa")
 
-  ## Add the q parameters to the prior specs table
-  q.params <- model$ctl$surv.q
-  num.q.params <- ncol(q.params)
-  q.specs <- lapply(1:num.q.params,
-                    function(x){
-                      c(q.params[2, x],
-                        q.params[1, x],
-                        q.params[2, x],
-                        q.params[3, x])
-                    })
-  q.specs <- as.data.frame(do.call(rbind, q.specs))
-  rownames(q.specs) <- paste0("log_q", 1:num.q.params)
-  colnames(q.specs) <- colnames(prior.specs)
-  prior.specs <- rbind(prior.specs, q.specs)
+  # Add the q parameters to the prior specs table
+  q_params <- model$ctl$surv.q %>%
+    t() %>%
+    as_tibble() %>%
+    mutate(param = paste0("q", row_number())) %>%
+    mutate(ival = priormeanlog) %>%
+    rename(prior = priortype) %>%
+    rename(p1 = priormeanlog) %>%
+    rename(p2 = priorsd) %>%
+    select(param, ival, prior, p1, p2)
 
-  ## Get MPD estimates for the parameters in the posteriors
+  prior_specs <- prior_specs %>%
+    bind_rows(q_params)
+
+  # Get MPD estimates for the parameters in the posteriors
   mpd <- model$mpd
-  q.pattern <- "^log_q([1-9]+)$"
-  mpd.lst <- lapply(1:length(post.names),
-                    function(x){
-                      mle <- NULL
-                      p.name <- post.names[x]
-                      if(p.name == "log_m1" | p.name == "log_m"){
-                        mle <- log(mpd$m[1])
-                      }else if(p.name == "log_m2"){
-                        mle <- log(mpd$m[2])
-                      }else if(p.name == "h"){
-                        mle <- mpd$steepness
-                      }else if(length(grep(q.pattern, p.name)) > 0){
-                        num <- as.numeric(sub(q.pattern, "\\1", p.name))
-                        mle <- log(mpd$q[num])
-                      }else{
-                        mle <- as.numeric(mpd[post.names[x]])
-                      }
-                      mle})
-  mpd.param.vals <- do.call(c, mpd.lst)
-  names(mpd.param.vals) <- post.names
+  q_pat <- "^log_q_gear([1-9]+)$"
+  mpd_vals <- imap_dbl(post_nms, ~{
+    mle <- NULL
+    if(.x == "log_m_sex1"){
+      mle <- log(mpd$m[1])
+    }else if(.x == "log_m_sex2"){
+      mle <- log(mpd$m[2])
+    }else if(.x == "h"){
+      mle <- mpd$steepness
+    }else if(length(grep(q_pat, .x)) > 0){
+      num <- as.numeric(sub(q_pat, "\\1", .x))
+      mle <- log(mpd$q[num])
+    }else{
+      mle <- as.numeric(mpd[.x])
+    }
+    mle
+  }) %>%
+    `names<-`(post_nms)
 
-  n.side <- get.rows.cols(length(post.names))
-  par(mfrow = n.side,
+  n_side <- get_rows_cols(length(post_nms))
+  par(mfrow = n_side,
       oma = c(2, 3, 1, 1),
       mai = c(0.2, 0.4, 0.3, 0.2))
 
-  for(i in 1:length(post.names)){
-    specs <- prior.specs[i,]
-    prior.fn <- f.names[[as.numeric(specs[2] + 1)]]
-    xx <- list(p = mc[,i],
-               p1 = as.numeric(specs[3]),
-               p2 = as.numeric(specs[4]),
-               fn = prior.fn,
-               nm = post.names[i],
-               mle = as.numeric(mpd.param.vals[i]))
+  for(i in 1:length(post_nms)){
+    specs <- prior_specs[i, ]
+    prior_fn <- f_nms[[as.numeric(specs$prior + 1)]]
+    xx <- list(p = mc[, i],
+               p1 = as.numeric(specs$p1),
+               p2 = as.numeric(specs$p2),
+               fn = prior_fn,
+               nm = post_nms[i],
+               mle = as.numeric(mpd_vals[i]))
+    if(i == 10)browser()
+    xx$nm <- get_latex_name(xx$nm)
 
-    xx$nm <- get.latex.name(xx$nm)
-
-    if(priors.only){
+    if(priors_only){
       func <- function(x){xx$fn(x, xx$p1, xx$p2)}
-      if(specs[2] == 0){
-        ## Uniform, plot from p1-1 to p2+1
+      if(specs$prior == 0){
+        # Uniform, plot from p1-1 to p2+1
         curve(func,
               from = xx$p1 - 1,
               to = xx$p2 + 1,
@@ -134,7 +107,7 @@ make.priors.posts.plot <- function(model,
               ylab = "",
               col = "black",
               lwd = 2)
-      }else if(specs[2] == 1){
+      }else if(specs$prior == 1){
         ## Normal, plot from -(p1-p2*4) to (p1+p2*4)
         curve(func,
               from = xx$p1 - 4 * xx$p2,
@@ -225,15 +198,15 @@ make.traces.plot <- function(model,
   }
 
   mc <- model$mcmc$params.est
-  n.side <- get.rows.cols(ncol(mc))
-  par(mfrow = n.side,
+  n_side <- get_rows_cols(ncol(mc))
+  par(mfrow = n_side,
       oma = c(2, 3, 1, 1),
       mai = c(0.2, 0.4, 0.3, 0.2))
 
   for(param in 1:ncol(mc)){
     mcmc.trace <- as.matrix(mc[,param])
     name <- colnames(mc)[param]
-    name <- get.latex.name(name)
+    name <- get_latex_name(name)
     plot(mcmc.trace,
          main = name,
          type = "l",
@@ -267,15 +240,15 @@ make.autocor.plot <- function(model){
   }
 
   mc <- model$mcmc$params.est
-  n.side <- get.rows.cols(ncol(mc))
-  par(mfrow = n.side,
+  n_side <- get_rows_cols(ncol(mc))
+  par(mfrow = n_side,
       oma = c(2, 3, 1, 1),
       mai = c(0.2, 0.4, 0.3, 0.2))
 
   for(param in 1:ncol(mc)){
     mcmc.autocor <- as.matrix(mc[,param])
     name <- colnames(mc)[param]
-    name <- get.latex.name(name)
+    name <- get_latex_name(name)
     autocorr.plot(mcmc.autocor,
                   lag.max = 100,
                   main = name,
@@ -418,7 +391,7 @@ make.pairs.plot <- function(model,
   latex.names <- NULL
   for(param in 1:ncol(mc)){
     name <- c.names[param]
-    latex.names <- c(latex.names, get.latex.name(name))
+    latex.names <- c(latex.names, get_latex_name(name))
   }
   pairs(mc,
         labels = latex.names,

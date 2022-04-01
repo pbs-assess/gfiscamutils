@@ -1419,11 +1419,11 @@ get_estimated_params <- function(mc){
 calc_logs <- function(mc,
                       log.params = c("^ro$",
                                      "^m$",
-                                     "^m1$",
-                                     "^m2$",
+                                     "^m_sex1$",
+                                     "^m_sex2$",
                                      "^rbar$",
                                      "^rinit$",
-                                     "^q[1-9]+$")){
+                                     "^q_gear[1-9]+$")){
 
   nm <- colnames(mc)
   grp <- lapply(log.params,
