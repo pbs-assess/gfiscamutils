@@ -26,7 +26,8 @@ plot_ts_mcmc(
   append_base_txt = NULL,
   show_bo_lines = FALSE,
   show_bmsy_lines = FALSE,
-  refpt_colors = c("red", "green"),
+  bo_refpt_colors = c("red", "green"),
+  bmsy_refpt_colors = c("salmon", "darkgreen"),
   ind_letter = NULL,
   leg_loc = NULL,
   probs = c(0.025, 0.5, 0.975),
@@ -89,19 +90,21 @@ plot legend}
 
 \item{show_bmsy_lines}{Show the Bmsy lines (0.4 and 0.8 Bmsy) for the first model}
 
-\item{refpt_colors}{A vector of two colors representing the LRP and USR. Used to
-display reference point lines if either `show_bo_lines` or `show_bmsy_lines` are `TRUE`}
+\item{bo_refpt_colors}{A vector of two colors representing the LRP and USR for B0.
+Used to display reference point lines if `show_bo_lines == TRUE`}
+
+\item{bmsy_refpt_colors}{A vector of two colors representing the LRP and USR for BMSY.
+Used to display reference point lines if `show_bmsy_lines == TRUE`}
 
 \item{ind_letter}{A letter to place in the upper left corner of the plot. If `NULL`,
 nothing will be shown}
+
+\item{leg_loc}{}
 
 \item{probs}{A 3-element vector of probabilities that appear in the output data frames
 This is provided in case the data frames have more than three different quantile levels}
 
 \item{...}{Other graphical arguments}
-
-\item{leg}{A vector of two values representing the X/Y coordinates inside the plot to
-place the legend. If `NULL`, the default placement is used}
 }
 \value{
 Nothing

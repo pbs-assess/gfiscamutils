@@ -163,15 +163,16 @@ plot_ts_mpd <- function(models,
 #' plot legend
 #' @param show_bo_lines Show the B0 lines (0.2 and 0.4 B0) for the first model
 #' @param show_bmsy_lines Show the Bmsy lines (0.4 and 0.8 Bmsy) for the first model
-#' @param refpt_colors A vector of two colors representing the LRP and USR. Used to
-#' display reference point lines if either `show_bo_lines` or `show_bmsy_lines` are `TRUE`
+#' @param bo_refpt_colors A vector of two colors representing the LRP and USR for B0.
+#' Used to display reference point lines if `show_bo_lines == TRUE`
+#' @param bmsy_refpt_colors A vector of two colors representing the LRP and USR for BMSY.
+#' Used to display reference point lines if `show_bmsy_lines == TRUE`
 #' @param ind_letter A letter to place in the upper left corner of the plot. If `NULL`,
 #' nothing will be shown
-#' @param leg A vector of two values representing the X/Y coordinates inside the plot to
-#' place the legend. If `NULL`, the default placement is used
 #' @param probs A 3-element vector of probabilities that appear in the output data frames
 #' This is provided in case the data frames have more than three different quantile levels
 #' @param ... Other graphical arguments
+#' @param leg_loc
 #'
 #' @return Nothing
 #' @export
@@ -195,7 +196,8 @@ plot_ts_mcmc <- function(models,
                          append_base_txt = NULL,
                          show_bo_lines = FALSE,
                          show_bmsy_lines = FALSE,
-                         refpt_colors = c("red", "green"),
+                         bo_refpt_colors = c("red", "green"),
+                         bmsy_refpt_colors = c("salmon", "darkgreen"),
                          ind_letter = NULL,
                          leg_loc = NULL,
                          probs = c(0.025, 0.5, 0.975),
@@ -248,6 +250,7 @@ plot_ts_mcmc <- function(models,
       j
     })
     tso_quants <- map(models, ~{.x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "sbo"]})
+    bmsy_quants <- map(models, ~{.x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "bmsy"]})
   }else if(type == "rt"){
     ts_quants <- map(models, ~{.x$mcmccalcs$rt_quants})
     tso_quants <- map(models, ~{.x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "ro"]})
@@ -268,6 +271,9 @@ plot_ts_mcmc <- function(models,
     }
     names(ts_quants) <- nms
     names(tso_quants) <- nms
+    if(type == "sbt"){
+      names(bmsy_quants) <- nms
+    }
   }else{
     names(ts_quants)[1] <- paste0(names(ts_quants)[1], append_base_txt)
     names(tso_quants)[1] <- paste0(names(tso_quants)[1], append_base_txt)
@@ -278,6 +284,12 @@ plot_ts_mcmc <- function(models,
     bind_rows() %>%
     mutate(model = nms, year = ifelse(show_initial, start_yr - 1, start_yr)) %>%
     select(model, year, everything())
+  if(type == "sbt"){
+    bmsy_quants <- bmsy_quants %>%
+      bind_rows() %>%
+      mutate(model = nms, year = start_yr) %>%
+      select(model, year, everything())
+  }
 
   ts_quants <- imap(ts_quants, ~{
     .x %>%
@@ -315,6 +327,10 @@ plot_ts_mcmc <- function(models,
     # Remove data prior to first year and change B0/R0 to first
     tso_quants <- tso_quants %>%
       mutate(year = ifelse(show_initial, xlim[1] - 1, xlim[1]))
+    if(type == "sbt"){
+      bmsy_quants <- bmsy_quants %>%
+        mutate(year = xlim[1])
+    }
     ts_quants <- ts_quants %>%
       filter(year %in% xlim[1]:xlim[2])
   }
@@ -372,43 +388,65 @@ plot_ts_mcmc <- function(models,
         geom_rect(data = tso_multiples,
                   aes(xmin = start_yr, xmax = end_yr),
                   alpha = refpts_alpha,
-                  fill = refpt_colors) +
+                  fill = bo_refpt_colors) +
         geom_hline(data = tso_multiples,
                    aes(yintercept = !!sym(quants[2])),
-                   color = refpt_colors, lty = 1, lwd = 1)
+                   color = bo_refpt_colors, lty = 1, lwd = 1)
     }else{
       g <- g +
         geom_hline(data = tso_multiples,
                    aes(yintercept = !!sym(quants[1])),
-                   color = refpt_colors,
+                   color = bo_refpt_colors,
                    lty = 4) +
         geom_hline(data = tso_multiples,
                    aes(yintercept = !!sym(quants[2])),
-                   color = refpt_colors,
+                   color = bo_refpt_colors,
                    lty = 1) +
         geom_hline(data = tso_multiples,
                    aes(yintercept = !!sym(quants[3])),
-                   color = refpt_colors,
+                   color = bo_refpt_colors,
                    lty = 4)
     }
   }
 
   if(show_bmsy_lines){
-    browser()
     # Show the B0 lines for the first model with CI, behind model lines
-    tso_base <- tso_quants %>%
+    bmsy_base <- bmsy_quants %>%
       slice(1)
     # Only two lines allowed, Limit Reference Point (LRP) and Upper Stock
     # Reference (USR)
-    tso_multiples <- imap(c(0.2, 0.4), ~{
-      tso_base %>%
+    bmsy_multiples <- imap(c(0.4, 0.8), ~{
+      bmsy_base %>%
         mutate(!!sym(quants[1]) := !!sym(quants[1]) * .x,
                !!sym(quants[2]) := !!sym(quants[2]) * .x,
                !!sym(quants[3]) := !!sym(quants[3]) * .x) %>%
         mutate(multiplier = .x)
     }) %>%
       bind_rows
-
+    if(refpts_ribbon){
+      g <- g +
+        geom_rect(data = bmsy_multiples,
+                  aes(xmin = start_yr, xmax = end_yr),
+                  alpha = refpts_alpha,
+                  fill = bmsy_refpt_colors) +
+        geom_hline(data = bmsy_multiples,
+                   aes(yintercept = !!sym(quants[2])),
+                   color = bmsy_refpt_colors, lty = 1, lwd = 1)
+    }else{
+      g <- g +
+        geom_hline(data = bmsy_multiples,
+                   aes(yintercept = !!sym(quants[1])),
+                   color = bmsy_refpt_colors,
+                   lty = 4) +
+        geom_hline(data = bmsy_multiples,
+                   aes(yintercept = !!sym(quants[2])),
+                   color = bmsy_refpt_colors,
+                   lty = 1) +
+        geom_hline(data = bmsy_multiples,
+                   aes(yintercept = !!sym(quants[3])),
+                   color = bmsy_refpt_colors,
+                   lty = 4)
+    }
   }
 
   if(rel){
@@ -431,7 +469,6 @@ plot_ts_mcmc <- function(models,
   }
 
   if(is.null(ylim)){
-    #browser()
     ymax <- max(select(ts_quants, -c(model, year)),
                 select(tso_quants, -c(model, year)))
     brk <- seq(0, ymax, 50)
@@ -448,7 +485,35 @@ plot_ts_mcmc <- function(models,
       lbl[wch][1] <- as.expression(bquote(.(tso_multiples$multiplier[1]) ~ B[0]))
       lbl[wch][2] <- as.expression(bquote(.(tso_multiples$multiplier[2]) ~ B[0]))
       cols <- rep("black", length(brk))
-      cols[wch] <- refpt_colors
+      cols[wch] <- bo_refpt_colors
+    }
+    if(show_bmsy_lines){
+      # Add the text labels to the y-axis ticks for the reference point levels
+      if(show_bo_lines){
+        # The labels and breaks have already be created so we have to go from those
+        brk <- sort(c(brk, bmsy_multiples[[quants[2]]]))
+        wch <- which(brk %in% bmsy_multiples[[quants[2]]])
+        if(length(wch) != 2){
+          stop("Could not find the B0 reference points in the tso_multiplier data frame. ",
+               "See function code for case where both show_bo_lines and show_msy_lines are enabled")
+        }
+        lbl <- append(lbl, as.expression(bquote(.(bmsy_multiples$multiplier[1]) ~ B[MSY])), after = wch[1] - 1)
+        lbl <- append(lbl, as.expression(bquote(.(bmsy_multiples$multiplier[2]) ~ B[MSY])), after = wch[2] - 1)
+        cols <- append(cols, bmsy_refpt_colors[1], after = wch[1] - 1)
+        cols <- append(cols, bmsy_refpt_colors[2], after = wch[2] - 1)
+      }else{
+        # Start from non-modified labels and breaks
+        brk <- sort(c(brk, bmsy_multiples[[quants[2]]]))
+        lbl <- brk
+        wch <- which(brk %in% bmsy_multiples[[quants[2]]])
+        if(length(wch) != 2){
+          stop("Could not find the BMSY reference points in the bmsy_multiplier data frame. See function code")
+        }
+        lbl[wch][1] <- as.expression(bquote(.(bmsy_multiples$multiplier[1]) ~ B[MSY]))
+        lbl[wch][2] <- as.expression(bquote(.(bmsy_multiples$multiplier[2]) ~ B[MSY]))
+        cols <- rep("black", length(brk))
+        cols[wch] <- bmsy_refpt_colors
+      }
     }
     g <- g +
       scale_y_continuous(limits = c(0, NA),
@@ -456,7 +521,6 @@ plot_ts_mcmc <- function(models,
                          labels = lbl) +
       theme(axis.text.y = element_text(color = cols),
             axis.ticks.y = element_line(color = cols))
-    #g <- g + scale_y_continuous(limits = c(0, NA), expand = c(0, 0))
   }else{
     g <- g + scale_y_continuous(limits = ylim, expand = c(0, 0))
   }
@@ -489,8 +553,15 @@ plot_ts_mcmc <- function(models,
       }) %>%
       bind_rows
     g <- g +
-      geom_point(data = ts_dodge, aes(color = model), size = point_size) +
-      geom_segment(data = ts_dodge, aes(xend = year, y = !!sym(quants[1]), yend = !!sym(quants[3]), color = model), size = line_width)
+      geom_point(data = ts_dodge,
+                 aes(color = model),
+                 size = point_size) +
+      geom_segment(data = ts_dodge,
+                   aes(xend = year,
+                       y = !!sym(quants[1]),
+                       yend = !!sym(quants[3]),
+                       color = model),
+                   size = line_width)
   }
 
   if(!rel && show_initial){
