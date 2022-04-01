@@ -113,7 +113,7 @@ calc_mcmc <- function(model,
   }
   out$params <- mcmc_thin(out$params, burnin, thin)
   # Remove non-parameters
-  out$params <- out$params[, -grep("msy|SSB|f", nm)]
+  out$params <- out$params[, -grep("fmsy|umsy|msy_|SSB|f", nm)]
   # Calculate sigma and tau and add to p_dat
   if("rho" %in% names(out$params) && "vartheta" %in% names(out$params)){
     sigtau <- calc_sig_tau(out$params$rho, out$params$vartheta)
