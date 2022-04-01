@@ -1,10 +1,10 @@
-#' Plot priors and posteriors for the given isam model
+#' Plot priors and posteriors on the same plot for the given iscam model
 #'
 #' @param model An iscam model object
-#' @param priors.only Plot the priors only? TRUE/FALSE
+#' @param priors_only Logical. If `TRUE`, plot the priors only. If `FALSE`,
+#' plot both priors and associated posterior histograms
 #'
-#' @details Plots the priors overlaid on the posteriors for the given iscm model.
-#'   If priors.only is TRUE, only the priors will be plotted.
+#' @details Plots the priors overlaid on the posteriors for the given iscam model.
 #'   The values in the control file (model$ctl$params) for each
 #'   prior are:
 #'   1. ival  = initial value
@@ -21,9 +21,11 @@
 #'   7. p2 (defined by 5 above)
 #'
 #' @return Nothing
+#' @importFrom cowplot plot_grid
 #' @export
 plot_priors_posts <- function(model,
-                              priors_only = TRUE){
+                              priors_only = TRUE,
+                              ...){
 
   if(class(model) != mdl_cls){
     stop("The `model` argument is not a gfiscamutils::mdl_cls class")
@@ -59,6 +61,7 @@ plot_priors_posts <- function(model,
     bind_rows(q_params)
 
   # Get MPD estimates for the parameters in the posteriors
+  # Not used currently but kept in case needed
   mpd <- model$mpd
   q_pat <- "^log_q_gear([1-9]+)$"
   mpd_vals <- imap_dbl(post_nms, ~{
@@ -79,51 +82,10 @@ plot_priors_posts <- function(model,
   }) %>%
     `names<-`(post_nms)
 
-  # n_side <- get_rows_cols(length(post_nms))
-  # par(mfrow = n_side,
-  #     oma = c(2, 3, 1, 1),
-  #     mai = c(0.2, 0.4, 0.3, 0.2))
-
   if(nrow(prior_specs) != length(post_nms)){
     stop("Number of rows in prior_specs and length of post_names are not the same, debug function")
   }
 
-  specs <- prior_specs[3, ]
-  prior_fn <- f_nms[[as.numeric(specs$prior + 1)]]
-  xx <- list(p = mc[, 1],
-             p1 = as.numeric(specs$p1),
-             p2 = as.numeric(specs$p2),
-             fn = prior_fn,
-             nm = post_nms[1],
-             mle = as.numeric(mpd_vals[1]))
-  xx$nm <- get_latex_name(xx$nm)
-  func <- function(x){xx$fn(x, xx$p1, xx$p2)}
-  curve(func,
-        from = xx$p1 - 4 * xx$p2,
-        to = xx$p2 + 4 * xx$p2,
-        xlab = "",
-        ylab = "",
-        col = "black",
-        lwd = 2)
-
-  plot_norm(alpha = 0.75, mean = xx$p1, sd = xx$p2)
-browser()
-  # g <- ggplot(data = data.frame(x = c(-6, 6)), aes(x)) +
-  #   stat_function(fun = dnorm,
-  #                 n = 100,
-  #                 args = list(mean = xx$p1, sd = xx$p2),
-  #                 geom = "area",
-  #                 fill = "steelblue",
-  #                 lwd = 1) +
-  #   ylab("") +
-  #   scale_y_continuous(breaks = NULL) +
-  #   geom_vline(xintercept = xx$p1, color = "white", lwd = 0.5, lty = 2) +
-  #   geom_vline(xintercept = xx$p1 - xx$p2, color = "white", lwd = 0.5, lty = 1) +
-  #   geom_vline(xintercept = xx$p1 + xx$p2, color = "white", lwd = 0.5, lty = 1)
-
-
-
-  # -----------------------------------------------
   g_lst <- imap(post_nms, ~{
     specs <- prior_specs[.y, ]
     prior_fn <- f_nms[[as.numeric(specs$prior + 1)]]
@@ -135,41 +97,83 @@ browser()
                mle = as.numeric(mpd_vals[.y]))
 
     xx$nm <- get_latex_name(xx$nm)
-    if(priors_only){
-      func <- function(x){xx$fn(x, xx$p1, xx$p2)}
-      g <- ggplot()
-      if(specs$prior == 0){
-        # Uniform, plot from p1-1 to p2+1
-        curve(func,
-              from = xx$p1 - 1,
-              to = xx$p2 + 1,
-              xlab = "",
-              ylab = "",
-              col = "black",
-              lwd = 2)
-      }else if(specs$prior == 1){
-        ## Normal, plot from -(p1-p2*4) to (p1+p2*4)
-        curve(func,
-              from = xx$p1 - 4 * xx$p2,
-              to = xx$p2 + 4 * xx$p2,
-              xlab = "",
-              ylab = "",
-              col = "black",
-              lwd = 2)
-      }else{
-        curve(func,
-              xlab = "",
-              ylab = "",
-              col = "black",
-              lwd = 2)
+    func <- function(x){xx$fn(x, xx$p1, xx$p2)}
+    if(specs$prior == 0){
+      # Uniform
+      g <- plot_fun(fun = dunif,
+                    xlim = c(xx$p1, xx$p2),
+                    title = xx$nm,
+                    alpha = 0.9,
+                    param_lst = list(min = xx$p1, max = xx$p2),
+                    show_mean_line = FALSE,
+                    show_sd_lines = FALSE)
+      if(!priors_only){
+        g_dat <- ggplot_build(g)
+        ymax <- max(g_dat$data[[1]]$ymax)
+        g <- g +
+          geom_histogram(data = data.frame(xx$p), aes(x = xx.p, y = ..ncount.. * ymax),
+                         color = "black",
+                         fill = "khaki1",
+                         alpha = 0.5,
+                         bins = 30)
       }
-      title(xx$nm)
-    }else{
-      plot_marg(xx,
-                breaks = "sturges",
-                col = "wheat")
+    }else if(specs$prior == 1){
+      # Normal
+      g <- plot_fun(fun = dnorm,
+                    xlim = c(-3, 3),
+                    title = xx$nm,
+                    alpha = 0.9,
+                    param_lst = list(mean = xx$p1, sd = xx$p2),
+                    show_mode_line = TRUE)
+      if(!priors_only){
+        g_dat <- ggplot_build(g)
+        ymax <- max(g_dat$data[[1]]$ymax)
+        g <- g +
+          geom_histogram(data = data.frame(xx$p), aes(x = xx.p, y = ..ncount.. * ymax),
+                         color = "black",
+                         fill = "khaki1",
+                         alpha = 0.5,
+                         bins = 30)
+      }
+    }else if(specs$prior == 2){
+      # Lognormal
+      g <- plot_fun(fun = dlnorm,
+                    xlim = c(log(xx$p1), log(xx$p2)),
+                    title = xx$nm,
+                    alpha = 0.9,
+                    param_lst = list(mean = log(xx$p1), sd = log(xx$p2)),
+                    show_mode_line = TRUE)
+      if(!priors_only){
+        g_dat <- ggplot_build(g)
+        ymax <- max(g_dat$data[[1]]$ymax)
+        g <- g +
+          geom_histogram(data = data.frame(log(xx$p)), aes(x = xx.p, y = ..ncount.. * ymax),
+                         color = "black",
+                         fill = "khaki1",
+                         alpha = 0.5,
+                         bins = 30)
+      }
+    }else if(specs$prior %in% 3:4){
+      # Beta
+      g <- plot_fun(fun = ifelse(specs$prior == 3, dbeta, dgamma),
+                    xlim = c(0.5, 1),
+                    title = xx$nm,
+                    alpha = 0.9,
+                    param_lst = list(shape1 = xx$p1, shape2 = xx$p2),
+                    show_mode_line = TRUE)
+      if(!priors_only){
+        g_dat <- ggplot_build(g)
+        ymax <- max(g_dat$data[[1]]$ymax)
+        g <- g +
+          geom_histogram(data = data.frame(xx$p), aes(x = xx.p, y = ..ncount.. * ymax),
+                         color = "black",
+                         fill = "khaki1",
+                         alpha = 0.5,
+                         bins = 30)
+      }
     }
+    g
   })
 
-  cowplot::plot_grid(plotlist = g_lst, nrow = 3)
+  plot_grid(plotlist = g_lst, ...)
 }

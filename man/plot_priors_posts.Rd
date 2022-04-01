@@ -2,24 +2,24 @@
 % Please edit documentation in R/figures-priors-posts.R
 \name{plot_priors_posts}
 \alias{plot_priors_posts}
-\title{Plot priors and posteriors for the given isam model}
+\title{Plot priors and posteriors on the same plot for the given iscam model}
 \usage{
-plot_priors_posts(model, priors_only = TRUE)
+plot_priors_posts(model, priors_only = TRUE, ...)
 }
 \arguments{
 \item{model}{An iscam model object}
 
-\item{priors.only}{Plot the priors only? TRUE/FALSE}
+\item{priors_only}{Logical. If `TRUE`, plot the priors only. If `FALSE`,
+plot both priors and associated posterior histograms}
 }
 \value{
 Nothing
 }
 \description{
-Plot priors and posteriors for the given isam model
+Plot priors and posteriors on the same plot for the given iscam model
 }
 \details{
-Plots the priors overlaid on the posteriors for the given iscm model.
-  If priors.only is TRUE, only the priors will be plotted.
+Plots the priors overlaid on the posteriors for the given iscam model.
   The values in the control file (model$ctl$params) for each
   prior are:
   1. ival  = initial value
