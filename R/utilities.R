@@ -74,62 +74,56 @@ get.age.prop <- function(vec, rank = 1){
   c(age, prop)
 }
 
-#' Get a pretty version of the parameter name
+#' Get a pretty version of the parameter name. Italicizes
+#' parameter names.
 #'
 #' @param name iscam parameter to pretty-up
-#' @param addToQ an integer to the parameter name for the q's. This is necessary
-#' because iscam sets the q parameter names to 1, 2, 3... regardless of the
-#' gear number. i.e. if gear 1 is a trawl fishery and gear 2 is a survey,
-#' iscam will call q1 the survey gear. We must add 1 to it to get q2 to
-#' accurately portray the survey gear number
 #'
 #' @return an R expression which represents the pretty version of the parameter name
 #' @export
-get_latex_name <- function(name, addToQ = 0){
-
-  if(name == "ro") return(expression("R"[0]))
-  if(name == "rbar") return(expression(bar("R")))
-  if(name == "rinit") return(expression(bar("R")[init]))
-  if(name == "m") return(expression("M"))
-  if(name == "bo") return(expression("B"[0]))
-  if(name == "sbo") return(expression("SB"[0]))
-  if(name == "vartheta") return(expression(vartheta))
-  if(name == "rho") return(expression(rho))
-  if(name == "bmsy") return(expression("B"[MSY]))
-  if(name == "msy") return(expression("MSY"))
-  if(name == "fmsy") return(expression("F"[MSY]))
-  if(name == "umsy") return(expression("U"[MSY]))
-  if(name == "ssb") return(expression("SSB"))
-  if(name == "sel1") return(expression(hat(a)[1]))
-  if(name == "selsd1") return(expression(hat(gamma)[1]))
-  if(name == "sel2") return(expression(hat(a)[2]))
-  if(name == "selsd2") return(expression(hat(gamma)[2]))
-  if(name == "sel3") return(expression(hat(a)[3]))
-  if(name == "selsd3") return(expression(hat(gamma)[3]))
-  if(name == "sel4") return(expression(hat(a)[4]))
-  if(name == "selsd4") return(expression(hat(gamma)[4]))
-  if(name == "sel5") return(expression(hat(a)[5]))
-  if(name == "selsd5") return(expression(hat(gamma)[5]))
-  if(name == "log_ro") return(expression("ln(R"[0]*")"))
-  if(name == "h") return(expression("h"))
-  if(name == "m1") return(expression("M"[1]))
-  if(name == "m2") return(expression("M"[2]))
-  if(name == "log_m") return(expression("ln(M)"))
-  if(name == "log_m_sex1") return(expression("ln(M"[Male]*")"))
-  if(name == "log_m_sex2") return(expression("ln(M"[Female]*")"))
-  if(name == "log_rbar") return(expression("ln("*bar("R")*")"))
-  if(name == "log_rinit") return(expression("ln("*bar("R")[init]*")"))
+get_latex_name <- function(name){
 
   if(length(grep("^q_gear[1-9]+$", name))){
     digit <- as.numeric(sub("^q_gear([1-9]+)$", "\\1", name))
-    return(substitute("q"[digit], list(digit = digit)))
+    return(substitute(italic(q)[digit], list(digit = digit)))
   }
 
   if(length(grep("^log_q_gear[1-9]+$", name))){
     digit <- as.numeric(sub("^log_q_gear([1-9]+)$", "\\1", name))
-    return(substitute("ln(q"[digit]*")", list(digit = digit)))
+    return(substitute("ln("*italic(q)[digit]*")", list(digit = digit)))
   }
-  NULL
+
+  switch(name,
+         "ro" = expression(italic(R)[0]),
+         "rbar" = expression(bar(italic(R))),
+         "rinit" = expression(bar(italic(R))[init]),
+         "m" = expression(italic(M)),
+         "bo" = expression("B"[0]),
+         "sbo" = expression("SB"[0]),
+         "vartheta" = expression(vartheta),
+         "rho" = expression(rho),
+         "bmsy" = expression("B"[MSY]),
+         "msy" = expression("MSY"),
+         "fmsy" = expression("F"[MSY]),
+         "umsy" = expression("U"[MSY]),
+         "ssb" = expression("SSB"),
+         "sel1" = expression(hat(italic(a))[1]),
+         "selsd1" = expression(hat(italic(gamma))[1]),
+         "sel2" = expression(hat(italic(a))[2]),
+         "selsd2" = expression(hat(italic(gamma))[2]),
+         "sel3" = expression(hat(italic(a))[3]),
+         "selsd3" = expression(hat(italic(gamma))[3]),
+         "sel4" = expression(hat(italic(a))[4]),
+         "selsd4" = expression(hat(italic(gamma))[4]),
+         "sel5" = expression(hat(italic(a))[5]),
+         "selsd5" = expression(hat(italic(gamma))[5]),
+         "log_ro" = expression("ln("*italic(R)[0]*")"),
+         "h" = expression(italic("h")),
+         "log_m_sex1" = expression("ln("*italic(M)[Male]*")"),
+         "log_m_sex2" = expression("ln("*italic(M)[Female]*")"),
+         "log_rbar"  = expression("ln("*bar(italic(R))*")"),
+         "log_rinit" = expression("ln("*bar(italic(R)[init])*")"))
+
 }
 
 #' Draw a time series envelope on a device on which [plot.new()] has already been called

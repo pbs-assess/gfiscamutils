@@ -2,22 +2,18 @@
 % Please edit documentation in R/utilities.R
 \name{get_latex_name}
 \alias{get_latex_name}
-\title{Get a pretty version of the parameter name}
+\title{Get a pretty version of the parameter name. Italicizes
+parameter names.}
 \usage{
-get_latex_name(name, addToQ = 0)
+get_latex_name(name)
 }
 \arguments{
 \item{name}{iscam parameter to pretty-up}
-
-\item{addToQ}{an integer to the parameter name for the q's. This is necessary
-because iscam sets the q parameter names to 1, 2, 3... regardless of the
-gear number. i.e. if gear 1 is a trawl fishery and gear 2 is a survey,
-iscam will call q1 the survey gear. We must add 1 to it to get q2 to
-accurately portray the survey gear number}
 }
 \value{
 an R expression which represents the pretty version of the parameter name
 }
 \description{
-Get a pretty version of the parameter name
+Get a pretty version of the parameter name. Italicizes
+parameter names.
 }
