@@ -87,10 +87,42 @@ get_latex_name <- function(name){
     digit <- as.numeric(sub("^q_gear([1-9]+)$", "\\1", name))
     return(substitute(italic(q)[digit], list(digit = digit)))
   }
+  if(length(grep("^q[1-9]+$", name))){
+    digit <- as.numeric(sub("^q([1-9]+)$", "\\1", name))
+    return(substitute(italic(q)[digit], list(digit = digit)))
+  }
 
   if(length(grep("^log_q_gear[1-9]+$", name))){
     digit <- as.numeric(sub("^log_q_gear([1-9]+)$", "\\1", name))
     return(substitute("ln("*italic(q)[digit]*")", list(digit = digit)))
+  }
+  if(length(grep("^log_q[1-9]+$", name))){
+    digit <- as.numeric(sub("^log_q([1-9]+)$", "\\1", name))
+    return(substitute("ln("*italic(q)[digit]*")", list(digit = digit)))
+  }
+
+  get_sel_name <- function(nm){
+
+    if(length(grep("selage", nm))){
+      j <- sub("selage", "", nm)
+      sex <- sub("[0-9]+_", "\\1", j)
+      flt <- sub("_female|_male", "\\1", j)
+      sexflt <- paste0(firstup(sex), ",", flt)
+      return(bquote(hat(italic(a))[.(sexflt)]))
+    }else if(length(grep("selsd", nm))){
+      j <- sub("selsd", "", nm)
+      sex <- sub("[0-9]+_", "\\1", j)
+      flt <- sub("_female|_male", "\\1", j)
+      sexflt <- paste0(firstup(sex), ",", flt)
+      return(bquote(hat(italic(gamma))[.(sexflt)]))
+    }else{
+      stop("Selectivity name not recognized in the pretty name maker: ", name)
+    }
+    NULL
+  }
+
+  if(length(grep("^selage|^selsd", name))){
+    return(get_sel_name(name))
   }
 
   switch(name,
@@ -98,25 +130,32 @@ get_latex_name <- function(name){
          "rbar" = expression(bar(italic(R))),
          "rinit" = expression(bar(italic(R))[init]),
          "m" = expression(italic(M)),
+         "m1" = expression(italic(M)[Male]),
+         "m2" = expression(italic(M)[Female]),
          "bo" = expression("B"[0]),
          "sbo" = expression("SB"[0]),
          "vartheta" = expression(vartheta),
          "rho" = expression(rho),
          "bmsy" = expression("B"[MSY]),
          "msy" = expression("MSY"),
+         "msy1" = expression(MSY[1]),
+         "msy2" = expression(MSY[2]),
+         "msy3" = expression(MSY[3]),
+         "msy4" = expression(MSY[4]),
+         "msy5" = expression(MSY[5]),
          "fmsy" = expression("F"[MSY]),
+         "fmsy1" = expression("F"[MSY1]),
+         "fmsy2" = expression("F"[MSY2]),
+         "fmsy3" = expression("F"[MSY3]),
+         "fmsy4" = expression("F"[MSY4]),
+         "fmsy5" = expression("F"[MSY5]),
          "umsy" = expression("U"[MSY]),
+         "umsy1" = expression("U"[MSY1]),
+         "umsy2" = expression("U"[MSY2]),
+         "umsy3" = expression("U"[MSY3]),
+         "umsy4" = expression("U"[MSY4]),
+         "umsy5" = expression("U"[MSY5]),
          "ssb" = expression("SSB"),
-         "sel1" = expression(hat(italic(a))[1]),
-         "selsd1" = expression(hat(italic(gamma))[1]),
-         "sel2" = expression(hat(italic(a))[2]),
-         "selsd2" = expression(hat(italic(gamma))[2]),
-         "sel3" = expression(hat(italic(a))[3]),
-         "selsd3" = expression(hat(italic(gamma))[3]),
-         "sel4" = expression(hat(italic(a))[4]),
-         "selsd4" = expression(hat(italic(gamma))[4]),
-         "sel5" = expression(hat(italic(a))[5]),
-         "selsd5" = expression(hat(italic(gamma))[5]),
          "log_ro" = expression("ln("*italic(R)[0]*")"),
          "h" = expression(italic("h")),
          "log_m_sex1" = expression("ln("*italic(M)[Male]*")"),
