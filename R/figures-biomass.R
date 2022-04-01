@@ -314,9 +314,10 @@ plot_ts_mcmc <- function(models,
   })
 
   if(rel){
+    # Recruitment not relative even if `rel == TRUE`
     y_label <- switch(type,
                       "sbt" = "Relative Spawning biomass",
-                      "rt" = "Relative Recruitment")
+                      "rt" = "Recruitment (millions)")
   }else{
     y_label <- switch(type,
                       "sbt" = "Spawning biomass ('000 tonnes)",
@@ -368,7 +369,7 @@ plot_ts_mcmc <- function(models,
                                   "#FFFF99",
                                   "#B15928"))
 
-  if(show_bo_lines){
+  if(show_bo_lines && type == "sbt"){
     # Show the B0 lines for the first model with CI, behind model lines
     tso_base <- tso_quants %>%
       slice(1)
@@ -409,7 +410,7 @@ plot_ts_mcmc <- function(models,
     }
   }
 
-  if(show_bmsy_lines){
+  if(show_bmsy_lines && type == "sbt"){
     # Show the B0 lines for the first model with CI, behind model lines
     bmsy_base <- bmsy_quants %>%
       slice(1)
@@ -468,7 +469,7 @@ plot_ts_mcmc <- function(models,
     }
   }
 
-  if(is.null(ylim)){
+  if(is.null(ylim) && type == "sbt"){
     ymax <- max(select(ts_quants, -c(model, year)),
                 select(tso_quants, -c(model, year)))
     brk <- seq(0, ymax, 50)
