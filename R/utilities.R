@@ -80,6 +80,7 @@ get.age.prop <- function(vec, rank = 1){
 #' @param name iscam parameter to pretty-up
 #'
 #' @return an R expression which represents the pretty version of the parameter name
+#' @importFrom gfutilities firstup
 #' @export
 get_latex_name <- function(name){
 
@@ -101,24 +102,25 @@ get_latex_name <- function(name){
     return(substitute("ln("*italic(q)[digit]*")", list(digit = digit)))
   }
 
+  #' Get the pretty name for selectivity parameters
+  #' @param nm The parameter name starting with selage or selsd
+  #' @return The pretty name or `NULL`
   get_sel_name <- function(nm){
-
     if(length(grep("selage", nm))){
       j <- sub("selage", "", nm)
       sex <- sub("[0-9]+_", "\\1", j)
       flt <- sub("_female|_male", "\\1", j)
       sexflt <- paste0(firstup(sex), ",", flt)
-      return(bquote(hat(italic(a))[.(sexflt)]))
+      bquote(hat(italic(a))[.(sexflt)])
     }else if(length(grep("selsd", nm))){
       j <- sub("selsd", "", nm)
       sex <- sub("[0-9]+_", "\\1", j)
       flt <- sub("_female|_male", "\\1", j)
       sexflt <- paste0(firstup(sex), ",", flt)
-      return(bquote(hat(italic(gamma))[.(sexflt)]))
+      bquote(hat(italic(gamma))[.(sexflt)])
     }else{
-      stop("Selectivity name not recognized in the pretty name maker: ", name)
+      NULL
     }
-    NULL
   }
 
   if(length(grep("^selage|^selsd", name))){
@@ -162,7 +164,6 @@ get_latex_name <- function(name){
          "log_m_sex2" = expression("ln("*italic(M)[Female]*")"),
          "log_rbar"  = expression("ln("*bar(italic(R))*")"),
          "log_rinit" = expression("ln("*bar(italic(R)[init])*")"))
-
 }
 
 #' Draw a time series envelope on a device on which [plot.new()] has already been called
