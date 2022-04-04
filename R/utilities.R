@@ -102,9 +102,10 @@ get_latex_name <- function(name){
     return(substitute("ln("*italic(q)[digit]*")", list(digit = digit)))
   }
 
-  #' Get the pretty name for selectivity parameters
-  #' @param nm The parameter name starting with selage or selsd
-  #' @return The pretty name or `NULL`
+  # Get the pretty name for selectivity parameters
+  #
+  # @param nm The parameter name starting with selage or selsd
+  # @return The pretty name or `NULL`
   get_sel_name <- function(nm){
     if(length(grep("selage", nm))){
       j <- sub("selage", "", nm)

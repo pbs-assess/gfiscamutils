@@ -4,13 +4,16 @@
 \alias{plot_traces}
 \title{Plot parameter values from each posterior for the estimated parameters}
 \usage{
-plot_traces(model, plot_sel = FALSE)
+plot_traces(model, plot_sel = FALSE, param_rm = NULL)
 }
 \arguments{
 \item{model}{An iscam model}
 
 \item{plot_sel}{Logical. If `TRUE`, plot only the selectivity parameters.
 If `FALSE`, plot only non-selectivity parameters}
+
+\item{param_rm}{A vector of parameter names to remove. If any are not found
+in the output, a warning will be issued. If `NULL`, nothing is removed}
 }
 \value{
 A [ggplot2::gglot()] object

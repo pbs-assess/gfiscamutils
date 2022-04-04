@@ -9,13 +9,9 @@ get_latex_name(name)
 }
 \arguments{
 \item{name}{iscam parameter to pretty-up}
-
-\item{nm}{The parameter name starting with selage or selsd}
 }
 \value{
 an R expression which represents the pretty version of the parameter name
-
-The pretty name or `NULL`
 }
 \description{
 Get a pretty version of the parameter name. Italicizes
