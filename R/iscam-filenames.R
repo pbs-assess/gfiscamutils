@@ -48,6 +48,11 @@
 #' MCMC vulnerable biomass file
 "mcmc.vuln.biomass.file"
 
+#' iscam MCMC output index fits filename
+#'
+#' MCMC index fits file
+"mcmc.index.fits.file"
+
 #' iscam MCMC projection filename
 #'
 #' MCMC projection file

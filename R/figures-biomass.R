@@ -1,130 +1,3 @@
-#' Plot biomass for MPD models against each other. Typically used for bridge models
-#'
-#' @param models Model list as output by [model_setup()]
-#' @param model_names A vector of model names to show in plots of the same length as `model`
-#' @param type Which value to plot. sbt = spawning biomass (and sbo), rt = recruitment (and ro)
-#' @param rel If `TRUE`, plot relative to initial value
-#' @param legend_title Title to use for the legend
-#' @param palette The [RColorBrewer::brewer.pal.info] palette to use for line and point color
-#' @param line_width The width of the lines
-#' @param point_size The size of the points
-
-#' @return A [ggplot2::ggplot()] object
-#' @importFrom forcats fct_relevel
-#' @importFrom ggplot2 scale_color_viridis_d xlab ylab ylim
-#' @importFrom purrr map_dbl
-#' @importFrom tidyr pivot_longer
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' library(here)
-#' library(gfiscamutils)
-#' bridge_models_text <- c("2015 Base model",
-#'                         "Update data to 2019",
-#'                         "Remove HS MSA survey",
-#'                         "Add Discard CPUE index",
-#'                         "Convert model to split sex",
-#'                         "Change fishing year to Feb 21 - Feb 20")
-#' bridge_models_text <- factor(bridge_models_text, levels = bridge_models_text)
-#' drs <- arrowtooth::set_dirs(base_model_dir = "base",
-#'                             bridge_models_dirs = bridge_models_dirs,
-#'                             sens_models_dirs = NULL)
-#' models <- arrowtooth::model_setup(main_dirs = drs,
-#'                                   bridge_models_text = bridge_models_text,
-#'                                   overwrite_rds_files = TRUE)
-#' plot_biomass_mpd(models$bridge_models, bridge_models_text)
-#' }
-plot_ts_mpd <- function(models,
-                        model_names = factor(names(models), levels = names(models)),
-                        type = "sbt",
-                        rel = FALSE,
-                        legend_title = "Bridge model",
-                        palette = "Paired",
-                        line_width = 1,
-                        point_size = 2){
-
-  if(!type %in% c("sbt", "rt")){
-    stop("type '", type, "' is not one of the implemented time series", call. = FALSE)
-  }
-
-  if(class(models) != mdl_lst_cls){
-    stop("The `models` list is not a gfiscamutils::mdl_lst_cls class. If you are trying to plot ",
-         "a single model, modify it like this first:\n\n",
-         "model <- list(model)\n",
-         "class(model) <- mdl_lst_cls\n")
-  }
-
-  mpd <- map(models, ~{.x$mpd})
-  sbt <- map(mpd, ~{.x[[type]]})
-  start_year <- map_dbl(models, ~{.x$dat$start.yr}) %>% min
-  end_year <- map_dbl(models, ~{.x$dat$end.yr}) %>% max
-  sbt <- map(sbt, ~{
-    length(.x) = end_year - start_year + 1
-    .x
-  }) %>%
-    do.call(rbind, .)
-
-  # Get initial estimate, ro, sbo
-  init_type <- switch(type,
-                      "sbt" = "sbo",
-                      "rt" = "ro")
-  init <- map(mpd, ~{.x[[init_type]]})
-  init_df <- tibble(year = start_year - 1,
-                    model = names(init),
-                    sbt = map_dbl(init, ~{.x}))
-  init_vals <- init_df %>% select(-year)
-
-  if(type == "sbt"){
-    bind_yrs <- start_year:end_year
-  }else if(type == "rt"){
-    bind_yrs <- (start_year + 1):(end_year + 1)
-  }
-  val <- bind_yrs %>%
-    as_tibble() %>%
-    `names<-`("year") %>%
-    bind_cols(t(sbt)) %>% pivot_longer(cols = -year, names_to = "model", values_to = "sbt")
-
-  if(rel){
-    val <- val %>% left_join(init_vals, by = "model") %>%
-      mutate(sbt = sbt.x / sbt.y) %>%
-      select(-sbt.x, -sbt.y)
-  }
-  if(is.null(model_names)){
-    model_names <- paste0("model ", seq_along(models))
-    model_names <- factor(model_names, levels = model_names)
-  }
-  val <- val %>%
-    mutate(model = fct_relevel(model, levels(model_names)))
-
-  if(rel){
-    y_label <- switch(type,
-                      "sbt" = "Relative Spawning biomass",
-                      "rt" = "Relative Recruitment")
-  }else{
-    y_label <- switch(type,
-                      "sbt" = "Spawning biomass ('000 tonnes)",
-                      "rt" = "Recruitment (millions)")
-  }
-
-  g <- ggplot(val, aes(x = year, y = sbt, color = model)) +
-    xlab("Year") +
-    ylab(y_label) +
-    geom_line(size = line_width) +
-    geom_point(size = point_size) +
-    guides(color = guide_legend(title = legend_title)) +
-    scale_color_brewer(palette = palette) +
-    scale_x_continuous(breaks = seq(min(bind_yrs), max(bind_yrs), 5))
-
-  if(!rel){
-    g <- g +
-      geom_point(data = init_df, size = point_size)
-  }
-  g <- g +
-    ylim(0, NA)
-  g
-}
-
 #' Plot the MCMC time series trajectories for iscam models, including spawning biomass
 #' and recruitment for both absolute and relative cases.
 #'
@@ -581,3 +454,131 @@ plot_ts_mcmc <- function(models,
 
   g
 }
+
+#' Plot biomass for MPD models against each other. Typically used for bridge models
+#'
+#' @param models Model list as output by [model_setup()]
+#' @param model_names A vector of model names to show in plots of the same length as `model`
+#' @param type Which value to plot. sbt = spawning biomass (and sbo), rt = recruitment (and ro)
+#' @param rel If `TRUE`, plot relative to initial value
+#' @param legend_title Title to use for the legend
+#' @param palette The [RColorBrewer::brewer.pal.info] palette to use for line and point color
+#' @param line_width The width of the lines
+#' @param point_size The size of the points
+
+#' @return A [ggplot2::ggplot()] object
+#' @importFrom forcats fct_relevel
+#' @importFrom ggplot2 scale_color_viridis_d xlab ylab ylim
+#' @importFrom purrr map_dbl
+#' @importFrom tidyr pivot_longer
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(here)
+#' library(gfiscamutils)
+#' bridge_models_text <- c("2015 Base model",
+#'                         "Update data to 2019",
+#'                         "Remove HS MSA survey",
+#'                         "Add Discard CPUE index",
+#'                         "Convert model to split sex",
+#'                         "Change fishing year to Feb 21 - Feb 20")
+#' bridge_models_text <- factor(bridge_models_text, levels = bridge_models_text)
+#' drs <- arrowtooth::set_dirs(base_model_dir = "base",
+#'                             bridge_models_dirs = bridge_models_dirs,
+#'                             sens_models_dirs = NULL)
+#' models <- arrowtooth::model_setup(main_dirs = drs,
+#'                                   bridge_models_text = bridge_models_text,
+#'                                   overwrite_rds_files = TRUE)
+#' plot_biomass_mpd(models$bridge_models, bridge_models_text)
+#' }
+plot_ts_mpd <- function(models,
+                        model_names = factor(names(models), levels = names(models)),
+                        type = "sbt",
+                        rel = FALSE,
+                        legend_title = "Bridge model",
+                        palette = "Paired",
+                        line_width = 1,
+                        point_size = 2){
+
+  if(!type %in% c("sbt", "rt")){
+    stop("type '", type, "' is not one of the implemented time series", call. = FALSE)
+  }
+
+  if(class(models) != mdl_lst_cls){
+    stop("The `models` list is not a gfiscamutils::mdl_lst_cls class. If you are trying to plot ",
+         "a single model, modify it like this first:\n\n",
+         "model <- list(model)\n",
+         "class(model) <- mdl_lst_cls\n")
+  }
+
+  mpd <- map(models, ~{.x$mpd})
+  sbt <- map(mpd, ~{.x[[type]]})
+  start_year <- map_dbl(models, ~{.x$dat$start.yr}) %>% min
+  end_year <- map_dbl(models, ~{.x$dat$end.yr}) %>% max
+  sbt <- map(sbt, ~{
+    length(.x) = end_year - start_year + 1
+    .x
+  }) %>%
+    do.call(rbind, .)
+
+  # Get initial estimate, ro, sbo
+  init_type <- switch(type,
+                      "sbt" = "sbo",
+                      "rt" = "ro")
+  init <- map(mpd, ~{.x[[init_type]]})
+  init_df <- tibble(year = start_year - 1,
+                    model = names(init),
+                    sbt = map_dbl(init, ~{.x}))
+  init_vals <- init_df %>% select(-year)
+
+  if(type == "sbt"){
+    bind_yrs <- start_year:end_year
+  }else if(type == "rt"){
+    bind_yrs <- (start_year + 1):(end_year + 1)
+  }
+  val <- bind_yrs %>%
+    as_tibble() %>%
+    `names<-`("year") %>%
+    bind_cols(t(sbt)) %>% pivot_longer(cols = -year, names_to = "model", values_to = "sbt")
+
+  if(rel){
+    val <- val %>% left_join(init_vals, by = "model") %>%
+      mutate(sbt = sbt.x / sbt.y) %>%
+      select(-sbt.x, -sbt.y)
+  }
+  if(is.null(model_names)){
+    model_names <- paste0("model ", seq_along(models))
+    model_names <- factor(model_names, levels = model_names)
+  }
+  val <- val %>%
+    mutate(model = fct_relevel(model, levels(model_names)))
+
+  if(rel){
+    y_label <- switch(type,
+                      "sbt" = "Relative Spawning biomass",
+                      "rt" = "Relative Recruitment")
+  }else{
+    y_label <- switch(type,
+                      "sbt" = "Spawning biomass ('000 tonnes)",
+                      "rt" = "Recruitment (millions)")
+  }
+
+  g <- ggplot(val, aes(x = year, y = sbt, color = model)) +
+    xlab("Year") +
+    ylab(y_label) +
+    geom_line(size = line_width) +
+    geom_point(size = point_size) +
+    guides(color = guide_legend(title = legend_title)) +
+    scale_color_brewer(palette = palette) +
+    scale_x_continuous(breaks = seq(min(bind_yrs), max(bind_yrs), 5))
+
+  if(!rel){
+    g <- g +
+      geom_point(data = init_df, size = point_size)
+  }
+  g <- g +
+    ylim(0, NA)
+  g
+}
+
