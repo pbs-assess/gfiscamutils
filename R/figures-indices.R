@@ -1,14 +1,14 @@
 #' Plot MCMC index fits
 #' @export
-plot_index_fit_mcmc <- function(models,
-                                model_names = factor(names(models), levels = names(models)),
-                                surv_index,
-                                start_year = 1996,
-                                end_year = 2021,
-                                legend_title = "Bridge model",
-                                palette = "Paired",
-                                line_width = 0.5,
-                                point_size = 1){
+plot_index_fits_mcmc <- function(models,
+                                 model_names = factor(names(models), levels = names(models)),
+                                 surv_index,
+                                 start_year = 1996,
+                                 end_year = 2021,
+                                 legend_title = "Bridge model",
+                                 palette = "Paired",
+                                 line_width = 0.5,
+                                 point_size = 1){
 
   if(class(models) == mdl_cls){
     models <- list(models)
@@ -136,15 +136,15 @@ plot_index_fit_mcmc <- function(models,
 #' @importFrom dplyr mutate_at
 #' @importFrom ggplot2 geom_ribbon facet_wrap scale_color_brewer
 #' @export
-plot_index_fit_mpd <- function(models,
-                               model_names = factor(names(models), levels = names(models)),
-                               surv_index,
-                               start_year = 1996,
-                               end_year = 2021,
-                               legend_title = "Bridge model",
-                               palette = "Paired",
-                               line_width = 0.5,
-                               point_size = 1){
+ plot_index_fits_mpd <- function(models,
+                                 model_names = factor(names(models), levels = names(models)),
+                                 surv_index,
+                                 start_year = 1996,
+                                 end_year = 2021,
+                                 legend_title = "Bridge model",
+                                 palette = "Paired",
+                                 line_width = 0.5,
+                                 point_size = 1){
 
   # surv_abbrev will be in order of the gears in the models
   surv_abbrevs <- map(models, ~{
