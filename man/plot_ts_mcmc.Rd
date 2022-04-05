@@ -35,7 +35,7 @@ plot_ts_mcmc(
 )
 }
 \arguments{
-\item{models}{A list of iscam model objects}
+\item{models}{A list of iscam model objects (class [mdl_lst_cls])}
 
 \item{model_names}{Names to use for the models in the plots. The names of
 the list items in `models` will be used if they are present and this will

@@ -1,4 +1,22 @@
-#' Plot MCMC index fits
+#' Plot MCMC index fits for a single or group of models
+#'
+#' @param models A list of iscam model objects (class [mdl_lst_cls])
+#' @param model_names Names to use for the models in the plots. The names of
+#' the list items in `models` will be used if they are present and this will
+#' be ignored. If the list item names are not defined, temporary names will be used
+#' @param surv_index The `survey_index` data frame which is the `dat` object in the output
+#' from the [read_data_file()] function
+#' @param start_year Year to start plot
+#' @param end_year Year to end plot
+#' @param legend_title Title text for the legend
+#' @param palette A palette value that can be accepted by [ggplot2::scale_color_brewer()]
+#' @param dodge A small value added to each year for each model. This is added cumulatively,
+#' so each model fit appears more to the right than the previous one
+#' @param index_line_width The index data error bar and connecting line width
+#' @param index_point_size The index data point size
+#' @param fit_line_width The model fit error bar and connecting line width
+#' @param fit_point_size The model fit point size
+#'
 #' @export
 plot_index_fits_mcmc <- function(models,
                                  model_names = factor(names(models), levels = names(models)),
@@ -7,8 +25,11 @@ plot_index_fits_mcmc <- function(models,
                                  end_year = 2021,
                                  legend_title = "Bridge model",
                                  palette = "Paired",
-                                 line_width = 0.5,
-                                 point_size = 1){
+                                 dodge = 0.3,
+                                 index_line_width = 0.75,
+                                 index_point_size = 3,
+                                 fit_line_width = 1,
+                                 fit_point_size = 3){
 
   if(class(models) == mdl_cls){
     models <- list(models)
@@ -51,7 +72,85 @@ plot_index_fits_mcmc <- function(models,
     model_names <- factor(model_names, levels = model_names)
   }
 
-  browser()
+  fits <- imap(models, ~{
+    ind_fits <- .x$mcmccalcs$it_quants
+    if(is.null(ind_fits)){
+      return(NULL)
+    }
+    ind_fits %>%
+      mutate(model = .y)
+  })
+  if(all(map_lgl(fits, is.null))){
+    stop("None of the models supplied have MCMC index fits")
+  }
+
+  # Remove any NULL list items (no index fits found in model)
+  fits <- fits[!sapply(fits, is.null)] %>%
+    bind_rows() %>%
+    select(model, survey_abbrev, year, biomass, lowerci, upperci) %>%
+    mutate(year = as.numeric(year))
+
+  # Remove any non-fit indices so the index isn't plot unless there is a fit
+  surv_indices <- surv_indices %>%
+    filter(survey_abbrev %in% unique(fits$survey_abbrev))
+
+  # Remove any missing models from the `model_names` vector
+  model_names <- model_names[model_names %in% unique(fits$model)]
+  surv_abbrev <- surv_abbrev[surv_abbrev %in% unique(fits$survey_abbrev)]
+  # Re-order the legend and facets
+  model_names <- factor(model_names, levels = model_names)
+  surv_abbrev <- factor(surv_abbrev, levels = surv_abbrev)
+  fits <- fits %>% mutate(model = as.factor(model))
+
+  fits <- fits %>%
+    mutate(model = fct_relevel(model, levels(!!model_names))) %>%
+    mutate(survey_abbrev = fct_relevel(survey_abbrev, levels(!!surv_abbrev)))
+  surv_indices <- surv_indices %>%
+    mutate(survey_abbrev = fct_relevel(survey_abbrev, levels(!!surv_abbrev)))
+
+  # Rescale values
+  surv_indices <- surv_indices %>%
+    mutate_at(vars(biomass, lowerci, upperci),
+              function(x){
+                ifelse(.$survey_abbrev == "DCPUE", x,  x / 1e6)
+              })
+  fits <- fits %>%
+    mutate_at(vars(biomass, lowerci, upperci),
+              function(x){
+                ifelse(.$survey_abbrev == "DCPUE", x,  x / 1e6)
+              })
+
+  # Dodge year points a little, cumulative for each model
+  dodge_amt <- dodge
+  fits <- fits %>%
+    split(~model) %>%
+    imap(~{
+      tmp <- .x %>% mutate(year = year + dodge_amt)
+      dodge_amt <<- dodge_amt + dodge
+      tmp
+    }) %>%
+    bind_rows()
+
+  g <- ggplot(surv_indices, aes(x = year, y = biomass)) +
+    geom_line(size = index_line_width) +
+    geom_point(size = index_point_size) +
+    geom_errorbar(aes(ymin = lowerci, ymax = upperci),
+                  width = index_line_width,
+                  size = index_line_width) +
+    facet_wrap(~survey_abbrev, scales = "free_y") +
+    geom_line(data = fits, aes(color = model), size = fit_line_width) +
+    geom_point(data = fits, aes(color = model), size = fit_point_size) +
+    geom_errorbar(data = fits,
+                  aes(color = model, ymin = lowerci, ymax = upperci),
+                  width = fit_line_width,
+                  size = fit_line_width) +
+    xlab("Year") +
+    ylab("Index (thousand tonnes, DCPUE ~ kg/hr)") +
+    scale_color_brewer(palette = palette) +
+    guides(color = guide_legend(title = legend_title)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+  g
 }
 
 #' Plot the residuals for multiple models

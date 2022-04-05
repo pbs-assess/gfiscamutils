@@ -2,7 +2,7 @@
 % Please edit documentation in R/figures-indices.R
 \name{plot_index_fits_mcmc}
 \alias{plot_index_fits_mcmc}
-\title{Plot MCMC index fits}
+\title{Plot MCMC index fits for a single or group of models}
 \usage{
 plot_index_fits_mcmc(
   models,
@@ -12,10 +12,42 @@ plot_index_fits_mcmc(
   end_year = 2021,
   legend_title = "Bridge model",
   palette = "Paired",
-  line_width = 0.5,
-  point_size = 1
+  dodge = 0.3,
+  index_line_width = 0.75,
+  index_point_size = 3,
+  fit_line_width = 1,
+  fit_point_size = 3
 )
 }
+\arguments{
+\item{models}{A list of iscam model objects (class [mdl_lst_cls])}
+
+\item{model_names}{Names to use for the models in the plots. The names of
+the list items in `models` will be used if they are present and this will
+be ignored. If the list item names are not defined, temporary names will be used}
+
+\item{surv_index}{The `survey_index` data frame which is the `dat` object in the output
+from the [read_data_file()] function}
+
+\item{start_year}{Year to start plot}
+
+\item{end_year}{Year to end plot}
+
+\item{legend_title}{Title text for the legend}
+
+\item{palette}{A palette value that can be accepted by [ggplot2::scale_color_brewer()]}
+
+\item{dodge}{A small value added to each year for each model. This is added cumulatively,
+so each model fit appears more to the right than the previous one}
+
+\item{index_line_width}{The index data error bar and connecting line width}
+
+\item{index_point_size}{The index data point size}
+
+\item{fit_line_width}{The model fit error bar and connecting line width}
+
+\item{fit_point_size}{The model fit point size}
+}
 \description{
-Plot MCMC index fits
+Plot MCMC index fits for a single or group of models
 }
