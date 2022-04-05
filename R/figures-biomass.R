@@ -1,7 +1,7 @@
 #' Plot the MCMC time series trajectories for iscam models, including spawning biomass
 #' and recruitment for both absolute and relative cases.
 #'
-#' @param models A list of iscam model objects
+#' @param models A list of iscam model objects (class [mdl_lst_cls])
 #' @param model_names Names to use for the models in the plots. The names of
 #' the list items in `models` will be used if they are present and this will
 #' be ignored. If the list item names are not defined, temporary names will be used
