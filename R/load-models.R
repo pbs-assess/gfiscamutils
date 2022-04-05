@@ -81,6 +81,8 @@ load_iscam_files <- function(model_dir, mcmc_subdir = "mcmc", ...){
 #' for projections if `load_proj == TRUE`
 #' @param probs The probabilities to use for `quantile()` calculations
 #' @param load_proj Load the projections from the MCMC and do the calculations
+#' @param index_scale Number to multiply the index values by so they match the
+#' `survey_index` values
 #' @param ... arguments to pass to [calc_proj_probs()] to construct the
 #' decision tables
 #'
@@ -90,6 +92,7 @@ calc_mcmc <- function(model,
                       burnin = 1000,
                       thin = 1,
                       probs = c(0.025, 0.5, 0.975),
+                      index_scale = 1e6,
                       load_proj = TRUE,
                       ...){
 
@@ -204,6 +207,26 @@ calc_mcmc <- function(model,
   out$ut <- mc$ut
   out$ut_quants <- build_quant_list(mc$ut, mpd$ut)
 
+  # Index fits
+  prob_cols <- paste0(prettyNum(probs * 100), "%")
+  if(!is.null(mc$it)){
+    out$it_quants <- imap(mc$it, ~{
+      imap(.x, ~{
+        quantile(.x * index_scale, probs = probs, na.rm = TRUE) %>%
+          t() %>%
+          as.data.frame() %>%
+          as_tibble() %>%
+          mutate(year = .y)
+      }) %>%
+        bind_rows() %>%
+        mutate(survey_abbrev = .y)
+    }) %>%
+      bind_rows() %>%
+      rename(lowerci = !!sym(prob_cols[1]),
+             biomass = !!sym(prob_cols[2]),
+             upperci = !!sym(prob_cols[3])) %>%
+      select(survey_abbrev, year, biomass, lowerci, upperci)
+  }
   if(load_proj){
     # Burn in and calculate quantiles for each TAC level
     out$proj <- mc$proj %>%

@@ -9,6 +9,7 @@ calc_mcmc(
   burnin = 1000,
   thin = 1,
   probs = c(0.025, 0.5, 0.975),
+  index_scale = 1e+06,
   load_proj = TRUE,
   ...
 )
@@ -23,6 +24,9 @@ for projections if `load_proj == TRUE`}
 for projections if `load_proj == TRUE`}
 
 \item{probs}{The probabilities to use for `quantile()` calculations}
+
+\item{index_scale}{Number to multiply the index values by so they match the
+`survey_index` values}
 
 \item{load_proj}{Load the projections from the MCMC and do the calculations}
 
