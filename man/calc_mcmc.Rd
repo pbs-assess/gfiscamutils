@@ -16,9 +16,11 @@ calc_mcmc(
 \arguments{
 \item{model}{An iSCAM model object as created in [load_iscam_files()]}
 
-\item{burnin}{The number of MCMC records to remove for burnin period}
+\item{burnin}{The number of MCMC records to remove for burnin period
+for projections if `load_proj == TRUE`}
 
-\item{thin}{Remove every nth record for thinning of MCMC output}
+\item{thin}{Remove every nth record for thinning of MCMC output
+for projections if `load_proj == TRUE`}
 
 \item{probs}{The probabilities to use for `quantile()` calculations}
 

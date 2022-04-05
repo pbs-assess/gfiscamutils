@@ -5,7 +5,7 @@
 \title{Get a pretty version of the parameter name. Italicizes
 parameter names.}
 \usage{
-get_latex_name(name)
+get_latex_name(name, subst = FALSE)
 }
 \arguments{
 \item{name}{iscam parameter to pretty-up}

@@ -82,7 +82,7 @@ get.age.prop <- function(vec, rank = 1){
 #' @return an R expression which represents the pretty version of the parameter name
 #' @importFrom gfutilities firstup
 #' @export
-get_latex_name <- function(name){
+get_latex_name <- function(name, subst = FALSE){
 
   if(length(grep("^q_gear[1-9]+$", name))){
     digit <- as.numeric(sub("^q_gear([1-9]+)$", "\\1", name))
@@ -129,42 +129,42 @@ get_latex_name <- function(name){
   }
 
   switch(name,
-         "ro" = expression(italic(R)[0]),
-         "rbar" = expression(bar(italic(R))),
-         "rinit" = expression(bar(italic(R))[init]),
-         "m" = expression(italic(M)),
-         "m1" = expression(italic(M)[Male]),
-         "m2" = expression(italic(M)[Female]),
-         "bo" = expression("B"[0]),
-         "sbo" = expression("SB"[0]),
-         "vartheta" = expression(vartheta),
-         "rho" = expression(rho),
-         "bmsy" = expression("B"[MSY]),
-         "msy" = expression("MSY"),
-         "msy1" = expression(MSY[1]),
-         "msy2" = expression(MSY[2]),
-         "msy3" = expression(MSY[3]),
-         "msy4" = expression(MSY[4]),
-         "msy5" = expression(MSY[5]),
-         "fmsy" = expression("F"[MSY]),
-         "fmsy1" = expression("F"[MSY1]),
-         "fmsy2" = expression("F"[MSY2]),
-         "fmsy3" = expression("F"[MSY3]),
-         "fmsy4" = expression("F"[MSY4]),
-         "fmsy5" = expression("F"[MSY5]),
-         "umsy" = expression("U"[MSY]),
-         "umsy1" = expression("U"[MSY1]),
-         "umsy2" = expression("U"[MSY2]),
-         "umsy3" = expression("U"[MSY3]),
-         "umsy4" = expression("U"[MSY4]),
-         "umsy5" = expression("U"[MSY5]),
-         "ssb" = expression("SSB"),
-         "log_ro" = expression("ln("*italic(R)[0]*")"),
-         "h" = expression(italic("h")),
-         "log_m_sex1" = expression("ln("*italic(M)[Male]*")"),
-         "log_m_sex2" = expression("ln("*italic(M)[Female]*")"),
-         "log_rbar"  = expression("ln("*bar(italic(R))*")"),
-         "log_rinit" = expression("ln("*bar(italic(R)[init])*")"))
+         "ro" = if(subst) substitute(italic(R)[0]) else expression(italic(R)[0]),
+         "rbar" = if(subst) substitute(bar(italic(R))) else expression(bar(italic(R))),
+         "rinit" = if(subst) substitute(bar(italic(R))[init]) else expression(bar(italic(R))[init]),
+         "m" = if(subst) substitute(italic(M)) else expression(italic(M)),
+         "m1" = if(subst) substitute(italic(M)[Male]) else expression(italic(M)[Male]),
+         "m2" = if(subst) substitute(italic(M)[Female]) else expression(italic(M)[Female]),
+         "bo" = if(subst) substitute("B"[0]) else expression("B"[0]),
+         "sbo" = if(subst) substitute("SB"[0]) else expression("SB"[0]),
+         "vartheta" = if(subst) substitute(vartheta) else expression(vartheta),
+         "rho" = if(subst) substitute(rho) else expression(rho),
+         "bmsy" = if(subst) substitute("B"[MSY]) else expression("B"[MSY]),
+         "msy" = if(subst) substitute("MSY") else expression("MSY"),
+         "msy1" = if(subst) substitute("MSY"[1]) else expression(MSY[1]),
+         "msy2" = if(subst) substitute("MSY"[2]) else expression(MSY[2]),
+         "msy3" = if(subst) substitute("MSY"[3]) else expression(MSY[3]),
+         "msy4" = if(subst) substitute("MSY"[4]) else expression(MSY[4]),
+         "msy5" = if(subst) substitute("MSY"[5]) else expression(MSY[5]),
+         "fmsy" = if(subst) substitute("F"[MSY]) else expression("F"[MSY]),
+         "fmsy1" = if(subst) substitute("FMSY"[1]) else expression("F"[MSY1]),
+         "fmsy2" = if(subst) substitute("FMSY"[2]) else expression("F"[MSY2]),
+         "fmsy3" = if(subst) substitute("FMSY"[3]) else expression("F"[MSY3]),
+         "fmsy4" = if(subst) substitute("FMSY"[4]) else expression("F"[MSY4]),
+         "fmsy5" = if(subst) substitute("FMSY"[5]) else expression("F"[MSY5]),
+         "umsy" = if(subst) substitute("U"[MSY]) else expression("U"[MSY]),
+         "umsy1" = if(subst) substitute("UMSY"[1]) else expression("U"[MSY1]),
+         "umsy2" = if(subst) substitute("UMSY"[2]) else expression("U"[MSY2]),
+         "umsy3" = if(subst) substitute("UMSY"[3]) else expression("U"[MSY3]),
+         "umsy4" = if(subst) substitute("UMSY"[4]) else expression("U"[MSY4]),
+         "umsy5" = if(subst) substitute("UMSY"[5]) else expression("U"[MSY5]),
+         "ssb" = if(subst) substitute("SSB") else expression("SSB"),
+         "log_ro" = if(subst) substitute("ln("*italic(R)[0]*")") else expression("ln("*italic(R)[0]*")"),
+         "h" = if(subst) substitute(italic("h")) else expression(italic("h")),
+         "log_m_sex1" = if(subst) substitute("ln("*italic(M)[Male]*")") else expression("ln("*italic(M)[Male]*")"),
+         "log_m_sex2" = if(subst) substitute("ln("*italic(M)[Female]*")") else expression("ln("*italic(M)[Female]*")"),
+         "log_rbar"  = if(subst) substitute("ln("*bar(italic(R))*")") else expression("ln("*bar(italic(R))*")"),
+         "log_rinit" = if(subst) substitute("ln("*bar(italic(R)[init])*")") else expression("ln("*bar(italic(R)[init])*")"))
 }
 
 #' Draw a time series envelope on a device on which [plot.new()] has already been called

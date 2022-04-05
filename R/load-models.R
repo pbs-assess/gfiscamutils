@@ -76,7 +76,9 @@ load_iscam_files <- function(model_dir, mcmc_subdir = "mcmc", ...){
 #'
 #' @param model An iSCAM model object as created in [load_iscam_files()]
 #' @param burnin The number of MCMC records to remove for burnin period
+#' for projections if `load_proj == TRUE`
 #' @param thin Remove every nth record for thinning of MCMC output
+#' for projections if `load_proj == TRUE`
 #' @param probs The probabilities to use for `quantile()` calculations
 #' @param load_proj Load the projections from the MCMC and do the calculations
 #' @param ... arguments to pass to [calc_proj_probs()] to construct the
@@ -107,11 +109,6 @@ calc_mcmc <- function(model,
   }
   out$params <- strip_static_params(model, out$params)
   nm <- names(out$params)
-  if(nrow(out$params) <= burnin){
-    stop("burnin ", burnin, " is as large or larger than the number ",
-         " of rows in the MCMC data (", nrow(out$params), ")")
-  }
-  out$params <- mcmc_thin(out$params, burnin, thin)
   # Remove non-parameters
   out$params <- out$params[, -grep("fmsy|umsy|msy_|SSB|f", nm)]
   # Calculate sigma and tau and add to p_dat
@@ -1154,9 +1151,10 @@ read_mcmc <- function(model,
   }
 
   # list of files to load in, with associated type of data:
-  # "default" means no extra processing is done
+  # "default" means thinning/burnin is done
   # "single" means column names are converted to years, output is a data frame
   # "list" means the data frame is broken into a list by the third item in the list
+  # "projections" means no processing is done, it is done in calc_mcmc() instead
   # which is sent to `list_by()` to extract by column names
   fn_lst <- list(list(mcmc.file, "default"),
                  list(mcmc.biomass.file, "single"),
@@ -1166,7 +1164,7 @@ read_mcmc <- function(model,
                  list(mcmc.natural.mort.file, "list", "sex"),
                  list(mcmc.fishing.mort.u.file, "list", "fleet"),
                  list(mcmc.vuln.biomass.file, "list", "fleet"),
-                 list(mcmc.proj.file, "default"))
+                 list(mcmc.proj.file, "projections"))
 
   # Names given to the return list elements. Must be same length as `fn_lst`
   nms <- c("params", "sbt", "rt", "rdev", "ft",
@@ -1182,7 +1180,7 @@ read_mcmc <- function(model,
     if(file.exists(fn)){
       d <- read.csv(fn)
       if(.x[[2]] == "default"){
-
+        d <- mcmc_thin(d, burnin, thin)
       }else if(.x[[2]] == "single"){
         names(d) <- str_extract(names(d), "[0-9]+$")
         d <- mcmc_thin(d, burnin, thin)
@@ -1192,6 +1190,8 @@ read_mcmc <- function(model,
                "required when using 'list' for the second item")
         }
         d <- list_by(d, by = .x[[3]])
+      }else if(.x[[2]] == "projections"){
+        # Do no processing
       }else{
         stop("Sublist ", .y, " of fn_lst has an unimplmented value for its second element (", .x[[2]], ")")
       }
