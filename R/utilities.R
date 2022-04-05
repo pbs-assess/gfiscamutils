@@ -74,15 +74,19 @@ get.age.prop <- function(vec, rank = 1){
   c(age, prop)
 }
 
-#' Get a pretty version of the parameter name. Italicizes
-#' parameter names.
+#' Get a fancy version of the parameter name.
+#' Includes expressions which have special characters (greek)
+#' and super/subscripts. Also italicizes estimated parameter names
 #'
-#' @param name iscam parameter to pretty-up
+#' @param name iscam parameter name to make fancy
+#' @param substr Logical. If `TRUE`, return all `substitute()`
+#' expressions which are necessary for rendering by certain functions.
+#' If `FALSE`, return all `expression()` expressions
 #'
-#' @return an R expression which represents the pretty version of the parameter name
+#' @return an R expression which represents the fancy version of the parameter name
 #' @importFrom gfutilities firstup
 #' @export
-get_latex_name <- function(name, subst = FALSE){
+get_fancy_name <- function(name, subst = FALSE){
 
   if(length(grep("^q_gear[1-9]+$", name))){
     digit <- as.numeric(sub("^q_gear([1-9]+)$", "\\1", name))
@@ -102,10 +106,10 @@ get_latex_name <- function(name, subst = FALSE){
     return(substitute("ln("*italic(q)[digit]*")", list(digit = digit)))
   }
 
-  # Get the pretty name for selectivity parameters
+  # Get the fancy name for selectivity parameters
   #
   # @param nm The parameter name starting with selage or selsd
-  # @return The pretty name or `NULL`
+  # @return The fancy name or `NULL`
   get_sel_name <- function(nm){
     if(length(grep("selage", nm))){
       j <- sub("selage", "", nm)
@@ -174,7 +178,7 @@ get_latex_name <- function(name, subst = FALSE){
 #' the lower and upper values for some confidence interval.
 #' @param col color of the envelope
 #' @param first boolean. If TRUE, [plot.new()] will be called. If FALSE, [lines()] will be
-#'  called.
+#' called.
 #' @param opacity how opaque the envelope shading is. Percentage value
 #' @param ... other graphical parameters
 #'

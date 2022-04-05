@@ -45,7 +45,7 @@ plot_pairs <- function(model, plot_sel = FALSE, param_rm = NULL){
     }
   }
   nms <- imap(names(mc), ~{
-    get_latex_name(.x, subst = TRUE)
+    get_fancy_name(.x, subst = TRUE)
   })
   mc <- mc[1:50, ]
   names(mc) <- nms

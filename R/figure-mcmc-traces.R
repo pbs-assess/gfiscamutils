@@ -47,7 +47,7 @@ plot_traces <- function(model, plot_sel = FALSE, param_rm = NULL){
   }
 
   g_lst <- imap(names(mc), ~{
-    param_name <- get_latex_name(.x)
+    param_name <- get_fancy_name(.x)
     param_dat <- mc %>%
       select(.x) %>%
       rename(y = !!.x) %>%

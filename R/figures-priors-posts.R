@@ -96,7 +96,7 @@ plot_priors_posts <- function(model,
                nm = post_nms[.y],
                mle = as.numeric(mpd_vals[.y]))
 
-    xx$nm <- get_latex_name(xx$nm)
+    xx$nm <- get_fancy_name(xx$nm)
     func <- function(x){xx$fn(x, xx$p1, xx$p2)}
     if(specs$prior == 0){
       # Uniform
