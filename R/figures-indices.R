@@ -1,3 +1,59 @@
+#' Plot MCMC index fits
+#' @export
+plot_index_fit_mcmc <- function(models,
+                                model_names = factor(names(models), levels = names(models)),
+                                surv_index,
+                                start_year = 1996,
+                                end_year = 2021,
+                                legend_title = "Bridge model",
+                                palette = "Paired",
+                                line_width = 0.5,
+                                point_size = 1){
+
+  if(class(models) == mdl_cls){
+    models <- list(models)
+    class(models) <- mdl_lst_cls
+  }
+
+  if(class(models) != mdl_lst_cls){
+    stop("The `models` list is not a gfiscamutils::mdl_lst_cls class. If you are trying to plot ",
+         "a single model, modify it like this first:\n\n",
+         "model <- list(model)\n",
+         "class(model) <- mdl_lst_cls\n")
+  }
+
+  if(length(models) > 13){
+    stop("Cannot plot more than 13 models due to palette restrictions (See RColorBrewer 'Paired' palette)")
+  }
+
+  # surv_abbrev will be in order of the gears in the models
+  surv_abbrevs <- map(models, ~{
+    .x$dat$index_abbrevs
+  })
+
+  surv_abbrev <- surv_abbrevs %>%
+    flatten() %>%
+    map_chr(~{.x}) %>%
+    unique()
+
+  surv_index <- surv_index %>%
+    filter(year %in% start_year:end_year) %>%
+    filter(survey_abbrev %in% surv_abbrev)
+
+  surv_indices <- map_df(surv_abbrev, ~{
+    surv_index %>%
+      filter(survey_abbrev == .x) %>%
+      select(year, biomass, lowerci, upperci, survey_abbrev)
+  })
+
+  if(is.null(model_names)){
+    model_names <- paste0("model ", seq_along(models))
+    model_names <- factor(model_names, levels = model_names)
+  }
+
+  browser()
+}
+
 #' Plot the residuals for multiple models
 #'
 #' @param models A list of iSCAM models
@@ -170,62 +226,4 @@ plot_index_fit_mpd <- function(models,
     scale_color_brewer(palette = palette) +
     guides(color = guide_legend(title = legend_title)) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
-}
-
-#' Plot MCMC index fits
-#' @export
-plot_index_fit_mcmc <- function(models,
-                                model_names = factor(names(models), levels = names(models)),
-                                surv_index,
-                                start_year = 1996,
-                                end_year = 2021,
-                                legend_title = "Bridge model",
-                                palette = "Paired",
-                                line_width = 0.5,
-                                point_size = 1){
-
-  if(class(models) == mdl_cls){
-    models <- list(models)
-    class(models) <- mdl_lst_cls
-  }
-
-  if(class(models) != mdl_lst_cls){
-    stop("The `models` list is not a gfiscamutils::mdl_lst_cls class. If you are trying to plot ",
-         "a single model, modify it like this first:\n\n",
-         "model <- list(model)\n",
-         "class(model) <- mdl_lst_cls\n")
-  }
-
-  if(length(models) > 13){
-    stop("Cannot plot more than 13 models due to palette restrictions (See RColorBrewer 'Paired' palette)")
-  }
-
-  # surv_abbrev will be in order of the gears in the models
-  surv_abbrevs <- map(models, ~{
-    .x$dat$index_abbrevs
-  })
-
-  surv_abbrev <- surv_abbrevs %>%
-    flatten() %>%
-    map_chr(~{.x}) %>%
-    unique()
-
-  surv_index <- surv_index %>%
-    filter(year %in% start_year:end_year) %>%
-    filter(survey_abbrev %in% surv_abbrev)
-
-  surv_indices <- map_df(surv_abbrev, ~{
-    surv_index %>%
-      filter(survey_abbrev == .x) %>%
-      select(year, biomass, lowerci, upperci, survey_abbrev)
-  })
-
-  if(is.null(model_names)){
-    model_names <- paste0("model ", seq_along(models))
-    model_names <- factor(model_names, levels = model_names)
-  }
-
-
-
-  browser()
 }
