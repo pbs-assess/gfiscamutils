@@ -53,6 +53,11 @@
 #' MCMC index fits file
 "mcmc.index.fits.file"
 
+#' iscam MCMC output index residuals filename
+#'
+#' MCMC index residuals file
+"mcmc.index.resids.file"
+
 #' iscam MCMC projection filename
 #'
 #' MCMC projection file

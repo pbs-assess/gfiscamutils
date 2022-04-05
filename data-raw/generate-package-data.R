@@ -15,6 +15,7 @@ mcmc.natural.mort.file <- "iscam_m_mcmc.csv"
 mcmc.fishing.mort.u.file <- "iscam_ut_mcmc.csv"
 mcmc.vuln.biomass.file <- "iscam_vbt_mcmc.csv"
 mcmc.index.fits.file <- "iscam_index_fits_mcmc.csv"
+mcmc.index.resids.file <- "iscam_index_residuals_mcmc.csv"
 mcmc.proj.file <- "iscam_mcmc_proj.csv"
 mpd.proj.file <- "iscam_mpd_proj.csv"
 output.files <- c(rep.file,
@@ -73,6 +74,7 @@ use_data(mcmc.natural.mort.file, overwrite = TRUE)
 use_data(mcmc.fishing.mort.u.file, overwrite = TRUE)
 use_data(mcmc.vuln.biomass.file, overwrite = TRUE)
 use_data(mcmc.index.fits.file,  overwrite = TRUE)
+use_data(mcmc.index.resids.file,  overwrite = TRUE)
 use_data(mcmc.proj.file, overwrite = TRUE)
 use_data(mpd.proj.file, overwrite = TRUE)
 use_data(output.files, overwrite = TRUE)

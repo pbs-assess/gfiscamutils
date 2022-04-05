@@ -87,8 +87,7 @@ plot_index_fits_mcmc <- function(models,
   # Remove any NULL list items (no index fits found in model)
   fits <- fits[!sapply(fits, is.null)] %>%
     bind_rows() %>%
-    select(model, survey_abbrev, year, biomass, lowerci, upperci) %>%
-    mutate(year = as.numeric(year))
+    select(model, survey_abbrev, year, biomass, lowerci, upperci)
 
   # Remove any non-fit indices so the index isn't plot unless there is a fit
   surv_indices <- surv_indices %>%

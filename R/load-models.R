@@ -225,8 +225,32 @@ calc_mcmc <- function(model,
       rename(lowerci = !!sym(prob_cols[1]),
              biomass = !!sym(prob_cols[2]),
              upperci = !!sym(prob_cols[3])) %>%
-      select(survey_abbrev, year, biomass, lowerci, upperci)
+      select(survey_abbrev, year, biomass, lowerci, upperci) %>%
+      mutate(year = as.numeric(year))
   }
+  # Index residuals
+  prob_cols <- paste0(prettyNum(probs * 100), "%")
+  if(!is.null(mc$epsilon)){
+    names(mc$epsilon) <- names(mc$it)
+    out$epsilon_quants <- imap(mc$epsilon, ~{
+      imap(.x, ~{
+        quantile(.x, probs = probs, na.rm = TRUE) %>%
+          t() %>%
+          as.data.frame() %>%
+          as_tibble() %>%
+          mutate(year = .y)
+      }) %>%
+        bind_rows() %>%
+        mutate(survey_abbrev = .y)
+    }) %>%
+      bind_rows() %>%
+      rename(lowerci = !!sym(prob_cols[1]),
+             biomass = !!sym(prob_cols[2]),
+             upperci = !!sym(prob_cols[3])) %>%
+      select(survey_abbrev, year, biomass, lowerci, upperci) %>%
+      mutate(year = as.numeric(year))
+  }
+
   if(load_proj){
     # Burn in and calculate quantiles for each TAC level
     out$proj <- mc$proj %>%
@@ -1188,11 +1212,12 @@ read_mcmc <- function(model,
                  list(mcmc.fishing.mort.u.file, "list", "fleet"),
                  list(mcmc.vuln.biomass.file, "list", "fleet"),
                  list(mcmc.index.fits.file, "list", "gear"),
+                 list(mcmc.index.resids.file, "list", "gear"),
                  list(mcmc.proj.file, "projections"))
 
   # Names given to the return list elements. Must be same length as `fn_lst`
   nms <- c("params", "sbt", "rt", "rdev", "ft",
-           "m", "ut", "vbt", "it", "proj")
+           "m", "ut", "vbt", "it", "epsilon", "proj")
 
   if(length(nms) != length(fn_lst)){
     stop("Length of `fn_lst` must be the same as the length of `nms`")
@@ -1201,8 +1226,6 @@ read_mcmc <- function(model,
   imap(fn_lst, ~{
     d <- NULL
     fn <- file.path(mcmc_dir, .x[1])
-    #if(.y == 9 && fn == "C:/github/pbs-assess/arrowtooth-project/arrowtooth-nongit/models/001-bridge-models/05-bridge-switch-to-dm-likelihood/mcmc/iscam_index_fits_mcmc.csv")
-    #  browser()
     if(file.exists(fn)){
       d <- read.csv(fn)
       if(.x[[2]] == "default"){
@@ -1216,14 +1239,14 @@ read_mcmc <- function(model,
                "required when using 'list' for the second item")
         }
         d <- list_by(d, by = .x[[3]])
-        if(nms[.y] == "it"){
+        # Set column names for indices to actual years instead of numbers 1:ncol
+        if(nms[.y] == "it" || nms[.y] == "epsilon"){
           # Set names and years for index fits
           d <- imap(d, ~{
             as_tibble(.x) %>%
               `names<-`(model$dat$indices[[.y]][, "iyr"])
           }) %>%
             `names<-`(model$dat$index_abbrevs)
-
         }
       }else if(.x[[2]] == "projections"){
         # Do no processing
