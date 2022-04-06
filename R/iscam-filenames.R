@@ -58,6 +58,11 @@
 #' MCMC index residuals file
 "mcmc.index.resids.file"
 
+#' iscam MCMC output age fits filename
+#'
+#' MCMC index age fits file
+"mcmc.age.fits.file"
+
 #' iscam MCMC projection filename
 #'
 #' MCMC projection file

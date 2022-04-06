@@ -1213,11 +1213,12 @@ read_mcmc <- function(model,
                  list(mcmc.vuln.biomass.file, "list", "fleet"),
                  list(mcmc.index.fits.file, "list", "gear"),
                  list(mcmc.index.resids.file, "list", "gear"),
+                 list(mcmc.age.fits.file, "special", "gear"),
                  list(mcmc.proj.file, "projections"))
 
   # Names given to the return list elements. Must be same length as `fn_lst`
   nms <- c("params", "sbt", "rt", "rdev", "ft",
-           "m", "ut", "vbt", "it", "epsilon", "proj")
+           "m", "ut", "vbt", "it", "epsilon", "agefits", "proj")
 
   if(length(nms) != length(fn_lst)){
     stop("Length of `fn_lst` must be the same as the length of `nms`")
@@ -1227,10 +1228,13 @@ read_mcmc <- function(model,
     d <- NULL
     fn <- file.path(mcmc_dir, .x[1])
     if(file.exists(fn)){
-      d <- read.csv(fn)
-      if(.x[[2]] == "default"){
+      if(.x[[2]] == "special"){
+        d <- load_agefit(fn, gear_names = model$dat$age_gear_names)
+      }else if(.x[[2]] == "default"){
+        d <- read.csv(fn)
         d <- mcmc_thin(d, burnin, thin)
       }else if(.x[[2]] == "single"){
+        d <- read.csv(fn)
         names(d) <- str_extract(names(d), "[0-9]+$")
         d <- mcmc_thin(d, burnin, thin)
       }else if(.x[[2]] == "list"){
@@ -1238,6 +1242,7 @@ read_mcmc <- function(model,
           stop("sublist ", .y, " does not have a third element which is ",
                "required when using 'list' for the second item")
         }
+        d <- read.csv(fn)
         d <- list_by(d, by = .x[[3]])
         # Set column names for indices to actual years instead of numbers 1:ncol
         if(nms[.y] == "it" || nms[.y] == "epsilon"){
@@ -1250,6 +1255,7 @@ read_mcmc <- function(model,
         }
       }else if(.x[[2]] == "projections"){
         # Do no processing
+        d <- read.csv(fn)
       }else{
         stop("Sublist ", .y, " of fn_lst has an unimplmented value for its second element (", .x[[2]], ")")
       }
