@@ -7,8 +7,9 @@
 plot_index_fits_mcmc(
   models,
   model_names = factor(names(models), levels = names(models)),
+  type = "fits",
   surv_index,
-  start_year = 1996,
+  start_year = 1995,
   end_year = 2021,
   legend_title = "Bridge model",
   palette = "Paired",
@@ -16,7 +17,8 @@ plot_index_fits_mcmc(
   index_line_width = 0.75,
   index_point_size = 3,
   fit_line_width = 1,
-  fit_point_size = 3
+  fit_point_size = 3,
+  errbar_width = 0.5
 )
 }
 \arguments{
@@ -47,6 +49,8 @@ so each model fit appears more to the right than the previous one}
 \item{fit_line_width}{The model fit error bar and connecting line width}
 
 \item{fit_point_size}{The model fit point size}
+
+\item{errbar_width}{The width of the top and bottom crossbar of the errorbars}
 }
 \description{
 Plot MCMC index fits for a single or group of models

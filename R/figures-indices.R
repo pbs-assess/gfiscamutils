@@ -16,12 +16,14 @@
 #' @param index_point_size The index data point size
 #' @param fit_line_width The model fit error bar and connecting line width
 #' @param fit_point_size The model fit point size
+#' @param errbar_width The width of the top and bottom crossbar of the errorbars
 #'
 #' @export
 plot_index_fits_mcmc <- function(models,
                                  model_names = factor(names(models), levels = names(models)),
+                                 type = "fits",
                                  surv_index,
-                                 start_year = 1996,
+                                 start_year = 1995,
                                  end_year = 2021,
                                  legend_title = "Bridge model",
                                  palette = "Paired",
@@ -29,7 +31,12 @@ plot_index_fits_mcmc <- function(models,
                                  index_line_width = 0.75,
                                  index_point_size = 3,
                                  fit_line_width = 1,
-                                 fit_point_size = 3){
+                                 fit_point_size = 3,
+                                 errbar_width = 0.5){
+
+  if(!type %in% c("fits", "resids")){
+    stop("Type '", type, "' is not one of the implemented types")
+  }
 
   if(class(models) == mdl_cls){
     models <- list(models)
@@ -69,59 +76,53 @@ plot_index_fits_mcmc <- function(models,
 
   if(is.null(model_names)){
     model_names <- paste0("model ", seq_along(models))
-    model_names <- factor(model_names, levels = model_names)
   }
 
-  fits <- imap(models, ~{
-    ind_fits <- .x$mcmccalcs$it_quants
-    if(is.null(ind_fits)){
+  vals <- imap(models, ~{
+    ind_vals <- if(type == "fits") .x$mcmccalcs$it_quants else .x$mcmccalcs$epsilon_quants
+    if(is.null(ind_vals)){
       return(NULL)
     }
-    ind_fits %>%
+    ind_vals %>%
       mutate(model = .y)
   })
-  if(all(map_lgl(fits, is.null))){
-    stop("None of the models supplied have MCMC index fits")
+
+  if(all(map_lgl(vals, is.null))){
+    stop("None of the models supplied have MCMC index ", if(type == "fits") "fits" else "residuals")
   }
 
   # Remove any NULL list items (no index fits found in model)
-  fits <- fits[!sapply(fits, is.null)] %>%
+  vals <- vals[!sapply(vals, is.null)] %>%
     bind_rows() %>%
     select(model, survey_abbrev, year, biomass, lowerci, upperci)
 
-  # Remove any non-fit indices so the index isn't plot unless there is a fit
-  surv_indices <- surv_indices %>%
-    filter(survey_abbrev %in% unique(fits$survey_abbrev))
-
   # Remove any missing models from the `model_names` vector
-  model_names <- model_names[model_names %in% unique(fits$model)]
-  surv_abbrev <- surv_abbrev[surv_abbrev %in% unique(fits$survey_abbrev)]
+  model_names <- model_names[model_names %in% unique(vals$model)]
+  surv_abbrev <- surv_abbrev[surv_abbrev %in% unique(vals$survey_abbrev)]
   # Re-order the legend and facets
   model_names <- factor(model_names, levels = model_names)
   surv_abbrev <- factor(surv_abbrev, levels = surv_abbrev)
-  fits <- fits %>% mutate(model = as.factor(model))
 
-  fits <- fits %>%
+  vals <- vals %>%
+    mutate(model = as.factor(model)) %>%
     mutate(model = fct_relevel(model, levels(!!model_names))) %>%
     mutate(survey_abbrev = fct_relevel(survey_abbrev, levels(!!surv_abbrev)))
-  surv_indices <- surv_indices %>%
-    mutate(survey_abbrev = fct_relevel(survey_abbrev, levels(!!surv_abbrev)))
 
-  # Rescale values
-  surv_indices <- surv_indices %>%
-    mutate_at(vars(biomass, lowerci, upperci),
-              function(x){
-                ifelse(.$survey_abbrev == "DCPUE", x,  x / 1e6)
-              })
-  fits <- fits %>%
-    mutate_at(vars(biomass, lowerci, upperci),
-              function(x){
-                ifelse(.$survey_abbrev == "DCPUE", x,  x / 1e6)
-              })
+  # Filter out for the years provided
+  vals <- vals %>%
+    filter(year %in% start_year:end_year)
+
+  if(type == "fits"){
+    vals <- vals %>%
+      mutate_at(vars(biomass, lowerci, upperci),
+                function(x){
+                  ifelse(.$survey_abbrev == "DCPUE", x, x / 1e6)
+                })
+  }
 
   # Dodge year points a little, cumulative for each model
-  dodge_amt <- dodge
-  fits <- fits %>%
+  dodge_amt <- if(type == "fits") dodge else 0
+  vals <- vals %>%
     split(~model) %>%
     imap(~{
       tmp <- .x %>% mutate(year = year + dodge_amt)
@@ -130,24 +131,70 @@ plot_index_fits_mcmc <- function(models,
     }) %>%
     bind_rows()
 
-  g <- ggplot(surv_indices, aes(x = year, y = biomass)) +
-    geom_line(size = index_line_width) +
-    geom_point(size = index_point_size) +
-    geom_errorbar(aes(ymin = lowerci, ymax = upperci),
-                  width = index_line_width,
-                  size = index_line_width) +
-    facet_wrap(~survey_abbrev, scales = "free_y") +
-    geom_line(data = fits, aes(color = model), size = fit_line_width) +
-    geom_point(data = fits, aes(color = model), size = fit_point_size) +
-    geom_errorbar(data = fits,
-                  aes(color = model, ymin = lowerci, ymax = upperci),
-                  width = fit_line_width,
-                  size = fit_line_width) +
-    xlab("Year") +
-    ylab("Index (thousand tonnes, DCPUE ~ kg/hr)") +
-    scale_color_brewer(palette = palette) +
-    guides(color = guide_legend(title = legend_title)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  # Remove any non-fit indices so the index isn't plot unless there is a fit
+  surv_indices <- surv_indices %>%
+    filter(survey_abbrev %in% unique(vals$survey_abbrev))
+
+  surv_indices <- surv_indices %>%
+    mutate(survey_abbrev = fct_relevel(survey_abbrev, levels(!!surv_abbrev)))
+  if(type == "fits"){
+    # Rescale values
+    surv_indices <- surv_indices %>%
+      mutate_at(vars(biomass, lowerci, upperci),
+                function(x){
+                  ifelse(.$survey_abbrev == "DCPUE", x,  x / 1e6)
+                })
+  }
+
+  if(type == "fits"){
+
+    g <- ggplot(surv_indices,
+                aes(x = year, y = biomass)) +
+      geom_line(size = index_line_width) +
+      geom_point(size = index_point_size) +
+      geom_errorbar(aes(ymin = lowerci, ymax = upperci),
+                    width = errbar_width,
+                    size = index_line_width) +
+      facet_wrap(~survey_abbrev, scales = "free_y") +
+      geom_line(data = vals,
+                aes(color = model),
+                size = fit_line_width) +
+      geom_point(data = vals,
+                 aes(color = model),
+                 size = fit_point_size) +
+      geom_errorbar(data = vals,
+                    aes(color = model, ymin = lowerci, ymax = upperci),
+                    width = errbar_width,
+                    size = fit_line_width) +
+      xlab("Year") +
+      ylab("Index (thousand tonnes, DCPUE ~ kg/hr)") +
+      scale_color_brewer(palette = palette) +
+      guides(color = guide_legend(title = legend_title)) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+      scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
+
+  }else if(type == "resids"){
+
+    g <- vals %>%
+      ggplot(aes(x = year, y = biomass, color = model)) +
+      stat_identity(yintercept = 0,
+                    geom = "hline",
+                    inherit.aes = FALSE,
+                    linetype = "longdash") +
+      #geom_line(size = fit_line_width) +
+      geom_point(size = fit_point_size) +
+      geom_errorbar(aes(ymin = lowerci, ymax = upperci),
+                    width = errbar_width,
+                    size = fit_line_width) +
+      facet_wrap(~survey_abbrev, scales = "free_y") +
+      xlab("Year") +
+      ylab("Log standardized residual") +
+      scale_color_brewer(palette = palette) +
+      guides(color = guide_legend(title = legend_title)) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+      scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
+
+  }
 
   g
 }
@@ -167,6 +214,22 @@ plot_index_fits_mcmc <- function(models,
  plot_index_resids_mpd <- function(models,
                                    gear = "SYN QCS",
                                    angle_x_labels = FALSE){
+
+   if(class(models) == mdl_cls){
+     models <- list(models)
+     class(models) <- mdl_lst_cls
+   }
+
+   if(class(models) != mdl_lst_cls){
+     stop("The `models` list is not a gfiscamutils::mdl_lst_cls class. If you are trying to plot ",
+          "a single model, modify it like this first:\n\n",
+          "model <- list(model)\n",
+          "class(model) <- mdl_lst_cls\n")
+   }
+
+   if(length(models) > 13){
+     stop("Cannot plot more than 13 models due to palette restrictions (See RColorBrewer 'Paired' palette)")
+   }
 
   surv_abbrevs <- map(models, ~{
     .x$dat$index_abbrevs
@@ -198,9 +261,8 @@ plot_index_fits_mcmc <- function(models,
     resid
   })
   names(resids) <- names(models)
-  resids <- resids[!is.na(resids)]
-  resids <- resids %>% bind_rows()
-  resids <- resids %>%
+  resids <- resids[!is.na(resids)] %>%
+    bind_rows() %>%
     rename(Year = year, Model = model, `Log standardized residual` = value)
 
   g <- ggplot(resids, aes(Year, `Log standardized residual`, color = Model)) +
