@@ -11,7 +11,9 @@
 #'
 #' @return An iscam model object
 #' @export
-load_iscam_files <- function(model_dir, mcmc_subdir = "mcmc", ...){
+load_iscam_files <- function(model_dir,
+                             mcmc_subdir = "mcmc",
+                             ...){
 
   model <- list()
   model$path <- model_dir
@@ -98,6 +100,21 @@ calc_mcmc <- function(model,
 
   if(is.null(model$mcmc)){
     stop("The mcmc list was null. Check read_mcmc() function.")
+  }
+  if(length(probs) != 3){
+    stop("`probs` must be a vector of three numeric values")
+  }
+  if(class(probs) != "numeric"){
+    stop("`probs` must be a numeric vector")
+  }
+  if(any(probs < 0 || probs > 1)){
+    stop("`probs` values must all be between 0 and 1")
+  }
+  if(probs[1] >= probs[2] || probs[2] >= probs[3]){
+    stop("`probs` values must be incresing and no two can be equal")
+  }
+  if(probs[2] != 0.5){
+    warning("The second value for `probs` is not 0.5 (the median)")
   }
 
   # Create output list
@@ -249,6 +266,47 @@ calc_mcmc <- function(model,
              upperci = !!sym(prob_cols[3])) %>%
       select(survey_abbrev, year, biomass, lowerci, upperci) %>%
       mutate(year = as.numeric(year))
+  }
+
+  # Calculate agefit quantiles
+  if(!is.null(mc$agefits)){
+    gear_lst <- mc$agefits %>% split(~gear)
+    out$agefit_quants <- imap(gear_lst, ~{
+      sex_lst <- split(.x, ~sex)
+      sexes <- as.numeric(names(sex_lst))
+      # Remove names so that .y in the following loop is an iterator, not the name
+      names(sex_lst) <- NULL
+      imap(sex_lst, ~{
+        # Making a 'bare-bones' data frame by removing these columns makes the
+        # following calls simpler. They are appended to the resulting data frame
+        # afterwards
+        bare_df <- .x %>%
+          select(-c(gear, post, sex))
+        lower <- bare_df %>%
+          group_by(year) %>%
+          summarize_all(quantile, probs = probs[1]) %>%
+          ungroup() %>%
+          mutate(quant = paste0(probs[1] * 100, "%"))
+        med <- bare_df %>%
+          group_by(year) %>%
+          summarize_all(quantile, probs = probs[2]) %>%
+          ungroup() %>%
+          mutate(quant = paste0(probs[2] * 100, "%"))
+        upper <- bare_df %>%
+          group_by(year) %>%
+          summarize_all(quantile, probs = probs[3]) %>%
+          ungroup() %>%
+          mutate(quant = paste0(probs[3] * 100, "%"))
+
+        bind_rows(lower, med, upper) %>%
+        mutate(sex = sexes[.y]) %>%
+        select(year, sex, quant, everything())
+      }) %>%
+        bind_rows() %>%
+        mutate(gear = .y) %>%
+        select(gear, everything())
+    }) %>%
+      bind_rows()
   }
 
   if(load_proj){
@@ -1197,12 +1255,15 @@ read_mcmc <- function(model,
     tmp
   }
 
-  # list of files to load in, with associated type of data:
-  # "default" means thinning/burnin is done
-  # "single" means column names are converted to years, output is a data frame
-  # "list" means the data frame is broken into a list by the third item in the list
-  # "projections" means no processing is done, it is done in calc_mcmc() instead
-  # which is sent to `list_by()` to extract by column names
+  # List of files to load in, with associated type of data:
+  # "default"     - thinning/burnin is done
+  # "single"      - column names are converted to years, output is a data frame
+  # "list"        - the data frame is broken into a list by the third item in the list
+  # "projections" - no processing is done, it is done in calc_mcmc() instead
+  #   which is sent to `list_by()` to extract by column names
+  # "special"     - outputs which are matrices by year, gear, and sex such as
+  #   age fits or age residuals. There is a special format for these files. See
+  #   the mcmc_output() function in iscam source (iscam.tpl file) for the output format
   fn_lst <- list(list(mcmc.file, "default"),
                  list(mcmc.biomass.file, "single"),
                  list(mcmc.recr.file, "single"),
@@ -1229,7 +1290,10 @@ read_mcmc <- function(model,
     fn <- file.path(mcmc_dir, .x[1])
     if(file.exists(fn)){
       if(.x[[2]] == "special"){
-        d <- load_agefit(fn, gear_names = model$dat$age_gear_names)
+        d <- load_agefit(fn,
+                         gear_names = model$dat$age_gear_names,
+                         burnin = burnin,
+                         thin = thin)
       }else if(.x[[2]] == "default"){
         d <- read.csv(fn)
         d <- mcmc_thin(d, burnin, thin)
@@ -1260,7 +1324,7 @@ read_mcmc <- function(model,
         stop("Sublist ", .y, " of fn_lst has an unimplmented value for its second element (", .x[[2]], ")")
       }
     }else{
-      warning("File ", fn, " does not exist")
+      warning("File ", fn, " does not exist, check iSCAM output")
     }
     d
   }) %>% `names<-`(nms)

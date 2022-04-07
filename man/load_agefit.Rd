@@ -2,20 +2,30 @@
 % Please edit documentation in R/load-agefit-file.R
 \name{load_agefit}
 \alias{load_agefit}
-\title{Load the specially-formatted age fit or age residuals file}
+\title{Load the specially-formatted age fit or age residuals file. Loading uses
+parallelism by gear}
 \usage{
-load_agefit(fn, type = "fits", gear_names = NULL)
+load_agefit(fn, type = "fits", gear_names = NULL, burnin = 1000, thin = 1)
 }
 \arguments{
 \item{fn}{The filename}
 
 \item{type}{Either 'fits' or 'resids' for the age fits (A_hat in iscam)
-or residuals (A_nu in iscam)}
+or residuals (A_nu in iscam) respectively}
+
+\item{gear_names}{A vector of gear names to use in the resulting data frame.
+If `NULL`, the gear numbers set in the age comp section of the iscam
+data file will be used}
+
+\item{burnin}{The number of MCMC records to remove for burnin period}
+
+\item{thin}{Remove every nth record for thinning of MCMC output}
 }
 \value{
 The list of output data frames representing the age fits
 by gear and year
 }
 \description{
-Load the specially-formatted age fit or age residuals file
+Load the specially-formatted age fit or age residuals file. Loading uses
+parallelism by gear
 }
