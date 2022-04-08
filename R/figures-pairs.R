@@ -7,7 +7,9 @@
 #' @importFrom GGally ggpairs ggally_cor wrap ggally_text ggally_densityDiag
 #' @importFrom ggplot2 layer_scales
 #' @export
-plot_pairs <- function(model, plot_sel = FALSE, param_rm = NULL){
+plot_pairs <- function(model,
+                       plot_sel = FALSE,
+                       param_rm = NULL){
 
   if(class(model) != mdl_cls){
     stop("The `model` argument is not a gfiscamutils::mdl_cls class")
