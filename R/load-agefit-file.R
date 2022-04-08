@@ -17,10 +17,12 @@
 #' @importFrom furrr future_imap
 #' @export
 load_agefit <- function(fn,
-                        type = "fits",
+                        type = c("fits", "resids"),
                         gear_names = NULL,
                         burnin = 1000,
                         thin = 1){
+
+  type <- match.arg(type)
 
   d <- readLines(fn)
   d <- d[d != ""]

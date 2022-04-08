@@ -51,7 +51,7 @@
 #' @export
 plot_ts_mcmc <- function(models,
                          model_names = NULL,
-                         type = "sbt",
+                         type = c("sbt", "rt"),
                          rel = FALSE,
                          show_initial = TRUE,
                          legend_title = "Models",
@@ -76,9 +76,7 @@ plot_ts_mcmc <- function(models,
                          probs = c(0.025, 0.5, 0.975),
                          ...){
 
-  if(!type %in% c("sbt", "rt")){
-    stop("type '", type, "' is not one of the implemented time series", call. = FALSE)
-  }
+  type <- match.arg(type)
 
   if(class(models) == mdl_cls){
     models <- list(models)

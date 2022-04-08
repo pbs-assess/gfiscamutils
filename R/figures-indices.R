@@ -21,7 +21,7 @@
 #' @export
 plot_index_fits_mcmc <- function(models,
                                  model_names = factor(names(models), levels = names(models)),
-                                 type = "fits",
+                                 type = c("fits", "resids"),
                                  surv_index,
                                  start_year = 1995,
                                  end_year = 2021,
@@ -34,9 +34,7 @@ plot_index_fits_mcmc <- function(models,
                                  fit_point_size = 3,
                                  errbar_width = 0.5){
 
-  if(!type %in% c("fits", "resids")){
-    stop("Type '", type, "' is not one of the implemented types")
-  }
+  type <- match.arg(type)
 
   if(class(models) == mdl_cls){
     models <- list(models)
