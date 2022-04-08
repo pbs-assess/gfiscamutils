@@ -5,7 +5,13 @@
 \title{Load the specially-formatted age fit or age residuals file. Loading uses
 parallelism by gear}
 \usage{
-load_agefit(fn, type = "fits", gear_names = NULL, burnin = 1000, thin = 1)
+load_agefit(
+  fn,
+  type = c("fits", "resids"),
+  gear_names = NULL,
+  burnin = 1000,
+  thin = 1
+)
 }
 \arguments{
 \item{fn}{The filename}

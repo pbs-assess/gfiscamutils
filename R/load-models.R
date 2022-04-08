@@ -1275,11 +1275,13 @@ read_mcmc <- function(model,
                  list(mcmc.index.fits.file, "list", "gear"),
                  list(mcmc.index.resids.file, "list", "gear"),
                  list(mcmc.age.fits.file, "special", "gear"),
+                 list(mcmc.age.resids.file, "special", "gear"),
                  list(mcmc.proj.file, "projections"))
 
   # Names given to the return list elements. Must be same length as `fn_lst`
   nms <- c("params", "sbt", "rt", "rdev", "ft",
-           "m", "ut", "vbt", "it", "epsilon", "agefits", "proj")
+           "m", "ut", "vbt", "it", "epsilon",
+           "agefits", "ageresids", "proj")
 
   if(length(nms) != length(fn_lst)){
     stop("Length of `fn_lst` must be the same as the length of `nms`")

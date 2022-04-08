@@ -2,8 +2,6 @@
 #' parallelism by gear
 #'
 #' @param fn The filename
-#' @param type Either 'fits' or 'resids' for the age fits (A_hat in iscam)
-#' or residuals (A_nu in iscam) respectively
 #' @param gear_names A vector of gear names to use in the resulting data frame.
 #' If `NULL`, the gear numbers set in the age comp section of the iscam
 #' data file will be used
@@ -17,12 +15,9 @@
 #' @importFrom furrr future_imap
 #' @export
 load_agefit <- function(fn,
-                        type = c("fits", "resids"),
                         gear_names = NULL,
                         burnin = 1000,
                         thin = 1){
-
-  type <- match.arg(type)
 
   d <- readLines(fn)
   d <- d[d != ""]
