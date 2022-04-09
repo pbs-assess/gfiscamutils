@@ -5,19 +5,10 @@
 \title{Load the specially-formatted age fit or age residuals file. Loading uses
 parallelism by gear}
 \usage{
-load_agefit(
-  fn,
-  type = c("fits", "resids"),
-  gear_names = NULL,
-  burnin = 1000,
-  thin = 1
-)
+load_agefit(fn, gear_names = NULL, burnin = 1000, thin = 1)
 }
 \arguments{
 \item{fn}{The filename}
-
-\item{type}{Either 'fits' or 'resids' for the age fits (A_hat in iscam)
-or residuals (A_nu in iscam) respectively}
 
 \item{gear_names}{A vector of gear names to use in the resulting data frame.
 If `NULL`, the gear numbers set in the age comp section of the iscam

@@ -1,3 +1,50 @@
+#' Calculate age fits / age residuals quantiles
+#'
+#'  @param lst A list as output by [load_agefit()]
+#'  of either MCMC age fits or residuals
+#'  @param probs A vector of three values for quantiles calculations
+#'  @export
+calc_age_quants <- function(lst, probs){
+
+  gear_lst <- lst %>% split(~gear)
+  imap(gear_lst, ~{
+    sex_lst <- split(.x, ~sex)
+    sexes <- as.numeric(names(sex_lst))
+    # Remove names so that .y in the following loop is an iterator, not the name
+    names(sex_lst) <- NULL
+    imap(sex_lst, ~{
+      # Making a 'bare-bones' data frame by removing these columns makes the
+      # following calls simpler. They are appended to the resulting data frame
+      # afterwards
+      bare_df <- .x %>%
+        select(-c(gear, post, sex))
+      lower <- bare_df %>%
+        group_by(year) %>%
+        summarize_all(quantile, probs = probs[1]) %>%
+        ungroup() %>%
+        mutate(quant = paste0(probs[1] * 100, "%"))
+      med <- bare_df %>%
+        group_by(year) %>%
+        summarize_all(quantile, probs = probs[2]) %>%
+        ungroup() %>%
+        mutate(quant = paste0(probs[2] * 100, "%"))
+      upper <- bare_df %>%
+        group_by(year) %>%
+        summarize_all(quantile, probs = probs[3]) %>%
+        ungroup() %>%
+        mutate(quant = paste0(probs[3] * 100, "%"))
+
+      bind_rows(lower, med, upper) %>%
+        mutate(sex = sexes[.y]) %>%
+        select(year, sex, quant, everything())
+    }) %>%
+      bind_rows() %>%
+      mutate(gear = .y) %>%
+      select(gear, everything())
+  }) %>%
+    bind_rows()
+}
+
 #' Verify that models object is a list of iscam models and that models is the same length as models_names
 #'
 #' @param models a list of iscam model objects

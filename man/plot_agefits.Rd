@@ -7,6 +7,8 @@
 plot_agefits(
   model,
   gear = 1,
+  type = c("fits", "resids"),
+  resid_type = c("age", "year", "birth_year"),
   probs = c(0.025, 0.5, 0.975),
   comp_color = "black",
   comp_point_size = 0.5,
@@ -18,6 +20,11 @@ plot_agefits(
 }
 \arguments{
 \item{gear}{The number of the gear to plot}
+
+\item{type}{The type of plot to make. Options are "fits" and "resids"}
+
+\item{resid_type}{The type of residual plot to make if `type == "resids"`.
+Options are "age", "year", and "birth_year"}
 
 \item{probs}{A 3-element vector of probabilities that appear in the output data frames
 This is provided in case the data frames have more than three different quantile levels}
