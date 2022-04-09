@@ -268,45 +268,11 @@ calc_mcmc <- function(model,
       mutate(year = as.numeric(year))
   }
 
-  # Calculate agefit quantiles
   if(!is.null(mc$agefits)){
-    gear_lst <- mc$agefits %>% split(~gear)
-    out$agefit_quants <- imap(gear_lst, ~{
-      sex_lst <- split(.x, ~sex)
-      sexes <- as.numeric(names(sex_lst))
-      # Remove names so that .y in the following loop is an iterator, not the name
-      names(sex_lst) <- NULL
-      imap(sex_lst, ~{
-        # Making a 'bare-bones' data frame by removing these columns makes the
-        # following calls simpler. They are appended to the resulting data frame
-        # afterwards
-        bare_df <- .x %>%
-          select(-c(gear, post, sex))
-        lower <- bare_df %>%
-          group_by(year) %>%
-          summarize_all(quantile, probs = probs[1]) %>%
-          ungroup() %>%
-          mutate(quant = paste0(probs[1] * 100, "%"))
-        med <- bare_df %>%
-          group_by(year) %>%
-          summarize_all(quantile, probs = probs[2]) %>%
-          ungroup() %>%
-          mutate(quant = paste0(probs[2] * 100, "%"))
-        upper <- bare_df %>%
-          group_by(year) %>%
-          summarize_all(quantile, probs = probs[3]) %>%
-          ungroup() %>%
-          mutate(quant = paste0(probs[3] * 100, "%"))
-
-        bind_rows(lower, med, upper) %>%
-        mutate(sex = sexes[.y]) %>%
-        select(year, sex, quant, everything())
-      }) %>%
-        bind_rows() %>%
-        mutate(gear = .y) %>%
-        select(gear, everything())
-    }) %>%
-      bind_rows()
+    out$agefit_quants <- calc_age_quants(mc$agefits, probs)
+  }
+  if(!is.null(mc$ageresids)){
+    out$ageresids_quants <- calc_age_quants(mc$ageresids, probs)
   }
 
   if(load_proj){
