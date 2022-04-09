@@ -8,7 +8,7 @@ and recruitment for both absolute and relative cases.}
 plot_ts_mcmc(
   models,
   model_names = NULL,
-  type = "sbt",
+  type = c("sbt", "rt"),
   rel = FALSE,
   show_initial = TRUE,
   legend_title = "Models",
