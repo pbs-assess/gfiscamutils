@@ -48,6 +48,7 @@
 #' @param leg_loc
 #'
 #' @return Nothing
+#' @importFrom tibble rownames_to_column
 #' @export
 plot_ts_mcmc <- function(models,
                          model_names = NULL,
@@ -97,6 +98,18 @@ plot_ts_mcmc <- function(models,
   if(length(probs) != 3){
     stop("`probs` has length ", length(probs), " but must be a vector of three values ",
          "representing lower CI, median, and upper CI")
+  }
+
+  # Set up model names for the legend
+  if(is.null(model_names)){
+    if(is.null(names(models))){
+      names(models) <- paste0("model ", seq_along(models))
+    }
+  }else{
+    if(length(model_names) != length(models)){
+      stop("`model_names` is not the same length as the `models` list")
+    }
+    names(models) <- model_names
   }
 
   start_yr <- map_dbl(models, ~{.x$dat$start.yr}) %>% min
@@ -166,7 +179,7 @@ plot_ts_mcmc <- function(models,
     .x %>%
       t() %>%
       as.data.frame %>%
-      add_rownames(var = "year") %>%
+      rownames_to_column(var = "year") %>%
       mutate(model = .y) %>%
       select(model, year, everything()) %>%
       mutate(year = as.numeric(year))
