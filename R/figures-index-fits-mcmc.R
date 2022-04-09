@@ -25,7 +25,7 @@ plot_index_fits_mcmc <- function(models,
                                  surv_index,
                                  start_year = 1995,
                                  end_year = 2021,
-                                 legend_title = "Bridge model",
+                                 legend_title = "Models",
                                  palette = "Paired",
                                  dodge = 0.3,
                                  index_line_width = 0.75,
@@ -182,7 +182,6 @@ plot_index_fits_mcmc <- function(models,
                     geom = "hline",
                     inherit.aes = FALSE,
                     linetype = "longdash") +
-      #geom_line(size = fit_line_width) +
       geom_point(size = fit_point_size) +
       geom_errorbar(aes(ymin = lowerci, ymax = upperci),
                     width = errbar_width,

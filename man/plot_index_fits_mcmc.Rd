@@ -11,7 +11,7 @@ plot_index_fits_mcmc(
   surv_index,
   start_year = 1995,
   end_year = 2021,
-  legend_title = "Bridge model",
+  legend_title = "Models",
   palette = "Paired",
   dodge = 0.3,
   index_line_width = 0.75,
