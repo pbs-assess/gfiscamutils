@@ -1,10 +1,10 @@
-#' Calculate age fits / age residuals quantiles
+#' Calculate age fits / age residuals and selectivity estimates quantiles
 #'
-#'  @param lst A list as output by [load_agefit()]
-#'  of either MCMC age fits or residuals
+#'  @param lst A list as output by [load_special()]
+#'  of either MCMC age fits, age residuals, or selectivity estimates
 #'  @param probs A vector of three values for quantiles calculations
 #'  @export
-calc_age_quants <- function(lst, probs){
+calc_special_quants <- function(lst, probs){
 
   gear_lst <- lst %>% split(~gear)
   imap(gear_lst, ~{

@@ -269,10 +269,16 @@ calc_mcmc <- function(model,
   }
 
   if(!is.null(mc$agefits)){
-    out$agefit_quants <- calc_age_quants(mc$agefits, probs)
+    out$agefit_quants <- calc_special_quants(mc$agefits, probs)
   }
   if(!is.null(mc$ageresids)){
-    out$ageresids_quants <- calc_age_quants(mc$ageresids, probs)
+    out$ageresids_quants <- calc_special_quants(mc$ageresids, probs)
+  }
+  if(!is.null(mc$selest_female)){
+    out$selest_female_quants <- calc_special_quants(mc$selest_female, probs)
+  }
+  if(!is.null(mc$selest_male)){
+    out$selest_male_quants <- calc_special_quants(mc$selest_male, probs)
   }
 
   if(load_proj){
@@ -1227,9 +1233,10 @@ read_mcmc <- function(model,
   # "list"        - the data frame is broken into a list by the third item in the list
   # "projections" - no processing is done, it is done in calc_mcmc() instead
   #   which is sent to `list_by()` to extract by column names
-  # "special"     - outputs which are matrices by year, gear, and sex such as
+  # "specialage"  - outputs which are matrices by year, gear, and sex such as
   #   age fits or age residuals. There is a special format for these files. See
   #   the mcmc_output() function in iscam source (iscam.tpl file) for the output format
+  # "specialsel"  - the same as "specialage" but for selectivity estimates
   fn_lst <- list(list(mcmc.file, "default"),
                  list(mcmc.biomass.file, "single"),
                  list(mcmc.recr.file, "single"),
@@ -1240,14 +1247,18 @@ read_mcmc <- function(model,
                  list(mcmc.vuln.biomass.file, "list", "fleet"),
                  list(mcmc.index.fits.file, "list", "gear"),
                  list(mcmc.index.resids.file, "list", "gear"),
-                 list(mcmc.age.fits.file, "special", "gear"),
-                 list(mcmc.age.resids.file, "special", "gear"),
+                 list(mcmc.age.fits.file, "specialage", "gear"),
+                 list(mcmc.age.resids.file, "specialage", "gear"),
+                 list(mcmc.sel.female.file, "specialsel", "gear"),
+                 list(mcmc.sel.male.file, "specialsel", "gear"),
                  list(mcmc.proj.file, "projections"))
 
   # Names given to the return list elements. Must be same length as `fn_lst`
   nms <- c("params", "sbt", "rt", "rdev", "ft",
-           "m", "ut", "vbt", "it", "epsilon",
-           "agefits", "ageresids", "proj")
+           "m", "ut", "vbt",
+           "it", "epsilon",
+           "agefits", "ageresids",
+           "selest_female", "selest_male", "proj")
 
   if(length(nms) != length(fn_lst)){
     stop("Length of `fn_lst` must be the same as the length of `nms`")
@@ -1257,11 +1268,16 @@ read_mcmc <- function(model,
     d <- NULL
     fn <- file.path(mcmc_dir, .x[1])
     if(file.exists(fn)){
-      if(.x[[2]] == "special"){
-        d <- load_agefit(fn,
-                         gear_names = model$dat$age_gear_names,
-                         burnin = burnin,
-                         thin = thin)
+      if(.x[[2]] == "specialsel"){
+        d <- load_special(fn,
+                          gear_names = model$dat$gear_names,
+                          burnin = burnin,
+                          thin = thin)
+      }else if(.x[[2]] == "specialage"){
+        d <- load_special(fn,
+                          gear_names = model$dat$age_gear_names,
+                          burnin = burnin,
+                          thin = thin)
       }else if(.x[[2]] == "default"){
         d <- read.csv(fn)
         d <- mcmc_thin(d, burnin, thin)

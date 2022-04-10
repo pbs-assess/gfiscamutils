@@ -1,4 +1,4 @@
-#' Load the specially-formatted age fit or age residuals file. Loading uses
+#' Load the specially-formatted selectivity estimates file. Loading uses
 #' parallelism by gear
 #'
 #' @param fn The filename
@@ -8,13 +8,10 @@
 #' @param burnin The number of MCMC records to remove for burnin period
 #' @param thin Remove every nth record for thinning of MCMC output
 #'
-#' @return The list of output data frames representing the age fits
+#' @return The list of output data frames representing the selectivity estimates
 #' by gear and year
-#' @importFrom stringr str_split
-#' @importFrom future plan
-#' @importFrom furrr future_imap
 #' @export
-load_agefit <- function(fn,
+load_selest <- function(fn,
                         gear_names = NULL,
                         burnin = 1000,
                         thin = 1){
