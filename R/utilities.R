@@ -4,7 +4,8 @@
 #'  of either MCMC age fits, age residuals, or selectivity estimates
 #'  @param probs A vector of three values for quantiles calculations
 #'  @export
-calc_special_quants <- function(lst, probs){
+calc_special_quants <- function(lst,
+                                probs = c(0.025, 0.5, 0.975)){
 
   gear_lst <- lst %>% split(~gear)
   imap(gear_lst, ~{

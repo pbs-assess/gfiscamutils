@@ -26,6 +26,10 @@ load_special <- function(fn,
   gears <- sort(unique(as.numeric(gsub(".*gear([0-9]+)", "\\1", d[label_inds]))))
   posts <- sort(unique(as.numeric(gsub("posterior([0-9]+).*", "\\1", d[label_inds]))))
 
+  if(length(posts) <= burnin){
+    stop("Your burnin is too high for the number of posteriors (burnin == ", burnin,
+         ", posts == ", length(posts), ")")
+  }
   # Make a list of gears, each has a data frame with the posterior values with
   # years as the columns
   future::plan("multisession", workers = length(gears))
