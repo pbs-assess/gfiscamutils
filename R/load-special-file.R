@@ -32,8 +32,8 @@ load_special <- function(fn,
   }
   # Make a list of gears, each has a data frame with the posterior values with
   # years as the columns
-  future::plan("multisession", workers = length(gears))
-  lst <- furrr::future_imap(gears, ~{
+  plan("multisession", workers = length(gears))
+  lst <- future_imap(gears, ~{
     inds <- grep(paste0("gear", .x), d)
     start <- inds + 1
     # Each gear has a number of posteriors

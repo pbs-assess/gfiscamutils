@@ -4,7 +4,7 @@
 \alias{calc_special_quants}
 \title{Calculate age fits / age residuals and selectivity estimates quantiles}
 \usage{
-calc_special_quants(lst, probs)
+calc_special_quants(lst, probs = c(0.025, 0.5, 0.975))
 }
 \description{
 @param lst A list as output by [load_special()]
