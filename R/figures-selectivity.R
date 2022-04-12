@@ -225,6 +225,7 @@ plot_selex <- function(model,
                     color = "red",
                     linetype = "dashed")
   }
-  g
+
+  suppressWarnings(print(g))
 }
 
