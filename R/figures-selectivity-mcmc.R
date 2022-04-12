@@ -38,21 +38,6 @@ plot_selex_mcmc <- function(model,
          "representing lower CI, median, and upper CI")
   }
 
-  est_phz <- model$ctl$sel %>%
-    as_tibble(rownames = "x") %>%
-    `names<-`(c("sel_setting", model$dat$gear_abbrevs))
-
-  est_phz <- as_tibble(cbind(nms = names(est_phz), t(est_phz)))
-  nms <- est_phz %>% slice(1) %>% unlist(., use.names = FALSE)
-  nms[1] <- "index"
-  names(est_phz) <- nms
-  est_phz <- est_phz[-1,]
-  est_phz <- est_phz %>% mutate_at(vars(-index), function(x)as.numeric(x))
-
-  # Append " (Fixed)" to indices which have a negative phase
-  est_phz <- est_phz %>%
-    mutate(index = ifelse(estphase < 0, paste(index, "(Fixed)"), index))
-
   # Extract selectivity parameters
   vals <- model$mcmccalcs$selest_quants
   if(is.null(vals)){
