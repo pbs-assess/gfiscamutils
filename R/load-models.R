@@ -274,11 +274,8 @@ calc_mcmc <- function(model,
   if(!is.null(mc$ageresids)){
     out$ageresids_quants <- calc_special_quants(mc$ageresids, probs)
   }
-  if(!is.null(mc$selest_female)){
-    out$selest_female_quants <- calc_special_quants(mc$selest_female, probs)
-  }
-  if(!is.null(mc$selest_male)){
-    out$selest_male_quants <- calc_special_quants(mc$selest_male, probs)
+  if(!is.null(mc$selest)){
+    out$selest_quants <- calc_special_quants(mc$selest, probs)
   }
 
   if(load_proj){
@@ -1249,8 +1246,7 @@ read_mcmc <- function(model,
                  list(mcmc.index.resids.file, "list", "gear"),
                  list(mcmc.age.fits.file, "specialage", "gear"),
                  list(mcmc.age.resids.file, "specialage", "gear"),
-                 list(mcmc.sel.female.file, "specialsel", "gear"),
-                 list(mcmc.sel.male.file, "specialsel", "gear"),
+                 list(mcmc.sel.file, "specialsel", "gear"),
                  list(mcmc.proj.file, "projections"))
 
   # Names given to the return list elements. Must be same length as `fn_lst`
@@ -1258,7 +1254,7 @@ read_mcmc <- function(model,
            "m", "ut", "vbt",
            "it", "epsilon",
            "agefits", "ageresids",
-           "selest_female", "selest_male", "proj")
+           "selest", "proj")
 
   if(length(nms) != length(fn_lst)){
     stop("Length of `fn_lst` must be the same as the length of `nms`")
@@ -1273,6 +1269,38 @@ read_mcmc <- function(model,
                           gear_names = model$dat$gear_names,
                           burnin = burnin,
                           thin = thin)
+        # Insert `start_year` and `end_year` columns
+        d <- d %>%
+          split(~gear) %>%
+          map(~{
+            k <- .x %>% split(~sex) %>%
+              map(~{
+                .x %>% split(~year)
+              })
+            # At this point, there are three levels of lists with the deepest being
+            # a list of data frames with different starting years for each data frame.
+            # But, each data frame has all the same value for year (starting year).
+            # These represent the start years for the selectivity blocks for that sex
+            # and gear combination.
+            # Now, we must create start and end year for each data frame based on the next
+            # one if it exists. If not, use the model end year for the final year of
+            # selectivity
+            # Currently, iSCAM cannot have different selectivity blocks for different sexes
+            # so the call below using unique() is acceptable
+            start_yrs <- as.numeric(unique(map(k, ~{names(.x)}))[[1]])
+            end_yrs <- model$dat$end.yr
+            if(length(start_yrs) > 1){
+              end_yrs <- c(map_dbl(start_yrs[-1], ~{.x - 1}), end_yrs)
+            }
+            k <- k %>%
+              map(~{
+                .x %>% map2(seq_along(.x), ~{
+                  .x %>% mutate(start_year = start_yrs[.y],
+                                end_year = end_yrs[.y]) %>%
+                    select(-year)
+                }) %>% bind_rows()
+              }) %>% bind_rows()
+          }) %>% bind_rows()
       }else if(.x[[2]] == "specialage"){
         d <- load_special(fn,
                           gear_names = model$dat$age_gear_names,

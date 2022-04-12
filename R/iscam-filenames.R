@@ -68,15 +68,10 @@
 #' MCMC index age residuals file
 "mcmc.age.resids.file"
 
-#' iscam MCMC output female selectivity fits filename
+#' iscam MCMC output selectivity fits filename
 #'
-#' MCMC index female selectivity fits file
-"mcmc.sel.female.file"
-
-#' iscam MCMC output male selectivity fits filename
-#'
-#' MCMC index male selectivity fits file
-"mcmc.sel.male.file"
+#' MCMC index selectivity fits file
+"mcmc.sel.file"
 
 #' iscam MCMC projection filename
 #'

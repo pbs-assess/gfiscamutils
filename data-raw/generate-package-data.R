@@ -18,8 +18,7 @@ mcmc.index.fits.file <- "iscam_index_fits_mcmc.csv"
 mcmc.index.resids.file <- "iscam_index_residuals_mcmc.csv"
 mcmc.age.fits.file <- "iscam_age_fits_mcmc.csv"
 mcmc.age.resids.file <- "iscam_age_residuals_mcmc.csv"
-mcmc.sel.female.file <- "iscam_selectivity_female_mcmc.csv"
-mcmc.sel.male.file <- "iscam_selectivity_male_mcmc.csv"
+mcmc.sel.file <- "iscam_selectivity_mcmc.csv"
 mcmc.proj.file <- "iscam_mcmc_proj.csv"
 mpd.proj.file <- "iscam_mpd_proj.csv"
 output.files <- c(rep.file,
@@ -81,8 +80,7 @@ use_data(mcmc.index.fits.file,  overwrite = TRUE)
 use_data(mcmc.index.resids.file,  overwrite = TRUE)
 use_data(mcmc.age.fits.file, overwrite = TRUE)
 use_data(mcmc.age.resids.file, overwrite = TRUE)
-use_data(mcmc.sel.female.file, overwrite = TRUE)
-use_data(mcmc.sel.male.file, overwrite = TRUE)
+use_data(mcmc.sel.file, overwrite = TRUE)
 use_data(mcmc.proj.file, overwrite = TRUE)
 use_data(mpd.proj.file, overwrite = TRUE)
 use_data(output.files, overwrite = TRUE)

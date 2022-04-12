@@ -7,6 +7,13 @@
 calc_special_quants <- function(lst,
                                 probs = c(0.025, 0.5, 0.975)){
 
+  if("year" %in% names(lst)){
+    year <- sym("year")
+  }else if("start_year" %in% names(lst)){
+    year <- sym("start_year")
+  }else{
+    stop("`lst` does not contain column `year` or `start_year`")
+  }
   gear_lst <- lst %>% split(~gear)
   imap(gear_lst, ~{
     sex_lst <- split(.x, ~sex)
@@ -20,17 +27,17 @@ calc_special_quants <- function(lst,
       bare_df <- .x %>%
         select(-c(gear, post, sex))
       lower <- bare_df %>%
-        group_by(year) %>%
+        group_by(!!year) %>%
         summarize_all(quantile, probs = probs[1]) %>%
         ungroup() %>%
         mutate(quant = paste0(probs[1] * 100, "%"))
       med <- bare_df %>%
-        group_by(year) %>%
+        group_by(!!year) %>%
         summarize_all(quantile, probs = probs[2]) %>%
         ungroup() %>%
         mutate(quant = paste0(probs[2] * 100, "%"))
       upper <- bare_df %>%
-        group_by(year) %>%
+        group_by(!!year) %>%
         summarize_all(quantile, probs = probs[3]) %>%
         ungroup() %>%
         mutate(quant = paste0(probs[3] * 100, "%"))

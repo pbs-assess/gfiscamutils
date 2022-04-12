@@ -6,19 +6,27 @@
 \usage{
 plot_selex_mcmc(
   model,
+  probs = c(0.025, 0.5, 0.975),
   show_maturity = FALSE,
-  last_year_only = TRUE,
-  title = NULL
+  ci_type = c("both", "line", "ribbon"),
+  ci_linetype = c("dotted", "solid", "dashed", "dotdash", "longdash", "twodash"),
+  ci_alpha = 0.3
 )
 }
 \arguments{
 \item{model}{An iscam model object as output by [arrowtooth::model_setup()]}
 
+\item{probs}{A 3-element vector of probabilities that appear in the output data frames
+This is provided in case the data frames have more than three different quantile levels}
+
 \item{show_maturity}{If `TRUE`, overlay the maturity ogive on the selectivity plots}
 
-\item{last_year_only}{If `TRUE`, only show the last year. This would be used for non-time-varying selectivities}
+\item{ci_type}{One of "line", "ribbon", "both" to show the credible interval}
 
-\item{title}{The plot title. NULL means no title}
+\item{ci_linetype}{See `linetype` in [ggplot2]. Only used if `ci_type` is "line" or "both"}
+
+\item{ci_alpha}{Opacity between 0 and 1 for the credible intervals ribbons. Only used if
+`ci_type` is "ribbon" or "both"}
 }
 \value{
 A [ggplot2::ggplot()] object
