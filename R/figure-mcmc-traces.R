@@ -8,7 +8,9 @@
 #'
 #' @return A [ggplot2::gglot()] object
 #' @export
-plot_traces <- function(model, plot_sel = FALSE, param_rm = NULL){
+plot_traces_mcmc <- function(model,
+                             plot_sel = FALSE,
+                             param_rm = NULL){
 
   if(class(model) != mdl_cls){
     stop("The `model` argument is not a gfiscamutils::mdl_cls class")
@@ -59,9 +61,7 @@ plot_traces <- function(model, plot_sel = FALSE, param_rm = NULL){
       ggtitle(param_name) +
       ylab("") +
       xlab("") +
-      theme(axis.text.x = element_blank(),
-            axis.text.y = element_blank(),
-            plot.title = element_text(face = "bold.italic", hjust = 0.5))
+      theme(plot.title = element_text(face = "bold.italic", hjust = 0.5))
   })
 
   plot_grid(plotlist = g_lst)
