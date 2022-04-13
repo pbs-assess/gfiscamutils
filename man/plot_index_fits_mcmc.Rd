@@ -14,10 +14,10 @@ plot_index_fits_mcmc(
   legend_title = "Models",
   palette = "Paired",
   dodge = 0.3,
-  index_line_width = 0.75,
-  index_point_size = 3,
-  fit_line_width = 1,
-  fit_point_size = 3,
+  index_line_width = 0.5,
+  index_point_size = 2,
+  fit_line_width = 0.5,
+  fit_point_size = 2,
   errbar_width = 0.5
 )
 }
@@ -37,7 +37,7 @@ from the [read_data_file()] function}
 
 \item{legend_title}{Title text for the legend}
 
-\item{palette}{A palette value that can be accepted by [ggplot2::scale_color_brewer()]}
+\item{palette}{A palette value that is in [RColorBrewer::brewer.pal.info]}
 
 \item{dodge}{A small value added to each year for each model. This is added cumulatively,
 so each model fit appears more to the right than the previous one}
