@@ -9,7 +9,7 @@
 #' @param start_year Year to start plot
 #' @param end_year Year to end plot
 #' @param legend_title Title text for the legend
-#' @param palette A palette value that can be accepted by [ggplot2::scale_color_brewer()]
+#' @param palette A palette value that is in [RColorBrewer::brewer.pal.info]
 #' @param dodge A small value added to each year for each model. This is added cumulatively,
 #' so each model fit appears more to the right than the previous one
 #' @param index_line_width The index data error bar and connecting line width
@@ -18,6 +18,7 @@
 #' @param fit_point_size The model fit point size
 #' @param errbar_width The width of the top and bottom crossbar of the errorbars
 #'
+#' @importFrom RColorBrewer brewer.pal.info
 #' @export
 plot_index_fits_mcmc <- function(models,
                                  model_names = NULL,
@@ -28,10 +29,10 @@ plot_index_fits_mcmc <- function(models,
                                  legend_title = "Models",
                                  palette = "Paired",
                                  dodge = 0.3,
-                                 index_line_width = 0.75,
-                                 index_point_size = 3,
-                                 fit_line_width = 1,
-                                 fit_point_size = 3,
+                                 index_line_width = 0.5,
+                                 index_point_size = 2,
+                                 fit_line_width = 0.5,
+                                 fit_point_size = 2,
                                  errbar_width = 0.5){
 
   type <- match.arg(type)
@@ -48,8 +49,15 @@ plot_index_fits_mcmc <- function(models,
          "class(model) <- mdl_lst_cls\n")
   }
 
-  if(length(models) > 13){
-    stop("Cannot plot more than 13 models due to palette restrictions (See RColorBrewer 'Paired' palette)")
+  if(!palette %in% rownames(brewer.pal.info)){
+    stop("`palette` name not found in `RColorBrewer::brewer.pal.info`")
+  }
+
+  palette_info <- brewer.pal.info[rownames(brewer.pal.info) == palette, ]
+
+  if(length(models) > palette_info$maxcolors){
+    stop("Cannot plot more than ", palette_info$maxcolors, " models because that is the ",
+         "maximum number for the ", palette, " palette")
   }
 
   # Set up model names for the legend
