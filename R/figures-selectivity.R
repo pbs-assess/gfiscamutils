@@ -8,9 +8,9 @@
 #' @importFrom dplyr group_split
 #' @importFrom stats setNames
 #' @export
-plot_tv_selex <- function(model,
-                          gear = NULL,
-                          title = NULL){
+plot_tv_selex_mpd <- function(model,
+                              gear = NULL,
+                              title = NULL){
 
   if(is.null(gear)){
     stop("You must specify a gear to plot", call. = FALSE)
@@ -103,10 +103,10 @@ plot_tv_selex <- function(model,
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom ggplot2 geom_function
 #' @export
-plot_selex <- function(model,
-                       show_maturity = FALSE,
-                       last_year_only = TRUE,
-                       title = NULL){
+plot_selex_mpd <- function(model,
+                           show_maturity = FALSE,
+                           last_year_only = TRUE,
+                           title = NULL){
 
   # Extract selectivity parameters
   sel_par <- model$mpd$sel_par_f %>% as_tibble() %>%
