@@ -19,7 +19,8 @@ plot_index_mcmc(
   index_point_size = 2,
   fit_line_width = 0.5,
   fit_point_size = 2,
-  errbar_width = 0.5
+  errbar_width = 0.5,
+  angle_x_labels = FALSE
 )
 
 plot_index_mpd(
@@ -35,7 +36,8 @@ plot_index_mpd(
   index_line_width = 0.5,
   index_point_size = 2,
   fit_line_width = 0.5,
-  fit_point_size = 2
+  fit_point_size = 2,
+  angle_x_labels = FALSE
 )
 }
 \arguments{
@@ -68,6 +70,8 @@ so each model fit appears more to the right than the previous one}
 \item{fit_point_size}{The model fit point size}
 
 \item{errbar_width}{The width of the top and bottom crossbar of the errorbars}
+
+\item{angle_x_labels}{If `TRUE` put 45 degree angle on x-axis tick labels}
 }
 \value{
 A [ggplot2::ggplot()] object

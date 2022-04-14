@@ -17,6 +17,7 @@
 #' @param fit_line_width The model fit error bar and connecting line width
 #' @param fit_point_size The model fit point size
 #' @param errbar_width The width of the top and bottom crossbar of the errorbars
+#' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
 #'
 #' @family index plotting functions
 #' @importFrom RColorBrewer brewer.pal.info
@@ -35,7 +36,8 @@ plot_index_mcmc <- function(models,
                             index_point_size = 2,
                             fit_line_width = 0.5,
                             fit_point_size = 2,
-                            errbar_width = 0.5){
+                            errbar_width = 0.5,
+                            angle_x_labels = FALSE){
 
   type <- match.arg(type)
 
@@ -225,8 +227,12 @@ plot_index_mcmc <- function(models,
       ylab("Log standardized residual") +
       scale_color_brewer(palette = palette) +
       guides(color = guide_legend(title = legend_title)) +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
+  }
+
+  if(angle_x_labels){
+    g <- g +
+      theme(axis.text.x = element_text(angle = 45, hjust = 0.55, vjust = 0.5))
   }
 
   g

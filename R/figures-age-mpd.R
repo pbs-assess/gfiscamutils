@@ -1,25 +1,18 @@
 #' Plot the age fits for an MPD model
 #'
-#' @param model An iscam model object (class [mdl_cls])
-#' @param gear The number of the gear to plot
-#' @param resid_type The type of residual plot to make if `type == "resids"`.
-#' Options are "age", "year", and "birth_year"
-#' @param comp_color Color for the age comp data lines and points
-#' @param comp_point_size Size of the age comp data points
-#' @param fit_line_color Color for the fit line
-#' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
+#' @rdname plot_age_mcmc
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom ggplot2 geom_linerange facet_grid
 #' @export
-plot_agefits_mpd <- function(model,
-                             gear = 1,
-                             type = c("fits", "resids"),
-                             resid_type = c("age", "year", "birth_year"),
-                             comp_color = "black",
-                             comp_point_size = 0.5,
-                             fir_line_color = "red",
-                             angle_x_labels = FALSE){
+plot_age_mpd <- function(model,
+                         gear = 1,
+                         type = c("fits", "resids"),
+                         resid_type = c("age", "year", "birth_year"),
+                         comp_color = "black",
+                         comp_point_size = 0.5,
+                         fir_line_color = "red",
+                         angle_x_labels = FALSE){
 
   type <- match.arg(type)
   resid_type <- match.arg(resid_type)

@@ -18,20 +18,20 @@
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export
-plot_agefits_mcmc <- function(model,
-                              gear = 1,
-                              type = c("fits", "resids"),
-                              resid_type = c("age", "year", "birth_year"),
-                              probs = c(0.025, 0.5, 0.975),
-                              comp_color = "black",
-                              comp_point_size = 0.5,
-                              ci_type = c("both", "line", "ribbon"),
-                              ci_linetype =  c("dotted", "solid",
-                                               "dashed", "dotdash",
-                                               "longdash", "twodash"),
-                              ci_color = "red",
-                              ci_alpha = 0.3,
-                              angle_x_labels = FALSE){
+plot_age_mcmc <- function(model,
+                          gear = 1,
+                          type = c("fits", "resids"),
+                          resid_type = c("age", "year", "birth_year"),
+                          probs = c(0.025, 0.5, 0.975),
+                          comp_color = "black",
+                          comp_point_size = 0.5,
+                          ci_type = c("both", "line", "ribbon"),
+                          ci_linetype =  c("dotted", "solid",
+                                           "dashed", "dotdash",
+                                           "longdash", "twodash"),
+                          ci_color = "red",
+                          ci_alpha = 0.3,
+                          angle_x_labels = FALSE){
 
   type <- match.arg(type)
   resid_type <- match.arg(resid_type)
