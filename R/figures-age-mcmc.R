@@ -1,6 +1,6 @@
 #' Plot the age fits for an MCMC model
 #'
-#' @param models An iscam model object (class [mdl_cls])
+#' @param model An iscam model object (class [mdl_cls])
 #' @param gear The number of the gear to plot
 #' @param type The type of plot to make. Options are "fits" and "resids"
 #' @param resid_type The type of residual plot to make if `type == "resids"`.
@@ -14,22 +14,24 @@
 #' @param ci_color Color for the lines or ribbon for the credible intervals
 #' @param ci_alpha Opacity between 0 and 1 for the credible intervals ribbons. Only used if
 #' `ci_type` is "ribbon" or "both"
+#' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
 #'
-#' @return
+#' @return A [ggplot2::ggplot()] object
 #' @export
-plot_agefits <- function(model,
-                         gear = 1,
-                         type = c("fits", "resids"),
-                         resid_type = c("age", "year", "birth_year"),
-                         probs = c(0.025, 0.5, 0.975),
-                         comp_color = "black",
-                         comp_point_size = 0.5,
-                         ci_type = c("both", "line", "ribbon"),
-                         ci_linetype =  c("dotted", "solid",
-                                          "dashed", "dotdash",
-                                          "longdash", "twodash"),
-                         ci_color = "red",
-                         ci_alpha = 0.3){
+plot_agefits_mcmc <- function(model,
+                              gear = 1,
+                              type = c("fits", "resids"),
+                              resid_type = c("age", "year", "birth_year"),
+                              probs = c(0.025, 0.5, 0.975),
+                              comp_color = "black",
+                              comp_point_size = 0.5,
+                              ci_type = c("both", "line", "ribbon"),
+                              ci_linetype =  c("dotted", "solid",
+                                               "dashed", "dotdash",
+                                               "longdash", "twodash"),
+                              ci_color = "red",
+                              ci_alpha = 0.3,
+                              angle_x_labels = FALSE){
 
   type <- match.arg(type)
   resid_type <- match.arg(resid_type)
@@ -151,6 +153,11 @@ plot_agefits <- function(model,
       theme(plot.title = element_text(size = 14, face = "bold")) +
       ylab("Standardized residuals") +
       xlab(ifelse(resid_type == "birth_year", "Year of birth", firstup(resid_type)))
+  }
+
+  if(angle_x_labels){
+    g <- g +
+      theme(axis.text.x = element_text(angle = 45, hjust = 0.55, vjust = 0.5))
   }
 
   g
