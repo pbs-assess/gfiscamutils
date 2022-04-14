@@ -18,22 +18,24 @@
 #' @param fit_point_size The model fit point size
 #' @param errbar_width The width of the top and bottom crossbar of the errorbars
 #'
+#' @family index plotting functions
 #' @importFrom RColorBrewer brewer.pal.info
+#' @importFrom tibble enframe
 #' @export
-plot_index_fits_mcmc <- function(models,
-                                 model_names = NULL,
-                                 type = c("fits", "resids"),
-                                 surv_index,
-                                 start_year = 1995,
-                                 end_year = 2021,
-                                 legend_title = "Models",
-                                 palette = "Paired",
-                                 dodge = 0.3,
-                                 index_line_width = 0.5,
-                                 index_point_size = 2,
-                                 fit_line_width = 0.5,
-                                 fit_point_size = 2,
-                                 errbar_width = 0.5){
+plot_index_mcmc <- function(models,
+                            model_names = NULL,
+                            type = c("fits", "resids"),
+                            surv_index,
+                            start_year = 1995,
+                            end_year = 2021,
+                            legend_title = "Models",
+                            palette = "Paired",
+                            dodge = 0.3,
+                            index_line_width = 0.5,
+                            index_point_size = 2,
+                            fit_line_width = 0.5,
+                            fit_point_size = 2,
+                            errbar_width = 0.5){
 
   type <- match.arg(type)
 
@@ -73,23 +75,45 @@ plot_index_fits_mcmc <- function(models,
   }
 
   # surv_abbrev will be in order of the gears in the models
-  surv_abbrevs <- map(models, ~{
+  surv_abbrev_lst <- map(models, ~{
     .x$dat$index_abbrevs
   })
+  surv_name_lst <- map(models, ~{
+    .x$dat$index_gear_names
+  })
 
-  surv_abbrev <- surv_abbrevs %>%
+  surv_abbrevs <- surv_abbrev_lst %>%
+    flatten() %>%
+    map_chr(~{.x}) %>%
+    unique()
+  surv_names <- surv_name_lst %>%
     flatten() %>%
     map_chr(~{.x}) %>%
     unique()
 
-  surv_index <- surv_index %>%
-    filter(year %in% start_year:end_year) %>%
-    filter(survey_abbrev %in% surv_abbrev)
+  if(length(surv_names) != length(surv_abbrevs)){
+    stop("The total number of unique 'IndexGears' and 'IndexAbbrevs' defined in the data files ",
+         "for the `models` do not match. It is likely you defined some of these slightly ",
+         "differently in different data files. They must match exactly.")
+  }
 
-  surv_indices <- map_df(surv_abbrev, ~{
-    surv_index %>%
+  # Add survey names to the table with a left join by survey_abbrev
+  surv_abbrevs_df <- surv_abbrevs %>%
+    enframe(name = NULL)
+  surv_names_df <- surv_names %>%
+    enframe(name = NULL)
+  surv_df <- surv_abbrevs_df %>%
+    cbind(surv_names_df) %>%
+    `names<-`(c("survey_abbrev", "survey_name"))
+  surv_index_df <- surv_index %>%
+    filter(year %in% start_year:end_year) %>%
+    filter(survey_abbrev %in% !!surv_abbrevs) %>%
+    left_join(surv_df, by = "survey_abbrev")
+
+  surv_indices <- map_df(surv_abbrevs, ~{
+    surv_index_df %>%
       filter(survey_abbrev == .x) %>%
-      select(year, biomass, lowerci, upperci, survey_abbrev)
+      select(year, biomass, lowerci, upperci, survey_name, survey_abbrev)
   })
 
   vals <- imap(models, ~{
@@ -98,7 +122,8 @@ plot_index_fits_mcmc <- function(models,
       return(NULL)
     }
     ind_vals %>%
-      mutate(model = .y)
+      mutate(model = .y) %>%
+      left_join(surv_df, by = "survey_abbrev")
   })
 
   if(all(map_lgl(vals, is.null))){
@@ -108,18 +133,19 @@ plot_index_fits_mcmc <- function(models,
   # Remove any NULL list items (no index fits found in model)
   vals <- vals[!sapply(vals, is.null)] %>%
     bind_rows() %>%
-    select(model, survey_abbrev, year, biomass, lowerci, upperci)
+    select(model, survey_name, survey_abbrev, year, biomass, lowerci, upperci)
 
   # Remove any missing indices from the `surv_abbrevs` vector and
   # the `surv_indices` data frame
-  surv_abbrev <- surv_abbrev[surv_abbrev %in% unique(vals$survey_abbrev)]
+  surv_abbrevs <- surv_abbrevs[surv_abbrevs %in% unique(vals$survey_abbrev)]
+  surv_names <- surv_names[surv_names %in% unique(vals$survey_name)]
   surv_indices <- surv_indices %>%
-    filter(survey_abbrev %in% unique(vals$survey_abbrev)) %>%
-    mutate(survey_abbrev = fct_relevel(survey_abbrev, !!surv_abbrev))
+    filter(survey_name %in% unique(vals$survey_name)) %>%
+    mutate(survey_name = fct_relevel(survey_name, !!surv_names))
 
   vals <- vals %>%
     mutate(model = factor(model, names(models[names(models) %in% model]))) %>%
-    mutate(survey_abbrev = factor(survey_abbrev, !!surv_abbrev))
+    mutate(survey_name = factor(survey_name, !!surv_names))
 
   # Filter out for the years provided
   vals <- vals %>%
@@ -166,7 +192,7 @@ plot_index_fits_mcmc <- function(models,
       geom_errorbar(aes(ymin = lowerci, ymax = upperci),
                     width = errbar_width,
                     size = index_line_width) +
-      facet_wrap(~survey_abbrev, scales = "free_y") +
+      facet_wrap(~survey_name, scales = "free_y") +
       geom_line(data = vals,
                 aes(color = model),
                 size = fit_line_width) +
@@ -194,7 +220,7 @@ plot_index_fits_mcmc <- function(models,
       geom_errorbar(aes(ymin = lowerci, ymax = upperci),
                     width = errbar_width,
                     size = fit_line_width) +
-      facet_wrap(~survey_abbrev, scales = "free_y") +
+      facet_wrap(~survey_name, scales = "free_y") +
       xlab("Year") +
       ylab("Log standardized residual") +
       scale_color_brewer(palette = palette) +
