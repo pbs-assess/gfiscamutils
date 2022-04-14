@@ -1,21 +1,33 @@
 #' Plot parameter values from each posterior for the estimated parameters
 #'
-#' @param model An iscam model
+#' @param model An iscam model object (class [mdl_cls])
 #' @param plot_sel Logical. If `TRUE`, plot only the selectivity parameters.
 #' If `FALSE`, plot only non-selectivity parameters
 #' @param param_rm A vector of parameter names to remove. If any are not found
 #' in the output, a warning will be issued. If `NULL`, nothing is removed
+#' @param list_param_names If `TRUE`, list the parameter names that will be plot
+#' by this function, but do not actually plot it. This is to help you to use the
+#' `param_rm` argument, so you know what the names to be removed can be
 #'
 #' @return A [ggplot2::gglot()] object
 #' @export
 plot_traces_mcmc <- function(model,
                              plot_sel = FALSE,
-                             param_rm = NULL){
+                             param_rm = NULL,
+                             list_param_names = FALSE){
 
   if(class(model) != mdl_cls){
-    stop("The `model` argument is not a gfiscamutils::mdl_cls class")
+    if(class(model) == mdl_lst_cls){
+      stop("The `model` argument is of class `gfiscamutils::mdl_lst_cls`. ",
+           "This function requires that `model` be an object of class ",
+           "`gfiscamutils::mdl_cls`. Select one element of the list (which ",
+           "is a single model), and modify it like this, then call this function ",
+           "again with `model` as your argument:\n\n",
+           "model <- list(model)\n",
+           "class(model) <- mdl_lst_cls\n")
+    }
+    stop("The `model` argument is not of class `gfiscamutils::mdl_cls`")
   }
-
   mc <- model$mcmc$params %>%
     as_tibble()
 
@@ -27,9 +39,11 @@ plot_traces_mcmc <- function(model,
       select(-contains("sel"))
   }
 
-  # To list the parameter names, put a browser here and call this
-  # in browser debug session:
-  # names(mc)
+  if(list_param_names){
+    message("The names of the parameters this function will plot (by default) are:")
+    print(names(mc))
+    return(invisible())
+  }
 
   # Remove parameters requested for removal, ignoring erroneous ones
   if(!is.null(param_rm)){

@@ -4,16 +4,25 @@
 \alias{plot_traces_mcmc}
 \title{Plot parameter values from each posterior for the estimated parameters}
 \usage{
-plot_traces_mcmc(model, plot_sel = FALSE, param_rm = NULL)
+plot_traces_mcmc(
+  model,
+  plot_sel = FALSE,
+  param_rm = NULL,
+  list_param_names = FALSE
+)
 }
 \arguments{
-\item{model}{An iscam model}
+\item{model}{An iscam model object (class [mdl_cls])}
 
 \item{plot_sel}{Logical. If `TRUE`, plot only the selectivity parameters.
 If `FALSE`, plot only non-selectivity parameters}
 
 \item{param_rm}{A vector of parameter names to remove. If any are not found
 in the output, a warning will be issued. If `NULL`, nothing is removed}
+
+\item{list_param_names}{If `TRUE`, list the parameter names that will be plot
+by this function, but do not actually plot it. This is to help you to use the
+`param_rm` argument, so you know what the names to be removed can be}
 }
 \value{
 A [ggplot2::gglot()] object
