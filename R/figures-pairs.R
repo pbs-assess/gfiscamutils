@@ -1,18 +1,32 @@
-#' Plot the estimated parameters in a model against each other
-#' as a pairs plot
+#' Pairs plots for parameters in an MCMC run
 #'
-#' @param model An iscam model
+#' @details Show correlations between parameters as scatterplots in the lower
+#' triangular area, density of each parameter in the diagonals, and the correlation
+#' value with text size scaled to be larger for higher correlations in the upper
+#' triangular area
+#'
+#' @rdname plot_traces_mcmc
 #'
 #' @return A [ggplot2::ggplot()] object made from the [GGally::ggpairs()] function
 #' @importFrom GGally ggpairs ggally_cor wrap ggally_text ggally_densityDiag
 #' @importFrom ggplot2 layer_scales
 #' @export
-plot_pairs <- function(model,
-                       plot_sel = FALSE,
-                       param_rm = NULL){
+plot_pairs_mcmc <- function(model,
+                            plot_sel = FALSE,
+                            param_rm = c("rho", "vartheta"),
+                            list_param_names = FALSE){
 
   if(class(model) != mdl_cls){
-    stop("The `model` argument is not a gfiscamutils::mdl_cls class")
+    if(class(model) == mdl_lst_cls){
+      stop("The `model` argument is of class `gfiscamutils::mdl_lst_cls`. ",
+           "This function requires that `model` be an object of class ",
+           "`gfiscamutils::mdl_cls`. Select one element of the list (which ",
+           "is a single model), and modify it like this, then call this function ",
+           "again with `model` as your argument:\n\n",
+           "model <- list(model)\n",
+           "class(model) <- mdl_lst_cls\n")
+    }
+    stop("The `model` argument is not of class `gfiscamutils::mdl_cls`")
   }
 
   mc <- model$mcmc$params %>%
@@ -26,9 +40,11 @@ plot_pairs <- function(model,
       select(-contains("sel"))
   }
 
-  # To list the parameter names, put a browser here and call this
-  # in browser debug session:
-  # names(mc)
+  if(list_param_names){
+    message("The names of the parameters this function will plot (by default) are:")
+    print(names(mc))
+    return(invisible())
+  }
 
   # Remove parameters requested for removal, ignoring erroneous ones
   if(!is.null(param_rm)){
@@ -68,6 +84,7 @@ plot_pairs <- function(model,
     y <- unlist(data[quo_name(mapping$y) == names(data)])
 
     ct <- cor.test(x,y)
+    # Create significance stars
     # sig <- symnum(
     #   ct$p.value, corr = FALSE, na = FALSE,
     #   cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1),
@@ -93,12 +110,13 @@ plot_pairs <- function(model,
                 size = I(percent_of_range(cex * abs(r), sizeRange)),
                 color = color,
                 ...) +
-    # Add the sig stars
+    # Add the significance stars
     # geom_text(aes_string(x = 0.8, y = 0.8),
     #             label = sig,
     #             size = I(cex),
     #             color = color,
     #             ...) +
+
     # Remove all the background stuff and wrap it with a dashed line
     theme_classic() +
     theme(panel.background = element_rect(color = color,

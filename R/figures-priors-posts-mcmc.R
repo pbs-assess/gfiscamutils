@@ -1,8 +1,4 @@
-#' Plot priors and posteriors on the same plot for the given iscam model
-#'
-#' @param model An iscam model object
-#' @param priors_only Logical. If `TRUE`, plot the priors only. If `FALSE`,
-#' plot both priors and associated posterior histograms
+#' Priors and posteriors comparison plots for parameters in an MCMC run
 #'
 #' @details Plots the priors overlaid on the posteriors for the given iscam model.
 #'   The values in the control file (model$ctl$params) for each
@@ -13,30 +9,49 @@
 #'   4. phz   = ADMB phase
 #'   5. prior = prior distribution funnction
 #'          0 = Uniform
-#'          1 = normal    (p1=mu,p2=sig)
-#'          2 = lognormal (p1=log(mu),p2=sig)
-#'          3 = beta      (p1=alpha,p2=beta)
-#'          4 = gamma     (p1=alpha,p2=beta)
+#'          1 = normal    (p1 = mu, p2 = sig)
+#'          2 = lognormal (p1 = log(mu), p2 = sig)
+#'          3 = beta      (p1 = alpha, p2 = beta)
+#'          4 = gamma     (p1 = alpha, p2 = beta)
 #'   6. p1 (defined by 5 above)
 #'   7. p2 (defined by 5 above)
+#'
+#' See [plot_fun()] for prior plot details including an documentation on the
+#' vertical lines
+#'
+#' @param model An iscam model object (class [mdl_cls])
+#' @param priors_only Logical. If `TRUE`, plot the priors only. If `FALSE`,
+#' plot both priors and associated posterior histograms
+#' @param ... Additional arguments passed to [cowplot::plot_grid()]
 #'
 #' @return Nothing
 #' @importFrom cowplot plot_grid
 #' @export
-plot_priors_posts <- function(model,
-                              priors_only = TRUE,
-                              ...){
+plot_priors_posts_mcmc <- function(model,
+                                   param_rm = c("sel", "bo", "vartheta", "tau", "sigma", "bmsy"),
+                                   priors_only = FALSE,
+                                   ...){
 
   if(class(model) != mdl_cls){
-    stop("The `model` argument is not a gfiscamutils::mdl_cls class")
+    if(class(model) == mdl_lst_cls){
+      stop("The `model` argument is of class `gfiscamutils::mdl_lst_cls`. ",
+           "This function requires that `model` be an object of class ",
+           "`gfiscamutils::mdl_cls`. Select one element of the list (which ",
+           "is a single model), and modify it like this, then call this function ",
+           "again with `model` as your argument:\n\n",
+           "model <- list(model)\n",
+           "class(model) <- mdl_lst_cls\n")
+    }
+    stop("The `model` argument is not of class `gfiscamutils::mdl_cls`")
   }
 
   f_nms <- c(dunif, dnorm, dlnorm, dbeta, dgamma)
 
   mc <- model$mcmccalcs$params_log
+
   # Remove selectivity parameters, bo, vartheta, sigma, tau, bmsy from the posteriors
   mc <- mc %>%
-    select(-contains(c("sel", "bo", "vartheta", "tau", "sigma", "bmsy")))
+    select(-contains(param_rm))
   post_nms <- names(mc)
 
   # Remove fixed parameters, and upper and lower bound, and phase information,

@@ -3,7 +3,7 @@
 \name{plot_fun}
 \alias{plot_fun}
 \title{Plot a distribution function. Mostly for use with making prior plots
-for MCMC parameters. See [plot_priors_posts()]}
+for MCMC parameters. See [plot_priors_posts_mcmc()]}
 \usage{
 plot_fun(
   fun = dnorm,
@@ -22,17 +22,24 @@ plot_fun(
   sd_lines_lwd = 0.5,
   sd_lines_lty = 2,
   alpha = 0.75,
-  show_mode_line = FALSE,
+  show_mode_line = TRUE,
   show_mean_line = TRUE,
   show_sd_lines = TRUE
 )
 }
 \arguments{
+\item{fun}{The function to plot}
+
 \item{nsamp}{Number of points across x-axis}
+
+\item{param_lst}{A list of parameters required by the function provided (`fun`)
+They can be named but do not have to be}
 
 \item{xlim}{x-axis limits (2-element vector)}
 
 \item{fill}{Fill color for under the curve}
+
+\item{title}{Plot title}
 
 \item{mode_line_col}{Mode line color}
 
@@ -60,19 +67,19 @@ of the distribution}
 \item{show_mean_line}{Logical. If `TRUE`, show a vertical line at
 the mean}
 
-\item{show_sd_lines}{Logical. If `TRUE`, show a vertical lines one standard
+\item{show_sd_lines}{Logical. If `TRUE`, show vertical lines one standard
 deviation away from the mean}
-
-\item{mean}{Mean of normal}
-
-\item{sd}{Standard deviation of normal}
-
-\item{...}{Arguments passed to [cowplot::plot_grid()]}
 }
 \value{
 a [ggplot2::ggplot()] object
 }
 \description{
 Plot a distribution function. Mostly for use with making prior plots
-for MCMC parameters. See [plot_priors_posts()]
+for MCMC parameters. See [plot_priors_posts_mcmc()]
+}
+\details{
+The plot will contain a filled curve representing the prior distribution,
+and a solid red (`mode_line_col`) vertical line representing the mode of the distribution and a
+solid black (`mean_line_col`) and two dotted black (`sd_lines_col`) vertical lines
+representing the mean and one standard deviation from the mean
 }
