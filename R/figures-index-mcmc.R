@@ -10,6 +10,8 @@
 #' @param end_year Year to end plot
 #' @param legend_title Title text for the legend
 #' @param palette A palette value that is in [RColorBrewer::brewer.pal.info]
+#' @param base_color A color to prepend to the brewer colors which are set by `palette`.
+#' This is called `base_color` because it is likely to be a base model
 #' @param dodge A small value added to each year for each model. This is added cumulatively,
 #' so each model fit appears more to the right than the previous one
 #' @param index_line_width The index data error bar and connecting line width
@@ -19,9 +21,12 @@
 #' @param errbar_width The width of the top and bottom crossbar of the errorbars
 #' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
 #'
-#' @family index plotting functions
+#' @family Time series plotting functions
 #' @importFrom RColorBrewer brewer.pal.info
 #' @importFrom tibble enframe
+#' @importFrom purrr flatten map_chr map_df map2
+#' @importFrom dplyr mutate_at
+#' @importFrom ggplot2 geom_ribbon facet_wrap scale_color_brewer
 #' @export
 plot_index_mcmc <- function(models,
                             model_names = NULL,
@@ -31,6 +36,7 @@ plot_index_mcmc <- function(models,
                             end_year = 2021,
                             legend_title = "Models",
                             palette = "Paired",
+                            base_color = "#000000",
                             dodge = 0.3,
                             index_line_width = 0.5,
                             index_point_size = 2,
@@ -186,6 +192,11 @@ plot_index_mcmc <- function(models,
                 })
   }
 
+  # Color values have black prepended as it is the base model
+  model_colors <- c(base_color,
+                    brewer.pal(name = palette,
+                               n = palette_info$maxcolors))
+
   if(type == "fits"){
     g <- ggplot(surv_indices,
                 aes(x = year, y = biomass)) +
@@ -207,7 +218,7 @@ plot_index_mcmc <- function(models,
                     size = fit_line_width) +
       xlab("Year") +
       ylab("Index (thousand tonnes, DCPUE ~ kg/hr)") +
-      scale_color_brewer(palette = palette) +
+      scale_color_manual(values = model_colors) +
       guides(color = guide_legend(title = legend_title)) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
@@ -225,7 +236,7 @@ plot_index_mcmc <- function(models,
       facet_wrap(~survey_name, scales = "free_y") +
       xlab("Year") +
       ylab("Log standardized residual") +
-      scale_color_brewer(palette = palette) +
+      scale_color_manual(values = model_colors) +
       guides(color = guide_legend(title = legend_title)) +
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
   }

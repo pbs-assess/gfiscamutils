@@ -2,11 +2,8 @@
 #'
 #' @rdname plot_index_mcmc
 #'
-#' @family index plotting functions
+#' @family Time series plotting functions
 #' @return A [ggplot2::ggplot()] object
-#' @importFrom purrr flatten map_chr map_df map2
-#' @importFrom dplyr mutate_at
-#' @importFrom ggplot2 geom_ribbon facet_wrap scale_color_brewer
 #' @export
  plot_index_mpd <- function(models,
                             model_names = NULL,
@@ -16,6 +13,7 @@
                             end_year = 2021,
                             legend_title = "Models",
                             palette = "Paired",
+                            base_color = "#000000",
                             dodge = 0.3,
                             index_line_width = 0.5,
                             index_point_size = 2,
@@ -161,6 +159,11 @@
      }) %>%
      bind_rows()
 
+   # Color values have black prepended as it is the base model
+   model_colors <- c(base_color,
+                     brewer.pal(name = palette,
+                                n = palette_info$maxcolors))
+
    if(type == "fits"){
      g <- ggplot(surv_indices, aes(x = year, y = biomass)) +
        #geom_ribbon(aes(ymin = lowerci, ymax = upperci), fill = "red", alpha = 0.3) +
@@ -172,7 +175,7 @@
        facet_wrap(~survey_name, scales = "free_y") +
        xlab("Year") +
        ylab("Index (thousand tonnes, DCPUE ~ kg/hr)") +
-       scale_color_brewer(palette = palette) +
+       scale_color_manual(values = model_colors) +
        guides(color = guide_legend(title = legend_title)) +
        theme(axis.text.x = element_text(angle = 45, hjust = 1))
    }else if(type == "resids"){
@@ -187,7 +190,7 @@
        facet_wrap(~survey_name, scales = "free_y") +
        xlab("Year") +
        ylab("Log standardized residual") +
-       scale_color_brewer(palette = palette) +
+       scale_color_manual(values = model_colors) +
        guides(color = guide_legend(title = legend_title)) +
        scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
    }

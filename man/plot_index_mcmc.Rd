@@ -14,6 +14,7 @@ plot_index_mcmc(
   end_year = 2021,
   legend_title = "Models",
   palette = "Paired",
+  base_color = "#000000",
   dodge = 0.3,
   index_line_width = 0.5,
   index_point_size = 2,
@@ -32,6 +33,7 @@ plot_index_mpd(
   end_year = 2021,
   legend_title = "Models",
   palette = "Paired",
+  base_color = "#000000",
   dodge = 0.3,
   index_line_width = 0.5,
   index_point_size = 2,
@@ -58,6 +60,9 @@ from the [read_data_file()] function}
 
 \item{palette}{A palette value that is in [RColorBrewer::brewer.pal.info]}
 
+\item{base_color}{A color to prepend to the brewer colors which are set by `palette`.
+This is called `base_color` because it is likely to be a base model}
+
 \item{dodge}{A small value added to each year for each model. This is added cumulatively,
 so each model fit appears more to the right than the previous one}
 
@@ -81,4 +86,11 @@ Plot MCMC index fits for a single or group of models
 
 Plot MPD index fits for a single or group of models
 }
-\concept{index plotting functions}
+\seealso{
+Other Time series plotting functions: 
+\code{\link{plot_biomass_mcmc}()}
+
+Other Time series plotting functions: 
+\code{\link{plot_biomass_mcmc}()}
+}
+\concept{Time series plotting functions}
