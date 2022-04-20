@@ -22,7 +22,7 @@ plot_recr_mcmc <- function(models,
                            palette = "Paired",
                            base_color = "#000000",
                            r_dodge = 0.1,
-                           x_space = 0.1,
+                           x_space = 0.5,
                            append_base_txt = NULL,
                            ind_letter = NULL,
                            leg_loc = NULL,
@@ -72,7 +72,18 @@ plot_recr_mcmc <- function(models,
 
   start_yr <- map_dbl(models, ~{.x$dat$start.yr + 1}) %>% min
   end_yr <- map_dbl(models, ~{.x$dat$end.yr + 1}) %>% max
-  xlim <- c(start_yr, end_yr)
+  if(is.null(xlim)){
+    xlim <- c(start_yr, end_yr)
+  }else{
+    if(start_yr > xlim[1]){
+      stop("Start year in xlim comes before the data start year")
+    }
+    if(end_yr < xlim[2]){
+      stop("End year in xlim comes after the data end year")
+    }
+    start_yr <- xlim[1]
+    end_yr <- xlim[2]
+  }
 
   # Main time series values
   ts_quants <- map(models,
@@ -136,13 +147,25 @@ plot_recr_mcmc <- function(models,
       filter(year %in% xlim[1]:xlim[2])
   }
   ts_quants <- ts_quants %>%
-    mutate(model = fct_relevel(model, nms),
-           year = year)
+    mutate(model = fct_relevel(model, nms))
 
   # Color values have black prepended as it is the base model
   model_colors <- c(base_color,
                     brewer.pal(name = palette,
                                n = palette_info$maxcolors))
+
+  # Dodge years for recruitment values. Need to do this before setting xlim values
+  # because only the first model will be plotted in the last year if dodge is not
+  # accounted for
+  dodge_val <- 0
+  ts_dodge <- ts_quants %>%
+    split(~model) %>%
+    map(~{
+      x <- .x %>% mutate(year = year + dodge_val)
+      dodge_val <<- dodge_val + 0.1
+      x
+    }) %>%
+    bind_rows
 
   g <- ts_quants %>%
     ggplot(aes(x = year,
@@ -162,7 +185,8 @@ plot_recr_mcmc <- function(models,
     if(ro_ribbon){
       g <- g +
         geom_rect(data = tso_base,
-                  aes(xmin = ifelse(show_ro, start_yr - 1, start_yr), xmax = end_yr),
+                  aes(xmin = ifelse(show_ro, start_yr - 1, start_yr),
+                      xmax = max(ts_dodge$year)),
                   alpha = ro_alpha,
                   fill = ro_color) +
         geom_hline(data = tso_base,
@@ -173,7 +197,7 @@ plot_recr_mcmc <- function(models,
         geom_hline(data = tso_base,
                    aes(yintercept = !!sym(quants[1])),
                    color = ro_color,
-                   lty = 4) +
+                   lty = 3) +
         geom_hline(data = tso_base,
                    aes(yintercept = !!sym(quants[2])),
                    color = ro_color,
@@ -181,14 +205,14 @@ plot_recr_mcmc <- function(models,
         geom_hline(data = tso_base,
                    aes(yintercept = !!sym(quants[3])),
                    color = ro_color,
-                   lty = 4)
+                   lty = 3)
     }
-    g <- g + scale_x_continuous(limits = c(xlim[1] - 1, xlim[2]),
+    g <- g + scale_x_continuous(limits = c(xlim[1] - 1, max(ts_dodge$year)),
                                 breaks = (min(xlim) - 1):max(xlim),
                                 labels = c(expression(R[0]), xlim[1]:xlim[2]),
                                 expand = expansion(add = x_space))
   }else{
-    g <- g + scale_x_continuous(limits = c(xlim[1], xlim[2]),
+    g <- g + scale_x_continuous(limits = c(xlim[1], max(ts_dodge$year)),
                                 breaks = min(xlim):max(xlim),
                                 labels = xlim[1]:xlim[2],
                                 expand = expansion(add = x_space))
@@ -243,15 +267,6 @@ plot_recr_mcmc <- function(models,
             "This will cause overlapping in the plot with the main time series")
   }
 
-  dodge_val <- 0
-  ts_dodge <- ts_quants %>%
-    split(~model) %>%
-    map(~{
-      x <- .x %>% mutate(year = year + dodge_val)
-      dodge_val <<- dodge_val + 0.1
-      x
-    }) %>%
-    bind_rows
   g <- g +
     geom_point(data = ts_dodge,
                aes(color = model),
