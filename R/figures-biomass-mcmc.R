@@ -1,5 +1,10 @@
-#' Plot the MCMC time series trajectories for iscam models, including spawning biomass
-#' and recruitment for both absolute and relative cases.
+#' Plot the MCMC spawning biomass trajectories for iscam models in either
+#' absolute or relative form.
+#'
+#' @details Cannot make more than one model have a shaded credible interval. It is
+#' too difficult to tell what's going on with colors overlapping.If called with
+#' `rel = TRUE`, `show_bo` will be overridden to be `FALSE`. It makes no sense
+#' to show B0 when a relative plot is asked for, it is always 1.
 #'
 #' @param models A list of iscam model objects (class [mdl_lst_cls])
 #' @param model_names Names to use for the models in the plots. The names of
@@ -16,12 +21,12 @@
 #' will be used
 #' @param line_width Width of all median lines on the plot
 #' @param point_size Point size for all median points on the plot
-#' @param line_ribbon Logical. If `TRUE`, make the first model plotted an envelope
-#' of the credible interval, surrounding the median line
+#' @param first_model_ribbon Logical. If `TRUE`, give the first model a shaded
+#' credible interval instead of dotted lines
 #' @param refpts_ribbon Logical. If `TRUE`, make the first model's reference points lines
 #' (`show_bo_lines` and/or `show_bmsy_lines` must be `TRUE`) plotted an envelope
 #' of the credible interval, surrounding the median lines for the reference points
-#' @param alpha The opacity between 0 to 1 of the envelope shown when `line_ribbon == TRUE`
+#' @param alpha The opacity between 0 to 1 of the envelope shown when `first_model_ribbon == TRUE`
 #' @param refpts_alpha The opacity between 0 to 1 of the envelope shown for referece points
 #' when `refpts_ribbon == TRUE` and `show_bo_lines` and/or `show_bmsy_lines` are `TRUE`
 #' @param palette A palette value that is in [RColorBrewer::brewer.pal.info]
@@ -33,8 +38,14 @@
 #' with. To remove all padding, make this 0
 #' @param append_base_txt Text to append to the first model's name for display on the
 #' plot legend
-#' @param show_bo_lines Show the B0 lines (0.2 and 0.4 B0) for the first model
-#' @param show_bmsy_lines Show the Bmsy lines (0.4 and 0.8 Bmsy) for the first model
+#' @param show_bo_lines Show the B0 lines at values given by `bo_refpts` for the
+#' first model in the `models` list
+#' @param show_bmsy_lines Show the BMSY lines at values given by `bmsy_refpts` for the
+#' first model in the `models` list
+#' @param bo_refpts Vector of two proportional values for the limit reference point
+#' and Upper stock reference. Values are 0.2B0 and 0.4B0 by default
+#' @param bmsy_refpts Vector of two proportional values for the limit reference point
+#' and Upper stock reference. Values are 0.4BMSY and 0.8BMSY by default
 #' @param bo_refpt_colors A vector of two colors representing the LRP and USR for B0.
 #' Used to display reference point lines if `show_bo_lines == TRUE`
 #' @param bmsy_refpt_colors A vector of two colors representing the LRP and USR for BMSY.
@@ -63,17 +74,19 @@ plot_biomass_mcmc <- function(models,
                               ylim = NULL,
                               line_width = 1,
                               point_size = 2,
-                              line_ribbon = FALSE,
+                              first_model_ribbon = FALSE,
                               refpts_ribbon = TRUE,
                               alpha = 0.2,
                               refpts_alpha = alpha,
                               palette = "Paired",
-                              base_color = "#000000",
+                              base_color = "black",
                               bo_dodge = 0.1,
                               x_space = 0.5,
                               append_base_txt = NULL,
                               show_bo_lines = FALSE,
+                              bo_refpts = c(0.2, 0.4),
                               show_bmsy_lines = FALSE,
+                              bmsy_refpts = c(0.4, 0.8),
                               bo_refpt_colors = c("red", "green"),
                               bmsy_refpt_colors = c("salmon", "darkgreen"),
                               ind_letter = NULL,
@@ -122,6 +135,9 @@ plot_biomass_mcmc <- function(models,
     names(models) <- model_names
   }
 
+  if(rel){
+    show_bo <- FALSE
+  }
   start_yr <- map_dbl(models, ~{.x$dat$start.yr}) %>% min
   end_yr <- map_dbl(models, ~{.x$dat$end.yr}) %>% max
   if(is.null(xlim)){
@@ -228,13 +244,13 @@ plot_biomass_mcmc <- function(models,
     ylab(y_label) +
     scale_color_manual(values = model_colors)
 
+  tso_base <- tso_quants %>%
+    slice(1)
   if(show_bo_lines){
     # Show the B0 lines for the first model with CI, behind model lines
-    tso_base <- tso_quants %>%
-      slice(1)
     # Only two lines allowed, Limit Reference Point (LRP) and Upper Stock
     # Reference (USR)
-    tso_multiples <- imap(c(0.2, 0.4), ~{
+    tso_multiples <- imap(bo_refpts, ~{
       tso_base %>%
         mutate(!!sym(quants[1]) := !!sym(quants[1]) * .x,
                !!sym(quants[2]) := !!sym(quants[2]) * .x,
@@ -242,6 +258,28 @@ plot_biomass_mcmc <- function(models,
         mutate(multiplier = .x)
     }) %>%
       bind_rows
+
+    if(rel){
+      # Need special calculation for the Credible interval for the
+      # relative biomass
+      mdl_yr <- tso_base %>%
+        select(model, year)
+      tso_base_quants <- tso_base %>%
+        select(-model, -year) %>%
+        unlist
+      tso_mult_list <- map(bo_refpts, ~{
+        .x * tso_base_quants / tso_base_quants[2]
+      })
+      row1 <- c(unlist(mdl_yr), tso_mult_list[[1]]) %>% t() %>% as_tibble()
+      row2 <- c(unlist(mdl_yr), tso_mult_list[[2]]) %>% t() %>% as_tibble()
+      tso_multiples <- row1 %>%
+        bind_rows(row2) %>%
+        mutate(multiplier = tso_multiples$multiplier,
+               year = as.numeric(year),
+               !!sym(quants[1]) := as.numeric(!!sym(quants[1])),
+               !!sym(quants[2]) := as.numeric(!!sym(quants[2])),
+               !!sym(quants[3]) := as.numeric(!!sym(quants[3])))
+    }
 
     if(refpts_ribbon){
       g <- g +
@@ -275,18 +313,30 @@ plot_biomass_mcmc <- function(models,
       slice(1)
     # Only two lines allowed, Limit Reference Point (LRP) and Upper Stock
     # Reference (USR)
-    bmsy_multiples <- imap(c(0.4, 0.8), ~{
-      bmsy_base %>%
-        mutate(!!sym(quants[1]) := !!sym(quants[1]) * .x,
-               !!sym(quants[2]) := !!sym(quants[2]) * .x,
-               !!sym(quants[3]) := !!sym(quants[3]) * .x) %>%
-        mutate(multiplier = .x)
-    }) %>%
-      bind_rows
+    if(rel){
+      bmsy_multiples <- imap(bmsy_refpts, ~{
+        bmsy_base %>%
+          mutate(!!sym(quants[1]) := !!sym(quants[1]) / unlist(tso_base[1, quants[1]]) * .x,
+                 !!sym(quants[2]) := !!sym(quants[2]) / unlist(tso_base[1, quants[2]]) * .x,
+                 !!sym(quants[3]) := !!sym(quants[3]) / unlist(tso_base[1, quants[3]]) * .x) %>%
+          mutate(multiplier = .x)
+      }) %>%
+        bind_rows
+    }else{
+      bmsy_multiples <- imap(bmsy_refpts, ~{
+        bmsy_base %>%
+          mutate(!!sym(quants[1]) := !!sym(quants[1]) * .x,
+                 !!sym(quants[2]) := !!sym(quants[2]) * .x,
+                 !!sym(quants[3]) := !!sym(quants[3]) * .x) %>%
+          mutate(multiplier = .x)
+      }) %>%
+        bind_rows
+    }
+
     if(refpts_ribbon){
       g <- g +
         geom_rect(data = bmsy_multiples,
-                  aes(xmin = ifelse(show_bo, start_yr - 1, start_yr), xmax = end_yr),
+                  aes(xmin = ifelse(show_bmsy_lines, start_yr - 1, start_yr), xmax = end_yr),
                   alpha = refpts_alpha,
                   fill = bmsy_refpt_colors) +
         geom_hline(data = bmsy_multiples,
@@ -348,6 +398,10 @@ plot_biomass_mcmc <- function(models,
 
   if(show_bo_lines){
     # Add the text labels to the y-axis ticks for the reference point levels
+    if(any(bo_refpts %in% brk)){
+      wch <- which(brk %in% bo_refpts)
+      brk <- brk[-wch]
+    }
     brk <- sort(c(brk, tso_multiples[[quants[2]]]))
     lbl <- brk
     wch <- which(brk %in% tso_multiples[[quants[2]]])
@@ -407,7 +461,7 @@ plot_biomass_mcmc <- function(models,
       coord_cartesian(ylim = ylim)
   }
 
-  if(line_ribbon){
+  if(first_model_ribbon){
     first_model_nm <- as.character(ts_quants$model[1])
     ts_quants_first <- ts_quants %>%
       filter(model == first_model_nm)

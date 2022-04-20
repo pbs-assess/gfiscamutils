@@ -4,10 +4,6 @@
 #' @rdname plot_biomass_mcmc
 #'
 #' @family Biomass plotting functions
-#' @param bo_refpts Vector of two proportional values < 1 for the limit
-#' reference point and Upper stock reference. 0.2B0 and 0.4B0 by default
-#' @param bmsy_refpts Vector of two proportional values < 1 for the limit
-#' reference point and Upper stock reference. 0.4BMSY and 0.8BMSY by default
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_biomass_mpd <- function(models,

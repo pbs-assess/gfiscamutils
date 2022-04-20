@@ -6,8 +6,8 @@
 \alias{plot_biomass_mpd}
 \alias{plot_recr_mpd}
 \alias{plot_recr_mcmc}
-\title{Plot the MCMC time series trajectories for iscam models, including spawning biomass
-and recruitment for both absolute and relative cases.}
+\title{Plot the MCMC spawning biomass trajectories for iscam models in either
+absolute or relative form.}
 \usage{
 plot_biomass_mcmc(
   models,
@@ -19,17 +19,19 @@ plot_biomass_mcmc(
   ylim = NULL,
   line_width = 1,
   point_size = 2,
-  line_ribbon = FALSE,
+  first_model_ribbon = FALSE,
   refpts_ribbon = TRUE,
   alpha = 0.2,
   refpts_alpha = alpha,
   palette = "Paired",
-  base_color = "#000000",
+  base_color = "black",
   bo_dodge = 0.1,
   x_space = 0.5,
   append_base_txt = NULL,
   show_bo_lines = FALSE,
+  bo_refpts = c(0.2, 0.4),
   show_bmsy_lines = FALSE,
+  bmsy_refpts = c(0.4, 0.8),
   bo_refpt_colors = c("red", "green"),
   bmsy_refpt_colors = c("salmon", "darkgreen"),
   ind_letter = NULL,
@@ -139,14 +141,14 @@ will be used}
 
 \item{point_size}{Point size for all median points on the plot}
 
-\item{line_ribbon}{Logical. If `TRUE`, make the first model plotted an envelope
-of the credible interval, surrounding the median line}
+\item{first_model_ribbon}{Logical. If `TRUE`, give the first model a shaded
+credible interval instead of dotted lines}
 
 \item{refpts_ribbon}{Logical. If `TRUE`, make the first model's reference points lines
 (`show_bo_lines` and/or `show_bmsy_lines` must be `TRUE`) plotted an envelope
 of the credible interval, surrounding the median lines for the reference points}
 
-\item{alpha}{The opacity between 0 to 1 of the envelope shown when `line_ribbon == TRUE`}
+\item{alpha}{The opacity between 0 to 1 of the envelope shown when `first_model_ribbon == TRUE`}
 
 \item{refpts_alpha}{The opacity between 0 to 1 of the envelope shown for referece points
 when `refpts_ribbon == TRUE` and `show_bo_lines` and/or `show_bmsy_lines` are `TRUE`}
@@ -165,9 +167,17 @@ with. To remove all padding, make this 0}
 \item{append_base_txt}{Text to append to the first model's name for display on the
 plot legend}
 
-\item{show_bo_lines}{Show the B0 lines (0.2 and 0.4 B0) for the first model}
+\item{show_bo_lines}{Show the B0 lines at values given by `bo_refpts` for the
+first model in the `models` list}
 
-\item{show_bmsy_lines}{Show the Bmsy lines (0.4 and 0.8 Bmsy) for the first model}
+\item{bo_refpts}{Vector of two proportional values for the limit reference point
+and Upper stock reference. Values are 0.2B0 and 0.4B0 by default}
+
+\item{show_bmsy_lines}{Show the BMSY lines at values given by `bmsy_refpts` for the
+first model in the `models` list}
+
+\item{bmsy_refpts}{Vector of two proportional values for the limit reference point
+and Upper stock reference. Values are 0.4BMSY and 0.8BMSY by default}
 
 \item{bo_refpt_colors}{A vector of two colors representing the LRP and USR for B0.
 Used to display reference point lines if `show_bo_lines == TRUE`}
@@ -188,12 +198,6 @@ This is provided in case the data frames have more than three different quantile
 
 \item{...}{Other graphical arguments}
 
-\item{bo_refpts}{Vector of two proportional values < 1 for the limit
-reference point and Upper stock reference. 0.2B0 and 0.4B0 by default}
-
-\item{bmsy_refpts}{Vector of two proportional values < 1 for the limit
-reference point and Upper stock reference. 0.4BMSY and 0.8BMSY by default}
-
 \item{show_ro}{Show the initial recruitment, R0 median line and credible interval}
 
 \item{r_dodge}{See `bo_dodge` in [plot_biomass_mcmc()]}
@@ -212,8 +216,8 @@ A [ggplot2::ggplot()] object
 A [ggplot2::ggplot()] object
 }
 \description{
-Plot the MCMC time series trajectories for iscam models, including spawning biomass
-and recruitment for both absolute and relative cases.
+Plot the MCMC spawning biomass trajectories for iscam models in either
+absolute or relative form.
 
 Plot the MCMC time series trajectories for iscam models, including spawning biomass
 and recruitment for both absolute and relative cases.
@@ -222,6 +226,12 @@ Plot the MCMC time series trajectories for iscam models, including spawning biom
 and recruitment for both absolute and relative cases.
 
 Plot the MCMC recruitment time series trajectories for iscam models.
+}
+\details{
+Cannot make more than one model have a shaded credible interval. It is
+too difficult to tell what's going on with colors overlapping.If called with
+`rel = TRUE`, `show_bo` will be overridden to be `FALSE`. It makes no sense
+to show B0 when a relative plot is asked for, it is always 1.
 }
 \seealso{
 Other Time series plotting functions: 
