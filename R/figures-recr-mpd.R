@@ -91,7 +91,6 @@ plot_recr_mpd <- function(models,
 
   start_yr <- min(map_dbl(models, ~{.x$dat$start.yr})) + 1
   end_yr <- max(map_dbl(models, ~{.x$dat$end.yr}))
-
   if(is.null(xlim)){
     xlim <- c(start_yr, end_yr)
   }else{
@@ -215,17 +214,6 @@ plot_recr_mpd <- function(models,
     warning("`r_dodge` value of ", r_dodge, " makes R0 values span a year or more. ",
             "This will cause overlapping in the plot with the main time series")
   }
-
-  # Add biomass or recruitment trajectory lines and points
-  # dodge_val <- 0
-  # recr_dodge <- recr %>%
-  #   split(~model) %>%
-  #   map(~{
-  #     x <- .x %>% mutate(year = year + dodge_val)
-  #     dodge_val <<- dodge_val + 0.1
-  #     x
-  #   }) %>%
-  #   bind_rows
 
   g <- g +
       geom_point(data = recr,

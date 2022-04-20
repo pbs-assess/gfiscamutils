@@ -4,35 +4,37 @@
 #' @rdname plot_biomass_mcmc
 #'
 #' @family Biomass plotting functions
+#' @param bo_refpts Vector of two proportional values < 1 for the limit
+#' reference point and Upper stock reference. 0.2B0 and 0.4B0 by default
+#' @param bmsy_refpts Vector of two proportional values < 1 for the limit
+#' reference point and Upper stock reference. 0.4BMSY and 0.8BMSY by default
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_biomass_mpd <- function(models,
                              model_names = NULL,
-                             type = c("sbt", "rt"),
                              rel = FALSE,
-                             show_initial = TRUE,
+                             show_bo = TRUE,
                              legend_title = "Models",
                              xlim = NULL,
                              ylim = NULL,
                              line_width = 1,
                              point_size = 2,
                              alpha = 0.2,
-                             offset = 0.1,
                              palette = "Paired",
-                             base_color = "#000000",
+                             base_color = "black",
                              bo_dodge = 0.1,
                              x_space = 0.5,
                              append_base_txt = NULL,
                              show_bo_lines = FALSE,
+                             bo_refpts = c(0.2, 0.4),
                              show_bmsy_lines = FALSE,
+                             bmsy_refpts = c(0.4, 0.8),
                              bo_refpt_colors = c("red", "green"),
                              bmsy_refpt_colors = c("salmon", "darkgreen"),
                              ind_letter = NULL,
                              leg_loc = NULL,
-                             probs = c(0.025, 0.5, 0.975),
+                             angle_x_labels = FALSE,
                              ...){
-
-  type <- match.arg(type)
 
   if(class(models) == mdl_cls){
     models <- list(models)
@@ -55,11 +57,6 @@ plot_biomass_mpd <- function(models,
   if(length(models) > palette_info$maxcolors){
     stop("Cannot plot more than ", palette_info$maxcolors, " models because that is the ",
          "maximum number for the ", palette, " palette")
-  }
-
-  if(length(probs) != 3){
-    stop("`probs` has length ", length(probs), " but must be a vector of three values ",
-         "representing lower CI, median, and upper CI")
   }
 
   # Set up model names for the legend
@@ -92,33 +89,31 @@ plot_biomass_mpd <- function(models,
     names(mpd)[1] <- paste0(names(mpd)[1], append_base_txt)
   }
 
-  sbt <- map(mpd, ~{.x[[type]]})
-  start_yr <- map_dbl(models, ~{.x$dat$start.yr}) %>% min
-  end_yr <- map_dbl(models, ~{.x$dat$end.yr}) %>% max
+  start_yr <- min(map_dbl(models, ~{.x$dat$start.yr})) + 1
+  end_yr <- max(map_dbl(models, ~{.x$dat$end.yr}))
   if(is.null(xlim)){
-    if(type == "rt"){
-      start_yr <- start_yr + 1
-      end_yr <- end_yr + 1
-    }
     xlim <- c(start_yr, end_yr)
+  }else{
+    if(start_yr > xlim[1]){
+      stop("Start year in xlim comes before the data start year")
+    }
+    if(end_yr < xlim[2]){
+      stop("End year in xlim comes after the data end year")
+    }
+    start_yr <- xlim[1]
+    end_yr <- xlim[2]
   }
-  if(type == "sbt"){
-    bind_yrs <- start_yr:end_yr
-  }else if(type == "rt"){
-    bind_yrs <- (start_yr + 1):(end_yr + 1)
-  }
+  bind_yrs <- start_yr:end_yr
 
-  sbt <- map(sbt, ~{
-    length(.x) = end_yr - start_yr + 1
-    .x
-  }) %>%
+  sbt <- map(mpd, ~{.x$sbt}) %>%
+    map(~{
+      length(.x) = end_yr - start_yr + 1
+      .x
+    }) %>%
     do.call(rbind, .)
 
-  # Get initial estimate, ro, sbo
-  init_type <- switch(type,
-                      "sbt" = "sbo",
-                      "rt" = "ro")
-  init <- map(mpd, ~{.x[[init_type]]})
+  # Get initial estimate, sbo
+  init <- map(mpd, ~{.x$sbo})
   init_vals <- tibble(year = start_yr - 1,
                       model = names(init),
                       sbt = map_dbl(init, ~{.x})) %>%
@@ -136,35 +131,22 @@ plot_biomass_mpd <- function(models,
     pivot_longer(cols = -year, names_to = "model", values_to = "sbt")
 
   if(rel){
-    if(type == "sbt"){
-      # Recruitment not relative even if `rel == TRUE`
-      init_vals_tmp <- init_vals %>%
-        select(-year)
-      vals <- vals %>% left_join(init_vals_tmp, by = "model") %>%
-        mutate(sbt = sbt.x / sbt.y) %>%
-        select(-sbt.x, -sbt.y)
-    }
-    y_label <- switch(type,
-                      "sbt" = "Relative Spawning biomass",
-                      "rt" = "Recruitment (millions)")
-  }else{
-    y_label <- switch(type,
-                      "sbt" = "Spawning biomass ('000 tonnes)",
-                      "rt" = "Recruitment (millions)")
-  }
-
-  if(!is.null(xlim)){
+    init_vals_tmp <- init_vals %>%
+      select(-year)
     vals <- vals %>%
-    filter(year %in% xlim[1]:xlim[2])
-    init_vals <- init_vals %>%
-      mutate(year = xlim[1] - 1)
+      left_join(init_vals_tmp, by = "model") %>%
+      mutate(sbt = sbt.x / sbt.y) %>%
+      select(-sbt.x, -sbt.y)
+    y_label <- "Relative Spawning biomass"
+  }else{
+    y_label <- "Spawning biomass ('000 tonnes)"
   }
 
-  # 'Dodge' B0 points manually
-  if((nrow(init_vals) - 1) * bo_dodge >= 1){
-    warning("`bo_dodge` value of ", bo_dodge, " makes B0 values span a year or more. ",
-            "This will cause overlapping in the plot with the main time series")
-  }
+  vals <- vals %>%
+    filter(year %in% xlim[1]:xlim[2])
+  init_vals <- init_vals %>%
+    mutate(year = xlim[1] - 1)
+
   init_vals <- init_vals %>%
     mutate(year = seq(from = first(year), by = bo_dodge, length.out = nrow(.)))
 
@@ -179,23 +161,27 @@ plot_biomass_mpd <- function(models,
                color = model)) +
     xlab("Year") +
     ylab(y_label) +
-    #guides(color = guide_legend(title = legend_title)) +
-    scale_color_manual(values = model_colors) #+
-    #scale_x_continuous(breaks = seq(min(bind_yrs), max(bind_yrs), 5))
+    scale_color_manual(values = model_colors)
 
-  if(show_bo_lines && type == "sbt"){
+  if(show_bo_lines){
     # Show the B0 lines for the first model, behind model lines
     tso_base <- init_vals %>%
       slice(1)
     # Only two lines allowed, Limit Reference Point (LRP) and Upper Stock
     # Reference (USR)
-    tso_multiples <- imap(c(0.2, 0.4), ~{
+    tso_multiples <- imap(bo_refpts, ~{
       tso_base %>%
         mutate(val = sbt * .x) %>%
         mutate(multiplier = .x)
     }) %>%
       bind_rows
 
+    if(rel){
+      tso_multiples[1, ]$sbt <- 1
+      tso_multiples[2, ]$val <- 1
+      tso_multiples[1, ]$val <- bo_refpts[1]
+      tso_multiples[2, ]$val <- bo_refpts[2]
+    }
     g <- g +
       geom_hline(data = tso_multiples,
                  aes(yintercept = val),
@@ -203,15 +189,15 @@ plot_biomass_mpd <- function(models,
                  lty = 1)
   }
 
-  if(show_bmsy_lines && type == "sbt"){
+  if(show_bmsy_lines){
     # Show the BMSY lines for the first model, behind model lines
     bmsy_base <- bmsy_vals %>%
       slice(1)
     # Only two lines allowed, Limit Reference Point (LRP) and Upper Stock
     # Reference (USR)
-    bmsy_multiples <- imap(c(0.4, 0.8), ~{
+    bmsy_multiples <- imap(bmsy_refpts, ~{
       bmsy_base %>%
-        mutate(val = sbt * .x) %>%
+        mutate(val = ifelse(rel, sbt / tso_base[1, ]$sbt * .x, sbt * .x)) %>%
         mutate(multiplier = .x)
     }) %>%
       bind_rows
@@ -230,10 +216,10 @@ plot_biomass_mpd <- function(models,
                                 labels = xlim[1]:xlim[2],
                                 expand = expansion(add = x_space))
   }else{
-    if(show_initial){
+    if(show_bo){
       g <- g + scale_x_continuous(limits = c(xlim[1] - 1, xlim[2]),
                                   breaks = (min(xlim) - 1):max(xlim),
-                                  labels = c(ifelse(type == "sbt", expression(B[0]), expression(R[0])), xlim[1]:xlim[2]),
+                                  labels = c(expression(B[0]), xlim[1]:xlim[2]),
                                   expand = expansion(add = x_space))
     }else{
       g <- g + scale_x_continuous(limits = c(xlim[1], xlim[2]),
@@ -243,71 +229,100 @@ plot_biomass_mpd <- function(models,
     }
   }
 
-  if(is.null(ylim) && type == "sbt"){
-    # Set up the y-axis limits to fit the data
+  # Create tags for B0 and BMSY lines, and breaks and labels for y-axis
+  if(rel){
+    ymax <- max(select(vals, -c(model, year)))
+  }else{
     ymax <- max(select(vals, -c(model, year)),
                 select(init_vals, -c(model, year)))
-    brk <- seq(0, ymax, 50)
-    lbl <- seq(0, ymax, 50)
+  }
+  if(ymax <= 1){
+    upper_bound <- 1
+  }else{
+    upper_bound <- ifelse(ymax <= 10,
+                          max(ymax %/% 2) * 2 + 2,
+                          max(ymax %/% 100) * 100 + 100)
+  }
+  brk <- seq(0, upper_bound, upper_bound / 10)
+  lbl <- brk
+  cols <- rep("black", length(brk))
+  if(show_bo_lines){
+    # Add the text labels to the y-axis ticks for the reference point levels
+    if(any(bo_refpts %in% brk)){
+      wch <- which(brk %in% bo_refpts)
+      brk <- brk[-wch]
+    }
+    brk <- sort(c(brk, tso_multiples$val))
+    lbl <- brk
+    wch <- which(brk %in% tso_multiples$val)
+    if(length(wch) != 2){
+      stop("Could not find the B0 reference points in the tso_multiplier data frame. See function code")
+    }
+    lbl[wch][1] <- as.expression(bquote(.(tso_multiples$multiplier[1]) ~ B[0]))
+    lbl[wch][2] <- as.expression(bquote(.(tso_multiples$multiplier[2]) ~ B[0]))
     cols <- rep("black", length(brk))
+    cols[wch] <- bo_refpt_colors
+  }
+  if(show_bmsy_lines){
+    # Add the text labels to the y-axis ticks for the reference point levels
     if(show_bo_lines){
-      # Add the text labels to the y-axis ticks for the reference point levels
-      brk <- sort(c(brk, tso_multiples$val))
-      lbl <- brk
-      wch <- which(brk %in% tso_multiples$val)
+      # The labels and breaks have already be created so we have to go from those
+      brk <- sort(c(brk, bmsy_multiples$val))
+      wch <- which(brk %in% bmsy_multiples$val)
       if(length(wch) != 2){
-        stop("Could not find the B0 reference points in the tso_multiplier data frame. See function code")
+        stop("Could not find the B0 reference points in the tso_multiplier data frame. ",
+             "See function code for case where both show_bo_lines and show_msy_lines are enabled")
       }
-      lbl[wch][1] <- as.expression(bquote(.(tso_multiples$multiplier[1]) ~ B[0]))
-      lbl[wch][2] <- as.expression(bquote(.(tso_multiples$multiplier[2]) ~ B[0]))
+      lbl <- append(lbl, as.expression(bquote(.(bmsy_multiples$multiplier[1]) ~ B[MSY])), after = wch[1] - 1)
+      lbl <- append(lbl, as.expression(bquote(.(bmsy_multiples$multiplier[2]) ~ B[MSY])), after = wch[2] - 1)
+      cols <- append(cols, bmsy_refpt_colors[1], after = wch[1] - 1)
+      cols <- append(cols, bmsy_refpt_colors[2], after = wch[2] - 1)
+    }else{
+      # Start from non-modified labels and breaks
+      brk <- sort(c(brk, bmsy_multiples$val))
+      lbl <- brk
+      wch <- which(brk %in% bmsy_multiples$val)
+      if(length(wch) != 2){
+        stop("Could not find the BMSY reference points in the bmsy_multiplier data frame. See function code")
+      }
+      lbl[wch][1] <- as.expression(bquote(.(bmsy_multiples$multiplier[1]) ~ B[MSY]))
+      lbl[wch][2] <- as.expression(bquote(.(bmsy_multiples$multiplier[2]) ~ B[MSY]))
       cols <- rep("black", length(brk))
-      cols[wch] <- bo_refpt_colors
+      cols[wch] <- bmsy_refpt_colors
     }
-    if(show_bmsy_lines){
-      # Add the text labels to the y-axis ticks for the reference point levels
-      if(show_bo_lines){
-        # The labels and breaks have already be created so we have to go from those
-        brk <- sort(c(brk, bmsy_multiples$val))
-        wch <- which(brk %in% bmsy_multiples$val)
-        if(length(wch) != 2){
-          stop("Could not find the B0 reference points in the tso_multiplier data frame. ",
-               "See function code for case where both show_bo_lines and show_msy_lines are enabled")
-        }
-        lbl <- append(lbl, as.expression(bquote(.(bmsy_multiples$multiplier[1]) ~ B[MSY])), after = wch[1] - 1)
-        lbl <- append(lbl, as.expression(bquote(.(bmsy_multiples$multiplier[2]) ~ B[MSY])), after = wch[2] - 1)
-        cols <- append(cols, bmsy_refpt_colors[1], after = wch[1] - 1)
-        cols <- append(cols, bmsy_refpt_colors[2], after = wch[2] - 1)
-      }else{
-        # Start from non-modified labels and breaks
-        brk <- sort(c(brk, bmsy_multiples$val))
-        lbl <- brk
-        wch <- which(brk %in% bmsy_multiples$val)
-        if(length(wch) != 2){
-          stop("Could not find the BMSY reference points in the bmsy_multiplier data frame. See function code")
-        }
-        lbl[wch][1] <- as.expression(bquote(.(bmsy_multiples$multiplier[1]) ~ B[MSY]))
-        lbl[wch][2] <- as.expression(bquote(.(bmsy_multiples$multiplier[2]) ~ B[MSY]))
-        cols <- rep("black", length(brk))
-        cols[wch] <- bmsy_refpt_colors
-      }
-    }
+  }
 
+  if(is.null(ylim)){
+    g <- g +
+      scale_y_continuous(limits = c(0, upper_bound),
+                         breaks = brk,
+                         labels = lbl,
+                         expand = c(0, 0)) +
+      theme(axis.text.y = element_text(color = cols),
+            axis.ticks.y = element_line(color = cols))
+  }else{
     g <- g +
       scale_y_continuous(limits = c(0, NA),
                          breaks = brk,
                          labels = lbl) +
       theme(axis.text.y = element_text(color = cols),
-            axis.ticks.y = element_line(color = cols))
-  }else{
-    g <- g + scale_y_continuous(limits = ylim, expand = c(0, 0))
+            axis.ticks.y = element_line(color = cols)) +
+      coord_cartesian(ylim = ylim)
+  }
+
+  # 'Dodge' B0 points manually
+  if((nrow(init_vals) - 1) * bo_dodge >= 1){
+    warning("`bo_dodge` value of ", bo_dodge, " makes B0 values span a year or more. ",
+            "This will cause overlapping in the plot with the main time series")
   }
 
   # Add biomass or recruitment trajectory lines and points
   g <- g +
-    geom_line(aes(color = model), size = line_width) +
     geom_point(data = vals,
                aes(color = model),
-               size = point_size)
+               size = point_size) +
+    geom_line(data = vals,
+              size = line_width)
 
   if(!rel){
     # Add initial biomass points (B0)
@@ -315,16 +330,20 @@ plot_biomass_mpd <- function(models,
       geom_point(data = init_vals, size = point_size)
   }
 
+  # Change the legend title
+  g <- g + labs(color = legend_title)
+
   if(!is.null(leg_loc)){
     # Add a legend
     g <- g +
       theme(legend.position = leg_loc,
-            legend.background = element_rect(fill = "white", color = "black"))
+            legend.background = element_rect(fill = "white", color = "white"))
   }
 
-  # Change the legend title
-  g <- g + labs(color = legend_title)
+  if(angle_x_labels){
+    g <- g +
+      theme(axis.text.x = element_text(angle = 45, hjust = 0.55, vjust = 0.5))
+  }
 
   g
-
 }

@@ -26,7 +26,7 @@ plot_biomass_mcmc(
   palette = "Paired",
   base_color = "#000000",
   bo_dodge = 0.1,
-  x_space = 0.1,
+  x_space = 0.5,
   append_base_txt = NULL,
   show_bo_lines = FALSE,
   show_bmsy_lines = FALSE,
@@ -42,28 +42,28 @@ plot_biomass_mcmc(
 plot_biomass_mpd(
   models,
   model_names = NULL,
-  type = c("sbt", "rt"),
   rel = FALSE,
-  show_initial = TRUE,
+  show_bo = TRUE,
   legend_title = "Models",
   xlim = NULL,
   ylim = NULL,
   line_width = 1,
   point_size = 2,
   alpha = 0.2,
-  offset = 0.1,
   palette = "Paired",
-  base_color = "#000000",
+  base_color = "black",
   bo_dodge = 0.1,
   x_space = 0.5,
   append_base_txt = NULL,
   show_bo_lines = FALSE,
+  bo_refpts = c(0.2, 0.4),
   show_bmsy_lines = FALSE,
+  bmsy_refpts = c(0.4, 0.8),
   bo_refpt_colors = c("red", "green"),
   bmsy_refpt_colors = c("salmon", "darkgreen"),
   ind_letter = NULL,
   leg_loc = NULL,
-  probs = c(0.025, 0.5, 0.975),
+  angle_x_labels = FALSE,
   ...
 )
 
@@ -187,6 +187,12 @@ This is provided in case the data frames have more than three different quantile
 \item{angle_x_labels}{If `TRUE` put 45 degree angle on x-axis tick labels}
 
 \item{...}{Other graphical arguments}
+
+\item{bo_refpts}{Vector of two proportional values < 1 for the limit
+reference point and Upper stock reference. 0.2B0 and 0.4B0 by default}
+
+\item{bmsy_refpts}{Vector of two proportional values < 1 for the limit
+reference point and Upper stock reference. 0.4BMSY and 0.8BMSY by default}
 
 \item{show_ro}{Show the initial recruitment, R0 median line and credible interval}
 
