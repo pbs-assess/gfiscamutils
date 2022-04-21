@@ -10,14 +10,16 @@ plot_index_mcmc(
   model_names = NULL,
   type = c("fits", "resids"),
   surv_index,
+  gear = NULL,
   start_year = 1995,
   end_year = 2021,
   legend_title = "Models",
   palette = "Paired",
-  base_color = "#000000",
+  base_color = "black",
   dodge = 0.3,
   index_line_width = 0.5,
   index_point_size = 2,
+  index_color = "chocolate3",
   fit_line_width = 0.5,
   fit_point_size = 2,
   errbar_width = 0.5,
@@ -33,10 +35,11 @@ plot_index_mpd(
   end_year = 2021,
   legend_title = "Models",
   palette = "Paired",
-  base_color = "#000000",
+  base_color = "black",
   dodge = 0.3,
   index_line_width = 0.5,
   index_point_size = 2,
+  index_color = "chocolate3",
   fit_line_width = 0.5,
   fit_point_size = 2,
   angle_x_labels = FALSE
@@ -51,6 +54,8 @@ be ignored. If the list item names are not defined, temporary names will be used
 
 \item{surv_index}{The `survey_index` data frame which is the `dat` object in the output
 from the [read_data_file()] function}
+
+\item{gear}{A vector of gear numbers to show. If `NULL`, all will be shown}
 
 \item{start_year}{Year to start plot}
 
@@ -69,6 +74,8 @@ so each model fit appears more to the right than the previous one}
 \item{index_line_width}{The index data error bar and connecting line width}
 
 \item{index_point_size}{The index data point size}
+
+\item{index_color}{The color used for the observed index lines and points}
 
 \item{fit_line_width}{The model fit error bar and connecting line width}
 

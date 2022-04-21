@@ -2,19 +2,24 @@
 #'
 #' @param model An iscam model object (class [mdl_cls])
 #' @param plot_sel Logical. If `TRUE`, plot only the selectivity parameters.
-#' If `FALSE`, plot only non-selectivity parameters
+#' If `FALSE`, plot only non-selectivity parameters. If `NULL`, plot all parameters
+#' except those in `param_rm`
 #' @param param_rm A vector of parameter names to remove. If any are not found
 #' in the output, a warning will be issued. If `NULL`, nothing is removed
 #' @param list_param_names Logical. If `TRUE`, list the parameter names that will be plot
 #' by this function, but do not actually plot it. This is to help you to use the
 #' `param_rm` argument, so you know what the names to be removed can be
+#' @param priors_only Logical. If `TRUE`, plot the priors only. If `FALSE`,
+#' plot both priors and associated posterior histograms
 #' @param ... Additional arguments passed to [cowplot::plot_grid()]
 #'
+#' @family MCMC diagnostics plots
 #' @return A [ggplot2::gglot()] object
 #' @export
 plot_traces_mcmc <- function(model,
                              plot_sel = FALSE,
-                             param_rm = NULL,
+                             param_rm = c("rho",
+                                          "vartheta"),
                              list_param_names = FALSE,
                              ...){
 
@@ -34,12 +39,14 @@ plot_traces_mcmc <- function(model,
   mc <- model$mcmc$params %>%
     as_tibble()
 
-  if(plot_sel){
-    mc <- mc %>%
-      select(contains("sel"))
-  }else{
-    mc <- mc %>%
-      select(-contains("sel"))
+  if(!is.null(plot_sel)){
+    if(plot_sel){
+      mc <- mc %>%
+        select(contains("sel"))
+    }else{
+      mc <- mc %>%
+        select(-contains("sel"))
+    }
   }
 
   if(list_param_names){

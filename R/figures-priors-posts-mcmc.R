@@ -1,7 +1,7 @@
 #' Priors and posteriors comparison plots for parameters in an MCMC run
 #'
 #' @details Plots the priors overlaid on the posteriors for the given iscam model.
-#'   The values in the control file (model$ctl$params) for each
+#'   The values in the control file (`model$ctl$params`) for each
 #'   prior are:
 #'   1. ival  = initial value
 #'   2. lb    = lower bound
@@ -19,16 +19,19 @@
 #' See [plot_fun()] for prior plot details including an documentation on the
 #' vertical lines
 #'
-#' @param model An iscam model object (class [mdl_cls])
-#' @param priors_only Logical. If `TRUE`, plot the priors only. If `FALSE`,
-#' plot both priors and associated posterior histograms
-#' @param ... Additional arguments passed to [cowplot::plot_grid()]
+#' @rdname plot_traces_mcmc
 #'
+#' @family MCMC diagnostics plots
 #' @return Nothing
 #' @importFrom cowplot plot_grid
 #' @export
 plot_priors_posts_mcmc <- function(model,
-                                   param_rm = c("sel", "bo", "vartheta", "tau", "sigma", "bmsy"),
+                                   param_rm = c("sel",
+                                                "bo",
+                                                "vartheta",
+                                                "tau",
+                                                "sigma",
+                                                "bmsy"),
                                    priors_only = FALSE,
                                    ...){
 
@@ -56,7 +59,18 @@ plot_priors_posts_mcmc <- function(model,
 
   # Remove fixed parameters, and upper and lower bound, and phase information,
   # but keep initial value. Remove kappa if present
-  prior_specs <- as_tibble(model$ctl$params, rownames = "param") %>%
+  prior_specs <- as_tibble(model$ctl$params, rownames = "param")
+  wch_fem_m <- prior_specs$param == "log_m_female"
+  wch_mal_m <- prior_specs$param == "log_m_male"
+  wch_m <- prior_specs$param == "log_m"
+  fem_m_est <- prior_specs[wch_fem_m, ]$phz > 0
+  mal_m_est <- prior_specs[wch_mal_m, ]$phz > 0
+  m_est <- prior_specs[wch_m, ]$phz > 0
+  fem_m_est <- ifelse(!length(fem_m_est), FALSE, fem_m_est)
+  mal_m_est <- ifelse(!length(mal_m_est), FALSE, mal_m_est)
+  m_est <- ifelse(!length(m_est), FALSE, m_est)
+
+  prior_specs <- prior_specs  %>%
     filter(phz > 0) %>%
     select(-c(lb, ub, phz)) %>%
     filter(param != "kappa")
@@ -75,28 +89,13 @@ plot_priors_posts_mcmc <- function(model,
   prior_specs <- prior_specs %>%
     bind_rows(q_params)
 
-  # Get MPD estimates for the parameters in the posteriors
-  # Not used currently but kept in case needed
-  mpd <- model$mpd
-  q_pat <- "^log_q_gear([1-9]+)$"
-  mpd_vals <- imap_dbl(post_nms, ~{
-    mle <- NULL
-    if(.x == "log_m_sex1"){
-      mle <- log(mpd$m[1])
-    }else if(.x == "log_m_sex2"){
-      mle <- log(mpd$m[2])
-    }else if(.x == "h"){
-      mle <- mpd$steepness
-    }else if(length(grep(q_pat, .x)) > 0){
-      num <- as.numeric(sub(q_pat, "\\1", .x))
-      mle <- log(mpd$q[num])
-    }else{
-      mle <- as.numeric(mpd[.x])
-    }
-    mle
-  }) %>%
-    `names<-`(post_nms)
-
+  # Remove M parameters from posteriors if it was not estimated
+  if(!m_est && !mal_m_est){
+    post_nms <- post_nms[post_nms != "log_m_sex1"]
+  }
+  if(!fem_m_est){
+    post_nms <- post_nms[post_nms != "log_m_sex2"]
+  }
   if(nrow(prior_specs) != length(post_nms)){
     stop("Number of rows in prior_specs and length of post_names are not the same, debug function")
   }
@@ -108,8 +107,7 @@ plot_priors_posts_mcmc <- function(model,
                p1 = as.numeric(specs$p1),
                p2 = as.numeric(specs$p2),
                fn = prior_fn,
-               nm = post_nms[.y],
-               mle = as.numeric(mpd_vals[.y]))
+               nm = post_nms[.y])
 
     xx$nm <- get_fancy_name(xx$nm)
     func <- function(x){xx$fn(x, xx$p1, xx$p2)}

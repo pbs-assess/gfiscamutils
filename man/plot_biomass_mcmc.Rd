@@ -19,7 +19,7 @@ plot_biomass_mcmc(
   ylim = NULL,
   line_width = 1,
   point_size = 2,
-  first_model_ribbon = FALSE,
+  first_model_ribbon = TRUE,
   refpts_ribbon = TRUE,
   alpha = 0.2,
   refpts_alpha = alpha,

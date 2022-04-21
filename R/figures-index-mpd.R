@@ -13,10 +13,11 @@
                             end_year = 2021,
                             legend_title = "Models",
                             palette = "Paired",
-                            base_color = "#000000",
+                            base_color = "black",
                             dodge = 0.3,
                             index_line_width = 0.5,
                             index_point_size = 2,
+                            index_color = "chocolate3",
                             fit_line_width = 0.5,
                             fit_point_size = 2,
                             angle_x_labels = FALSE){
@@ -168,8 +169,8 @@
      g <- ggplot(surv_indices, aes(x = year, y = biomass)) +
        #geom_ribbon(aes(ymin = lowerci, ymax = upperci), fill = "red", alpha = 0.3) +
        #geom_line(size = line_width, color = "red") +
-       geom_errorbar(aes(ymin = lowerci, ymax = upperci), alpha = 0.3) +
-       geom_point() +
+       geom_errorbar(aes(ymin = lowerci, ymax = upperci), alpha = 0.3, color = index_color) +
+       geom_point(, color = index_color) +
        geom_line(data = vals, aes(color = model), size = fit_line_width) +
        geom_point(data = vals, aes(color = model), size = fit_point_size)+
        facet_wrap(~survey_name, scales = "free_y") +

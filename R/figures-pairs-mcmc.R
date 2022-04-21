@@ -7,13 +7,15 @@
 #'
 #' @rdname plot_traces_mcmc
 #'
+#' @family MCMC diagnostics plots
 #' @return A [ggplot2::ggplot()] object made from the [GGally::ggpairs()] function
 #' @importFrom GGally ggpairs ggally_cor wrap ggally_text ggally_densityDiag
 #' @importFrom ggplot2 layer_scales
 #' @export
 plot_pairs_mcmc <- function(model,
-                            plot_sel = FALSE,
-                            param_rm = c("rho", "vartheta"),
+                            plot_sel = NULL,
+                            param_rm = c("rho",
+                                         "vartheta"),
                             list_param_names = FALSE){
 
   if(class(model) != mdl_cls){
@@ -32,12 +34,14 @@ plot_pairs_mcmc <- function(model,
   mc <- model$mcmc$params %>%
     as_tibble()
 
-  if(plot_sel){
-    mc <- mc %>%
-      select(contains("sel"))
-  }else{
-    mc <- mc %>%
-      select(-contains("sel"))
+  if(!is.null(plot_sel)){
+    if(plot_sel){
+      mc <- mc %>%
+        select(contains("sel"))
+    }else{
+      mc <- mc %>%
+        select(-contains("sel"))
+    }
   }
 
   if(list_param_names){

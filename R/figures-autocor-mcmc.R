@@ -2,12 +2,14 @@
 #'
 #' @rdname plot_traces_mcmc
 #'
+#' @family MCMC diagnostics plots
 #' @return A [ggplot2::ggplot()] object made from the [forecast::ggAcf()] function
 #' @importFrom forecast ggAcf
 #' @export
 plot_autocor <- function(model,
-                         plot_sel = FALSE,
-                         param_rm = NULL,
+                         plot_sel = NULL,
+                         param_rm = c("rho",
+                                      "vartheta"),
                          lag = 100,
                          list_param_names = FALSE,
                          ...){
@@ -28,12 +30,14 @@ plot_autocor <- function(model,
   mc <- model$mcmc$params %>%
     as_tibble()
 
-  if(plot_sel){
-    mc <- mc %>%
-      select(contains("sel"))
-  }else{
-    mc <- mc %>%
-      select(-contains("sel"))
+  if(!is.null(plot_sel)){
+    if(plot_sel){
+      mc <- mc %>%
+        select(contains("sel"))
+    }else{
+      mc <- mc %>%
+        select(-contains("sel"))
+    }
   }
 
   if(list_param_names){

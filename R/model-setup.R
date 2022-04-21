@@ -176,7 +176,7 @@ model_setup <- function(main_dirs = NULL,
         unique() %>%
         map_chr(~{.x})
 
-      nul <- map(unique_models_dirs, function(x, ...){create_rds_file(x, ...)}, ...)
+      nul <- future_map(unique_models_dirs, function(x, ...){create_rds_file(x, ...)}, ...)
 
       # This ensures that each unique model is loaded only once, even if it is in multiple
       # sensitivity groups

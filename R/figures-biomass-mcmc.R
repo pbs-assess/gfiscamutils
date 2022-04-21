@@ -74,7 +74,7 @@ plot_biomass_mcmc <- function(models,
                               ylim = NULL,
                               line_width = 1,
                               point_size = 2,
-                              first_model_ribbon = FALSE,
+                              first_model_ribbon = TRUE,
                               refpts_ribbon = TRUE,
                               alpha = 0.2,
                               refpts_alpha = alpha,
@@ -468,11 +468,13 @@ plot_biomass_mcmc <- function(models,
     g <- g +
       geom_ribbon(data = ts_quants_first, fill = model_colors[1], alpha = alpha) +
       geom_line(aes(color = model), size = line_width) +
+      geom_point(aes(color = model), size = point_size) +
       geom_line(aes(y = !!sym(quants[1]), color = model), size = 0.5, lty = 2) +
       geom_line(aes(y = !!sym(quants[3]), color = model), size = 0.5, lty = 2)
   }else{
     g <- g +
       geom_line(aes(color = model), size = line_width) +
+      geom_point(aes(color = model), size = point_size) +
       geom_line(aes(y = !!sym(quants[1]), color = model), size = 0.5, lty = 2) +
       geom_line(aes(y = !!sym(quants[3]), color = model), size = 0.5, lty = 2)
   }

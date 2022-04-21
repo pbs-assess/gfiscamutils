@@ -6,6 +6,7 @@
 #' be ignored. If the list item names are not defined, temporary names will be used
 #' @param surv_index The `survey_index` data frame which is the `dat` object in the output
 #' from the [read_data_file()] function
+#' @param gear A vector of gear numbers to show. If `NULL`, all will be shown
 #' @param start_year Year to start plot
 #' @param end_year Year to end plot
 #' @param legend_title Title text for the legend
@@ -16,6 +17,7 @@
 #' so each model fit appears more to the right than the previous one
 #' @param index_line_width The index data error bar and connecting line width
 #' @param index_point_size The index data point size
+#' @param index_color The color used for the observed index lines and points
 #' @param fit_line_width The model fit error bar and connecting line width
 #' @param fit_point_size The model fit point size
 #' @param errbar_width The width of the top and bottom crossbar of the errorbars
@@ -32,14 +34,16 @@ plot_index_mcmc <- function(models,
                             model_names = NULL,
                             type = c("fits", "resids"),
                             surv_index,
+                            gear = NULL,
                             start_year = 1995,
                             end_year = 2021,
                             legend_title = "Models",
                             palette = "Paired",
-                            base_color = "#000000",
+                            base_color = "black",
                             dodge = 0.3,
                             index_line_width = 0.5,
                             index_point_size = 2,
+                            index_color = "chocolate3",
                             fit_line_width = 0.5,
                             fit_point_size = 2,
                             errbar_width = 0.5,
@@ -105,6 +109,16 @@ plot_index_mcmc <- function(models,
          "differently in different data files. They must match exactly.")
   }
 
+  if(!is.null(gear)){
+    valid_gear_nums <- seq_along(surv_names)
+    if(!all(gear %in% valid_gear_nums)){
+      stop("One or more of the gear numbers you requested is outside the range of possible gears.\n",
+           "Available gears numbers are: ", paste(valid_gear_nums, collapse = ", "), "\n",
+           "Names for these are:\n", paste(surv_names, collapse = "\n"))
+    }
+    surv_abbrevs <- surv_abbrevs[gear]
+    surv_names <- surv_names[gear]
+  }
   # Add survey names to the table with a left join by survey_abbrev
   surv_abbrevs_df <- surv_abbrevs %>%
     enframe(name = NULL)
@@ -142,6 +156,11 @@ plot_index_mcmc <- function(models,
   vals <- vals[!sapply(vals, is.null)] %>%
     bind_rows() %>%
     select(model, survey_name, survey_abbrev, year, biomass, lowerci, upperci)
+
+  # Remove all rows where `survey_name` is `NULL` which is caused by it not being in the gear list
+  vals <- vals %>%
+    filter(!is.na(survey_name))
+#  browser()
 
   # Remove any missing indices from the `surv_abbrevs` vector and
   # the `surv_indices` data frame
@@ -200,11 +219,12 @@ plot_index_mcmc <- function(models,
   if(type == "fits"){
     g <- ggplot(surv_indices,
                 aes(x = year, y = biomass)) +
-      geom_line(size = index_line_width) +
-      geom_point(size = index_point_size) +
+      geom_line(size = index_line_width, color = index_color) +
+      geom_point(size = index_point_size, color = index_color) +
       geom_errorbar(aes(ymin = lowerci, ymax = upperci),
                     width = errbar_width,
-                    size = index_line_width) +
+                    size = index_line_width,
+                    color = index_color) +
       facet_wrap(~survey_name, scales = "free_y") +
       geom_line(data = vals,
                 aes(color = model),
@@ -220,7 +240,6 @@ plot_index_mcmc <- function(models,
       ylab("Index (thousand tonnes, DCPUE ~ kg/hr)") +
       scale_color_manual(values = model_colors) +
       guides(color = guide_legend(title = legend_title)) +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
   }else if(type == "resids"){
     g <- vals %>%
