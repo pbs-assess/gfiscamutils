@@ -1,3 +1,64 @@
+#' Determine if a model is a valid iSCAM model
+#'
+#' @details
+#' Check that the model has class `mdl_cls` and that
+#' the attribute `model_desc` is set to something other than `NULL`
+#' @param model A proposed iscam model object
+#' @return Logical
+#' @export
+is_iscam_model <- function(model){
+  if(mdl_cls %in% class(model)){
+    if(!is.null(attributes(model)$model_desc)){
+      return(TRUE)
+    }
+    warning("The model located at ", model$path, " ",
+            "does not have the `model_desc` attribute set as ",
+            "is therefore not accepted as a valid iscam_model")
+  }
+  warning("The model located at ", model$path, " ",
+          "is not of class `mdl_cls` ('iscam_model') and ",
+          "is therefore not accepted as a valid iscam_model")
+  FALSE
+}
+
+#' Determine if a list of models is a valid iSCAM model list
+#'
+#' @details
+#' Checks not only that the list has class `mdl_lst_cls` but that each list
+#' element is a valid iscam model object.
+#' @param model A proposed iscam model list object
+#' @return Logical
+is_iscam_model_list <- function(models){
+  if(mdl_lst_cls %in% class(models)){
+    mdls <- map_lgl(models, ~{
+      is_iscam_model(.x)
+    })
+    if(all(mdls)){
+      return(TRUE)
+    }
+  }
+  FALSE
+}
+
+#' Determine if a list is a valid iSCAM model group
+#'
+#' @details
+#' Checks not only that the list has class `mdl_grp_cls` but that each list
+#' element is a valid iscam model list object.
+#' @param lst A proposed iscam model group object
+#' @return Logical
+is_iscam_model_group <- function(lst){
+  if(mdl_grp_cls %in% class(lst)){
+    mdl_lsts <- map_lgl(lst, ~{
+      is_iscam_model_list(.x)
+    })
+    if(all(mdl_lsts)){
+      return(TRUE)
+    }
+  }
+  FALSE
+}
+
 #' Calculate age fits / age residuals and selectivity estimates quantiles
 #'
 #'  @param lst A list as output by [load_special()]
