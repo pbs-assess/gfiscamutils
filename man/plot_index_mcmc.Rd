@@ -95,9 +95,9 @@ Plot MPD index fits for a single or group of models
 }
 \seealso{
 Other Time series plotting functions: 
-\code{\link{plot_biomass_mcmc}()}
+\code{\link{plot_biomass_grid_mcmc}()}
 
 Other Time series plotting functions: 
-\code{\link{plot_biomass_mcmc}()}
+\code{\link{plot_biomass_grid_mcmc}()}
 }
 \concept{Time series plotting functions}

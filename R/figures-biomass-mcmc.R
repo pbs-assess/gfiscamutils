@@ -95,7 +95,9 @@ plot_biomass_mcmc <- function(models,
                               angle_x_labels = FALSE,
                               ...){
 
+  single_model <- FALSE
   if(class(models) == mdl_cls){
+    single_model <- TRUE
     models <- list(models)
     class(models) <- mdl_lst_cls
   }
@@ -488,9 +490,15 @@ plot_biomass_mcmc <- function(models,
     g <- g +
       theme(legend.position = leg_loc,
             legend.background = element_rect(fill = "white", color = "white"))
+    g <- g + labs(color = legend_title)
+  }else{
+    g <- g +
+      theme(legend.position = "none")
+    if(single_model){
+      g <- g + ggtitle(names(models)) +
+        theme(plot.title = element_text(hjust = 0.5, size = 10))
+    }
   }
-
-  g <- g + labs(color = legend_title)
 
   if(angle_x_labels){
     g <- g +
