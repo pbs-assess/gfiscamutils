@@ -7,7 +7,6 @@
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_biomass_mpd <- function(models,
-                             model_names = NULL,
                              rel = FALSE,
                              show_bo = TRUE,
                              legend_title = "Models",
@@ -32,7 +31,9 @@ plot_biomass_mpd <- function(models,
                              angle_x_labels = FALSE,
                              ...){
 
+  single_model <- FALSE
   if(class(models) == mdl_cls){
+    single_model <- TRUE
     models <- list(models)
     class(models) <- mdl_lst_cls
   }
@@ -55,35 +56,14 @@ plot_biomass_mpd <- function(models,
          "maximum number for the ", palette, " palette")
   }
 
-  # Set up model names for the legend
-  if(is.null(model_names)){
-    if(is.null(names(models))){
-      names(models) <- paste0("model ", seq_along(models))
-    }
-  }else{
-    if(length(model_names) != length(models)){
-      stop("`model_names` is not the same length as the `models` list")
-    }
-    names(models) <- model_names
-  }
+  # Set up model names for the legend/title
+  names(models) <- map_chr(models, ~{
+    as.character(attributes(.x)$model_desc)
+  })
+  names(models)[1] <- paste0(names(models)[1], append_base_txt)
 
   mpd <- map(models, ~{.x$mpd})
   nms <- names(mpd)
-  if(is.null(nms)){
-    if(is.null(model_names)){
-      nms <- paste0("Temporary model ", seq_len(length(ts_quants)), append_base_txt)
-    }else{
-      if(length(model_names) != length(models)){
-        stop("`model_names` is not the same length as the number of models supplied in `models`")
-      }else{
-        nms <- model_names
-        nms[1] <- paste0(nms[1], append_base_txt)
-      }
-    }
-    names(mpd) <- nms
-  }else{
-    names(mpd)[1] <- paste0(names(mpd)[1], append_base_txt)
-  }
 
   start_yr <- min(map_dbl(models, ~{.x$dat$start.yr})) + 1
   end_yr <- max(map_dbl(models, ~{.x$dat$end.yr}))
@@ -326,14 +306,18 @@ plot_biomass_mpd <- function(models,
       geom_point(data = init_vals, size = point_size)
   }
 
-  # Change the legend title
-  g <- g + labs(color = legend_title)
-
-  if(!is.null(leg_loc)){
-    # Add a legend
+  if(is.null(leg_loc)){
+    g <- g +
+      theme(legend.position = "none")
+    if(single_model){
+      g <- g + ggtitle(names(models)) +
+        theme(plot.title = element_text(hjust = 0.5, size = 10))
+    }
+  }else{
     g <- g +
       theme(legend.position = leg_loc,
             legend.background = element_rect(fill = "white", color = "white"))
+    g <- g + labs(color = legend_title)
   }
 
   if(angle_x_labels){

@@ -15,10 +15,6 @@
 #' It makes no sense to show B0 when a relative plot is asked for, it is always 1.
 #'
 #' @param models A list of iscam model objects (class [mdl_lst_cls])
-#' @param model_names Names to use for the models in the plots. The names of
-#' the list items in `models` will be used if they are present and this will
-#' be ignored. If the list item names are not defined, temporary names will be used
-#' (Temporary model 1, Temporary model 2, etc.)
 #' @param rel Logical. Make plot relative to initial estimate (B0), also known as depletion
 #' @param show_bo Logical. If `TRUE` and `rel == FALSE`, show the initial value
 #' on the plot (B0)
@@ -74,7 +70,6 @@
 #' @importFrom forcats fct_relevel
 #' @export
 plot_biomass_mcmc <- function(models,
-                              model_names = NULL,
                               rel = FALSE,
                               show_bo = TRUE,
                               legend_title = "Models",
@@ -110,11 +105,8 @@ plot_biomass_mcmc <- function(models,
     class(models) <- mdl_lst_cls
   }
 
-  if(class(models) != mdl_lst_cls){
-    stop("The `models` list is not a gfiscamutils::mdl_lst_cls class. If you are trying to plot ",
-         "a single model, modify it like this first:\n\n",
-         "model <- list(model)\n",
-         "class(model) <- mdl_lst_cls\n")
+  if(!is_iscam_model_list(models)){
+    stop("The `models` list is not a gfiscamutils::mdl_lst_cls class.")
   }
 
   if(!palette %in% rownames(brewer.pal.info)){
@@ -133,17 +125,11 @@ plot_biomass_mcmc <- function(models,
          "representing lower CI, median, and upper CI")
   }
 
-  # Set up model names for the legend
-  if(is.null(model_names)){
-    if(is.null(names(models))){
-      names(models) <- paste0("model ", seq_along(models))
-    }
-  }else{
-    if(length(model_names) != length(models)){
-      stop("`model_names` is not the same length as the `models` list")
-    }
-    names(models) <- model_names
-  }
+  # Set up model names for the legend/title
+  names(models) <- map_chr(models, ~{
+    as.character(attributes(.x)$model_desc)
+  })
+  names(models)[1] <- paste0(names(models)[1], append_base_txt)
 
   if(rel){
     show_bo <- FALSE
@@ -166,35 +152,13 @@ plot_biomass_mcmc <- function(models,
   })
   tso_quants <- map(models, ~{.x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "sbo"]})
   bmsy_quants <- map(models, ~{.x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "bmsy"]})
-
-  nms <- names(ts_quants)
-  if(is.null(nms)){
-    if(is.null(model_names)){
-      nms <- paste0("Temporary model ", seq_len(length(ts_quants)), append_base_txt)
-    }else{
-      if(length(model_names) != length(ts_quants)){
-        stop("`model_names` is not the same length as the number of models supplied in `models`")
-      }else{
-        nms <- model_names
-        nms[1] <- paste0(nms[1], append_base_txt)
-      }
-    }
-    names(ts_quants) <- nms
-    names(tso_quants) <- nms
-    names(bmsy_quants) <- nms
-  }else{
-    names(ts_quants)[1] <- paste0(names(ts_quants)[1], append_base_txt)
-    names(tso_quants)[1] <- paste0(names(tso_quants)[1], append_base_txt)
-  }
-
-  nms <- names(ts_quants)
   tso_quants <- tso_quants %>%
     bind_rows() %>%
-    mutate(model = nms, year = ifelse(show_bo, start_yr - 1, start_yr)) %>%
+    mutate(model = names(models), year = ifelse(show_bo, start_yr - 1, start_yr)) %>%
     select(model, year, everything())
   bmsy_quants <- bmsy_quants %>%
     bind_rows() %>%
-    mutate(model = nms, year = start_yr) %>%
+    mutate(model = names(models), year = start_yr) %>%
     select(model, year, everything())
 
   ts_quants <- imap(ts_quants, ~{
@@ -230,7 +194,7 @@ plot_biomass_mcmc <- function(models,
       filter(year %in% xlim[1]:xlim[2])
   }
   ts_quants <- ts_quants %>%
-    mutate(model = fct_relevel(model, nms))
+    mutate(model = fct_relevel(model, names(models)))
 
   # 'Dodge' B0 points manually
   if((nrow(tso_quants) - 1) * bo_dodge >= 1){
@@ -494,18 +458,18 @@ plot_biomass_mcmc <- function(models,
       geom_pointrange(data = tso_quants, aes(color = model))
   }
 
-  if(!is.null(leg_loc)){
-    g <- g +
-      theme(legend.position = leg_loc,
-            legend.background = element_rect(fill = "white", color = "white"))
-    g <- g + labs(color = legend_title)
-  }else{
+  if(is.null(leg_loc)){
     g <- g +
       theme(legend.position = "none")
     if(single_model){
       g <- g + ggtitle(names(models)) +
         theme(plot.title = element_text(hjust = 0.5, size = 10))
     }
+  }else{
+    g <- g +
+      theme(legend.position = leg_loc,
+            legend.background = element_rect(fill = "white", color = "white"))
+    g <- g + labs(color = legend_title)
   }
 
   if(angle_x_labels){
