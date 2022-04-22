@@ -163,8 +163,8 @@ other so the values and uncertainty can be easily seen for multiple models}
 \item{x_space}{The amount of x-interval space to pad the left and right of the plot
 with. To remove all padding, make this 0}
 
-\item{append_base_txt}{Text to append to the first model's name for display on the
-plot legend}
+\item{append_base_txt}{A vector of strings to append to the model names for
+display on the plot legend or title}
 
 \item{show_bo_lines}{Show the B0 lines at values given by `bo_refpts` for the
 first model in the `models` list}
@@ -243,12 +243,6 @@ If called with `rel = TRUE`, `show_bo` will be overridden to be `FALSE`.
 It makes no sense to show B0 when a relative plot is asked for, it is always 1.
 }
 \seealso{
-Other Time series plotting functions: 
-\code{\link{plot_index_mcmc}()}
-
-Other Time series plotting functions: 
-\code{\link{plot_index_mcmc}()}
-
 Other Time series plotting functions: 
 \code{\link{plot_index_mcmc}()}
 

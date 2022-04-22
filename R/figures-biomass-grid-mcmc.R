@@ -4,7 +4,7 @@
 #' @rdname plot_biomass_mcmc
 #' @param ... Further arguments to pass to [cowplot::plot_grid()]
 #'
-#' @family Time series plotting functions
+#' @family Biomass plotting functions
 #' @return A [cowplot::plot_grid()] object
 #' @export
 plot_biomass_grid_mcmc <- function(models,

@@ -40,8 +40,8 @@
 #' other so the values and uncertainty can be easily seen for multiple models
 #' @param x_space The amount of x-interval space to pad the left and right of the plot
 #' with. To remove all padding, make this 0
-#' @param append_base_txt Text to append to the first model's name for display on the
-#' plot legend
+#' @param append_base_txt A vector of strings to append to the model names for
+#' display on the plot legend or title
 #' @param show_bo_lines Show the B0 lines at values given by `bo_refpts` for the
 #' first model in the `models` list
 #' @param show_bmsy_lines Show the BMSY lines at values given by `bmsy_refpts` for the
@@ -63,7 +63,7 @@
 #' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
 #' @param ... Other graphical arguments
 #'
-#' @family Time series plotting functions
+#' @family Biomass plotting functions
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom tibble rownames_to_column
 #' @importFrom RColorBrewer brewer.pal
@@ -125,11 +125,17 @@ plot_biomass_mcmc <- function(models,
          "representing lower CI, median, and upper CI")
   }
 
+  if(!is.null(append_base_txt)){
+    length(append_base_txt) <- length(models)
+    # If `append_base_txt` is shorter than the number of models, append empty strings
+    # for remainder of items
+    append_base_txt[which(is.na(append_base_txt))] <- ""
+  }
   # Set up model names for the legend/title
   names(models) <- map_chr(models, ~{
     as.character(attributes(.x)$model_desc)
   })
-  names(models)[1] <- paste0(names(models)[1], append_base_txt)
+  names(models) <- paste0(names(models), append_base_txt)
 
   if(rel){
     show_bo <- FALSE
