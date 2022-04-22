@@ -11,13 +11,7 @@ is_iscam_model <- function(model){
     if(!is.null(attributes(model)$model_desc)){
       return(TRUE)
     }
-    warning("The model located at ", model$path, " ",
-            "does not have the `model_desc` attribute set as ",
-            "is therefore not accepted as a valid iscam_model")
   }
-  warning("The model located at ", model$path, " ",
-          "is not of class `mdl_cls` ('iscam_model') and ",
-          "is therefore not accepted as a valid iscam_model")
   FALSE
 }
 

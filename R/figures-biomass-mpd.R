@@ -315,7 +315,8 @@ plot_biomass_mpd <- function(models,
     }
   }else{
     g <- g +
-      theme(legend.position = leg_loc,
+      theme(legend.justification = leg_loc,
+            legend.position = leg_loc,
             legend.background = element_rect(fill = "white", color = "white"))
     g <- g + labs(color = legend_title)
   }

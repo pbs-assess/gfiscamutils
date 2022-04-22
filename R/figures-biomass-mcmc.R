@@ -58,8 +58,8 @@
 #' nothing will be shown
 #' @param probs A 3-element vector of probabilities that appear in the output data frames
 #' This is provided in case the data frames have more than three different quantile levels
-#' @param leg_loc See the `legend.position` argument in [ggplot2::theme()]. Use "none"
-#' to remove legend completely
+#' @param leg_loc A two-element vector describing the X-Y values between 0 and 1 to anchor
+#' the legend to. eg. c(1, 1) is the top right corner and c(0, 0) is the bottom left corner
 #' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
 #' @param ... Other graphical arguments
 #'
@@ -99,7 +99,7 @@ plot_biomass_mcmc <- function(models,
                               ...){
 
   single_model <- FALSE
-  if(class(models) == mdl_cls){
+  if(is_iscam_model(models)){
     single_model <- TRUE
     models <- list(models)
     class(models) <- mdl_lst_cls
@@ -467,7 +467,8 @@ plot_biomass_mcmc <- function(models,
     }
   }else{
     g <- g +
-      theme(legend.position = leg_loc,
+      theme(legend.justification = leg_loc,
+            legend.position = leg_loc,
             legend.background = element_rect(fill = "white", color = "white"))
     g <- g + labs(color = legend_title)
   }

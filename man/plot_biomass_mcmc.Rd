@@ -187,8 +187,8 @@ Used to display reference point lines if `show_bmsy_lines == TRUE`}
 \item{ind_letter}{A letter to place in the upper left corner of the plot. If `NULL`,
 nothing will be shown}
 
-\item{leg_loc}{See the `legend.position` argument in [ggplot2::theme()]. Use "none"
-to remove legend completely}
+\item{leg_loc}{A two-element vector describing the X-Y values between 0 and 1 to anchor
+the legend to. eg. c(1, 1) is the top right corner and c(0, 0) is the bottom left corner}
 
 \item{probs}{A 3-element vector of probabilities that appear in the output data frames
 This is provided in case the data frames have more than three different quantile levels}
