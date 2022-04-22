@@ -110,6 +110,7 @@ set_dirs <- function(nongit_dir = file.path(dirname(here()), paste0(basename(her
 #' are groups lists of models which are to be compared with each other in the document.
 #' This simplifies plotting and table functions
 #' @importFrom purrr map_chr flatten
+#' @importFrom furrr future_walk
 #' @export
 #' @examples
 #' \dontrun{
@@ -162,13 +163,18 @@ model_setup <- function(main_dirs = NULL,
     sens_models_text <- sens_models_text %>% map(~{factor(.x, levels = .x)})
   }
 
-  # model_list is a list of three lists, one for the base model, one for the bridge models (also a list),
-  # and one for the sensitivity models (also a list)
-  model_list <- list(list(main_dirs$base_model_dir),
-                     main_dirs$bridge_models_dirs,
-                     main_dirs$sens_models_dirs)
+  # model_list is a list of three lists, one for the base model, one for the bridge models,
+  # and one for the sensitivity models
+  model_list <- list(base_model_groups = list(main_dirs$base_model_dir),
+                     bridge_model_groups = main_dirs$bridge_models_dirs,
+                     sens_model_groups = main_dirs$sens_models_dirs)
 
-  j <- map(model_list, function(.x, ...){
+  model_names_list <- list(base_model_groups = "Base model",
+                           bridge_model_groups = bridge_models_text,
+                           sens_model_groups = sens_models_text)
+
+  plan("multisession")
+  j <- imap(model_list, function(.x, .y, ...){
     models <- NULL
     if(!is.null(.x)){
       unique_models_dirs <- .x %>%
@@ -176,42 +182,39 @@ model_setup <- function(main_dirs = NULL,
         unique() %>%
         map_chr(~{.x})
 
-      nul <- future_map(unique_models_dirs, function(x, ...){create_rds_file(x, ...)}, ...)
+      future_walk(unique_models_dirs, function(x, ...){
+                    create_rds_file(x, ...)},
+                  ...)
 
       # This ensures that each unique model is loaded only once, even if it is in multiple
       # sensitivity groups
       unique_models <- map(unique_models_dirs, ~{load_rds_file(.x)}) %>%
-        set_names(unique_models_dirs)
+        `names<-`(unique_models_dirs)
 
-      # sens_models is a list of lists of sensitivities of the same structure as sens_models_dirs.
-      # the base_model is first in each sensitivity group list
-      models <- map(.x, ~{
-        map(.x, ~{
-          unique_models[[match(.x, unique_models_dirs)]]
-        })
+      models <- map2(.x, model_names_list[[.y]], ~{
+        map2(.x, .y, ~{
+          k <- unique_models[[match(.x, unique_models_dirs)]] %>%
+            `class<-`(mdl_cls)
+          # Assign description text to the model (from bridge_model_text and sens_model_text)
+          attr(k, "model_desc") <- .y
+          k
+        }) %>%
+          `names<-`(.y) %>%
+          `class<-`(mdl_lst_cls)
       })
     }
   }, ...)
+  plan()
 
   base_model <- j[[1]][[1]]
-  names(base_model) <- "Base model"
-  class(base_model) <- mdl_lst_cls
-
   bridge_grps <- j[[2]]
-  bridge_grps <- map2(bridge_grps, bridge_models_text, ~{
-    names(.x) <- factor(.y)
-    class(.x) <- mdl_lst_cls
-    .x
-  })
-  class(bridge_grps) <- mdl_grp_cls
-
+  if(!is.null(bridge_grps)){
+    class(bridge_grps) <- mdl_grp_cls
+  }
   sens_grps <- j[[3]]
-  sens_grps <- map2(sens_grps, sens_models_text, ~{
-    names(.x) <- factor(.y)
-    class(.x) <- mdl_lst_cls
-    .x
-  })
-  class(sens_grps) <- mdl_grp_cls
+  if(!is.null(sens_grps)){
+    class(sens_grps) <- mdl_grp_cls
+  }
 
   list(base_model = base_model,
        bridge_grps = bridge_grps,
