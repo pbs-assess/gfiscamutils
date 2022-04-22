@@ -1,10 +1,18 @@
 #' Plot the MCMC spawning biomass trajectories for iscam models in either
 #' absolute or relative form.
 #'
-#' @details Cannot make more than one model have a shaded credible interval. It is
-#' too difficult to tell what's going on with colors overlapping.If called with
-#' `rel = TRUE`, `show_bo` will be overridden to be `FALSE`. It makes no sense
-#' to show B0 when a relative plot is asked for, it is always 1.
+#' @details
+#' The model description text will appear in the legend if `models` length
+#' is greater than 1, and as a title if there is only one model. The
+#' description text is found in the `model_desc` attribute of a
+#' `mdl_cls` class ("iscam_model") object. The attribute is set in the
+#' [model_setup()] function, from either the `bridge_model_text` or
+#' `sens_model_text` arguments.
+#'
+#' This function cannot have more than one model with a shaded credible interval.
+#' It is too difficult to tell what's going on with colors overlapping.
+#' If called with `rel = TRUE`, `show_bo` will be overridden to be `FALSE`.
+#' It makes no sense to show B0 when a relative plot is asked for, it is always 1.
 #'
 #' @param models A list of iscam model objects (class [mdl_lst_cls])
 #' @param model_names Names to use for the models in the plots. The names of
