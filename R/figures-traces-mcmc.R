@@ -11,30 +11,32 @@
 #' `param_rm` argument, so you know what the names to be removed can be
 #' @param priors_only Logical. If `TRUE`, plot the priors only. If `FALSE`,
 #' plot both priors and associated posterior histograms
+#' @param title_text_size Add the model description as a title with this font size. The text
+#' comes from the `model_desc` attribute of `model`. If this is `NULL`, don't show a title
 #' @param ... Additional arguments passed to [cowplot::plot_grid()]
 #'
 #' @family MCMC diagnostics plots
 #' @return A [ggplot2::gglot()] object
+#' @importFrom cowplot ggdraw draw_label
 #' @export
 plot_traces_mcmc <- function(model,
                              plot_sel = FALSE,
                              param_rm = c("rho",
                                           "vartheta"),
                              list_param_names = FALSE,
+                             text_title_size = 12,
                              ...){
 
-  if(class(model) != mdl_cls){
-    if(class(model) == mdl_lst_cls){
-      stop("The `model` argument is of class `gfiscamutils::mdl_lst_cls`. ",
-           "This function requires that `model` be an object of class ",
-           "`gfiscamutils::mdl_cls`. Select one element of the list (which ",
-           "is a single model), and modify it like this, then call this function ",
-           "again with `model` as your argument:\n\n",
-           "model <- list(model)\n",
-           "class(model) <- mdl_lst_cls\n")
+  if(!is_iscam_model(model)){
+    if(is_iscam_model_list(model)){
+      stop("`model` is not an iscam model object, it is an iscam model ",
+           "list object")
     }
-    stop("The `model` argument is not of class `gfiscamutils::mdl_cls`")
+    stop("`model` is not an iscam model object")
   }
+
+  # Set up model description for the title
+  model_desc <- as.character(attributes(model)$model_desc)
 
   mc <- model$mcmc$params %>%
     as_tibble()
@@ -88,5 +90,14 @@ plot_traces_mcmc <- function(model,
       theme(plot.title = element_text(face = "bold.italic", hjust = 0.5))
   })
 
-  plot_grid(plotlist = g_lst, ...)
+  if(is.null(text_title_size)){
+    plot_grid(plotlist = g_lst, ...)
+  }else{
+    title <- ggdraw() +
+      draw_label(model_desc,
+                 size = text_title_size,
+                 x = 0.5)
+    p <- plot_grid(plotlist = g_lst, ...)
+    plot_grid(title, p, ncol = 1, rel_heights = c(0.05, 1), ...)
+  }
 }

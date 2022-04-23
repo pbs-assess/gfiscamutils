@@ -18,7 +18,7 @@ plot_age_resids_mcmc <- function(model,
                                  ci_color = "red",
                                  ci_alpha = 0.3,
                                  ylim = c(-3, 3),
-                                 text_title_size = 10,
+                                 text_title_size = 12,
                                  leg_loc = c(1, 1),
                                  angle_x_labels = FALSE){
 

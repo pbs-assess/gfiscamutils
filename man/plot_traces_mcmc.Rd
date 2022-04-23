@@ -14,6 +14,7 @@ plot_autocor(
   param_rm = c("rho", "vartheta"),
   lag = 100,
   list_param_names = FALSE,
+  text_title_size = 12,
   ...
 )
 
@@ -21,13 +22,15 @@ plot_pairs_mcmc(
   model,
   plot_sel = NULL,
   param_rm = c("rho", "vartheta"),
-  list_param_names = FALSE
+  list_param_names = FALSE,
+  text_title_size = 12
 )
 
 plot_priors_posts_mcmc(
   model,
   param_rm = c("sel", "bo", "vartheta", "tau", "sigma", "bmsy"),
   priors_only = FALSE,
+  text_title_size = 12,
   ...
 )
 
@@ -36,6 +39,7 @@ plot_traces_mcmc(
   plot_sel = FALSE,
   param_rm = c("rho", "vartheta"),
   list_param_names = FALSE,
+  text_title_size = 12,
   ...
 )
 }
@@ -57,6 +61,9 @@ by this function, but do not actually plot it. This is to help you to use the
 
 \item{priors_only}{Logical. If `TRUE`, plot the priors only. If `FALSE`,
 plot both priors and associated posterior histograms}
+
+\item{title_text_size}{Add the model description as a title with this font size. The text
+comes from the `model_desc` attribute of `model`. If this is `NULL`, don't show a title}
 }
 \value{
 A [ggplot2::ggplot()] object made from the [forecast::ggAcf()] function

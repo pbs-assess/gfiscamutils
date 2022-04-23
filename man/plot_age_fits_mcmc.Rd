@@ -16,7 +16,7 @@ plot_age_fits_mcmc(
   ci_linetype = c("dotted", "solid", "dashed", "dotdash", "longdash", "twodash"),
   ci_color = "red",
   ci_alpha = 0.3,
-  text_title_size = 10,
+  text_title_size = 12,
   angle_x_labels = FALSE
 )
 
@@ -32,7 +32,7 @@ plot_age_resids_mcmc(
   ci_color = "red",
   ci_alpha = 0.3,
   ylim = c(-3, 3),
-  text_title_size = 10,
+  text_title_size = 12,
   leg_loc = c(1, 1),
   angle_x_labels = FALSE
 )

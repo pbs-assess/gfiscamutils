@@ -28,6 +28,7 @@ plot_biomass_mpd <- function(models,
                              bmsy_refpt_colors = c("salmon", "darkgreen"),
                              ind_letter = NULL,
                              leg_loc = NULL,
+                             text_title_size = 12,
                              angle_x_labels = FALSE,
                              ...){
 
@@ -55,12 +56,17 @@ plot_biomass_mpd <- function(models,
     stop("Cannot plot more than ", palette_info$maxcolors, " models because that is the ",
          "maximum number for the ", palette, " palette")
   }
-
+  if(!is.null(append_base_txt)){
+    length(append_base_txt) <- length(models)
+    # If `append_base_txt` is shorter than the number of models, append empty strings
+    # for remainder of items
+    append_base_txt[which(is.na(append_base_txt))] <- ""
+  }
   # Set up model names for the legend/title
   names(models) <- map_chr(models, ~{
     as.character(attributes(.x)$model_desc)
   })
-  names(models)[1] <- paste0(names(models)[1], append_base_txt)
+  names(models) <- paste0(names(models), append_base_txt)
 
   mpd <- map(models, ~{.x$mpd})
   nms <- names(mpd)
@@ -311,7 +317,7 @@ plot_biomass_mpd <- function(models,
       theme(legend.position = "none")
     if(single_model){
       g <- g + ggtitle(names(models)) +
-        theme(plot.title = element_text(hjust = 0.5, size = 10))
+        theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
     }
   }else{
     g <- g +

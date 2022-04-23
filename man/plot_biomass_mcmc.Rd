@@ -40,6 +40,7 @@ plot_biomass_mcmc(
   ind_letter = NULL,
   leg_loc = NULL,
   probs = c(0.025, 0.5, 0.975),
+  text_title_size = 12,
   angle_x_labels = FALSE,
   ...
 )
@@ -67,6 +68,7 @@ plot_biomass_mpd(
   bmsy_refpt_colors = c("salmon", "darkgreen"),
   ind_letter = NULL,
   leg_loc = NULL,
+  text_title_size = 12,
   angle_x_labels = FALSE,
   ...
 )
@@ -202,6 +204,9 @@ This is provided in case the data frames have more than three different quantile
 \item{ro_ribbon}{See `refpts_ribbon` in [plot_biomass_mcmc()]}
 
 \item{ro_alpha}{See `refpts_alpha` in [plot_biomass_mcmc()]}
+
+\item{title_text_size}{Add the model description as a title with this font size. The text
+comes from the `model_desc` attribute of `model`. If this is `NULL`, don't show a title}
 }
 \value{
 A [cowplot::plot_grid()] object
@@ -230,17 +235,18 @@ and recruitment for both absolute and relative cases.
 Plot the MCMC recruitment time series trajectories for iscam models.
 }
 \details{
+This function cannot have more than one model with a shaded credible interval.
+It is too difficult to tell what's going on with colors overlapping.
+
+If called with `rel = TRUE`, `show_bo` will be overridden to be `FALSE`.
+It makes no sense to show B0 when a relative plot is asked for, it is always 1.
+
 The model description text will appear in the legend if `models` length
 is greater than 1, and as a title if there is only one model. The
 description text is found in the `model_desc` attribute of a
 `mdl_cls` class ("iscam_model") object. The attribute is set in the
 [model_setup()] function, from either the `bridge_model_text` or
 `sens_model_text` arguments.
-
-This function cannot have more than one model with a shaded credible interval.
-It is too difficult to tell what's going on with colors overlapping.
-If called with `rel = TRUE`, `show_bo` will be overridden to be `FALSE`.
-It makes no sense to show B0 when a relative plot is asked for, it is always 1.
 }
 \seealso{
 Other Time series plotting functions: 

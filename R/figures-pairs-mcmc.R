@@ -1,6 +1,7 @@
 #' Pairs plots for parameters in an MCMC run
 #'
-#' @details Show correlations between parameters as scatterplots in the lower
+#' @details
+#' Show correlations between parameters as scatterplots in the lower
 #' triangular area, density of each parameter in the diagonals, and the correlation
 #' value with text size scaled to be larger for higher correlations in the upper
 #' triangular area
@@ -16,20 +17,19 @@ plot_pairs_mcmc <- function(model,
                             plot_sel = NULL,
                             param_rm = c("rho",
                                          "vartheta"),
-                            list_param_names = FALSE){
+                            list_param_names = FALSE,
+                            text_title_size = 12){
 
-  if(class(model) != mdl_cls){
-    if(class(model) == mdl_lst_cls){
-      stop("The `model` argument is of class `gfiscamutils::mdl_lst_cls`. ",
-           "This function requires that `model` be an object of class ",
-           "`gfiscamutils::mdl_cls`. Select one element of the list (which ",
-           "is a single model), and modify it like this, then call this function ",
-           "again with `model` as your argument:\n\n",
-           "model <- list(model)\n",
-           "class(model) <- mdl_lst_cls\n")
+  if(!is_iscam_model(model)){
+    if(is_iscam_model_list(model)){
+      stop("`model` is not an iscam model object, it is an iscam model ",
+           "list object")
     }
-    stop("The `model` argument is not of class `gfiscamutils::mdl_cls`")
+    stop("`model` is not an iscam model object")
   }
+
+  # Set up model description for the title
+  model_desc <- as.character(attributes(model)$model_desc)
 
   mc <- model$mcmc$params %>%
     as_tibble()
@@ -181,6 +181,11 @@ plot_pairs_mcmc <- function(model,
                lower = list(continuous = lower_triangle)) +
     # Rotate the right-hand parameter names so they are the same as the rest
     theme(strip.text.y.right = element_text(angle = 0))
+
+  if(!is.null(text_title_size)){
+    g <- g + ggtitle(model_desc) +
+      theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
+  }
 
   g
 }

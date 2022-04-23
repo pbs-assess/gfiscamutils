@@ -2,17 +2,18 @@
 #' absolute or relative form.
 #'
 #' @details
+#' This function cannot have more than one model with a shaded credible interval.
+#' It is too difficult to tell what's going on with colors overlapping.
+#'
+#' If called with `rel = TRUE`, `show_bo` will be overridden to be `FALSE`.
+#' It makes no sense to show B0 when a relative plot is asked for, it is always 1.
+#'
 #' The model description text will appear in the legend if `models` length
 #' is greater than 1, and as a title if there is only one model. The
 #' description text is found in the `model_desc` attribute of a
 #' `mdl_cls` class ("iscam_model") object. The attribute is set in the
 #' [model_setup()] function, from either the `bridge_model_text` or
 #' `sens_model_text` arguments.
-#'
-#' This function cannot have more than one model with a shaded credible interval.
-#' It is too difficult to tell what's going on with colors overlapping.
-#' If called with `rel = TRUE`, `show_bo` will be overridden to be `FALSE`.
-#' It makes no sense to show B0 when a relative plot is asked for, it is always 1.
 #'
 #' @param models A list of iscam model objects (class [mdl_lst_cls])
 #' @param rel Logical. Make plot relative to initial estimate (B0), also known as depletion
@@ -60,6 +61,8 @@
 #' This is provided in case the data frames have more than three different quantile levels
 #' @param leg_loc A two-element vector describing the X-Y values between 0 and 1 to anchor
 #' the legend to. eg. c(1, 1) is the top right corner and c(0, 0) is the bottom left corner
+#' @param title_text_size Add the model description as a title with this font size. The text
+#' comes from the `model_desc` attribute of `model`. If this is `NULL`, don't show a title
 #' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
 #' @param ... Other graphical arguments
 #'
@@ -95,6 +98,7 @@ plot_biomass_mcmc <- function(models,
                               ind_letter = NULL,
                               leg_loc = NULL,
                               probs = c(0.025, 0.5, 0.975),
+                              text_title_size = 12,
                               angle_x_labels = FALSE,
                               ...){
 
@@ -131,6 +135,7 @@ plot_biomass_mcmc <- function(models,
     # for remainder of items
     append_base_txt[which(is.na(append_base_txt))] <- ""
   }
+
   # Set up model names for the legend/title
   names(models) <- map_chr(models, ~{
     as.character(attributes(.x)$model_desc)
@@ -469,7 +474,7 @@ plot_biomass_mcmc <- function(models,
       theme(legend.position = "none")
     if(single_model){
       g <- g + ggtitle(names(models)) +
-        theme(plot.title = element_text(hjust = 0.5, size = 10))
+        theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
     }
   }else{
     g <- g +

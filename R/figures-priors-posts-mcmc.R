@@ -33,20 +33,19 @@ plot_priors_posts_mcmc <- function(model,
                                                 "sigma",
                                                 "bmsy"),
                                    priors_only = FALSE,
+                                   text_title_size = 12,
                                    ...){
 
-  if(class(model) != mdl_cls){
-    if(class(model) == mdl_lst_cls){
-      stop("The `model` argument is of class `gfiscamutils::mdl_lst_cls`. ",
-           "This function requires that `model` be an object of class ",
-           "`gfiscamutils::mdl_cls`. Select one element of the list (which ",
-           "is a single model), and modify it like this, then call this function ",
-           "again with `model` as your argument:\n\n",
-           "model <- list(model)\n",
-           "class(model) <- mdl_lst_cls\n")
+  if(!is_iscam_model(model)){
+    if(is_iscam_model_list(model)){
+      stop("`model` is not an iscam model object, it is an iscam model ",
+           "list object")
     }
-    stop("The `model` argument is not of class `gfiscamutils::mdl_cls`")
+    stop("`model` is not an iscam model object")
   }
+
+  # Set up model description for the title
+  model_desc <- as.character(attributes(model)$model_desc)
 
   f_nms <- c(dunif, dnorm, dlnorm, dbeta, dgamma)
 
@@ -188,5 +187,14 @@ plot_priors_posts_mcmc <- function(model,
     g
   })
 
-  plot_grid(plotlist = g_lst, ...)
+  if(is.null(text_title_size)){
+    plot_grid(plotlist = g_lst, ...)
+  }else{
+    title <- ggdraw() +
+      draw_label(model_desc,
+                 size = text_title_size,
+                 x = 0.5)
+    p <- plot_grid(plotlist = g_lst, ...)
+    plot_grid(title, p, ncol = 1, rel_heights = c(0.05, 1), ...)
+  }
 }
