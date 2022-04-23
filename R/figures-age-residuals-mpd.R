@@ -1,30 +1,22 @@
-#' Plot the age residuals for an MCMC model
+#' Plot the age fits for an MPD model
 #'
-#' @rdname plot_age_fits_mcmc
+#' @rdname plot_age_mcmc
 #'
-#' @family Age plotting functions
 #' @return A [ggplot2::ggplot()] object
+#' @importFrom ggplot2 geom_linerange facet_grid
 #' @export
-plot_age_resids_mcmc <- function(model,
-                                 gear = 1,
-                                 type = c("age", "year", "birth_year"),
-                                 probs = c(0.025, 0.5, 0.975),
-                                 comp_color = "black",
-                                 comp_point_size = 0.5,
-                                 ci_type = c("both", "line", "ribbon"),
-                                 ci_linetype =  c("dotted", "solid",
-                                                  "dashed", "dotdash",
-                                                  "longdash", "twodash"),
-                                 ci_color = "red",
-                                 ci_alpha = 0.3,
-                                 ylim = c(-3, 3),
-                                 text_title_size = 12,
-                                 leg_loc = c(1, 1),
-                                 angle_x_labels = FALSE){
+plot_age_resids_mpd <- function(model,
+                                gear = 1,
+                                type = c("age", "year", "birth_year"),
+                                comp_color = "black",
+                                comp_point_size = 0.5,
+                                fir_line_color = "red",
+                                ylim = c(-3, 3),
+                                text_title_size = 12,
+                                leg_loc = c(1, 1),
+                                angle_x_labels = FALSE){
 
   type <- match.arg(type)
-  ci_type <- match.arg(ci_type)
-  ci_linetype <- match.arg(ci_linetype)
 
   if(!is_iscam_model(model)){
     if(is_iscam_model_list(model)){
@@ -42,11 +34,6 @@ plot_age_resids_mcmc <- function(model,
          call. = FALSE)
   }
 
-  if(length(probs) != 3){
-    stop("`probs` has length ", length(probs), " but must be a vector ",
-         "of three values representing lower CI, median, and upper CI")
-  }
-
   nsex <- model$dat$num.sex
   ages <- as.character(model$dat$start.age:model$dat$end.age)
   gear_names <- model$dat$age_gear_names
@@ -62,50 +49,27 @@ plot_age_resids_mcmc <- function(model,
   comps <- comps %>%
     select(-sample_size)
 
-  vals <- model$mcmccalcs$ageresids_quants %>%
+  vals <- model$mpd$a_nu[[gear]] %>%
+    select(year, sex, ages) %>%
+    mutate(gear = gear_names[gear]) %>%
     filter(gear == gear_name) %>%
     select(-gear) %>%
     mutate(sex = ifelse(sex %in% c(0, 2), "Female", "Male"))
 
-  prob_cols <- paste0(prettyNum(probs * 100), "%")
-  quant_vals <- unique(vals$quant)
-  quants <- imap_chr(prob_cols, ~{
-    mtch <- grep(.x, quant_vals, value = TRUE)
-    if(!length(mtch)){
-      stop("One of the values in `probs` does not appear in the MCMC ",
-           "output data: ", .x)
-    }
-    mtch
-  })
+  # Make long version of the resids data frame
+  vals <- vals %>%
+    pivot_longer(!c(year, sex), names_to = "age", values_to = "prop") %>%
+    mutate(age = factor(as.numeric(age))) %>%
+    mutate(year = factor(year))
 
-  get_val <- function(d, q){
-    d %>%
-      filter(quant == q) %>%
-      select(-quant) %>%
-      pivot_longer(-c(year, sex), names_to = "age", values_to = "prop") %>%
-      mutate(age = as.numeric(age))
-  }
-  lo_vals <- get_val(vals, quants[1]) %>%
-    mutate(lo_prop = prop)
-  med_vals <- get_val(vals, quants[2])
-  hi_vals <- get_val(vals, quants[3]) %>%
-    mutate(hi_prop = prop)
-  rib_vals <- lo_vals %>%
-    left_join(hi_vals, by = c("year", "sex", "age")) %>%
-    select(-c(prop.x, prop.y))
-
-  med_vals <- med_vals %>%
-    mutate(age = factor(age),
-           year = factor(year))
   if(type == "age"){
   }else if(type == "year"){
   }else if(type == "birth_year"){
-    med_vals <- med_vals %>%
-      mutate(birth_year = factor(as.numeric(as.character(year)) -
-                                   as.numeric(as.character(age))))
+    vals <- vals %>%
+      mutate(birth_year = factor(as.numeric(as.character(year)) - as.numeric(as.character(age))))
   }
 
-  g <- ggplot(med_vals, aes(!!sym(type), prop, fill = sex)) +
+  g <- ggplot(vals, aes(!!sym(type), prop, fill = sex)) +
     stat_boxplot(geom = "errorbar") +
     geom_boxplot(outlier.colour = "black",
                  outlier.shape = 3,
@@ -144,4 +108,3 @@ plot_age_resids_mcmc <- function(model,
 
   g
 }
-

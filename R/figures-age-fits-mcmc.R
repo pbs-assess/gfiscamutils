@@ -48,6 +48,9 @@ plot_age_fits_mcmc <- function(model,
     stop("`model` is not an iscam model object")
   }
 
+  # Set up model description for the title
+  model_desc <- as.character(attributes(model)$model_desc)
+
   if(gear < 1 || gear > length(model$mpd$a_obs)){
     stop("gear must be between 1 and ", length(model$mpd$a_obs),
          call. = FALSE)
@@ -57,9 +60,6 @@ plot_age_fits_mcmc <- function(model,
     stop("`probs` has length ", length(probs), " but must be a vector of three values ",
          "representing lower CI, median, and upper CI")
   }
-
-  # Set up model description for the title
-  model_desc <- as.character(attributes(model)$model_desc)
 
   nsex <- model$dat$num.sex
   ages <- as.character(model$dat$start.age:model$dat$end.age)
@@ -132,9 +132,10 @@ plot_age_fits_mcmc <- function(model,
     ylab("Proportion")
 
   if(!is.null(text_title_size)){
-    g <- g + ggtitle(model_desc, subtitle = model$dat$age_gear_names[gear]) +
-        theme(plot.title = element_text(hjust = 0.5, size = text_title_size),
-              plot.subtitle = element_text(hjust = 0.5, size = text_title_size))
+    g <- g + ggtitle(model_desc,
+                     subtitle = paste0(model$dat$age_gear_names[gear], " Index")) +
+      theme(plot.title = element_text(hjust = 0.5, size = text_title_size),
+            plot.subtitle = element_text(hjust = 0.5, size = text_title_size))
   }
 
   if(angle_x_labels){
