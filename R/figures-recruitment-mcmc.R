@@ -1,6 +1,7 @@
 #' Plot the MCMC recruitment time series trajectories for iscam models.
 #'
 #' @rdname plot_biomass_mcmc
+#'
 #' @family Time series plotting functions
 #' @param show_ro Show the initial recruitment, R0 median line and credible interval
 #' @param ro_ribbon See `refpts_ribbon` in [plot_biomass_mcmc()]
@@ -9,7 +10,6 @@
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_recr_mcmc <- function(models,
-                           model_names = NULL,
                            show_ro = TRUE,
                            ro_color = base_color,
                            legend_title = "Models",
@@ -27,19 +27,19 @@ plot_recr_mcmc <- function(models,
                            ind_letter = NULL,
                            leg_loc = NULL,
                            probs = c(0.025, 0.5, 0.975),
+                           text_title_size = 12,
                            angle_x_labels = FALSE,
                            ...){
 
-  if(class(models) == mdl_cls){
+  single_model <- FALSE
+  if(is_iscam_model(models)){
+    single_model <- TRUE
     models <- list(models)
     class(models) <- mdl_lst_cls
   }
 
-  if(class(models) != mdl_lst_cls){
-    stop("The `models` list is not a gfiscamutils::mdl_lst_cls class. If you are trying to plot ",
-         "a single model, modify it like this first:\n\n",
-         "model <- list(model)\n",
-         "class(model) <- mdl_lst_cls\n")
+  if(!is_iscam_model_list(models)){
+    stop("The `models` list is not a gfiscamutils::mdl_lst_cls class.")
   }
 
   if(!palette %in% rownames(brewer.pal.info)){
@@ -58,17 +58,18 @@ plot_recr_mcmc <- function(models,
          "representing lower CI, median, and upper CI")
   }
 
-  # Set up model names for the legend
-  if(is.null(model_names)){
-    if(is.null(names(models))){
-      names(models) <- paste0("model ", seq_along(models))
-    }
-  }else{
-    if(length(model_names) != length(models)){
-      stop("`model_names` is not the same length as the `models` list")
-    }
-    names(models) <- model_names
+  if(!is.null(append_base_txt)){
+    length(append_base_txt) <- length(models)
+    # If `append_base_txt` is shorter than the number of models, append empty strings
+    # for remainder of items
+    append_base_txt[which(is.na(append_base_txt))] <- ""
   }
+
+  # Set up model names for the legend/title
+  names(models) <- map_chr(models, ~{
+    as.character(attributes(.x)$model_desc)
+  })
+  names(models) <- paste0(names(models), append_base_txt)
 
   start_yr <- map_dbl(models, ~{.x$dat$start.yr + 1}) %>% min
   end_yr <- map_dbl(models, ~{.x$dat$end.yr + 1}) %>% max
@@ -286,13 +287,20 @@ plot_recr_mcmc <- function(models,
       geom_pointrange(data = tso_quants, aes(color = model))
   }
 
-  if(!is.null(leg_loc)){
+  if(is.null(leg_loc)){
     g <- g +
-      theme(legend.position = leg_loc,
-            legend.background = element_rect(fill = "white", color = "white"))
+      theme(legend.position = "none")
+    if(single_model){
+      g <- g + ggtitle(names(models)) +
+        theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
+    }
+  }else{
+    g <- g +
+      theme(legend.justification = leg_loc,
+            legend.position = leg_loc,
+            legend.background = element_rect(fill = "white", color = "white")) +
+      labs(color = legend_title)
   }
-
-  g <- g + labs(color = legend_title)
 
   if(angle_x_labels){
     g <- g +

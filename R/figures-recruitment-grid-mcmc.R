@@ -1,5 +1,5 @@
-#' Plot a grid of biomass plots, each with one model only so that
-#' the B0 and/or the BMSY lines and credible intervals can be viewed
+#' Plot a grid of recruitment plots, each with one model only so that
+#' the R0 line and credible intervals can be viewed
 #'
 #' @rdname plot_biomass_mcmc
 #' @param ... Further arguments to pass to [cowplot::plot_grid()]
@@ -7,8 +7,8 @@
 #' @family Biomass plotting functions
 #' @return A [cowplot::plot_grid()] object
 #' @export
-plot_biomass_grid_mcmc <- function(models,
-                                   ...){
+plot_recr_grid_mcmc <- function(models,
+                                ...){
 
   if(class(models) != mdl_lst_cls){
     if(class(models) == mdl_cls){
@@ -19,7 +19,7 @@ plot_biomass_grid_mcmc <- function(models,
          call. = FALSE)
   }
   g_lst <- map(models, function(.x, ...){
-    plot_biomass_mcmc(.x, ...)
+    plot_recr_mcmc(.x, ...)
   }, ...)
 
   plot_grid(plotlist = g_lst)

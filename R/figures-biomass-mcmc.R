@@ -480,8 +480,8 @@ plot_biomass_mcmc <- function(models,
     g <- g +
       theme(legend.justification = leg_loc,
             legend.position = leg_loc,
-            legend.background = element_rect(fill = "white", color = "white"))
-    g <- g + labs(color = legend_title)
+            legend.background = element_rect(fill = "white", color = "white")) +
+      labs(color = legend_title)
   }
 
   if(angle_x_labels){
