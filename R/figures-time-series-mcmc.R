@@ -7,6 +7,13 @@
 #' A list of multiple models must have a class attribute of `mdl_lst_cls` and
 #' each model in the list must have a class attribute of `mdl_cls`.
 #'
+#' The model description text will appear in a legend if `models` length
+#' is greater than 1, and as a title if there is only one model. The
+#' description text is found in the `model_desc` attribute of a
+#' `mdl_cls` class ("iscam_model") object. The attribute is set in the
+#' [model_setup()] function, from either the `bridge_model_text` or
+#' `sens_model_text` arguments.
+
 #' @param models A list of iscam model objects (class [mdl_lst_cls])
 #' @param quant_df A value which can be found in the `model$mcmccalcs` list
 #' for each iscam model in the `models` list

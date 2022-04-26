@@ -3,6 +3,7 @@
 #'
 #' @rdname plot_ts_mcmc
 #' @family Time series plotting functions
+#'
 #' @export
 plot_vuln_mcmc <- function(...){
   plot_ts_mcmc(...,

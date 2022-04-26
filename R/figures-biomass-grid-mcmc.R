@@ -1,13 +1,12 @@
-#' Plot a grid of biomass plots, each with one model only so that
-#' the B0 and/or the BMSY lines and credible intervals can be viewed
+#' Plot a grid of biomass plots, each with one model only so that the reference
+#' point lines and credible intervals can be compared correctly.
 #'
 #' @rdname plot_ts_mcmc
 #' @family Time series plotting functions
 #'
 #' @return A [cowplot::plot_grid()] object
 #' @export
-plot_biomass_grid_mcmc <- function(models,
-                                   ...){
+plot_biomass_grid_mcmc <- function(models, ...){
 
   if(class(models) != mdl_lst_cls){
     if(class(models) == mdl_cls){

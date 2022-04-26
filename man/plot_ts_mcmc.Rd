@@ -14,8 +14,8 @@
 \alias{plot_recr_mpd}
 \alias{plot_ts_mcmc}
 \alias{plot_vuln_mcmc}
-\title{Plot a grid of biomass plots, each with one model only so that
-the B0 and/or the BMSY lines and credible intervals can be viewed}
+\title{Plot a grid of biomass plots, each with one model only so that the reference
+point lines and credible intervals can be compared correctly.}
 \usage{
 plot_biomass_grid_mcmc(models, ...)
 
@@ -28,6 +28,7 @@ plot_biomass_mcmc(
   refpts_alpha = 0.2,
   bo_dodge = 0.1,
   x_space = 0.5,
+  y_space = ifelse(rel, 0.05, 0.5),
   show_bo_lines = FALSE,
   bo_refpts = c(0.2, 0.4),
   show_bmsy_lines = FALSE,
@@ -65,7 +66,7 @@ plot_biomass_mpd(
   ...
 )
 
-plot_f_mcmc(...)
+plot_f_mcmc(..., type = c("i", "e"))
 
 plot_recr_grid_mcmc(models, ...)
 
@@ -147,23 +148,27 @@ plot_vuln_mcmc(...)
 \arguments{
 \item{models}{A list of iscam model objects (class [mdl_lst_cls])}
 
-\item{...}{Other graphical arguments}
+\item{...}{Arguments passed to [plot_ts_mcmc()]}
 
-\item{rel}{Logical. Make plot relative to initial estimate (B0), also known as depletion}
+\item{rel}{Logical. Make plot relative to initial estimate (B0), also known
+as depletion}
 
-\item{show_bo}{Logical. If `TRUE` and `rel == FALSE`, show the initial value
-on the plot (B0)}
+\item{show_bo}{Logical. If `TRUE` and `rel == FALSE`, show the median
+initial value on the plot (B0) as a point with the credible intervals as
+bars}
 
 \item{probs}{A 3-element vector of probabilities that appear in the output
 data frames. This is provided in case the data frames have more than three
 different quantile levels}
 
-\item{refpts_ribbon}{Logical. If `TRUE`, make the first model's reference points lines
-(`show_bo_lines` and/or `show_bmsy_lines` must be `TRUE`) plotted an envelope
-of the credible interval, surrounding the median lines for the reference points}
+\item{refpts_ribbon}{Logical. If `TRUE`, make the first model's reference
+points lines (`show_bo_lines` and/or `show_bmsy_lines` must be `TRUE`)
+plotted an envelope of the credible interval, surrounding the median lines
+for the reference points}
 
-\item{refpts_alpha}{The opacity between 0 to 1 of the envelope shown for referece points
-when `refpts_ribbon == TRUE` and `show_bo_lines` and/or `show_bmsy_lines` are `TRUE`}
+\item{refpts_alpha}{The transparency of the envelope shown for reference
+points between 0 and 1. Only used when `refpts_ribbon` is `TRUE` and
+`show_bo_lines` and/or `show_bmsy_lines` are `TRUE`}
 
 \item{bo_dodge}{The amount to offset the initial value (B0 or R0) values
 from each other so the values and uncertainty can be easily seen for
@@ -172,23 +177,26 @@ multiple models}
 \item{x_space}{The amount of x-interval space to pad the left and right of
 the plot with. To remove all padding, make this 0}
 
-\item{show_bo_lines}{Show the B0 lines at values given by `bo_refpts` for the
-first model in the `models` list}
+\item{y_space}{The amount of y-interval space to pad the top and bottom of
+the plot with. To remove all padding, make this 0}
 
-\item{bo_refpts}{Vector of two proportional values for the limit reference point
-and Upper stock reference. Values are 0.2B0 and 0.4B0 by default}
+\item{show_bo_lines}{Show the B0 lines at values given by `bo_refpts` for
+the first model in the `models` list}
 
-\item{show_bmsy_lines}{Show the BMSY lines at values given by `bmsy_refpts` for the
-first model in the `models` list}
+\item{bo_refpts}{Vector of two proportional values for the limit reference
+point and Upper stock reference. Values are 0.2B0 and 0.4B0 by default}
 
-\item{bmsy_refpts}{Vector of two proportional values for the limit reference point
-and Upper stock reference. Values are 0.4BMSY and 0.8BMSY by default}
+\item{show_bmsy_lines}{Show the BMSY lines at values given by `bmsy_refpts`
+for the first model in the `models` list}
 
-\item{bo_refpt_colors}{A vector of two colors representing the LRP and USR for B0.
-Used to display reference point lines if `show_bo_lines == TRUE`}
+\item{bmsy_refpts}{Vector of two proportional values for the limit reference
+point and Upper stock reference. Values are 0.4BMSY and 0.8BMSY by default}
 
-\item{bmsy_refpt_colors}{A vector of two colors representing the LRP and USR for BMSY.
-Used to display reference point lines if `show_bmsy_lines == TRUE`}
+\item{bo_refpt_colors}{A vector of two colors representing the LRP and USR
+for B0. Used to display reference point lines if `show_bo_lines` is `TRUE`}
+
+\item{bmsy_refpt_colors}{A vector of two colors representing the LRP and USR
+for BMSY. Used to display reference point lines if `show_bmsy_lines` is `TRUE`}
 
 \item{legend_title}{Title for legend}
 
@@ -220,6 +228,8 @@ is the bottom left corner}
 
 \item{angle_x_labels}{If `TRUE` put 45 degree angle on x-axis tick labels}
 
+\item{type}{'i' means instantaneous, 'e' means exploitation rate (Ut)}
+
 \item{show_ro}{Show the initial recruitment, R0 median line and credible interval}
 
 \item{ro_ribbon}{See `refpts_ribbon` in [plot_biomass_mcmc()]}
@@ -234,9 +244,6 @@ for each iscam model in the `models` list}
 \item{facet_wrap_var}{A column in the `quant_df` data frame which will be
 used to split the output into separate panel plots. If "none", no faceting
 will be done}
-
-\item{y_space}{The amount of y-interval space to pad the top and bottom of
-the plot with. To remove all padding, make this 0}
 
 \item{first_model_ribbon}{Logical. If `TRUE`, give the first model a shaded
 credible interval instead of dotted lines}
@@ -257,11 +264,12 @@ A [ggplot2::ggplot()] object
 A [ggplot2::ggplot()] object
 }
 \description{
-Plot a grid of biomass plots, each with one model only so that
-the B0 and/or the BMSY lines and credible intervals can be viewed
+Plot a grid of biomass plots, each with one model only so that the reference
+point lines and credible intervals can be compared correctly.
 
 Plot the MCMC spawning biomass trajectories for iscam models in either
-absolute or relative form.
+absolute or relative form with or without reference point credible
+intervals and medians
 
 Plot the MCMC time series trajectories for iscam models, including spawning biomass
 and recruitment for both absolute and relative cases.
@@ -284,23 +292,23 @@ Plot vulnerable biomass time series plots for MCMC output with credible
 intervals
 }
 \details{
-This function cannot have more than one model with a shaded credible interval.
-It is too difficult to tell what's going on with colors overlapping.
-
-If called with `rel = TRUE`, `show_bo` will be overridden to be `FALSE`.
-It makes no sense to show B0 when a relative plot is asked for, it is always 1.
-
-The model description text will appear in the legend if `models` length
-is greater than 1, and as a title if there is only one model. The
-description text is found in the `model_desc` attribute of a
-`mdl_cls` class ("iscam_model") object. The attribute is set in the
-[model_setup()] function, from either the `bridge_model_text` or
-`sens_model_text` arguments.
+The reference point lines and credible intervals are output from the
+first model in the list, as such they cannot be used to judge the other
+model's status with respect to reference points. To see those, plot with
+[plot_biomass_grid_mcmc()] instead. This will show one panel per model,
+each with its own reference points.
 
 Plot a single model or multiple models overlaid for comparison.
 If a single model, it must have a class attribute of `mdl_cls`.
 A list of multiple models must have a class attribute of `mdl_lst_cls` and
 each model in the list must have a class attribute of `mdl_cls`.
+
+The model description text will appear in a legend if `models` length
+is greater than 1, and as a title if there is only one model. The
+description text is found in the `model_desc` attribute of a
+`mdl_cls` class ("iscam_model") object. The attribute is set in the
+[model_setup()] function, from either the `bridge_model_text` or
+`sens_model_text` arguments.
 }
 \seealso{
 Other Time series plotting functions: 
