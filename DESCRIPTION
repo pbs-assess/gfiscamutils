@@ -23,6 +23,7 @@ Imports:
   future,
   ggplot2,
   gfutilities,
+  gginnards,
   grDevices,
   GGally,
   grid,

@@ -46,141 +46,54 @@
 #' @importFrom tibble rownames_to_column
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom forcats fct_relevel
+#' @importFrom gginnards move_layers
 #' @export
 plot_biomass_mcmc <- function(models,
                               rel = FALSE,
                               show_bo = TRUE,
-                              legend_title = "Models",
-                              xlim = NULL,
-                              ylim = NULL,
-                              line_width = 1,
-                              point_size = 2,
-                              first_model_ribbon = TRUE,
+                              probs = c(0.025, 0.5, 0.975),
                               refpts_ribbon = TRUE,
-                              alpha = 0.2,
-                              refpts_alpha = alpha,
-                              palette = "Paired",
-                              base_color = "black",
+                              refpts_alpha = 0.2,
                               bo_dodge = 0.1,
                               x_space = 0.5,
-                              append_base_txt = NULL,
                               show_bo_lines = FALSE,
                               bo_refpts = c(0.2, 0.4),
                               show_bmsy_lines = FALSE,
                               bmsy_refpts = c(0.4, 0.8),
                               bo_refpt_colors = c("red", "green"),
                               bmsy_refpt_colors = c("salmon", "darkgreen"),
-                              leg_loc = NULL,
-                              probs = c(0.025, 0.5, 0.975),
-                              text_title_size = 12,
-                              angle_x_labels = FALSE,
                               ...){
 
+  g <- plot_ts_mcmc(models,
+                    quant_df = ifelse(rel, "depl_quants", "sbt_quants"),
+                    x_space = x_space,
+                    probs = probs,
+                    ...)
 
-  single_model <- FALSE
-  if(is_iscam_model(models)){
-    single_model <- TRUE
-    models <- list(models)
-    class(models) <- mdl_lst_cls
-  }
+  y_label <- ifelse(rel, "Relative Spawning biomass", "Spawning biomass ('000 tonnes)")
 
-  if(!is_iscam_model_list(models)){
-    stop("The `models` list is not a gfiscamutils::mdl_lst_cls class.")
-  }
+  start_yr <- min(g$data$year)
+  end_yr <- max(g$data$year)
 
-  if(!palette %in% rownames(brewer.pal.info)){
-    stop("`palette` name not found in `RColorBrewer::brewer.pal.info`")
-  }
-
-  palette_info <- brewer.pal.info[rownames(brewer.pal.info) == palette, ]
-
-  if(length(models) > palette_info$maxcolors){
-    stop("Cannot plot more than ", palette_info$maxcolors, " models because that is the ",
-         "maximum number for the ", palette, " palette")
-  }
-
-  if(length(probs) != 3){
-    stop("`probs` has length ", length(probs), " but must be a vector of three values ",
-         "representing lower CI, median, and upper CI")
-  }
-
-  if(!is.null(append_base_txt)){
-    length(append_base_txt) <- length(models)
-    # If `append_base_txt` is shorter than the number of models, append empty strings
-    # for remainder of items
-    append_base_txt[which(is.na(append_base_txt))] <- ""
-  }
-
-  # Set up model names for the legend/title
-  names(models) <- map_chr(models, ~{
-    as.character(attributes(.x)$model_desc)
-  })
-  names(models) <- paste0(names(models), append_base_txt)
-
-  if(rel){
-    show_bo <- FALSE
-  }
-  start_yr <- map_dbl(models, ~{.x$dat$start.yr}) %>% min
-  end_yr <- map_dbl(models, ~{.x$dat$end.yr}) %>% max
-  if(is.null(xlim)){
-    xlim <- c(start_yr, end_yr)
-  }
-  len <- end_yr - start_yr + 1
-  bind_yrs <- start_yr:end_yr
-
-  val <- ifelse(rel, "depl_quants", "sbt_quants")
-  ts_quants <- map(models, ~{
-    j <- .x$mcmccalcs[[val]]
-    if(len < ncol(j)){
-      j <- j[, 1:len]
-    }
-    j
-  })
-  tso_quants <- map(models, ~{.x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "sbo"]})
-  bmsy_quants <- map(models, ~{.x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "bmsy"]})
-  tso_quants <- tso_quants %>%
+  tso_quants <- map(models, ~{
+    .x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "sbo"]
+    }) %>%
     bind_rows() %>%
     mutate(model = names(models), year = ifelse(show_bo, start_yr - 1, start_yr)) %>%
     select(model, year, everything())
-  bmsy_quants <- bmsy_quants %>%
+
+  bmsy_quants <- map(models, ~{
+    .x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "bmsy"]
+    }) %>%
     bind_rows() %>%
     mutate(model = names(models), year = start_yr) %>%
     select(model, year, everything())
 
-  ts_quants <- imap(ts_quants, ~{
-    .x %>%
-      t() %>%
-      as.data.frame %>%
-      rownames_to_column(var = "year") %>%
-      mutate(model = .y) %>%
-      select(model, year, everything()) %>%
-      mutate(year = as.numeric(year))
-  }) %>%
-    bind_rows %>%
-    select(-MPD)
-
-  # Match the given probs with their respective quant columns
-  prob_cols <- paste0(prettyNum(probs * 100), "%")
-  quants <- imap_chr(prob_cols, ~{
-    mtch <- grep(.x, names(ts_quants), value = TRUE)
-    if(!length(mtch)){
-      stop("One of the values in `probs` does not appear in the MCMC output data: ", .x)
-    }
-    mtch
-  })
-
-  y_label <- ifelse(rel, "Relative Spawning biomass", "Spawning biomass ('000 tonnes)")
-  if(!is.null(xlim)){
-    # Remove data prior to first year and change B0/R0 to first
-    tso_quants <- tso_quants %>%
-      mutate(year = ifelse(show_bo, xlim[1] - 1, xlim[1]))
-    bmsy_quants <- bmsy_quants %>%
-      mutate(year = xlim[1])
-    ts_quants <- ts_quants %>%
-      filter(year %in% xlim[1]:xlim[2])
-  }
-  ts_quants <- ts_quants %>%
-    mutate(model = fct_relevel(model, names(models)))
+  # Remove data prior to first year and change B0 to first year
+  tso_quants <- tso_quants %>%
+    mutate(year = ifelse(show_bo, start_yr - 1, start_yr))
+  bmsy_quants <- bmsy_quants %>%
+    mutate(year = start_yr)
 
   # 'Dodge' B0 points manually
   if((nrow(tso_quants) - 1) * bo_dodge >= 1){
@@ -190,19 +103,16 @@ plot_biomass_mcmc <- function(models,
   tso_quants <- tso_quants %>%
     mutate(year = seq(from = first(year), by = bo_dodge, length.out = nrow(.)))
 
-  # Color values have black prepended as it is the base model
-  model_colors <- c(base_color,
-                    brewer.pal(name = palette,
-                               n = palette_info$maxcolors))
-
-  g <- ts_quants %>%
-    ggplot(aes(x = year,
-               y = !!sym(quants[2]),
-               ymin = !!sym(quants[1]),
-               ymax = !!sym(quants[3]))) +
-    xlab("Year") +
-    ylab(y_label) +
-    scale_color_manual(values = model_colors)
+  # Match the given probs with their respective quant columns
+  prob_cols <- paste0(prettyNum(probs * 100), "%")
+  quants <- imap_chr(prob_cols, ~{
+    mtch <- grep(.x, names(tso_quants), value = TRUE)
+    if(!length(mtch)){
+      stop("One of the values in `probs` does not appear in the MCMC output data\n",
+           .x, call. = FALSE)
+    }
+    mtch
+  })
 
   tso_base <- tso_quants %>%
     slice(1)
@@ -211,11 +121,12 @@ plot_biomass_mcmc <- function(models,
     # Only two lines allowed, Limit Reference Point (LRP) and Upper Stock
     # Reference (USR)
     tso_multiples <- imap(bo_refpts, ~{
-      tso_base %>%
+      j <- tso_base %>%
         mutate(!!sym(quants[1]) := !!sym(quants[1]) * .x,
                !!sym(quants[2]) := !!sym(quants[2]) * .x,
                !!sym(quants[3]) := !!sym(quants[3]) * .x) %>%
         mutate(multiplier = .x)
+      j
     }) %>%
       bind_rows
 
@@ -319,30 +230,11 @@ plot_biomass_mcmc <- function(models,
     }
   }
 
-  if(rel){
-    g <- g + scale_x_continuous(limits = c(xlim[1], xlim[2]),
-                                breaks = min(xlim):max(xlim),
-                                labels = xlim[1]:xlim[2],
-                                expand = expansion(add = x_space))
-  }else{
-    if(show_bo){
-      g <- g + scale_x_continuous(limits = c(xlim[1] - 1, xlim[2]),
-                                  breaks = (min(xlim) - 1):max(xlim),
-                                  labels = c(expression(B[0]), xlim[1]:xlim[2]),
-                                  expand = expansion(add = x_space))
-    }else{
-      g <- g + scale_x_continuous(limits = c(xlim[1], xlim[2]),
-                                  breaks = min(xlim):max(xlim),
-                                  labels = xlim[1]:xlim[2],
-                                  expand = expansion(add = x_space))
-    }
-  }
-
   # Create tags for B0 lines, and breaks and labels for y-axis
   if(rel){
-    ymax <- max(select(ts_quants, -c(model, year)))
+    ymax <- max(select(g$data, -c(model, year)))
   }else{
-    ymax <- max(select(ts_quants, -c(model, year)),
+    ymax <- max(select(g$data, -c(model, year)),
                 select(tso_quants, -c(model, year)))
   }
   if(ymax <= 1){
@@ -355,6 +247,14 @@ plot_biomass_mcmc <- function(models,
   brk <- seq(0, upper_bound, upper_bound / 10)
   lbl <- brk
   cols <- rep("black", length(brk))
+
+  g <- g +
+    scale_y_continuous(limits = c(0, upper_bound),
+                       breaks = brk,
+                       labels = lbl) +
+    #expand = c(0, 0)) +
+    theme(axis.text.y = element_text(color = cols),
+          axis.ticks.y = element_line(color = cols))
 
   if(show_bo_lines){
     # Add the text labels to the y-axis ticks for the reference point levels
@@ -402,67 +302,18 @@ plot_biomass_mcmc <- function(models,
     }
   }
 
-  if(is.null(ylim)){
-    g <- g +
-      scale_y_continuous(limits = c(0, upper_bound),
-                         breaks = brk,
-                         labels = lbl,
-                         expand = c(0, 0)) +
-      theme(axis.text.y = element_text(color = cols),
-            axis.ticks.y = element_line(color = cols))
-  }else{
-    g <- g +
-      scale_y_continuous(limits = c(0, NA),
-                         breaks = brk,
-                         labels = lbl,
-                         expand = c(0, 0)) +
-      theme(axis.text.y = element_text(color = cols),
-            axis.ticks.y = element_line(color = cols)) +
-      coord_cartesian(ylim = ylim)
-  }
-
-  if(first_model_ribbon){
-    first_model_nm <- as.character(ts_quants$model[1])
-    ts_quants_first <- ts_quants %>%
-      filter(model == first_model_nm)
-    g <- g +
-      geom_ribbon(data = ts_quants_first, fill = model_colors[1], alpha = alpha) +
-      geom_line(aes(color = model), size = line_width) +
-      geom_point(aes(color = model), size = point_size) +
-      geom_line(aes(y = !!sym(quants[1]), color = model), size = 0.5, lty = 2) +
-      geom_line(aes(y = !!sym(quants[3]), color = model), size = 0.5, lty = 2)
-  }else{
-    g <- g +
-      geom_line(aes(color = model), size = line_width) +
-      geom_point(aes(color = model), size = point_size) +
-      geom_line(aes(y = !!sym(quants[1]), color = model), size = 0.5, lty = 2) +
-      geom_line(aes(y = !!sym(quants[3]), color = model), size = 0.5, lty = 2)
-  }
-
   if(!rel && show_bo){
     g <- g +
-      geom_pointrange(data = tso_quants, aes(color = model))
+      geom_pointrange(data = tso_quants, aes(color = model)) +
+      scale_x_continuous(limits = c(start_yr - 1, end_yr),
+                         breaks = (start_yr - 1):end_yr,
+                         labels = c(expression(B[0]), start_yr:end_yr),
+                         expand = expansion(add = x_space))
   }
 
-  if(is.null(leg_loc)){
-    g <- g +
-      theme(legend.position = "none")
-    if(single_model){
-      g <- g + ggtitle(names(models)) +
-        theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
-    }
-  }else{
-    g <- g +
-      theme(legend.justification = leg_loc,
-            legend.position = leg_loc,
-            legend.background = element_rect(fill = "white", color = "white")) +
-      labs(color = legend_title)
-  }
-
-  if(angle_x_labels){
-    g <- g +
-      theme(axis.text.x = element_text(angle = 45, hjust = 0.55, vjust = 0.5))
-  }
+  # Move the B0 and BMSY lines and shaded areas behind the models
+  g <- move_layers(g, "GeomHline", 1L)
+  g <- move_layers(g, "GeomRect", 1L)
 
   g
 }

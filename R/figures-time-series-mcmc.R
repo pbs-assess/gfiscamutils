@@ -148,7 +148,7 @@ plot_ts_mcmc <- function(models,
     }
     out <- .x$mcmccalcs[[quant_df]]
     fleet_names <- .x$dat$fleet_gear_names
-    if(class(out) == "list"){
+    if("list" %in% class(out)){
       if(facet_wrap_var == "sex"){
         if(length(out) > 2){
           stop("Length of the `mcmccalcs` output list for ", quant_df, " for the model:\n",
