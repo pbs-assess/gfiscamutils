@@ -1,4 +1,3 @@
-
 #' Call the Batman
 #'
 #' https://charlotte-ngs.github.io/BatmanPlot/BatmanPlotPost.html

@@ -1,9 +1,9 @@
 #' Plot the MCMC time series trajectories for iscam models, including spawning biomass
 #' and recruitment for both absolute and relative cases.
 #'
-#' @rdname plot_biomass_mcmc
+#' @rdname plot_ts_mcmc
+#' @family Time series plotting functions
 #'
-#' @family Biomass plotting functions
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_biomass_mpd <- function(models,

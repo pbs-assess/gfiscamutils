@@ -10,7 +10,6 @@ make.recr.retro.mpd.plot(
   model.names = NULL,
   ylim,
   offset = 0.1,
-  ind.letter = NULL,
   leg = TRUE,
   color.brew.class = "Paired",
   ...
@@ -27,8 +26,6 @@ make.recr.retro.mpd.plot(
 
 \item{offset}{The amount on the x-axis to offset each point and line for
 multiple models}
-
-\item{ind.letter}{A letter to show on the plot (for panel plots)}
 
 \item{leg}{Position of the legend. NULL means no legend is shown}
 

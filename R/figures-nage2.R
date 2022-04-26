@@ -4,7 +4,6 @@
 #' @param model.names A vector of names to show on the legend
 #' @param ylim The y limits for the plot
 #' @param opacity How opaque the credibility envelopes are
-#' @param ind.letter A letter to show on the plot (for panel plots)
 #' @param leg Position of the legend. NULL means no legend is shown
 #' @param ... Other graphical arguments
 #'
@@ -17,7 +16,6 @@ make.nage2.plot <- function(models,
                             model.names = NULL,
                             ylim,
                             opacity = 75,
-                            ind.letter = NULL,
                             leg = NULL,
                             ...
                             ){
@@ -70,10 +68,6 @@ make.nage2.plot <- function(models,
            col = 1:length(models),
            lty = 1,
            lwd = 2)
-  }
-
-  if(!is.null(ind.letter)){
-    panel.letter(ind.letter)
   }
 
 }

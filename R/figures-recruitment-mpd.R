@@ -1,9 +1,9 @@
 #' Plot the MCMC time series trajectories for iscam models, including spawning biomass
 #' and recruitment for both absolute and relative cases.
 #'
-#' @rdname plot_biomass_mcmc
-#'
+#' @rdname plot_ts_mcmc
 #' @family Time series plotting functions
+#'
 #' @param show_ro Show the initial recruitment, R0 median line and credible interval
 #' @param ro_ribbon See `refpts_ribbon` in [plot_biomass_mcmc()]
 #' @param ro_alpha See `refpts_alpha` in [plot_biomass_mcmc()]

@@ -1,13 +1,12 @@
 #' Plot the MCMC recruitment time series trajectories for iscam models.
 #'
-#' @rdname plot_biomass_mcmc
-#'
+#' @rdname plot_ts_mcmc
 #' @family Time series plotting functions
+#'
 #' @param show_ro Show the initial recruitment, R0 median line and credible interval
 #' @param ro_ribbon See `refpts_ribbon` in [plot_biomass_mcmc()]
 #' @param ro_alpha See `refpts_alpha` in [plot_biomass_mcmc()]
 #' @param r_dodge See `bo_dodge` in [plot_biomass_mcmc()]
-#' @return A [ggplot2::ggplot()] object
 #' @export
 plot_recr_mcmc <- function(models,
                            show_ro = TRUE,
@@ -20,7 +19,7 @@ plot_recr_mcmc <- function(models,
                            ro_ribbon = TRUE,
                            ro_alpha = 0.3,
                            palette = "Paired",
-                           base_color = "#000000",
+                           base_color = "black",
                            r_dodge = 0.1,
                            x_space = 0.5,
                            append_base_txt = NULL,
@@ -93,29 +92,9 @@ plot_recr_mcmc <- function(models,
   tso_quants <- map(models,
                     ~{.x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "ro"]})
 
-  nms <- names(ts_quants)
-  if(is.null(nms)){
-    if(is.null(model_names)){
-      nms <- paste0("Temporary model ", seq_len(length(ts_quants)), append_base_txt)
-    }else{
-      if(length(model_names) != length(ts_quants)){
-        stop("`model_names` is not the same length as the number of models supplied in `models`")
-      }else{
-        nms <- model_names
-        nms[1] <- paste0(nms[1], append_base_txt)
-      }
-    }
-    names(ts_quants) <- nms
-    names(tso_quants) <- nms
-  }else{
-    names(ts_quants)[1] <- paste0(names(ts_quants)[1], append_base_txt)
-    names(tso_quants)[1] <- paste0(names(tso_quants)[1], append_base_txt)
-  }
-
-  nms <- names(ts_quants)
   tso_quants <- tso_quants %>%
     bind_rows() %>%
-    mutate(model = nms) %>%
+    mutate(model = names(models)) %>%
     mutate(year = start_yr - 1) %>%
     select(model, year, everything())
 
@@ -148,7 +127,7 @@ plot_recr_mcmc <- function(models,
       filter(year %in% xlim[1]:xlim[2])
   }
   ts_quants <- ts_quants %>%
-    mutate(model = fct_relevel(model, nms))
+    mutate(model = fct_relevel(model, names(models)))
 
   # Color values have black prepended as it is the base model
   model_colors <- c(base_color,

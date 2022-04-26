@@ -9,7 +9,6 @@
 #' @param append.base.txt Text to append to the name of the first model
 #' @param show.median Show the median line on the plot
 #' @param show.mean Show the mean line on the plot
-#' @param ind.letter A letter to show on the plot (for panel plots)
 #' @param leg Position of the legend. NULL means no legend is shown
 #' @param ... Other graphical arguments
 #'
@@ -26,7 +25,6 @@ make.recr.mcmc.plot <- function(models,
                                 append.base.txt = NULL,
                                 show.median = FALSE,
                                 show.mean = FALSE,
-                                ind.letter = NULL,
                                 leg = NULL,
                                 ... ){
 
@@ -107,9 +105,6 @@ make.recr.mcmc.plot <- function(models,
            lwd = 2)
   }
 
-  if(!is.null(ind.letter)){
-    panel.letter(ind.letter)
-  }
 }
 
 #' Plot the recruitment for the MPD cases for iscam models
@@ -120,7 +115,6 @@ make.recr.mcmc.plot <- function(models,
 #' @param ylim The y limits for the plot
 #' @param offset The amount on the x-axis to offset each point and line for
 #'   multiple models
-#' @param ind.letter A letter to show on the plot (for panel plots)
 #' @param leg Position of the legend. NULL means no legend is shown
 #' @param color.brew.class RColorBrewer class. e.g. "Paired"
 #' @param ... Other graphical arguments
@@ -133,7 +127,6 @@ make.recr.retro.mpd.plot <- function(base.model,
                                      model.names = NULL,
                                      ylim,
                                      offset = 0.1,
-                                     ind.letter = NULL,
                                      leg = TRUE,
                                      color.brew.class = "Paired",
                                      ...
@@ -220,8 +213,5 @@ make.recr.retro.mpd.plot <- function(base.model,
   mtext("Year", 1, line = 3)
   mtext("Recruitment (millions)", 2, line = 3)
 
-  if(!is.null(ind.letter)){
-    panel.letter(ind.letter)
-  }
 }
 

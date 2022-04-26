@@ -5,7 +5,6 @@
 #' @param which.gear The gear index to plot
 #' @param ylim The y limits for the plot
 #' @param opacity How opaque the credibility envelopes are
-#' @param ind.letter A letter to show on the plot (for panel plots)
 #' @param leg Position of the legend. NULL means no legend is shown
 #' @param ... Other graphical arguments
 #'
@@ -19,7 +18,6 @@ make.natural.mort.mcmc.plot <- function(models,
                                         which.gear = 1,
                                         ylim,
                                         opacity = 75,
-                                        ind.letter = NULL,
                                         leg = NULL,
                                         ...
                                         ){
@@ -74,7 +72,4 @@ make.natural.mort.mcmc.plot <- function(models,
            lwd = 2)
   }
 
-  if(!is.null(ind.letter)){
-    panel.letter(ind.letter)
-  }
 }

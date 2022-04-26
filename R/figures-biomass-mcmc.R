@@ -15,59 +15,34 @@
 #' [model_setup()] function, from either the `bridge_model_text` or
 #' `sens_model_text` arguments.
 #'
+#' @rdname plot_ts_mcmc
+#' @family Time series plotting functions
+#'
 #' @param models A list of iscam model objects (class [mdl_lst_cls])
 #' @param rel Logical. Make plot relative to initial estimate (B0), also known as depletion
 #' @param show_bo Logical. If `TRUE` and `rel == FALSE`, show the initial value
 #' on the plot (B0)
-#' @param legend_title Title for legend
-#' @param xlim The x limits for the plot. If `NULL`, the limits of the data
-#' will be used
-#' @param ylim The y limits for the plot. If `NULL`, the limits of the data
-#' will be used
-#' @param line_width Width of all median lines on the plot
-#' @param point_size Point size for all median points on the plot
-#' @param first_model_ribbon Logical. If `TRUE`, give the first model a shaded
-#' credible interval instead of dotted lines
 #' @param refpts_ribbon Logical. If `TRUE`, make the first model's reference points lines
 #' (`show_bo_lines` and/or `show_bmsy_lines` must be `TRUE`) plotted an envelope
 #' of the credible interval, surrounding the median lines for the reference points
-#' @param alpha The opacity between 0 to 1 of the envelope shown when `first_model_ribbon == TRUE`
 #' @param refpts_alpha The opacity between 0 to 1 of the envelope shown for referece points
 #' when `refpts_ribbon == TRUE` and `show_bo_lines` and/or `show_bmsy_lines` are `TRUE`
-#' @param palette A palette value that is in [RColorBrewer::brewer.pal.info]
-#' @param base_color A color to prepend to the brewer colors which are set by `palette`.
-#' This is called `base_color` because it is likely to be a base model
-#' @param bo_dodge The amount to offset the initial value (B0 or R0) values from each
-#' other so the values and uncertainty can be easily seen for multiple models
-#' @param x_space The amount of x-interval space to pad the left and right of the plot
-#' with. To remove all padding, make this 0
-#' @param append_base_txt A vector of strings to append to the model names for
-#' display on the plot legend or title
 #' @param show_bo_lines Show the B0 lines at values given by `bo_refpts` for the
 #' first model in the `models` list
 #' @param show_bmsy_lines Show the BMSY lines at values given by `bmsy_refpts` for the
 #' first model in the `models` list
 #' @param bo_refpts Vector of two proportional values for the limit reference point
 #' and Upper stock reference. Values are 0.2B0 and 0.4B0 by default
+#' @param bo_dodge The amount to offset the initial value (B0 or R0) values from each
+#' other so the values and uncertainty can be easily seen for multiple models
 #' @param bmsy_refpts Vector of two proportional values for the limit reference point
 #' and Upper stock reference. Values are 0.4BMSY and 0.8BMSY by default
 #' @param bo_refpt_colors A vector of two colors representing the LRP and USR for B0.
 #' Used to display reference point lines if `show_bo_lines == TRUE`
 #' @param bmsy_refpt_colors A vector of two colors representing the LRP and USR for BMSY.
 #' Used to display reference point lines if `show_bmsy_lines == TRUE`
-#' @param ind_letter A letter to place in the upper left corner of the plot. If `NULL`,
-#' nothing will be shown
-#' @param probs A 3-element vector of probabilities that appear in the output data frames
-#' This is provided in case the data frames have more than three different quantile levels
-#' @param leg_loc A two-element vector describing the X-Y values between 0 and 1 to anchor
-#' the legend to. eg. c(1, 1) is the top right corner and c(0, 0) is the bottom left corner
-#' @param title_text_size Add the model description as a title with this font size. The text
-#' comes from the `model_desc` attribute of `model`. If this is `NULL`, don't show a title
-#' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
 #' @param ... Other graphical arguments
 #'
-#' @family Biomass plotting functions
-#' @return A [ggplot2::ggplot()] object
 #' @importFrom tibble rownames_to_column
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom forcats fct_relevel
@@ -95,12 +70,12 @@ plot_biomass_mcmc <- function(models,
                               bmsy_refpts = c(0.4, 0.8),
                               bo_refpt_colors = c("red", "green"),
                               bmsy_refpt_colors = c("salmon", "darkgreen"),
-                              ind_letter = NULL,
                               leg_loc = NULL,
                               probs = c(0.025, 0.5, 0.975),
                               text_title_size = 12,
                               angle_x_labels = FALSE,
                               ...){
+
 
   single_model <- FALSE
   if(is_iscam_model(models)){

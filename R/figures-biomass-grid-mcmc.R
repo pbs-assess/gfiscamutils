@@ -1,10 +1,9 @@
 #' Plot a grid of biomass plots, each with one model only so that
 #' the B0 and/or the BMSY lines and credible intervals can be viewed
 #'
-#' @rdname plot_biomass_mcmc
-#' @param ... Further arguments to pass to [cowplot::plot_grid()]
+#' @rdname plot_ts_mcmc
+#' @family Time series plotting functions
 #'
-#' @family Biomass plotting functions
 #' @return A [cowplot::plot_grid()] object
 #' @export
 plot_biomass_grid_mcmc <- function(models,

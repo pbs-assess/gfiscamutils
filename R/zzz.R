@@ -115,7 +115,6 @@ globalVariables(c(
 "outCRS",
 "over",
 "pairs",
-"panel.letter",
 "panel.smooth",
 "par",
 "par.file",

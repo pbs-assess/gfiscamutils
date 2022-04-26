@@ -23,8 +23,6 @@ make.q.plot(
 
 \item{opacity}{How opaque the credibility envelopes are}
 
-\item{ind.letter}{A letter to show on the plot (for panel plots)}
-
 \item{leg}{Position of the legend. NULL means no legend is shown}
 
 \item{...}{Other graphical arguments}

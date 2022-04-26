@@ -13,7 +13,6 @@ make.recr.mcmc.plot(
   append.base.txt = NULL,
   show.median = FALSE,
   show.mean = FALSE,
-  ind.letter = NULL,
   leg = NULL,
   ...
 )
@@ -35,8 +34,6 @@ multiple models}
 \item{show.median}{Show the median line on the plot}
 
 \item{show.mean}{Show the mean line on the plot}
-
-\item{ind.letter}{A letter to show on the plot (for panel plots)}
 
 \item{leg}{Position of the legend. NULL means no legend is shown}
 
