@@ -236,13 +236,13 @@ calc_mcmc <- function(model,
           mutate(year = .y)
       }) %>%
         bind_rows() %>%
-        mutate(survey_abbrev = .y)
+        mutate(survey_name = .y)
     }) %>%
       bind_rows() %>%
       rename(lowerci = !!sym(prob_cols[1]),
              biomass = !!sym(prob_cols[2]),
              upperci = !!sym(prob_cols[3])) %>%
-      select(survey_abbrev, year, biomass, lowerci, upperci) %>%
+      select(survey_name, year, biomass, lowerci, upperci) %>%
       mutate(year = as.numeric(year))
   }
   # Index residuals
@@ -258,13 +258,13 @@ calc_mcmc <- function(model,
           mutate(year = .y)
       }) %>%
         bind_rows() %>%
-        mutate(survey_abbrev = .y)
+        mutate(survey_name = .y)
     }) %>%
       bind_rows() %>%
       rename(lowerci = !!sym(prob_cols[1]),
              biomass = !!sym(prob_cols[2]),
              upperci = !!sym(prob_cols[3])) %>%
-      select(survey_abbrev, year, biomass, lowerci, upperci) %>%
+      select(survey_name, year, biomass, lowerci, upperci) %>%
       mutate(year = as.numeric(year))
   }
 
@@ -1327,7 +1327,7 @@ read_mcmc <- function(model,
             as_tibble(.x) %>%
               `names<-`(model$dat$indices[[.y]][, "iyr"])
           }) %>%
-            `names<-`(model$dat$index_abbrevs)
+            `names<-`(model$dat$index_gear_names)
         }
       }else if(.x[[2]] == "projections"){
         # Do no processing

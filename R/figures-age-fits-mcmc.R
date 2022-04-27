@@ -132,8 +132,11 @@ plot_age_fits_mcmc <- function(model,
     ylab("Proportion")
 
   if(!is.null(text_title_size)){
+    subtitle <- ifelse(model$dat$age_gear_names[gear] %in% model$dat$index_gear_names,
+                       paste(model$dat$age_gear_names[gear], "Index"),
+                       model$dat$age_gear_names[gear])
     g <- g + ggtitle(model_desc,
-                     subtitle = paste0(model$dat$age_gear_names[gear], " Index")) +
+                     subtitle = subtitle) +
       theme(plot.title = element_text(hjust = 0.5, size = text_title_size),
             plot.subtitle = element_text(hjust = 0.5, size = text_title_size))
   }

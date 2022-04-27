@@ -1,3 +1,47 @@
+#' Moves a ggplot legend to an empty facet if one exists
+#'
+#' @details
+#' If an empty facet does not exist, an error will be thrown
+#' If the input object `g` is not a [ggplot2::ggplot()] object nor a
+#' [ggplot2::ggplot_gtable()] object, the original object is returned.
+#'
+#' @param g A [ggplot2::ggplot()]
+#'
+#' @return A [ggplot2::ggplot()] object
+#' @importFrom lemon reposition_legend
+#' @export
+move_legend_to_empty_facet <- function(g) {
+  if(!(inherits(g, "gtable"))){
+    if(inherits(g, "ggplot")){
+      gp <- ggplotGrob(g) # convert to grob
+    }else{
+      message("This is neither a ggplot object nor a grob ",
+              "generated from ggplotGrob. Returning original plot.")
+      return(g)
+    }
+  }else{
+    gp <- g
+  }
+
+  # check for unfilled facet panels
+  facet_panels <- grep("^panel", gp[["layout"]][["name"]])
+  empty_facet_panels <- sapply(facet_panels,
+                               function(i){
+                                 "zeroGrob" %in% class(gp[["grobs"]][[i]])
+                                 })
+  empty_facet_panels <- facet_panels[empty_facet_panels]
+
+  # establish name of empty panels
+  empty_facet_panels <- gp[["layout"]][empty_facet_panels, ]
+  names <- empty_facet_panels$name
+  if(!length(names)){
+    stop("There are no empty facets to place the legend in", call. = FALSE)
+  }
+  # example of names:
+  #[1] "panel-3-2" "panel-3-3"
+  reposition_legend(g, 'center', panel = names)
+}
+
 #' Determine if a model is a valid iSCAM model
 #'
 #' @details
@@ -312,7 +356,7 @@ draw.envelope <- function(yrs,
          lty = 1,
          lwd = 2,
          ...)
-    shade <- get.shade(col, opacity)
+    shade <- get_shade(col, opacity)
     poly.yrs <- c(yrs, rev(yrs))
     poly.ci    <- c(lower, rev(upper))
     polygon(poly.yrs, poly.ci, col = shade)

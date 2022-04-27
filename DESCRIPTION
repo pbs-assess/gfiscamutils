@@ -29,6 +29,7 @@ Imports:
   grid,
   here,
   kableExtra,
+  lemon,
   PBSmodelling,
   purrr,
   RColorBrewer,

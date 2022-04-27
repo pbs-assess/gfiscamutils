@@ -173,7 +173,7 @@ model_setup <- function(main_dirs = NULL,
                            bridge_model_groups = bridge_models_text,
                            sens_model_groups = sens_models_text)
 
-  plan("multisession")
+  #plan("multisession")
   j <- imap(model_list, function(.x, .y, ...){
     models <- NULL
     if(!is.null(.x)){
@@ -182,7 +182,7 @@ model_setup <- function(main_dirs = NULL,
         unique() %>%
         map_chr(~{.x})
 
-      future_walk(unique_models_dirs, function(x, ...){
+      walk(unique_models_dirs, function(x, ...){
                     create_rds_file(x, ...)},
                   ...)
 
@@ -204,7 +204,7 @@ model_setup <- function(main_dirs = NULL,
       })
     }
   }, ...)
-  plan()
+  #plan()
 
   base_model <- j[[1]][[1]]
   bridge_grps <- j[[2]]

@@ -1,16 +1,29 @@
 #' Plot MPD index fits for a single or group of models
 #'
 #' @rdname plot_index_mcmc
-#'
 #' @family Time series plotting functions
-#' @return A [ggplot2::ggplot()] object
+#'
+#' @param surv_index The `survey_index` data frame which is the `dat` object in the output
+#' from the [read_data_file()] function
+#' @param gear A vector of gear numbers to show. If `NULL`, all will be shown
+#' @param index_line_width The index data error bar and connecting line width
+#' @param index_point_size The index data point size
+#' @param index_color The color used for the observed index lines and points
+#' @param fit_line_width The model fit error bar and connecting line width
+#' @param fit_point_size The model fit point size
+#' @param errbar_width The width of the top and bottom crossbar of the errorbars
+#' @param leg_loc A two-element vector describing the X-Y values between 0 and
+#' 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
+#' is the bottom left corner. It can also be the string "facet" in which case
+#' the legend will appear in the empty facet if it exists.
 #' @export
  plot_index_mpd <- function(models,
-                            model_names = NULL,
                             type = c("fits", "resids"),
                             surv_index,
+                            gear = NULL,
                             start_year = 1995,
                             end_year = 2021,
+                            append_base_txt = NULL,
                             legend_title = "Models",
                             palette = "Paired",
                             base_color = "black",
@@ -20,6 +33,7 @@
                             index_color = "chocolate3",
                             fit_line_width = 0.5,
                             fit_point_size = 2,
+                            leg_loc = c(1, 1),
                             angle_x_labels = FALSE){
 
    type <- match.arg(type)
@@ -47,17 +61,18 @@
           "maximum number for the ", palette, " palette")
    }
 
-   # Set up model names for the legend
-   if(is.null(model_names)){
-     if(is.null(names(models))){
-       names(models) <- paste0("model ", seq_along(models))
-     }
-   }else{
-     if(length(model_names) != length(models)){
-       stop("`model_names` is not the same length as the `models` list")
-     }
-     names(models) <- model_names
+   if(!is.null(append_base_txt)){
+     length(append_base_txt) <- length(models)
+     # If `append_base_txt` is shorter than the number of models, append empty strings
+     # for remainder of items
+     append_base_txt[which(is.na(append_base_txt))] <- ""
    }
+
+   # Set up model names for the legend/title
+   names(models) <- map_chr(models, ~{
+     as.character(attributes(.x)$model_desc)
+   })
+   names(models) <- paste0(names(models), append_base_txt)
 
    # surv_abbrev will be in order of the gears in the models
    surv_abbrev_lst <- map(models, ~{
@@ -82,6 +97,17 @@
           "differently in different data files. They must match exactly.")
    }
 
+   if(!is.null(gear)){
+     valid_gear_nums <- seq_along(surv_names)
+     if(!all(gear %in% valid_gear_nums)){
+       stop("One or more of the gear numbers you requested is outside the range of possible gears.\n",
+            "Available gears numbers are: ", paste(valid_gear_nums, collapse = ", "), "\n",
+            "Names for these are:\n", paste(surv_names, collapse = "\n"))
+     }
+     surv_abbrevs <- surv_abbrevs[gear]
+     surv_names <- surv_names[gear]
+   }
+
    # Add survey names to the table with a left join by survey_abbrev
    surv_abbrevs_df <- surv_abbrevs %>%
      enframe(name = NULL)
@@ -98,11 +124,13 @@
    surv_indices <- map_df(surv_abbrevs, ~{
      surv_index_df %>%
        filter(survey_abbrev == .x) %>%
-       select(year, biomass, lowerci, upperci, survey_name, survey_abbrev)
+       select(year, biomass, lowerci, upperci, survey_name)
    })
 
    vals <- imap(models, ~{
-     ind_vals <- if(type == "fits") .x$mpd$it_hat else .x$mpd$epsilon
+     ind_vals <- if(type == "fits")
+       .x$mpd$it_hat else
+         .x$mpd$epsilon
      if(is.null(ind_vals)){
        return(NULL)
      }
@@ -116,7 +144,6 @@
          enframe(name = "year", value = "biomass") %>%
          mutate(model = .y) %>%
          mutate(survey_name = .x$dat$index_gear_names[i]) %>%
-         mutate(survey_abbrev = .x$dat$index_abbrevs[i]) %>%
          mutate(year = as.numeric(year))
      }
      out %>%
@@ -124,15 +151,15 @@
    }) %>%
      bind_rows()
 
-   # Remove any missing indices from the `surv_abbrevs` vector and
+   # Remove any missing indices from the `surv_names` vector and
    # the `surv_indices` data frame
-   surv_abbrevs <- surv_abbrevs[surv_abbrevs %in% unique(vals$survey_abbrev)]
    surv_names <- surv_names[surv_names %in% unique(vals$survey_name)]
    surv_indices <- surv_indices %>%
      filter(survey_name %in% unique(vals$survey_name)) %>%
      mutate(survey_name = fct_relevel(survey_name, !!surv_names))
 
    vals <- vals %>%
+     filter(survey_name %in% surv_names) %>%
      mutate(model = factor(model, names(models[names(models) %in% model]))) %>%
      mutate(survey_name = factor(survey_name, !!surv_names))
 
@@ -145,7 +172,7 @@
      surv_indices <- surv_indices %>%
        mutate_at(vars(biomass, lowerci, upperci),
                  function(x){
-                   ifelse(.$survey_abbrev == "DCPUE", x,  x / 1e6)
+                   ifelse(.$survey_name == "Discard CPUE", x,  x / 1e6)
                  })
    }
 
@@ -165,17 +192,24 @@
                      brewer.pal(name = palette,
                                 n = palette_info$maxcolors))
 
+   has_dcpue <- "Discard CPUE" %in% unique(surv_indices$survey_name)
+   only_dcpue <- has_dcpue && length(unique(surv_indices$survey_name)) == 1
+
    if(type == "fits"){
      g <- ggplot(surv_indices, aes(x = year, y = biomass)) +
        #geom_ribbon(aes(ymin = lowerci, ymax = upperci), fill = "red", alpha = 0.3) +
-       #geom_line(size = line_width, color = "red") +
+       geom_line(size = index_line_width, color = index_color, linetype = "dotted") +
        geom_errorbar(aes(ymin = lowerci, ymax = upperci), alpha = 0.3, color = index_color) +
        geom_point(, color = index_color) +
        geom_line(data = vals, aes(color = model), size = fit_line_width) +
        geom_point(data = vals, aes(color = model), size = fit_point_size)+
        facet_wrap(~survey_name, scales = "free_y") +
        xlab("Year") +
-       ylab("Index (thousand tonnes, DCPUE ~ kg/hr)") +
+       ylab(ifelse(has_dcpue,
+                   ifelse(only_dcpue,
+                          "Index (kg/hr)",
+                          "Index ('000 t, kg/hr for Discard CPUE)"),
+                   "Index ('000 t)")) +
        scale_color_manual(values = model_colors) +
        guides(color = guide_legend(title = legend_title)) +
        theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -196,11 +230,23 @@
        scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
    }
 
+   if(is.null(leg_loc)){
+     g <- g +
+       theme(legend.position = "none")
+   }else if(leg_loc[1] == "facet"){
+     g <- g %>% move_legend_to_empty_facet()
+   }else{
+     g <- g +
+       theme(legend.justification = leg_loc,
+             legend.position = leg_loc,
+             legend.background = element_rect(fill = "white", color = "white")) +
+       labs(color = legend_title)
+   }
+
    if(angle_x_labels){
      g <- g +
        theme(axis.text.x = element_text(angle = 45, hjust = 0.55, vjust = 0.5))
    }
 
    g
-
-}
+ }

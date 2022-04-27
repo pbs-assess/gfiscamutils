@@ -1,29 +1,22 @@
-#' Plot MCMC index fits for a single or group of models
+#' Plot MCMC index fits for a single or group of models by gear
 #'
-#' @param models A list of iscam model objects (class [mdl_lst_cls])
-#' @param model_names Names to use for the models in the plots. The names of
-#' the list items in `models` will be used if they are present and this will
-#' be ignored. If the list item names are not defined, temporary names will be used
+#' @rdname plot_ts_mcmc
+#' @family Time series plotting functions
+#'
 #' @param surv_index The `survey_index` data frame which is the `dat` object in the output
 #' from the [read_data_file()] function
 #' @param gear A vector of gear numbers to show. If `NULL`, all will be shown
-#' @param start_year Year to start plot
-#' @param end_year Year to end plot
-#' @param legend_title Title text for the legend
-#' @param palette A palette value that is in [RColorBrewer::brewer.pal.info]
-#' @param base_color A color to prepend to the brewer colors which are set by `palette`.
-#' This is called `base_color` because it is likely to be a base model
-#' @param dodge A small value added to each year for each model. This is added cumulatively,
-#' so each model fit appears more to the right than the previous one
 #' @param index_line_width The index data error bar and connecting line width
 #' @param index_point_size The index data point size
 #' @param index_color The color used for the observed index lines and points
 #' @param fit_line_width The model fit error bar and connecting line width
 #' @param fit_point_size The model fit point size
 #' @param errbar_width The width of the top and bottom crossbar of the errorbars
-#' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
+#' @param leg_loc A two-element vector describing the X-Y values between 0 and
+#' 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
+#' is the bottom left corner. It can also be the string "facet" in which case
+#' the legend will appear in the empty facet if it exists.
 #'
-#' @family Time series plotting functions
 #' @importFrom RColorBrewer brewer.pal.info
 #' @importFrom tibble enframe
 #' @importFrom purrr flatten map_chr map_df map2
@@ -31,12 +24,12 @@
 #' @importFrom ggplot2 geom_ribbon facet_wrap scale_color_brewer
 #' @export
 plot_index_mcmc <- function(models,
-                            model_names = NULL,
                             type = c("fits", "resids"),
                             surv_index,
                             gear = NULL,
                             start_year = 1995,
                             end_year = 2021,
+                            append_base_txt = NULL,
                             legend_title = "Models",
                             palette = "Paired",
                             base_color = "black",
@@ -47,6 +40,7 @@ plot_index_mcmc <- function(models,
                             fit_line_width = 0.5,
                             fit_point_size = 2,
                             errbar_width = 0.5,
+                            leg_loc = c(1, 1),
                             angle_x_labels = FALSE){
 
   type <- match.arg(type)
@@ -74,17 +68,18 @@ plot_index_mcmc <- function(models,
          "maximum number for the ", palette, " palette")
   }
 
-  # Set up model names for the legend
-  if(is.null(model_names)){
-    if(is.null(names(models))){
-      names(models) <- paste0("model ", seq_along(models))
-    }
-  }else{
-    if(length(model_names) != length(models)){
-      stop("`model_names` is not the same length as the `models` list")
-    }
-    names(models) <- model_names
+  if(!is.null(append_base_txt)){
+    length(append_base_txt) <- length(models)
+    # If `append_base_txt` is shorter than the number of models, append empty strings
+    # for remainder of items
+    append_base_txt[which(is.na(append_base_txt))] <- ""
   }
+
+  # Set up model names for the legend/title
+  names(models) <- map_chr(models, ~{
+    as.character(attributes(.x)$model_desc)
+  })
+  names(models) <- paste0(names(models), append_base_txt)
 
   # surv_abbrev will be in order of the gears in the models
   surv_abbrev_lst <- map(models, ~{
@@ -135,42 +130,45 @@ plot_index_mcmc <- function(models,
   surv_indices <- map_df(surv_abbrevs, ~{
     surv_index_df %>%
       filter(survey_abbrev == .x) %>%
-      select(year, biomass, lowerci, upperci, survey_name, survey_abbrev)
+      select(year, biomass, lowerci, upperci, survey_name)
   })
 
+
   vals <- imap(models, ~{
-    ind_vals <- if(type == "fits") .x$mcmccalcs$it_quants else .x$mcmccalcs$epsilon_quants
+    ind_vals <- if(type == "fits")
+      .x$mcmccalcs$it_quants else
+        .x$mcmccalcs$epsilon_quants
     if(is.null(ind_vals)){
       return(NULL)
     }
     ind_vals %>%
-      mutate(model = .y) %>%
-      left_join(surv_df, by = "survey_abbrev")
+      mutate(model = .y)
   })
 
   if(all(map_lgl(vals, is.null))){
-    stop("None of the models supplied have MCMC index ", if(type == "fits") "fits" else "residuals")
+    stop("None of the models supplied have MCMC index ",
+         if(type == "fits") "fits" else "residuals",
+         call. = FALSE)
   }
 
   # Remove any NULL list items (no index fits found in model)
   vals <- vals[!sapply(vals, is.null)] %>%
     bind_rows() %>%
-    select(model, survey_name, survey_abbrev, year, biomass, lowerci, upperci)
+    select(model, survey_name, year, biomass, lowerci, upperci)
 
   # Remove all rows where `survey_name` is `NULL` which is caused by it not being in the gear list
   vals <- vals %>%
     filter(!is.na(survey_name))
-#  browser()
 
-  # Remove any missing indices from the `surv_abbrevs` vector and
+  # Remove any missing indices from the `surv_names` vector and
   # the `surv_indices` data frame
-  surv_abbrevs <- surv_abbrevs[surv_abbrevs %in% unique(vals$survey_abbrev)]
   surv_names <- surv_names[surv_names %in% unique(vals$survey_name)]
   surv_indices <- surv_indices %>%
     filter(survey_name %in% unique(vals$survey_name)) %>%
     mutate(survey_name = fct_relevel(survey_name, !!surv_names))
 
   vals <- vals %>%
+    filter(survey_name %in% surv_names) %>%
     mutate(model = factor(model, names(models[names(models) %in% model]))) %>%
     mutate(survey_name = factor(survey_name, !!surv_names))
 
@@ -182,7 +180,7 @@ plot_index_mcmc <- function(models,
     vals <- vals %>%
       mutate_at(vars(biomass, lowerci, upperci),
                 function(x){
-                  ifelse(.$survey_abbrev == "DCPUE", x, x / 1e6)
+                  ifelse(.$survey_name == "Discard CPUE", x / 1e6, x)
                 })
   }
 
@@ -202,12 +200,12 @@ plot_index_mcmc <- function(models,
     vals <- vals %>%
       mutate_at(vars(biomass, lowerci, upperci),
                 function(x){
-                  ifelse(.$survey_abbrev == "DCPUE", x / 1e6,  x)
+                  ifelse(.$survey_name == "Discard CPUE", x, x / 1e6)
                 })
     surv_indices <- surv_indices %>%
       mutate_at(vars(biomass, lowerci, upperci),
                 function(x){
-                  ifelse(.$survey_abbrev == "DCPUE", x,  x / 1e6)
+                  ifelse(.$survey_name == "Discard CPUE", x, x / 1e6)
                 })
   }
 
@@ -216,10 +214,13 @@ plot_index_mcmc <- function(models,
                     brewer.pal(name = palette,
                                n = palette_info$maxcolors))
 
+  has_dcpue <- "Discard CPUE" %in% unique(surv_indices$survey_name)
+  only_dcpue <- has_dcpue && length(unique(surv_indices$survey_name)) == 1
+
   if(type == "fits"){
     g <- ggplot(surv_indices,
                 aes(x = year, y = biomass)) +
-      geom_line(size = index_line_width, color = index_color) +
+      geom_line(size = index_line_width, color = index_color, linetype = "dotted") +
       geom_point(size = index_point_size, color = index_color) +
       geom_errorbar(aes(ymin = lowerci, ymax = upperci),
                     width = errbar_width,
@@ -237,7 +238,11 @@ plot_index_mcmc <- function(models,
                     width = errbar_width,
                     size = fit_line_width) +
       xlab("Year") +
-      ylab("Index (thousand tonnes, DCPUE ~ kg/hr)") +
+      ylab(ifelse(has_dcpue,
+                  ifelse(only_dcpue,
+                         "Index (kg/hr)",
+                         "Index ('000 t, kg/hr for Discard CPUE)"),
+                  "Index ('000 t)")) +
       scale_color_manual(values = model_colors) +
       guides(color = guide_legend(title = legend_title)) +
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
@@ -258,6 +263,19 @@ plot_index_mcmc <- function(models,
       scale_color_manual(values = model_colors) +
       guides(color = guide_legend(title = legend_title)) +
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
+  }
+
+  if(is.null(leg_loc)){
+    g <- g +
+      theme(legend.position = "none")
+  }else if(leg_loc[1] == "facet"){
+    g <- g %>% move_legend_to_empty_facet()
+  }else{
+    g <- g +
+      theme(legend.justification = leg_loc,
+            legend.position = leg_loc,
+            legend.background = element_rect(fill = "white", color = "white")) +
+      labs(color = legend_title)
   }
 
   if(angle_x_labels){
