@@ -2,7 +2,8 @@
 % Please edit documentation in R/utilities.R
 \name{c.model.list}
 \alias{c.model.list}
-\title{Extract the model class objects from the list of model lists,
+\title{Deprecated
+Extract the model class objects from the list of model lists,
 and merge them into a single model list containing all the model
 class objects}
 \usage{
@@ -15,6 +16,7 @@ class objects}
 an iscam model object list
 }
 \description{
+Deprecated
 Extract the model class objects from the list of model lists,
 and merge them into a single model list containing all the model
 class objects

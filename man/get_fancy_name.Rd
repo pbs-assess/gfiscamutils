@@ -2,9 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{get_fancy_name}
 \alias{get_fancy_name}
-\title{Get a fancy version of the parameter name.
-Includes expressions which have special characters (greek)
-and super/subscripts. Also italicizes estimated parameter names}
+\title{Get a properly-typeset version of the parameter name}
 \usage{
 get_fancy_name(name, subst = FALSE)
 }
@@ -19,7 +17,9 @@ If `FALSE`, return all `expression()` expressions}
 an R expression which represents the fancy version of the parameter name
 }
 \description{
-Get a fancy version of the parameter name.
+Get a properly-typeset version of the parameter name
+}
+\details{
 Includes expressions which have special characters (greek)
-and super/subscripts. Also italicizes estimated parameter names
+and super/subscripts. Also italicizes estimated parameter names.
 }

@@ -13,7 +13,9 @@ plot_selex_mcmc(
   show_maturity = FALSE,
   ci_type = c("both", "line", "ribbon"),
   ci_linetype = c("dotted", "solid", "dashed", "dotdash", "longdash", "twodash"),
-  ci_alpha = 0.3
+  ci_alpha = 0.3,
+  leg_loc = c(1, 1),
+  angle_x_labels = FALSE
 )
 
 plot_selex_mpd(model, gear = NULL, show_maturity = FALSE, title = NULL)
@@ -32,6 +34,11 @@ This is provided in case the data frames have more than three different quantile
 
 \item{ci_alpha}{Opacity between 0 and 1 for the credible intervals ribbons. Only used if
 `ci_type` is "ribbon" or "both"}
+
+\item{leg_loc}{A two-element vector describing the X-Y values between 0 and
+1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
+is the bottom left corner. It can also be the string "facet" in which case
+the legend will appear in the empty facet if it exists.}
 
 \item{title}{The plot title. NULL means no title}
 }

@@ -45,6 +45,7 @@ Imports:
   tibble,
   tidyr,
   usethis,
+  utils,
   xtable,
   zoo
 Remotes:

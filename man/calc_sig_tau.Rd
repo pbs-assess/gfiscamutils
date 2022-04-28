@@ -15,7 +15,11 @@ calc_sig_tau(rho, vartheta)
 a list of length 2, the calculated tau and sigma parameters
 }
 \description{
-Total variance is given by ϑ (`vartheta`) and the proportion of the total variance that is
-associated with observation errors is given by ρ (`rho`), the variance is partitioned into
-observation errors (σ^2) (`sigma`^2) and process errors (τ^2) (`tau`^2)
+Calculation of sigma and tau from rho and vartheta
+}
+\details{
+Total variance is given by ϑ (`vartheta`) and the proportion of the total
+variance that is associated with observation errors is given by ρ (`rho`),
+the variance is partitioned into observation errors (σ^2) (`sigma`^2) and
+process errors (τ^2) (`tau`^2).
 }

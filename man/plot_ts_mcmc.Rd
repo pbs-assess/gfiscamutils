@@ -76,7 +76,7 @@ plot_index_mcmc(
   type = c("fits", "resids"),
   surv_index,
   gear = NULL,
-  start_year = 1995,
+  start_year = 1996,
   end_year = 2021,
   append_base_txt = NULL,
   legend_title = "Models",
@@ -267,7 +267,7 @@ is the bottom left corner}
 
 \item{angle_x_labels}{If `TRUE` put 45 degree angle on x-axis tick labels}
 
-\item{type}{'i' means instantaneous, 'e' means exploitation rate (Ut)}
+\item{type}{Either "fits" or "resids" for model fits or residuals respectively}
 
 \item{surv_index}{The `survey_index` data frame which is the `dat` object in the output
 from the [read_data_file()] function}

@@ -25,29 +25,6 @@ plot_index_mpd(
   angle_x_labels = FALSE
 )
 }
-\arguments{
-\item{surv_index}{The `survey_index` data frame which is the `dat` object in the output
-from the [read_data_file()] function}
-
-\item{gear}{A vector of gear numbers to show. If `NULL`, all will be shown}
-
-\item{index_line_width}{The index data error bar and connecting line width}
-
-\item{index_point_size}{The index data point size}
-
-\item{index_color}{The color used for the observed index lines and points}
-
-\item{fit_line_width}{The model fit error bar and connecting line width}
-
-\item{fit_point_size}{The model fit point size}
-
-\item{leg_loc}{A two-element vector describing the X-Y values between 0 and
-1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
-is the bottom left corner. It can also be the string "facet" in which case
-the legend will appear in the empty facet if it exists.}
-
-\item{errbar_width}{The width of the top and bottom crossbar of the errorbars}
-}
 \description{
 Plot MPD index fits for a single or group of models
 }

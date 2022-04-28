@@ -8,6 +8,10 @@
 #' @param ci_linetype See `linetype` in [ggplot2]. Only used if `ci_type` is "line" or "both"
 #' @param ci_alpha Opacity between 0 and 1 for the credible intervals ribbons. Only used if
 #' `ci_type` is "ribbon" or "both"
+#' @param leg_loc A two-element vector describing the X-Y values between 0 and
+#' 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
+#' is the bottom left corner. It can also be the string "facet" in which case
+#' the legend will appear in the empty facet if it exists.
 
 #' @family Selectivity plotting functions
 #' @return A [ggplot2::ggplot()] object
@@ -21,7 +25,9 @@ plot_selex_mcmc <- function(model,
                             ci_linetype = c("dotted", "solid",
                                             "dashed", "dotdash",
                                             "longdash", "twodash"),
-                            ci_alpha = 0.3){
+                            ci_alpha = 0.3,
+                            leg_loc = c(1, 1),
+                            angle_x_labels = FALSE){
 
   ci_type <- match.arg(ci_type)
   ci_linetype <- match.arg(ci_linetype)
@@ -197,5 +203,24 @@ plot_selex_mcmc <- function(model,
                     linetype = "dashed")
   }
 
-  suppressWarnings(print(g))
+  if(is.null(leg_loc)){
+    g <- g +
+      theme(legend.position = "none")
+  }else if(leg_loc[1] == "facet"){
+    g <- g %>% move_legend_to_empty_facet()
+  }else{
+    g <- g +
+      theme(legend.justification = leg_loc,
+            legend.position = leg_loc,
+            legend.background = element_rect(fill = "white", color = "white")) +
+      labs(color = legend_title)
+  }
+
+  if(angle_x_labels){
+    g <- g +
+      theme(axis.text.x = element_text(angle = 45, hjust = 0.55, vjust = 0.5))
+  }
+
+  g
+  #suppressWarnings(print(g))
 }

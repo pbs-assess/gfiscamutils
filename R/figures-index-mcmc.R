@@ -5,6 +5,7 @@
 #'
 #' @param surv_index The `survey_index` data frame which is the `dat` object in the output
 #' from the [read_data_file()] function
+#' @param type Either "fits" or "resids" for model fits or residuals respectively
 #' @param gear A vector of gear numbers to show. If `NULL`, all will be shown
 #' @param index_line_width The index data error bar and connecting line width
 #' @param index_point_size The index data point size
@@ -22,12 +23,13 @@
 #' @importFrom purrr flatten map_chr map_df map2
 #' @importFrom dplyr mutate_at
 #' @importFrom ggplot2 geom_ribbon facet_wrap scale_color_brewer
+#' @importFrom utils capture.output
 #' @export
 plot_index_mcmc <- function(models,
                             type = c("fits", "resids"),
                             surv_index,
                             gear = NULL,
-                            start_year = 1995,
+                            start_year = 1996,
                             end_year = 2021,
                             append_base_txt = NULL,
                             legend_title = "Models",
@@ -107,13 +109,23 @@ plot_index_mcmc <- function(models,
   if(!is.null(gear)){
     valid_gear_nums <- seq_along(surv_names)
     if(!all(gear %in% valid_gear_nums)){
-      stop("One or more of the gear numbers you requested is outside the range of possible gears.\n",
-           "Available gears numbers are: ", paste(valid_gear_nums, collapse = ", "), "\n",
-           "Names for these are:\n", paste(surv_names, collapse = "\n"))
+      gear_table_str <- surv_names %>%
+        enframe(name = "gear") %>%
+        rename(gear_name = value) %>%
+        capture.output() %>%
+        paste(collapse = "\n")
+
+      stop("One or more of the gear numbers you requested is outside the ",
+           "range of possible gears.\n",
+           "Gears passed in were: ", paste(gear, collapse = ", "), "\n",
+           "Gear numbers for this (combination of) model(s) are:\n\n",
+           gear_table_str,
+           call. = FALSE)
     }
     surv_abbrevs <- surv_abbrevs[gear]
     surv_names <- surv_names[gear]
   }
+
   # Add survey names to the table with a left join by survey_abbrev
   surv_abbrevs_df <- surv_abbrevs %>%
     enframe(name = NULL)
