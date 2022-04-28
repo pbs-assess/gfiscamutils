@@ -19,8 +19,8 @@
 #'   6. p1 (defined by 5 above)
 #'   7. p2 (defined by 5 above)
 #'
-#' See [plot_fun()] for prior plot details including an documentation on the
-#' vertical lines
+#' See [plot_distribution()] for prior plot details including an documentation
+#' on the vertical lines
 #'
 #' @inheritParams plot_traces_mcmc
 #' @family MCMC diagnostics plots
@@ -114,13 +114,13 @@ plot_priors_posts_mcmc <- function(model,
     func <- function(x){xx$fn(x, xx$p1, xx$p2)}
     if(specs$prior == 0){
       # Uniform
-      g <- plot_fun(fun = dunif,
-                    xlim = c(xx$p1, xx$p2),
-                    title = xx$nm,
-                    alpha = 0.9,
-                    param_lst = list(min = xx$p1, max = xx$p2),
-                    show_mean_line = FALSE,
-                    show_sd_lines = FALSE)
+      g <- plot_distribution(fun = dunif,
+                             xlim = c(xx$p1, xx$p2),
+                             title = xx$nm,
+                             alpha = 0.9,
+                             param_lst = list(min = xx$p1, max = xx$p2),
+                             show_mean_line = FALSE,
+                             show_sd_lines = FALSE)
       if(!priors_only){
         g_dat <- ggplot_build(g)
         ymax <- max(g_dat$data[[1]]$ymax)
@@ -133,12 +133,12 @@ plot_priors_posts_mcmc <- function(model,
       }
     }else if(specs$prior == 1){
       # Normal
-      g <- plot_fun(fun = dnorm,
-                    xlim = c(-3, 3),
-                    title = xx$nm,
-                    alpha = 0.9,
-                    param_lst = list(mean = xx$p1, sd = xx$p2),
-                    show_mode_line = TRUE)
+      g <- plot_distribution(fun = dnorm,
+                             xlim = c(-3, 3),
+                             title = xx$nm,
+                             alpha = 0.9,
+                             param_lst = list(mean = xx$p1, sd = xx$p2),
+                             show_mode_line = TRUE)
       if(!priors_only){
         g_dat <- ggplot_build(g)
         ymax <- max(g_dat$data[[1]]$ymax)
@@ -151,12 +151,12 @@ plot_priors_posts_mcmc <- function(model,
       }
     }else if(specs$prior == 2){
       # Lognormal
-      g <- plot_fun(fun = dlnorm,
-                    xlim = c(log(xx$p1), log(xx$p2)),
-                    title = xx$nm,
-                    alpha = 0.9,
-                    param_lst = list(mean = log(xx$p1), sd = log(xx$p2)),
-                    show_mode_line = TRUE)
+      g <- plot_distribution(fun = dlnorm,
+                             xlim = c(log(xx$p1), log(xx$p2)),
+                             title = xx$nm,
+                             alpha = 0.9,
+                             param_lst = list(mean = log(xx$p1), sd = log(xx$p2)),
+                             show_mode_line = TRUE)
       if(!priors_only){
         g_dat <- ggplot_build(g)
         ymax <- max(g_dat$data[[1]]$ymax)
@@ -169,12 +169,12 @@ plot_priors_posts_mcmc <- function(model,
       }
     }else if(specs$prior %in% 3:4){
       # Beta
-      g <- plot_fun(fun = ifelse(specs$prior == 3, dbeta, dgamma),
-                    xlim = c(0.5, 1),
-                    title = xx$nm,
-                    alpha = 0.9,
-                    param_lst = list(shape1 = xx$p1, shape2 = xx$p2),
-                    show_mode_line = TRUE)
+      g <- plot_distribution(fun = ifelse(specs$prior == 3, dbeta, dgamma),
+                             xlim = c(0.5, 1),
+                             title = xx$nm,
+                             alpha = 0.9,
+                             param_lst = list(shape1 = xx$p1, shape2 = xx$p2),
+                             show_mode_line = TRUE)
       if(!priors_only){
         g_dat <- ggplot_build(g)
         ymax <- max(g_dat$data[[1]]$ymax)

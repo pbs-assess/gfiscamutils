@@ -9,14 +9,14 @@
 #' @return A [ggplot2::ggplot()] object made from the [forecast::ggAcf()] function
 #' @importFrom forecast ggAcf
 #' @export
-plot_autocor <- function(model,
-                         plot_sel = NULL,
-                         param_rm = c("rho",
-                                      "vartheta"),
-                         lag = 100,
-                         list_param_names = FALSE,
-                         text_title_size = 12,
-                         ...){
+plot_autocor_mcmc <- function(model,
+                              plot_sel = NULL,
+                              param_rm = c("rho",
+                                           "vartheta"),
+                              lag = 100,
+                              list_param_names = FALSE,
+                              text_title_size = 12,
+                              ...){
 
   if(!is_iscam_model(model)){
     if(is_iscam_model_list(model)){

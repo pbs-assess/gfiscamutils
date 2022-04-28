@@ -32,25 +32,25 @@
 #'
 #' @return a [ggplot2::ggplot()] object
 #' @export
-plot_fun <- function(fun = dnorm,
-                     nsamp = 100,
-                     param_lst = list(mean = 0, sd = 0.5),
-                     xlim = c(-2, 2),
-                     fill = "steelblue",
-                     title = "",
-                     mode_line_col = "red",
-                     mode_line_lwd = 0.5,
-                     mode_line_lty = 1,
-                     mean_line_col = "black",
-                     mean_line_lwd = 0.5,
-                     mean_line_lty = 1,
-                     sd_lines_col = "black",
-                     sd_lines_lwd = 0.5,
-                     sd_lines_lty = 2,
-                     alpha = 0.75,
-                     show_mode_line = TRUE,
-                     show_mean_line = TRUE,
-                     show_sd_lines = TRUE){
+plot_distribution <- function(fun = dnorm,
+                              nsamp = 100,
+                              param_lst = list(mean = 0, sd = 0.5),
+                              xlim = c(-2, 2),
+                              fill = "steelblue",
+                              title = "",
+                              mode_line_col = "red",
+                              mode_line_lwd = 0.5,
+                              mode_line_lty = 1,
+                              mean_line_col = "black",
+                              mean_line_lwd = 0.5,
+                              mean_line_lty = 1,
+                              sd_lines_col = "black",
+                              sd_lines_lwd = 0.5,
+                              sd_lines_lty = 2,
+                              alpha = 0.75,
+                              show_mode_line = TRUE,
+                              show_mean_line = TRUE,
+                              show_sd_lines = TRUE){
 
   fun_args <- as.list(args(fun))
   if(!all(names(param_lst) %in% names(fun_args))){

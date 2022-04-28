@@ -12,7 +12,7 @@
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom ggplot2 geom_function
 #' @export
-plot_gear_selex_mcmc <- function(model,
+plot_selex_gear_mcmc <- function(model,
                                  gear = 1,
                                  probs = c(0.025, 0.5, 0.975),
                                  show_maturity = FALSE,
