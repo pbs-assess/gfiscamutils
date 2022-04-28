@@ -1,4 +1,9 @@
+#' Plot MCMC traces for iSCAM models
+#'
+#' @description
 #' Trace plots for parameters in an MCMC run
+#'
+#' @family MCMC diagnostics plots
 #'
 #' @param model An iscam model object (class [mdl_cls])
 #' @param plot_sel Logical. If `TRUE`, plot only the selectivity parameters.
@@ -15,8 +20,7 @@
 #' comes from the `model_desc` attribute of `model`. If this is `NULL`, don't show a title
 #' @param ... Additional arguments passed to [cowplot::plot_grid()]
 #'
-#' @family MCMC diagnostics plots
-#' @return A [ggplot2::gglot()] object
+#' @return A [ggplot2::ggplot()] object
 #' @importFrom cowplot ggdraw draw_label
 #' @export
 plot_traces_mcmc <- function(model,

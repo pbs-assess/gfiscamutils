@@ -3,7 +3,7 @@
 \name{plot_fun}
 \alias{plot_fun}
 \title{Plot a distribution function. Mostly for use with making prior plots
-for MCMC parameters. See [plot_priors_posts_mcmc()]}
+for MCMC parameters. See \code{\link[=plot_priors_posts_mcmc]{plot_priors_posts_mcmc()}}}
 \usage{
 plot_fun(
   fun = dnorm,
@@ -32,7 +32,7 @@ plot_fun(
 
 \item{nsamp}{Number of points across x-axis}
 
-\item{param_lst}{A list of parameters required by the function provided (`fun`)
+\item{param_lst}{A list of parameters required by the function provided (\code{fun})
 They can be named but do not have to be}
 
 \item{xlim}{x-axis limits (2-element vector)}
@@ -61,25 +61,25 @@ They can be named but do not have to be}
 
 \item{alpha}{Opacity of fill from 0-1}
 
-\item{show_mode_line}{Logical. If `TRUE`, show a vertical line at the mode
+\item{show_mode_line}{Logical. If \code{TRUE}, show a vertical line at the mode
 of the distribution}
 
-\item{show_mean_line}{Logical. If `TRUE`, show a vertical line at
+\item{show_mean_line}{Logical. If \code{TRUE}, show a vertical line at
 the mean}
 
-\item{show_sd_lines}{Logical. If `TRUE`, show vertical lines one standard
+\item{show_sd_lines}{Logical. If \code{TRUE}, show vertical lines one standard
 deviation away from the mean}
 }
 \value{
-a [ggplot2::ggplot()] object
+a \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
 }
 \description{
 Plot a distribution function. Mostly for use with making prior plots
-for MCMC parameters. See [plot_priors_posts_mcmc()]
+for MCMC parameters. See \code{\link[=plot_priors_posts_mcmc]{plot_priors_posts_mcmc()}}
 }
 \details{
 The plot will contain a filled curve representing the prior distribution,
-and a solid red (`mode_line_col`) vertical line representing the mode of the distribution and a
-solid black (`mean_line_col`) and two dotted black (`sd_lines_col`) vertical lines
+and a solid red (\code{mode_line_col}) vertical line representing the mode of the distribution and a
+solid black (\code{mean_line_col}) and two dotted black (\code{sd_lines_col}) vertical lines
 representing the mean and one standard deviation from the mean
 }

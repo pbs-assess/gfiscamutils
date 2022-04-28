@@ -17,5 +17,5 @@ Fetch a data frame of the estimated MCMC parameters only
 }
 \details{
 If all values in a given column are different, it is assumed that
-  the parameter was estimated.
+the parameter was estimated.
 }

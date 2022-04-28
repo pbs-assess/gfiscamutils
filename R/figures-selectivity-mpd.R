@@ -1,9 +1,13 @@
+#' Plot MPD selectivities for iSCAM models
+#'
+#' @description
 #' Plot the selectivity for all gears in the iscam model
 #'
-#' @rdname plot_selex_mcmc
+#' @inheritParams plot_selex_mcmc
+#' @family Selectivity plotting functions
+#'
 #' @param title The plot title. NULL means no title
 #'
-#' @family Selectivity plotting functions
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom ggplot2 geom_function
 #' @export

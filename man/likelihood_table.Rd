@@ -17,14 +17,14 @@ likelihood_table(
 
 \item{digits}{number of decimal places for the values}
 
-\item{french}{If `TRUE` translate to French}
+\item{french}{If \code{TRUE} translate to French}
 
 \item{model_col_widths}{Widths for columns, except the Parameter column}
 
-\item{...}{Arguments to pass to [csasdown::csas_table()]}
+\item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }
 \value{
-An [csasdown::csas_table()]
+An \code{\link[csasdown:csas_table]{csasdown::csas_table()}}
 }
 \description{
 Create a table of likelihood outputs

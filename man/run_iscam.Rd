@@ -2,7 +2,7 @@
 % Please edit documentation in R/run-iscam.R
 \name{run_iscam}
 \alias{run_iscam}
-\title{Run an iscam model through the [base::shell()] command}
+\title{Run an iscam model through the \code{\link[base:shell]{base::shell()}} command}
 \usage{
 run_iscam(
   model_dir,
@@ -20,16 +20,16 @@ run_iscam(
 \arguments{
 \item{model_dir}{The directory in which the iscam model lies}
 
-\item{mcmc_mode}{Logical. TRUE means enter the `mcmc_dir` and run an
+\item{mcmc_mode}{Logical. TRUE means enter the \code{mcmc_dir} and run an
 MCMC with the remaining arguments}
 
 \item{mcmc_dir}{Directory to run the MCMC in}
 
 \item{mcmc_chain_length}{MCMC chain length}
 
-\item{mcsave}{MCMC save every `mcsave`th posterior}
+\item{mcsave}{MCMC save every \code{mcsave}th posterior}
 
-\item{mcscale}{Scale step size for the first `mcscale` evaluations}
+\item{mcscale}{Scale step size for the first \code{mcscale} evaluations}
 
 \item{maxfn}{Maximum number of function evaluations}
 
@@ -40,8 +40,8 @@ MCMC with the remaining arguments}
 \item{...}{Passed on to other functions}
 }
 \value{
-[base::invisible()]
+\code{\link[base:invisible]{base::invisible()}}
 }
 \description{
-Run an iscam model through the [base::shell()] command
+Run an iscam model through the \code{\link[base:shell]{base::shell()}} command
 }

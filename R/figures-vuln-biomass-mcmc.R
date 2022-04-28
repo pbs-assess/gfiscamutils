@@ -1,7 +1,10 @@
+#' Plot MCMC vulnerable biomass for iSCAM models
+#'
+#' @description
 #' Plot vulnerable biomass time series plots for MCMC output with credible
 #' intervals
 #'
-#' @rdname plot_ts_mcmc
+#' @inheritParams plot_ts_mcmc
 #' @family Time series plotting functions
 #'
 #' @export

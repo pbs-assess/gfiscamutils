@@ -1,4 +1,6 @@
-#' Plot the age fits for an MCMC model
+#' Plot MCMC age fits for an iSCAM model
+#'
+#' @family Age plotting functions
 #'
 #' @param model An iscam model object (class [mdl_cls])
 #' @param gear The number of the gear to plot
@@ -20,7 +22,6 @@
 #' the legend to. eg. c(1, 1) is the top right corner and c(0, 0) is the bottom left corner
 #' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
 #'
-#' @family Age plotting functions
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_age_fits_mcmc <- function(model,

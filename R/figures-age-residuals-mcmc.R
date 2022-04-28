@@ -1,6 +1,7 @@
-#' Plot the age residuals for an MCMC model
+#' Plot MCMC age residuals for an iSCAM model
 #'
-#' @rdname plot_age_fits_mcmc
+#' @inheritParams plot_age_fits_mcmc
+#' @family Age plotting functions
 #'
 #' @family Age plotting functions
 #' @return A [ggplot2::ggplot()] object

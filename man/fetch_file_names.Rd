@@ -13,9 +13,11 @@ fetch_file_names(path, filename)
 }
 \value{
 A list with three names:
-  1. Data file name
-  2. Control file name
-  3. Projection file name
+\enumerate{
+\item Data file name
+\item Control file name
+\item Projection file name
+}
 }
 \description{
 Read the iscam starter file to get the iscam input file names

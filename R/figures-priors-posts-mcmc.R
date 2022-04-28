@@ -1,3 +1,6 @@
+#' Plot MCMC priors and posteriors for iSCAM models
+#'
+#' @description
 #' Priors and posteriors comparison plots for parameters in an MCMC run
 #'
 #' @details Plots the priors overlaid on the posteriors for the given iscam model.
@@ -19,10 +22,9 @@
 #' See [plot_fun()] for prior plot details including an documentation on the
 #' vertical lines
 #'
-#' @rdname plot_traces_mcmc
-#'
+#' @inheritParams plot_traces_mcmc
 #' @family MCMC diagnostics plots
-#' @return Nothing
+#'
 #' @importFrom cowplot plot_grid
 #' @export
 plot_priors_posts_mcmc <- function(model,

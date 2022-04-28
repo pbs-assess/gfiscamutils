@@ -1,3 +1,6 @@
+#' Plot MCMC biomass for iSCAM models
+#'
+#' @description
 #' Plot the MCMC spawning biomass trajectories for iscam models in either
 #' absolute or relative form with or without reference point credible
 #' intervals and medians
@@ -9,7 +12,7 @@
 #' [plot_biomass_grid_mcmc()] instead. This will show one panel per model,
 #' each with its own reference points.
 #'
-#' @rdname plot_ts_mcmc
+#' @inheritParams plot_ts_mcmc
 #' @family Time series plotting functions
 #'
 #' @param models A list of iscam model objects (class [mdl_lst_cls])

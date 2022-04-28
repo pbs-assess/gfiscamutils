@@ -1,3 +1,6 @@
+#' Plot MCMC time series plots for iSCAM models
+#'
+#' @description
 #' Plot time series plots for MCMC output with credible intervals for single or
 #' multiple models
 #'
@@ -13,7 +16,9 @@
 #' `mdl_cls` class ("iscam_model") object. The attribute is set in the
 #' [model_setup()] function, from either the `bridge_model_text` or
 #' `sens_model_text` arguments.
-
+#'
+#' @family Time series plotting functions
+#'
 #' @param models A list of iscam model objects (class [mdl_lst_cls])
 #' @param quant_df A value which can be found in the `model$mcmccalcs` list
 #' for each iscam model in the `models` list
@@ -55,7 +60,6 @@
 #' `NULL`, don't show a title
 #' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
 #'
-#' @family Time series plotting functions
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_ts_mcmc <- function(models,

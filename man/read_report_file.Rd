@@ -17,19 +17,19 @@ Read in the iscam report (.rep) file
 }
 \details{
 Read in the iscam report (.rep) file:
-  File structure:
-  It is assumed that each text label will be on its own line,
-  followed by one or more lines of data.
-  If the label is followed by a single value or line of data,
-  a vector will be created to hold the data.
-  If the label is followed by multiple lines of data,
-  a matrix will be created to hold the data. The matrix might be
-  ragged so a check is done ahead of time to ensure correct
-  matrix dimensions.
+File structure:
+It is assumed that each text label will be on its own line,
+followed by one or more lines of data.
+If the label is followed by a single value or line of data,
+a vector will be created to hold the data.
+If the label is followed by multiple lines of data,
+a matrix will be created to hold the data. The matrix might be
+ragged so a check is done ahead of time to ensure correct
+matrix dimensions.
 
-  If a label has another label following it but no data,
-  that label is thrown away and not included in the returned list.
+If a label has another label following it but no data,
+that label is thrown away and not included in the returned list.
 
-  A label must start with an alphabetic character followed by
-  any number of alphanumeric characters (includes underscore and .)
+A label must start with an alphabetic character followed by
+any number of alphanumeric characters (includes underscore and .)
 }

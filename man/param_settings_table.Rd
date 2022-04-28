@@ -7,11 +7,11 @@
 param_settings_table(model, french = FALSE, ...)
 }
 \arguments{
-\item{model}{A single output model from [arrowtooth::model_setup()]}
+\item{model}{A single output model}
 
-\item{french}{If `TRUE` translate to French}
+\item{french}{If \code{TRUE} translate to French}
 
-\item{...}{Arguments to pass to [csasdown::csas_table()]}
+\item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }
 \description{
 Make a table showing number of parameters estimated and prior parameterizations

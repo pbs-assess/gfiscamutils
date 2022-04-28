@@ -9,9 +9,9 @@ get_fancy_name(name, subst = FALSE)
 \arguments{
 \item{name}{iscam parameter name to make fancy}
 
-\item{substr}{Logical. If `TRUE`, return all `substitute()`
+\item{substr}{Logical. If \code{TRUE}, return all \code{substitute()}
 expressions which are necessary for rendering by certain functions.
-If `FALSE`, return all `expression()` expressions}
+If \code{FALSE}, return all \code{expression()} expressions}
 }
 \value{
 an R expression which represents the fancy version of the parameter name

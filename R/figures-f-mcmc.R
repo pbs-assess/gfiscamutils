@@ -1,7 +1,10 @@
+#' Plot MCMC fishing mortalities for iSCAM models
+#'
+#' @description
 #' Plot fishing mortality time series plots for MCMC output with credible
 #' intervals
 #'
-#' @rdname plot_ts_mcmc
+#' @inheritParams plot_ts_mcmc
 #' @family Time series plotting functions
 #'
 #' @param type 'i' means instantaneous, 'e' means exploitation rate (Ut)

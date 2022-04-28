@@ -3,12 +3,12 @@
 \name{read_mcmc}
 \alias{read_mcmc}
 \title{Read in the MCMC results from an iscam model, reformat them, and
-remove some records as defined by `burnin` and `thin`}
+remove some records as defined by \code{burnin} and \code{thin}}
 \usage{
 read_mcmc(model, burnin = 1000, thin = 1, load_proj = TRUE, ...)
 }
 \arguments{
-\item{model}{An iSCAM model object as created in [load_iscam_files()]}
+\item{model}{An iSCAM model object as created in \code{\link[=load_iscam_files]{load_iscam_files()}}}
 
 \item{burnin}{The number of MCMC records to remove for burnin period}
 
@@ -25,5 +25,5 @@ output files
 }
 \description{
 Read in the MCMC results from an iscam model, reformat them, and
-remove some records as defined by `burnin` and `thin`
+remove some records as defined by \code{burnin} and \code{thin}
 }

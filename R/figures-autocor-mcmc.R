@@ -1,8 +1,11 @@
+#' Plot MCMC autocorrelations for iSCAM models
+#'
+#' @description
 #' Autocorrelation plots for parameters in an MCMC run
 #'
-#' @rdname plot_traces_mcmc
-#'
+#' @inheritParams plot_traces_mcmc
 #' @family MCMC diagnostics plots
+#'
 #' @return A [ggplot2::ggplot()] object made from the [forecast::ggAcf()] function
 #' @importFrom forecast ggAcf
 #' @export

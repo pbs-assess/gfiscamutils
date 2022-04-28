@@ -1,7 +1,10 @@
+#' Plot a grid of MCMC biomass plots for iSCAM models
+#'
+#' @description
 #' Plot a grid of biomass plots, each with one model only so that the reference
 #' point lines and credible intervals can be compared correctly.
 #'
-#' @rdname plot_ts_mcmc
+#' @inheritParams plot_ts_mcmc
 #' @family Time series plotting functions
 #'
 #' @return A [cowplot::plot_grid()] object

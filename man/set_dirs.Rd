@@ -21,18 +21,18 @@ such as data, model runs from iSCAM, and reference materials. Default is "repona
 
 \item{models_dir}{The full path in which the iSCAM model directories are located}
 
-\item{base_model_dir}{Name of the base model directory which is a subdirectory of `models`}
+\item{base_model_dir}{Name of the base model directory which is a subdirectory of \code{models}}
 
-\item{bridge_models_dir}{Name of the subdirectory of `models_dir` that
+\item{bridge_models_dir}{Name of the subdirectory of \code{models_dir} that
 contains the bridge model directories}
 
-\item{bridge_models_dirs}{A vector of subdirectory names in `models_dir/bridge_models_dir`
+\item{bridge_models_dirs}{A vector of subdirectory names in \code{models_dir/bridge_models_dir}
 that each contain an individual iSCAM bridge model}
 
-\item{sens_models_dir}{Name of the subdirectory of `models_dir` that
+\item{sens_models_dir}{Name of the subdirectory of \code{models_dir} that
 contains the sensitivity model directories}
 
-\item{sens_models_dirs}{A vector of subdirectory names in `models_dir/sens_models_dir`
+\item{sens_models_dirs}{A vector of subdirectory names in \code{models_dir/sens_models_dir}
 that each contain an individual iSCAM sensitivity model}
 }
 \value{

@@ -9,7 +9,7 @@ run_multiple_iscam(model_dirs, ...)
 \arguments{
 \item{model_dirs}{A vector of model directories}
 
-\item{...}{Arguments passed to [run_iscam()]}
+\item{...}{Arguments passed to \code{\link[=run_iscam]{run_iscam()}}}
 }
 \value{
 Nothing

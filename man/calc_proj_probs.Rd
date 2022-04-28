@@ -25,6 +25,6 @@ Extract and calculate probabilities from the iscam projection model
 }
 \details{
 Extract and calculate probabilities from the projection model.
-  Used for decision tables in the document (see make.decision.table())
-  in tables-decisions.r
+Used for decision tables in the document (see make.decision.table())
+in tables-decisions.r
 }

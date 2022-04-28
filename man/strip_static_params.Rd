@@ -19,6 +19,6 @@ Strip static parameters from MCMC output data
 }
 \details{
 Strip out the static (non-estimated) parameters from the mcmc output data
-  for the given scenario. We only need to see estimated parameters on the
-  diagnostic plots. If there are no static parameters, NULL will be returned
+for the given scenario. We only need to see estimated parameters on the
+diagnostic plots. If there are no static parameters, NULL will be returned
 }

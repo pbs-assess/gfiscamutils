@@ -7,7 +7,7 @@
 gfiscam_theme()
 }
 \value{
-a customized [ggplot2::theme()]
+a customized \code{\link[ggplot2:theme]{ggplot2::theme()}}
 }
 \description{
 ggplot theme for gfiscam

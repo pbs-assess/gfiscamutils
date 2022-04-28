@@ -1,6 +1,7 @@
-#' Plot the age fits for an MPD model
+#' Plot MPD age fits for an iSCAM model
 #'
-#' @rdname plot_age_mcmc
+#' @inheritParams plot_age_fits_mcmc
+#' @family Age plotting functions
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom ggplot2 geom_linerange facet_grid

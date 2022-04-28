@@ -1,3 +1,6 @@
+#' Plot MCMC catchabilities for iSCAM models
+#'
+#' @description
 #' Plot catchability plots for MCMC output with credible intervals
 #'
 #' @details
@@ -6,7 +9,7 @@
 #' thrown if trying to plot multiple gears and multiple models together. To
 #' do that, call [plot_q_grid_mcmc()] instead.
 #'
-#' @rdname plot_ts_mcmc
+#' @inheritParams plot_ts_mcmc
 #' @family Time series plotting functions
 #'
 #' @param gear The number of the gear to plot

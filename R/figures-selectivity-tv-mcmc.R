@@ -1,27 +1,26 @@
-#' Plot the (possibly time-varying) selectivity for a prticular gear in an iscam model
+#' Plot MCMC selectivities by single gear for iSCAM models
 #'
-#' @param model An iscam model object as output by [arrowtooth::model_setup()]
+#' @description
+#' Plot the (possibly time-varying) selectivity for a particular gear in
+#' an iscam model
+#'
+#' @inheritParams plot_selex_mcmc
+#' @family Selectivity plotting functions
+#'
 #' @param gear The gear number in the model
-#' @param probs A 3-element vector of probabilities that appear in the output data frames
-#' This is provided in case the data frames have more than three different quantile levels
-#' @param show_maturity If `TRUE`, overlay the maturity ogive on the selectivity plots
-#' @param ci_type One of "line", "ribbon", "both" to show the credible interval
-#' @param ci_linetype See `linetype` in [ggplot2]. Only used if `ci_type` is "line" or "both"
-#' @param ci_alpha Opacity between 0 and 1 for the credible intervals ribbons. Only used if
-#' `ci_type` is "ribbon" or "both"
 
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom ggplot2 geom_function
 #' @export
-plot_tv_selex_mcmc <- function(model,
-                               gear = 1,
-                               probs = c(0.025, 0.5, 0.975),
-                               show_maturity = FALSE,
-                               ci_type = c("both", "line", "ribbon"),
-                               ci_linetype = c("dotted", "solid",
-                                               "dashed", "dotdash",
-                                               "longdash", "twodash"),
-                               ci_alpha = 0.3){
+plot_gear_selex_mcmc <- function(model,
+                                 gear = 1,
+                                 probs = c(0.025, 0.5, 0.975),
+                                 show_maturity = FALSE,
+                                 ci_type = c("both", "line", "ribbon"),
+                                 ci_linetype = c("dotted", "solid",
+                                                 "dashed", "dotdash",
+                                                 "longdash", "twodash"),
+                                 ci_alpha = 0.3){
 
   ci_type <- match.arg(ci_type)
   ci_linetype <- match.arg(ci_linetype)

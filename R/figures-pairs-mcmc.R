@@ -1,3 +1,6 @@
+#' Plot MCMC pairs for iSCAM models
+#'
+#' @description
 #' Pairs plots for parameters in an MCMC run
 #'
 #' @details
@@ -6,9 +9,9 @@
 #' value with text size scaled to be larger for higher correlations in the upper
 #' triangular area
 #'
-#' @rdname plot_traces_mcmc
-#'
+#' @inheritParams plot_traces_mcmc
 #' @family MCMC diagnostics plots
+#'
 #' @return A [ggplot2::ggplot()] object made from the [GGally::ggpairs()] function
 #' @importFrom GGally ggpairs ggally_cor wrap ggally_text ggally_densityDiag
 #' @importFrom ggplot2 layer_scales

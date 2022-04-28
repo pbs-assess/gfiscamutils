@@ -15,22 +15,22 @@ calc_mcmc(
 )
 }
 \arguments{
-\item{model}{An iSCAM model object as created in [load_iscam_files()]}
+\item{model}{An iSCAM model object as created in \code{\link[=load_iscam_files]{load_iscam_files()}}}
 
 \item{burnin}{The number of MCMC records to remove for burnin period
-for projections if `load_proj == TRUE`}
+for projections if \code{load_proj == TRUE}}
 
 \item{thin}{Remove every nth record for thinning of MCMC output
-for projections if `load_proj == TRUE`}
+for projections if \code{load_proj == TRUE}}
 
-\item{probs}{The probabilities to use for `quantile()` calculations}
+\item{probs}{The probabilities to use for \code{quantile()} calculations}
 
 \item{index_scale}{Number to multiply the index values by so they match the
-`survey_index` values}
+\code{survey_index} values}
 
 \item{load_proj}{Load the projections from the MCMC and do the calculations}
 
-\item{...}{arguments to pass to [calc_proj_probs()] to construct the
+\item{...}{arguments to pass to \code{\link[=calc_proj_probs]{calc_proj_probs()}} to construct the
 decision tables}
 }
 \value{

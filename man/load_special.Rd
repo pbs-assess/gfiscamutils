@@ -11,7 +11,7 @@ load_special(fn, gear_names = NULL, burnin = 1000, thin = 1)
 \item{fn}{The filename}
 
 \item{gear_names}{A vector of gear names to use in the resulting data frame.
-If `NULL`, the gear numbers set in the iscam data file will be used}
+If \code{NULL}, the gear numbers set in the iscam data file will be used}
 
 \item{burnin}{The number of MCMC records to remove for burnin period}
 

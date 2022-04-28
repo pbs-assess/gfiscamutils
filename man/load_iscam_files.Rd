@@ -12,7 +12,7 @@ load_iscam_files(model_dir, mcmc_subdir = "mcmc", ...)
 \item{mcmc_subdir}{subdirectory in which mcmc results for models are stored.
 Can be the empty string in which case they will be in the model's root directory}
 
-\item{...}{arguments to pass to [calc_mcmc()]}
+\item{...}{arguments to pass to \code{\link[=calc_mcmc]{calc_mcmc()}}}
 }
 \value{
 An iscam model object
@@ -22,6 +22,6 @@ Construct an iscam model object from its input and output files
 }
 \details{
 Load all the iscam files for output and input, and return the model object
-  If MCMC directory is present, load that and perform calculations for mcmc
- parameters.
+If MCMC directory is present, load that and perform calculations for mcmc
+parameters.
 }

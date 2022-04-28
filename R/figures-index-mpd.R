@@ -1,6 +1,9 @@
-#' Plot MPD index fits for a single or group of models
+#' Plot MPD index fits or residuals for iSCAM models
 #'
-#' @rdname plot_index_mcmc
+#' @description
+#' Plot MPD index fits or residuals for a single or group of models by gear
+#'
+#' @inheritParams plot_index_mcmc
 #' @family Time series plotting functions
 #'
 #' @export
@@ -192,14 +195,25 @@ plot_index_mpd <- function(models,
   only_dcpue <- has_dcpue && length(unique(surv_indices$survey_name)) == 1
 
   if(type == "fits"){
-    g <- ggplot(surv_indices, aes(x = year, y = biomass)) +
-      #geom_ribbon(aes(ymin = lowerci, ymax = upperci), fill = "red", alpha = 0.3) +
-      geom_line(size = index_line_width, color = index_color, linetype = "dotted") +
-      geom_errorbar(aes(ymin = lowerci, ymax = upperci), alpha = 0.3, color = index_color) +
-      geom_point(, color = index_color) +
-      geom_line(data = vals, aes(color = model), size = fit_line_width) +
-      geom_point(data = vals, aes(color = model), size = fit_point_size)+
-      facet_wrap(~survey_name, scales = "free_y") +
+    g <- ggplot(surv_indices,
+                aes(x = year, y = biomass)) +
+      geom_line(size = index_line_width,
+                color = index_color,
+                linetype = "dotted") +
+      geom_point(size = index_point_size,
+                 color = index_color) +
+      geom_errorbar(aes(ymin = lowerci, ymax = upperci),
+                    width = errbar_width,
+                    size = index_line_width,
+                    color = index_color) +
+      geom_line(data = vals,
+                aes(color = model),
+                size = fit_line_width) +
+      geom_point(data = vals,
+                 aes(color = model),
+                 size = fit_point_size)+
+      facet_wrap(~survey_name,
+                 scales = "free_y") +
       xlab("Year") +
       ylab(ifelse(has_dcpue,
                   ifelse(only_dcpue,
@@ -211,14 +225,19 @@ plot_index_mpd <- function(models,
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
   }else if(type == "resids"){
     g <- vals %>%
-      ggplot(aes(x = year, y = biomass, color = model)) +
+      ggplot(aes(x = year,
+                 y = biomass, color = model)) +
       stat_identity(yintercept = 0,
                     geom = "hline",
                     inherit.aes = FALSE,
                     linetype = "longdash") +
       geom_point(size = fit_point_size) +
-      geom_segment(aes(x = year, xend = year, y = 0, yend = biomass)) +
-      facet_wrap(~survey_name, scales = "free_y") +
+      geom_segment(aes(x = year,
+                       xend = year,
+                       y = 0,
+                       yend = biomass)) +
+      facet_wrap(~survey_name,
+                 scales = "free_y") +
       xlab("Year") +
       ylab("Log standardized residual") +
       scale_color_manual(values = model_colors) +

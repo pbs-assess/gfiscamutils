@@ -17,6 +17,6 @@ Change the column name 'm1' to 'm' unless both 'm1' and 'm2' exist
 }
 \details{
 Fo column names of data frame mc:
-  If m1 and m2 both exist, no change
-  If only m1 exists, change the name to m
+If m1 and m2 both exist, no change
+If only m1 exists, change the name to m
 }

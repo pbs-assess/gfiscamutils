@@ -24,5 +24,5 @@ Calculate logs for several parameters using MCMC
 }
 \details{
 The column names will be prepended with log_ for the parameters which
-  had the log function applied
+had the log function applied
 }

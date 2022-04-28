@@ -8,18 +8,18 @@ for MPD models.}
 param_phi_mpd_table(model, digits = 2, french = FALSE, col_widths = "5em", ...)
 }
 \arguments{
-\item{model}{An iSCAM model as output from [load_iscam_files()]}
+\item{model}{An iSCAM model as output from \code{\link[=load_iscam_files]{load_iscam_files()}}}
 
 \item{digits}{Number of digits to show}
 
-\item{french}{If `TRUE` translate to French}
+\item{french}{If \code{TRUE} translate to French}
 
 \item{col_widths}{Widths for columns, except the Parameter column}
 
-\item{...}{Arguments to pass to [csasdown::csas_table()]}
+\item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }
 \value{
-An [csasdown::csas_table()]
+An \code{\link[csasdown:csas_table]{csasdown::csas_table()}}
 }
 \description{
 Make a table of comparisons of estimates of the phi parameter for the Dirichlet Multinomial

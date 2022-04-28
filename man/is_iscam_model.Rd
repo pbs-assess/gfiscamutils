@@ -16,6 +16,6 @@ Logical
 Determine if a model is a valid iSCAM model
 }
 \details{
-Check that the model has class `mdl_cls` and that
-the attribute `model_desc` is set to something other than `NULL`
+Check that the model has class \code{mdl_cls} and that
+the attribute \code{model_desc} is set to something other than \code{NULL}
 }

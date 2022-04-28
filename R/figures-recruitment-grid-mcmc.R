@@ -1,7 +1,10 @@
+#' Plot a grid of MCMC recruitment plots for iSCAM models
+#'
+#' @description
 #' Plot a grid of recruitment plots, each with one model only so that
 #' the R0 line and credible intervals can be viewed
 #'
-#' @rdname plot_ts_mcmc
+#' @inheritParams plot_ts_mcmc
 #' @family Time series plotting functions
 #'
 #' @return A [cowplot::plot_grid()] object

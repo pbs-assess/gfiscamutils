@@ -1,6 +1,10 @@
-#' Plot the MCMC recruitment time series trajectories for iscam models.
+#' Plot MCMC recruitments for iSCAM models
 #'
-#' @rdname plot_ts_mcmc
+#' @description
+#' Plot the MCMC recruitment time series trajectories with credible intervals
+#' for iscam models.
+#'
+#' @inheritParams plot_ts_mcmc
 #' @family Time series plotting functions
 #'
 #' @param show_ro Show the initial recruitment, R0 median line and credible interval

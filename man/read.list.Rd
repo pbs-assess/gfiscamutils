@@ -17,7 +17,7 @@ Read the data from the file into a list and return the list
 }
 \details{
 Read the data from the file 'fn' into a list and return the list.
-File structure: *Like an ADMB .rep file*
+File structure: \emph{Like an ADMB .rep file}
 It is assumed that each text label will be on its own line,
 followed by one or more lines of data.
 If the label is followed by a single value or line of data,

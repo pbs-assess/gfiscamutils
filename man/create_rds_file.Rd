@@ -11,10 +11,10 @@ create_rds_file(model_dir = NULL, overwrite_rds_files = FALSE, ...)
 
 \item{overwrite_rds_files}{Logical. If TRUE, overwrite the RDS file if it exists}
 
-\item{...}{Parameters passed to [load_iscam_files()]}
+\item{...}{Parameters passed to \code{\link[=load_iscam_files]{load_iscam_files()}}}
 }
 \value{
-[base::invisible()]
+\code{\link[base:invisible]{base::invisible()}}
 }
 \description{
 Create an rds file to hold the model's data and outputs.

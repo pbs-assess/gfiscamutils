@@ -8,7 +8,7 @@ which gear names for the various type of gears}
 gear_lu_table(model, type = c("all", "age", "index", "fleet"))
 }
 \arguments{
-\item{model}{An iscam model object (class [mdl_cls])}
+\item{model}{An iscam model object (class \link{mdl_cls})}
 
 \item{type}{The type of gear to include in the table.}
 }
@@ -20,6 +20,6 @@ Create a gear lookup table showing which gear numbers are associated with
 which gear names for the various type of gears
 }
 \details{
-`type` 'all' includes all gears in the model in the order they are found in
+\code{type} 'all' includes all gears in the model in the order they are found in
 the data file
 }

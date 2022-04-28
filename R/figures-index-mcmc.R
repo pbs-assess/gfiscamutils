@@ -1,12 +1,17 @@
-#' Plot MCMC index fits for a single or group of models by gear
+#' Plot MCMC index fits or residuals for iSCAM models
 #'
-#' @rdname plot_ts_mcmc
+#' @description
+#' Plot MCMC index fits or residuals for a single or group of models by gear
+#'
+#' @inheritParams plot_ts_mcmc
 #' @family Time series plotting functions
 #'
-#' @param surv_index The `survey_index` data frame which is the `dat` object in the output
-#' from the [read_data_file()] function
-#' @param type Either "fits" or "resids" for model fits or residuals respectively
-#' @param gear A vector of gear numbers to show. If `NULL`, all will be shown
+#' @param surv_index The `survey_index` data frame which is `dat$survey_index`
+#' if `dat` is the output from the [gfdata::get_survey_index()] function
+#' @param type Either 'fits' or 'resids' for model fits or residuals respectively
+#' @param gear A vector of gear numbers to show panels for. If `NULL`, all will be shown.
+#' If a gear number out of range is included, a lookup table with gear numbers and names
+#' will be shown
 #' @param index_line_width The index data error bar and connecting line width
 #' @param index_point_size The index data point size
 #' @param index_color The color used for the observed index lines and points
@@ -118,7 +123,7 @@ plot_index_mcmc <- function(models,
       stop("One or more of the gear numbers you requested is outside the ",
            "range of possible gears.\n",
            "Gears passed in were: ", paste(gear, collapse = ", "), "\n",
-           "Gear numbers for this (combination of) model(s) are:\n\n",
+           "Gear numbers for this combination of models are:\n\n",
            gear_table_str,
            call. = FALSE)
     }
@@ -232,8 +237,11 @@ plot_index_mcmc <- function(models,
   if(type == "fits"){
     g <- ggplot(surv_indices,
                 aes(x = year, y = biomass)) +
-      geom_line(size = index_line_width, color = index_color, linetype = "dotted") +
-      geom_point(size = index_point_size, color = index_color) +
+      geom_line(size = index_line_width,
+                color = index_color,
+                linetype = "dotted") +
+      geom_point(size = index_point_size,
+                 color = index_color) +
       geom_errorbar(aes(ymin = lowerci, ymax = upperci),
                     width = errbar_width,
                     size = index_line_width,
@@ -246,7 +254,9 @@ plot_index_mcmc <- function(models,
                  aes(color = model),
                  size = fit_point_size) +
       geom_errorbar(data = vals,
-                    aes(color = model, ymin = lowerci, ymax = upperci),
+                    aes(color = model,
+                        ymin = lowerci,
+                        ymax = upperci),
                     width = errbar_width,
                     size = fit_line_width) +
       xlab("Year") +
@@ -260,16 +270,20 @@ plot_index_mcmc <- function(models,
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
   }else if(type == "resids"){
     g <- vals %>%
-      ggplot(aes(x = year, y = biomass, color = model)) +
+      ggplot(aes(x = year,
+                 y = biomass,
+                 color = model)) +
       stat_identity(yintercept = 0,
                     geom = "hline",
                     inherit.aes = FALSE,
                     linetype = "longdash") +
       geom_point(size = fit_point_size) +
-      geom_errorbar(aes(ymin = lowerci, ymax = upperci),
+      geom_errorbar(aes(ymin = lowerci,
+                        ymax = upperci),
                     width = errbar_width,
                     size = fit_line_width) +
-      facet_wrap(~survey_name, scales = "free_y") +
+      facet_wrap(~survey_name,
+                 scales = "free_y") +
       xlab("Year") +
       ylab("Log standardized residual") +
       scale_color_manual(values = model_colors) +

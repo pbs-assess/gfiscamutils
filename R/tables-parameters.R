@@ -247,7 +247,7 @@ param_est_mpd_table <- function(models,
 
 #' Make a table showing number of parameters estimated and prior parameterizations
 #'
-#' @param model A single output model from [arrowtooth::model_setup()]
+#' @param model A single output model
 #' @param french If `TRUE` translate to French
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'

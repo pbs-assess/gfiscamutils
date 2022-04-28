@@ -13,7 +13,7 @@ model_setup(
 )
 }
 \arguments{
-\item{main_dirs}{Output list from [set_dirs()]}
+\item{main_dirs}{Output list from \code{\link[=set_dirs]{set_dirs()}}}
 
 \item{bridge_models_text}{A list of vectors of text strings to show in the legends for bridge
 model plots, one name for each model, where the list elements represent a group of models}
@@ -21,11 +21,11 @@ model plots, one name for each model, where the list elements represent a group 
 \item{sens_models_text}{A list of vectors of text strings to show in the legends for sensitivity
 model plots, one name for each model, where the list elements represent a group of models}
 
-\item{...}{Arguments to pass to [create_rds_file()]}
+\item{...}{Arguments to pass to \code{\link[=create_rds_file]{create_rds_file()}}}
 }
 \value{
 A list of three items, the base_model inside a single-element list, the list of
-bridge model groups, and the list of sensitivity model groups. `bridge_grp` and `sens_grp`
+bridge model groups, and the list of sensitivity model groups. \code{bridge_grp} and \code{sens_grp}
 are groups lists of models which are to be compared with each other in the document.
 This simplifies plotting and table functions
 }

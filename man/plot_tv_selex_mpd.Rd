@@ -2,20 +2,23 @@
 % Please edit documentation in R/figures-selectivity-tv-mpd.R
 \name{plot_tv_selex_mpd}
 \alias{plot_tv_selex_mpd}
-\title{Plot selectivities for a gear which has time-varying selectivity blocks (MPD)}
+\title{Plor MCMC selectivities for iSCAM models}
 \usage{
 plot_tv_selex_mpd(model, gear = NULL, title = NULL)
 }
 \arguments{
-\item{model}{An iscam model object as output by [arrowtooth::model_setup()]}
-
-\item{gear}{The gear number}
-
-\item{title}{The plot title. NULL means no title}
+\item{model}{An iscam model object (class \link{mdl_cls})}
 }
 \value{
-A [ggplot2::ggplot()] object
+A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
 }
 \description{
 Plot selectivities for a gear which has time-varying selectivity blocks (MPD)
 }
+\seealso{
+Other Selectivity plotting functions: 
+\code{\link{plot_gear_selex_mcmc}()},
+\code{\link{plot_selex_mcmc}()},
+\code{\link{plot_selex_mpd}()}
+}
+\concept{Selectivity plotting functions}

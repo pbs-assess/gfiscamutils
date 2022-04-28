@@ -1,8 +1,10 @@
+#' Plor MCMC selectivities for iSCAM models
+#'
+#' @description
 #' Plot selectivities for a gear which has time-varying selectivity blocks (MPD)
 #'
-#' @param model An iscam model object as output by [arrowtooth::model_setup()]
-#' @param gear The gear number
-#' @param title The plot title. NULL means no title
+#' @inheritParams plot_selex_mcmc
+#' @family Selectivity plotting functions
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom dplyr group_split

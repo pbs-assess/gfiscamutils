@@ -1,7 +1,9 @@
-#' Plot the MCMC time series trajectories for iscam models, including spawning biomass
-#' and recruitment for both absolute and relative cases.
+#' Plot MPD recruitments for iSCAM models
 #'
-#' @rdname plot_ts_mcmc
+#' @description
+#' Plot the MPD recruitment time series trajectories for iscam models
+#'
+#' @inheritParams plot_ts_mcmc
 #' @family Time series plotting functions
 #'
 #' @param show_ro Show the initial recruitment, R0 median line and credible interval
@@ -21,7 +23,7 @@ plot_recr_mpd <- function(models,
                           point_size = 2,
                           alpha = 0.2,
                           palette = "Paired",
-                          base_color = "#000000",
+                          base_color = "black",
                           r_dodge = 0.1,
                           x_space = 0.5,
                           append_base_txt = NULL,

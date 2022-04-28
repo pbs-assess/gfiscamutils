@@ -131,7 +131,7 @@ Make a table of reference points
 Make a table for values such as biomass and recruitment
 
 Make a table with both spawning biomass and depletion in it.
-Based on [make.value.table()], but wider with both and extra headers
+Based on \code{\link[=make.value.table]{make.value.table()}}, but wider with both and extra headers
 
 Make a table of the sensitivity parameter information as found in
 the CSV file in the data directory

@@ -1,4 +1,9 @@
+#' Plot MCMC selectivities for iSCAM models
+#'
+#' @description
 #' Plot the selectivity for any combination of gears in an iscam model
+#'
+#' @family Selectivity plotting functions
 #'
 #' @param model An iscam model object (class [mdl_cls])
 #' @param probs A 3-element vector of probabilities that appear in the output data frames
@@ -13,7 +18,6 @@
 #' is the bottom left corner. It can also be the string "facet" in which case
 #' the legend will appear in the empty facet if it exists.
 
-#' @family Selectivity plotting functions
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom ggplot2 geom_function
 #' @export

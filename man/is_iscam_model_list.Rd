@@ -16,6 +16,6 @@ Logical
 Determine if a list of models is a valid iSCAM model list
 }
 \details{
-Checks not only that the list has class `mdl_lst_cls` but that each list
+Checks not only that the list has class \code{mdl_lst_cls} but that each list
 element is a valid iscam model object.
 }

@@ -7,16 +7,16 @@
 move_legend_to_empty_facet(g)
 }
 \arguments{
-\item{g}{A [ggplot2::ggplot()]}
+\item{g}{A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}}}
 }
 \value{
-A [ggplot2::ggplot()] object
+A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
 }
 \description{
 Moves a ggplot legend to an empty facet if one exists
 }
 \details{
 If an empty facet does not exist, an error will be thrown
-If the input object `g` is not a [ggplot2::ggplot()] object nor a
-[ggplot2::ggplot_gtable()] object, the original object is returned.
+If the input object \code{g} is not a \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object nor a
+\code{\link[ggplot2:ggplot_gtable]{ggplot2::ggplot_gtable()}} object, the original object is returned.
 }
