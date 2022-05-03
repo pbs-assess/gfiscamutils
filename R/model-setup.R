@@ -169,7 +169,7 @@ model_setup <- function(main_dirs = NULL,
                      bridge_model_groups = main_dirs$bridge_models_dirs,
                      sens_model_groups = main_dirs$sens_models_dirs)
 
-  model_names_list <- list(base_model_groups = "Base model",
+  model_names_list <- list(base_model_groups = ifelse(fr(), "Modèle de base", "Base model"),
                            bridge_model_groups = bridge_models_text,
                            sens_model_groups = sens_models_text)
 

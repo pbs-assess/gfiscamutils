@@ -67,9 +67,15 @@ plot_ts_mcmc <- function(models,
                          facet_wrap_var = c("none", "sex", "gear"),
                          palette = "Paired",
                          base_color = "black",
-                         legend_title = "Models",
-                         x_label = "Year",
-                         y_label = "Spawning Biomass ('000 t)",
+                         legend_title = ifelse(fr(),
+                                               "Modèles",
+                                               "Models"),
+                         x_label = ifelse(fr(),
+                                          "Année",
+                                          "Year"),
+                         y_label = ifelse(fr(),
+                                          "Biomasse reproductrice (milliers de t)",
+                                          "Spawning Biomass (thousand t)"),
                          append_base_txt = NULL,
                          x_space = 0.5,
                          y_space = 0,
@@ -225,6 +231,9 @@ plot_ts_mcmc <- function(models,
 
   # Match the given probs with their respective quant columns
   prob_cols <- paste0(prettyNum(probs * 100), "%")
+  # In case the decimals have been changed to commas, change them back
+  prob_cols <- gsub(",", ".", prob_cols)
+
   quants <- imap_chr(prob_cols, ~{
     mtch <- grep(.x, names(var_quants), value = TRUE)
     if(!length(mtch)){

@@ -72,8 +72,8 @@ plot_biomass_mcmc <- function(models,
                                       "depl_quants",
                                       "sbt_quants"),
                     y_label = ifelse(rel,
-                                     "Relative Spawning biomass",
-                                     "Spawning biomass ('000 tonnes)"),
+                                     ifelse(fr(), "Biomasse relative de frai", "Relative Spawning biomass"),
+                                     ifelse(fr(), "Biomasse reproductrice (milliers de t)", "Spawning biomass (thousand t)")),
                     x_space = x_space,
                     y_space = y_space,
                     probs = probs,
@@ -121,6 +121,9 @@ plot_biomass_mcmc <- function(models,
 
   # Match the given probs with their respective quant columns
   prob_cols <- paste0(prettyNum(probs * 100), "%")
+  # In case the decimals have been changed to commas, change them back
+  prob_cols <- gsub(",", ".", prob_cols)
+
   quants <- imap_chr(prob_cols, ~{
     mtch <- grep(.x, names(tso_quants), value = TRUE)
     if(!length(mtch)){
