@@ -1,26 +1,20 @@
-#' Create a table of time series estimates for MCMC iSCAM models
+#' Make a table of reference points for MCMC iSCAM models
 #'
 #' @description
-#' Make a table of medians and/or credible intervals for values such as
-#' biomass, recruitment, depletion, and fishing mortality
+#' Make a table of reference points for MCMC iSCAM models
 #'
 #' @inheritParams table_param_est_mcmc
-#' @param value An output value to produce the table for. Can be
-#' 'sbt' (spawning biomass), 'rt' (recruitment), 'ft' (fishing mortality),
-#' 'ut' (exploitation rate), or 'depl' (depletion)
 #'
 #' @return A [csasdown::csas_table()]
 #' @export
-table_ts_values_mcmc <- function(models,
-                                 value = c("sbt", "rt", "ft", "ut", "depl"),
-                                 type = c("median", "ci"),
-                                 digits = 2,
-                                 probs = c(0.025, 0.5, 0.975),
-                                 model_col_widths = "5em",
-                                 ...){
+table_ref_points_mcmc <- function(models,
+                                  type = c("median", "ci"),
+                                  digits = 2,
+                                  probs = c(0.025, 0.5, 0.975),
+                                  model_col_widths = "5em",
+                                  ...){
 
   type <- match.arg(type)
-  value <- match.arg(value)
 
   if(is_iscam_model(models)){
     models <- list(models)
@@ -37,17 +31,18 @@ table_ts_values_mcmc <- function(models,
          "representing lower CI, median, and upper CI",
          call. = FALSE)
   }
+
   # Match the given probs with their respective quant columns
   prob_cols <- paste0(prettyNum(probs * 100), "%")
   # In case the decimals have been changed to commas, change them back
   prob_cols <- gsub(",", ".", prob_cols)
 
-  val_nm <- paste0(value, "_quants")
-
   tab_lst <- imap(models, ~{
-    j <- .x$mcmccalcs[[val_nm]] %>%
+    j <- .x$mcmccalcs$rt_quants %>%
       t() %>%
-      as_tibble(rownames = "year")
+      as_tibble(rownames = "year") %>%
+      select(-MPD) %>%
+      mutate(year = as.numeric(year))
 
     quants <- imap_chr(prob_cols, ~{
       mtch <- grep(.x, names(j), value = TRUE)
@@ -92,9 +87,9 @@ table_ts_values_mcmc <- function(models,
     # Add the credible interval column
     tab <- full_join(tab, ci_df, by = "year")
     if(fr()){
-      names(tab) <- c("Année", "Médiane", "Intervalle crédible")
+      names(tab) <- c("Point de référence", "Médiane", "Intervalle crédible")
     }else{
-      names(tab) <- c("Year", "Median", "Credible interval")
+      names(tab) <- c("Reference point", "Median", "Credible interval")
     }
   }else{
     names(tab)[-1] <- names(models)
