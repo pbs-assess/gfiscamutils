@@ -8,12 +8,15 @@
 #' @param value An output value to produce the table for. Can be
 #' 'sbt' (spawning biomass), 'rt' (recruitment), 'ft' (fishing mortality),
 #' 'ut' (exploitation rate), or 'depl' (depletion)
+#' @param start_yr Year to start the table with. If `NULL`, all years will
+#' be included
 #'
 #' @return A [csasdown::csas_table()]
 #' @export
 table_ts_values_mcmc <- function(models,
                                  value = c("sbt", "rt", "ft", "ut", "depl"),
                                  type = c("median", "ci"),
+                                 start_yr = NULL,
                                  digits = 2,
                                  probs = c(0.025, 0.5, 0.975),
                                  model_col_widths = "5em",
@@ -103,6 +106,15 @@ table_ts_values_mcmc <- function(models,
   # Replace NA's in the table with dashes
   tab[is.na(tab)] <- "--"
 
+  if(!is.null(start_yr)){
+    yrs <- unique(tab$year)
+    if(!start_yr %in% yrs){
+      stop("`start_yr` not in the range of years in the model output values",
+           call. = FALSE)
+    }
+    tab <- tab %>%
+      filter(year >= start_yr)
+  }
   out <- csas_table(tab,
                     format = "latex",
                     align = rep("r", ncol(tab)),

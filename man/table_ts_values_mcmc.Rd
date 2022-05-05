@@ -8,6 +8,7 @@ table_ts_values_mcmc(
   models,
   value = c("sbt", "rt", "ft", "ut", "depl"),
   type = c("median", "ci"),
+  start_yr = NULL,
   digits = 2,
   probs = c(0.025, 0.5, 0.975),
   model_col_widths = "5em",
@@ -17,10 +18,13 @@ table_ts_values_mcmc(
 \arguments{
 \item{value}{An output value to produce the table for. Can be
 'sbt' (spawning biomass), 'rt' (recruitment), 'ft' (fishing mortality),
-'ut' (exploitation rate), or 'depl' (depletion aka relative spawning biomass)}
+'ut' (exploitation rate), or 'depl' (depletion)}
 
 \item{type}{Use 'median' to show median parameter values or 'ci' for a
 dash-separated range for the credible interval}
+
+\item{start_yr}{Year to start the table with. If \code{NULL}, all years will
+be included}
 
 \item{digits}{Number of decimal places for the values in the table}
 
