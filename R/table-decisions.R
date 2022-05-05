@@ -21,12 +21,20 @@ table_decisions <- function(model,
                             digits = 2,
                             ...){
 
-  if(class(model) != mdl_cls){
-    if(class(model) != mdl_lst_cls){
-      stop("`model` is not a gfiscamutils::mdl_cls class (",mdl_cls, ")")
+  if(!mdl_cls %in% class(model)){
+    if(mdl_lst_cls %in% class(model) && length(model) == 1){
+      # An iSCAM model which happens to be in a list by itself
+      model <- model[[1]]
+      if(!mdl_cls %in% class(model)){
+        stop("`model` has class `gfiscamutils::mdl_lst_cls` class and ",
+             "contains one element but that element does not have class ",
+             "`gfiscamutils::mdl_cls`.",
+             call. = FALSE)
+      }
+    }else{
+      stop("`model` does not have class `gfiscamutils::mdl_cls`.",
+           call. = FALSE)
     }
-    stop("`model` is a `gfiscamutils::mdl_lst_cls` class (",mdl_lst_cls, ")\n",
-         "  It should be a `gfiscamutils::mdl_cls` class (",mdl_cls, ")")
   }
 
   ctl_options <- model$proj$ctl.options %>%

@@ -201,7 +201,7 @@ calc_special_quants <- function(lst,
 #' @return an R expression which represents the fancy version of the parameter name
 #' @importFrom gfutilities firstup
 #' @export
-get_fancy_name <- function(name, subst = FALSE){
+get_fancy_expr <- function(name, subst = FALSE){
 
   if(length(grep("^q_gear[1-9]+$", name))){
     digit <- as.numeric(sub("^q_gear([1-9]+)$", "\\1", name))
@@ -284,6 +284,164 @@ get_fancy_name <- function(name, subst = FALSE){
          "log_m_sex2" = if(subst) substitute("ln("*italic(M)[Female]*")") else expression("ln("*italic(M)[Female]*")"),
          "log_rbar"  = if(subst) substitute("ln("*bar(italic(R))*")") else expression("ln("*bar(italic(R))*")"),
          "log_rinit" = if(subst) substitute("ln("*bar(italic(R)[init])*")") else expression("ln("*bar(italic(R)[init])*")"))
+}
+
+#' Get a version of iSCAM parameter names in latex math format (i.e. $name$)
+#'
+#' @details
+#' Vectorized.
+#' Includes expressions which have special characters (greek)
+#' and super/subscripts.
+#'
+#' @param name A vector of iSCAM parameter names to make fancy
+#'
+#' @return an R expression which represents the parameter name in latex math format
+#' @export
+get_fancy_names <- function(names, subst = FALSE){
+
+  map_chr(names, ~{
+
+    # Catchability parameters
+    if(length(grep("^q_\\{.*\\}$", .x))){
+      return(paste0("$", .x, "$"))
+    }
+    if(length(grep("^q_gear[0-9]+$", .x))){
+      digit <- as.numeric(sub("^q_gear([0-9]+)$", "\\1", .x))
+      return(paste0("$q_{", digit, "}$"))
+    }
+    if(length(grep("^q[0-9]+$", .x))){
+      digit <- as.numeric(sub("^q([0-9]+)$", "\\1", .x))
+      return(paste0("$q_{", digit, "}$"))
+    }
+
+    if(length(grep("^log_q_gear[0-9]+$", .x))){
+      digit <- as.numeric(sub("^log_q_gear([0-9]+)$", "\\1", .x))
+      return(paste0("$log(q_{", digit, "})$"))
+    }
+    if(length(grep("^log_q[0-9]+$", .x))){
+      digit <- as.numeric(sub("^log_q([0-9]+)$", "\\1", .x))
+      return(paste0("$log(q_{", digit, "})$"))
+    }
+
+    # Selectivity parameters
+    # @param nm The parameter name starting with selage or selsd
+    # @return The fancy name or `NULL`
+    get_sel_name <- function(nm){
+      if(length(grep("sel_age50", nm))){
+        j <- sub("sel_age50_", "", nm)
+        sex <- sub("_gear[0-9]+", "", j)
+        sex <- ifelse(sex == "male",
+                      ifelse(fr(),
+                             "homme",
+                             "male"),
+                      ifelse(fr(),
+                             "femme",
+                             "female"))
+        flt <- sub("female_gear|male_gear", "\\1", j)
+        sexflt <- paste0(sex, ",", flt)
+        paste0("$\\hat{a}_{", sexflt, "}$")
+      }else if(length(grep("sel_sd50", nm))){
+        j <- sub("sel_sd50_", "", nm)
+        sex <- sub("_gear[0-9]+", "", j)
+        sex <- ifelse(sex == "male",
+                      ifelse(fr(),
+                             "homme",
+                             "male"),
+                      ifelse(fr(),
+                             "femme",
+                             "female"))
+        flt <- sub("female_gear|male_gear", "", j)
+        sexflt <- paste0(sex, ",", flt)
+        paste0("$\\hat{\\gamma}_{", sexflt, "}$")
+      }else if(length(grep("sel_(age|sd)_", nm))){
+        pat <- "^sel_(age|sd)_(male|female)_(\\{.*\\})$"
+        age_sd <- gsub(pat, "\\1", nm)
+        sex <- gsub(pat, "\\2", nm)
+        sex <- ifelse(sex == "male",
+                      ifelse(fr(),
+                             "homme",
+                             "male"),
+                      ifelse(fr(),
+                             "femme",
+                             "female"))
+        flt <- gsub(pat, "\\3", nm)
+        sexflt <- paste0(sex, ",", flt)
+        if(age_sd == "age"){
+          paste0("$\\hat{a}_{", sexflt, "}$")
+        }else if(age_sd == "sd"){
+          paste0("$\\hat{\\gamma}_{", sexflt, "}$")
+        }else{
+          stop("age_sd in selectivity parameter name is something other than 'age' or 'sd'",
+               call. = FALSE)
+        }
+      }else{
+        stop("selectivity parameter name is not recognized",
+             call. = FALSE)
+      }
+    }
+
+    if(length(grep("^sel_age|^sel_sd", .x))){
+      return(get_sel_name(.x))
+    }
+
+    switch(.x,
+           "ro" = "$R_0$",
+           "log_ro" = "$log(R_0)$",
+           "rbar" = "$\\overline{R}$",
+           "log_rbar"  = "$log(\\overline{R})$",
+           "rinit" = "$\\overline{R}_{init}$",
+           "log_rinit" = "$log(\\overline{R}_{init}$)",
+           "h" = "$h$",
+           "f" = "$F$",
+           "m" = "$M$",
+           "vartheta" = "$\\vartheta$",
+           "rho" = "$\\rho$",
+           "bo" = "$B_0$",
+           "sbo" = "$SB_0$",
+           "ssb" = "$SSB$",
+           "SSB" = "$SSB$",
+           "m1" = ifelse(fr(), "$M_{homme}$", "$M_{male}$"),
+           "m2" = ifelse(fr(), "$M_{femme}$", "$M_{female}$"),
+           "m_sex1" = ifelse(fr(), "$M_{homme}$", "$M_{male}$"),
+           "m_sex2" = ifelse(fr(), "$M_{femme}$", "$M_{female}$"),
+           "log_m_sex1" = ifelse(fr(), "$log(M_{homme})$", "$log(M_{male})$"),
+           "log_m_sex2" = ifelse(fr(), "$log(M_{femme})$", "$log(M_{female})$"),
+           "bmsy" = "$B_{MSY}$",
+           "msy" = "$MSY$",
+           "msy1" = "$MSY_1$",
+           "msy2" = "$MSY_2$",
+           "msy3" = "$MSY_3$",
+           "msy4" = "$MSY_4$",
+           "msy5" = "$MSY_5$",
+           "msy_fleet1" = "$MSY_1$",
+           "msy_fleet2" = "$MSY_2$",
+           "msy_fleet3" = "$MSY_3$",
+           "msy_fleet4" = "$MSY_4$",
+           "msy_fleet5" = "$MSY_5$",
+           "fmsy" = "$F_{MSY}$",
+           "fmsy1" = "$F_{MSY_1}$",
+           "fmsy2" = "$F_{MSY_2}$",
+           "fmsy3" = "$F_{MSY_3}$",
+           "fmsy4" = "$F_{MSY_4}$",
+           "fmsy5" = "$F_{MSY_5}$",
+           "fmsy_fleet1" = "$F_{MSY_1}$",
+           "fmsy_fleet2" = "$F_{MSY_2}$",
+           "fmsy_fleet3" = "$F_{MSY_3}$",
+           "fmsy_fleet4" = "$F_{MSY_4}$",
+           "fmsy_fleet5" = "$F_{MSY_5}$",
+           "umsy" = "$U_{MSY}$",
+           "umsy1" = "$U_{MSY_1}$",
+           "umsy2" = "$U_{MSY_2}$",
+           "umsy3" = "$U_{MSY_3}$",
+           "umsy4" = "$U_{MSY_4}$",
+           "umsy5" = "$U_{MSY_51}$",
+           "umsy_fleet1" = "$U_{MSY_1}$",
+           "umsy_fleet2" = "$U_{MSY_2}$",
+           "umsy_fleet3" = "$U_{MSY_3}$",
+           "umsy_fleet4" = "$U_{MSY_4}$",
+           "umsy_fleet5" = "$U_{MSY_5}$")
+  })
+
 }
 
 #' Deprecated

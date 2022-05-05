@@ -66,7 +66,7 @@ plot_autocor_mcmc <- function(model,
   }
 
   g_lst <- imap(names(mc), ~{
-    param_name <- get_fancy_name(.x)
+    param_name <- get_fancy_expr(.x)
     param_dat <- mc %>%
       select(.x)
 

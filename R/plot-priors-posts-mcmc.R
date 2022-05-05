@@ -110,7 +110,7 @@ plot_priors_posts_mcmc <- function(model,
                fn = prior_fn,
                nm = post_nms[.y])
 
-    xx$nm <- get_fancy_name(xx$nm)
+    xx$nm <- get_fancy_expr(xx$nm)
     func <- function(x){xx$fn(x, xx$p1, xx$p2)}
     if(specs$prior == 0){
       # Uniform
