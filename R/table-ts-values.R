@@ -100,7 +100,7 @@ table_ts_values_mcmc <- function(models,
       names(tab) <- c("Year", "Median", "Credible interval")
     }
   }else{
-    names(tab)[-1] <- names(models)
+    names(tab) <- c(ifelse(fr(), "Année", "Year"), names(models))
   }
 
   # Replace NA's in the table with dashes
@@ -115,6 +115,7 @@ table_ts_values_mcmc <- function(models,
     tab <- tab %>%
       filter(year >= start_yr)
   }
+
   out <- csas_table(tab,
                     format = "latex",
                     align = rep("r", ncol(tab)),
