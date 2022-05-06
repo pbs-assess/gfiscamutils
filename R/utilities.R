@@ -297,10 +297,40 @@ get_fancy_expr <- function(name, subst = FALSE){
 #'
 #' @return an R expression which represents the parameter name in latex math format
 #' @export
-get_fancy_names <- function(names, subst = FALSE){
+get_fancy_names <- function(names){
 
   map_chr(names, ~{
 
+    # Variants on reference point values (0.2B0, 0.8BMSY, FMSY_fleet, UMSY_fleet, etc)
+    if(length(grep("^[0-9\\.]+B0$", .x))){
+      refpt <- gsub("([0-9\\.]+)B0", "\\1", .x)
+      return(paste0("$", refpt, "B_0$"))
+    }
+    if(length(grep("^[0-9\\.]+BMSY$", .x))){
+      refpt <- gsub("([0-9\\.]+)BMSY", "\\1", .x)
+      return(paste0("$", refpt, "B_{MSY}$"))
+    }
+    if(length(grep("^msy_fleet[0-9]+$", .x))){
+      fleet <- gsub("^msy_fleet([0-9]+)$", "\\1", .x)
+      return(paste0("$MSY_", fleet, "$"))
+    }
+    if(length(grep("^fmsy_fleet[0-9]+$", .x))){
+      fleet <- gsub("^fmsy_fleet([0-9]+)$", "\\1", .x)
+      return(paste0("$F_{MSY_", fleet, "}$"))
+    }
+    if(length(grep("^umsy_fleet[0-9]+$", .x))){
+      fleet <- gsub("^umsy_fleet([0-9]+)$", "\\1", .x)
+      return(paste0("$U_{MSY_", fleet, "}$"))
+    }
+    if(length(grep("^f_fleet[0-9]+_[0-9]+$", .x))){
+      fleet <- gsub("^f_fleet([0-9]+)_[0-9]+$", "\\1", .x)
+      year <- gsub("^f_fleet[0-9]+_([0-9]+)$", "\\1", .x)
+      return(paste0("$F_{", year, "_", fleet, "}$"))
+    }
+    if(length(grep("^sbt_[0-9]+$", .x))){
+      year <- gsub("^sbt_([0-9]+)$", "\\1", .x)
+      return(paste0("$SB_{", year, "}$"))
+    }
     # Catchability parameters
     if(length(grep("^q_\\{.*\\}$", .x))){
       return(paste0("$", .x, "$"))
@@ -313,7 +343,6 @@ get_fancy_names <- function(names, subst = FALSE){
       digit <- as.numeric(sub("^q([0-9]+)$", "\\1", .x))
       return(paste0("$q_{", digit, "}$"))
     }
-
     if(length(grep("^log_q_gear[0-9]+$", .x))){
       digit <- as.numeric(sub("^log_q_gear([0-9]+)$", "\\1", .x))
       return(paste0("$log(q_{", digit, "})$"))

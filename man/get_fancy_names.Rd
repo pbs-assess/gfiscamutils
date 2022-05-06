@@ -4,7 +4,7 @@
 \alias{get_fancy_names}
 \title{Get a version of iSCAM parameter names in latex math format (i.e. $name$)}
 \usage{
-get_fancy_names(names, subst = FALSE)
+get_fancy_names(names)
 }
 \arguments{
 \item{name}{A vector of iSCAM parameter names to make fancy}

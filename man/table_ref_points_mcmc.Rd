@@ -7,15 +7,24 @@
 table_ref_points_mcmc(
   models,
   type = c("median", "ci"),
+  bo_refpts = c(0.2, 0.4),
+  bmsy_refpts = c(0.4, 0.8),
   digits = 2,
   probs = c(0.025, 0.5, 0.975),
   model_col_widths = "5em",
+  ord = NULL,
   ...
 )
 }
 \arguments{
 \item{type}{Use 'median' to show median parameter values or 'ci' for a
 dash-separated range for the credible interval}
+
+\item{bo_refpts}{Vector of two proportional values for the limit reference
+point and Upper stock reference. Values are 0.2B0 and 0.4B0 by default}
+
+\item{bmsy_refpts}{Vector of two proportional values for the limit reference
+point and Upper stock reference. Values are 0.4BMSY and 0.8BMSY by default}
 
 \item{digits}{Number of decimal places for the values in the table}
 
@@ -24,6 +33,12 @@ data frames. This is provided in case the data frames have more than three
 different quantile levels}
 
 \item{model_col_widths}{Widths for columns, except the Parameter column}
+
+\item{ord}{A vector of numbers signifying the order in which the rows should
+appear in the table based on what they were by default. If \code{NULL} the
+default order will be shown, then based on what you see, you decide what
+row order to supply to this argument. If too short or too long a vector
+is supplied, an error will be thrown}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }
