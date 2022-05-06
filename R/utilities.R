@@ -306,8 +306,16 @@ get_fancy_names <- function(names){
       refpt <- gsub("([0-9\\.]+)B0", "\\1", .x)
       return(paste0("$", refpt, "B_0$"))
     }
+    if(length(grep("^[0-9,]+B0$", .x))){
+      refpt <- gsub("([0-9,]+)B0", "\\1", .x)
+      return(paste0("$", refpt, "B_0$"))
+    }
     if(length(grep("^[0-9\\.]+BMSY$", .x))){
       refpt <- gsub("([0-9\\.]+)BMSY", "\\1", .x)
+      return(paste0("$", refpt, "B_{MSY}$"))
+    }
+    if(length(grep("^[0-9,]+BMSY$", .x))){
+      refpt <- gsub("([0-9,]+)BMSY", "\\1", .x)
       return(paste0("$", refpt, "B_{MSY}$"))
     }
     if(length(grep("^msy_fleet[0-9]+$", .x))){

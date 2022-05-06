@@ -16,6 +16,7 @@
 #'
 #' @return A [csasdown::csas_table()]
 #' @importFrom purrr imap_dfr
+#' @importFrom readr parse_number locale
 #' @export
 table_ref_points_mcmc <- function(models,
                                   type = c("median", "ci"),
@@ -49,6 +50,8 @@ table_ref_points_mcmc <- function(models,
 
   # Match the given probs with their respective quant columns
   prob_cols <- paste0(prettyNum(probs * 100), "%")
+  # In case the decimals have been changed to commas, change them back
+  prob_cols <- gsub(",", ".", prob_cols)
 
   tab_lst <- imap(models, ~{
 
@@ -83,7 +86,8 @@ table_ref_points_mcmc <- function(models,
 
         tmp %>%
           mutate(param = paste0("f_fleet", .y, "_", param)) %>%
-          mutate_at(vars(-param), ~{as.numeric(.)})
+          mutate_at(vars(-param), ~{parse_number(.,
+            locale = locale(decimal_mark = getOption("OutDec")))})
       })
     # Add spawning biomass in the final year and next year
     sbt <- .x$mcmccalcs$sbt_quants %>%
@@ -97,7 +101,8 @@ table_ref_points_mcmc <- function(models,
     names(sbt)[-1] <- sbt[1, -1]
     sbt <- sbt[-1, ] %>%
       mutate(param = paste0("sbt_", param)) %>%
-      mutate_at(vars(-param), ~{as.numeric(.)})
+      mutate_at(vars(-param), ~{parse_number(.,
+        locale = locale(decimal_mark = getOption("OutDec")))})
     j <- j %>%
       bind_rows(ft) %>%
       bind_rows(sbt)
