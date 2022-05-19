@@ -4,22 +4,30 @@
 #'
 #' @param model An iscam model object (class [mdl_cls])
 #' @param gear The number of the gear to plot
-#' @param type The type of residual plot to create. Options are "age",
-#' "year", and "birth_year"
-#' @param probs A 3-element vector of probabilities that appear in the output data frames
-#' This is provided in case the data frames have more than three different quantile levels
+#' @param type The type of residual plot to create. Options are "age", "year",
+#' and "birth_year"
+#' @param probs A 3-element vector of probabilities that appear in the
+#' output data frames. This is provided in case the data frames have more than
+#' three different quantile levels
+#' @param yrs A vector of years to include in the plot. If the maximum extends
+#' past the range of years in the data, the maximum in the data will be used.
+#' If `NULL`, all years will be included
 #' @param comp_color Color for the age comp data lines and points
 #' @param comp_point_size Size of the age comp data points
 #' @param ci_type One of "line", "ribbon", "both" to show the credible interval
-#' @param ci_linetype See `linetype` in [ggplot2]. Only used if `ci_type` is "line" or "both"
+#' @param ci_linetype See `linetype` in [ggplot2]. Only used if `ci_type` is
+#' "line" or "both"
 #' @param ci_color Color for the lines or ribbon for the credible intervals
-#' @param ci_alpha Opacity between 0 and 1 for the credible intervals ribbons. Only used if
-#' `ci_type` is "ribbon" or "both"
-#' @param ylim For residual plots, set the y-axis limits with this two-element vector
-#' @param title_text_size Add the model description as a title with this font size. The text
-#' comes from the `model_desc` attribute of `model`. If this is `NULL`, don't show a title
-#' @param leg_loc A two-element vector describing the X-Y values between 0 and 1 to anchor
-#' the legend to. eg. c(1, 1) is the top right corner and c(0, 0) is the bottom left corner
+#' @param ci_alpha Opacity between 0 and 1 for the credible intervals ribbons.
+#' Only used if `ci_type` is "ribbon" or "both"
+#' @param ylim For residual plots, set the y-axis limits with this two-element
+#' vector
+#' @param title_text_size Add the model description as a title with this font
+#' size. The text comes from the `model_desc` attribute of `model`. If this is
+#' `NULL`, don't show a title
+#' @param leg_loc A two-element vector describing the X-Y values between 0 and
+#' 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
+#' is the bottom left corner
 #' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
 #'
 #' @return A [ggplot2::ggplot()] object
@@ -27,6 +35,7 @@
 plot_age_fits_mcmc <- function(model,
                                gear = 1,
                                probs = c(0.025, 0.5, 0.975),
+                               yrs = NULL,
                                comp_color = "black",
                                comp_point_size = 0.5,
                                ci_type = c("both", "line", "ribbon"),
@@ -41,12 +50,18 @@ plot_age_fits_mcmc <- function(model,
   ci_type <- match.arg(ci_type)
   ci_linetype <- match.arg(ci_linetype)
 
+  if(is_iscam_model_list(model) && length(model) == 1){
+    model <- model[[1]]
+  }
+
   if(!is_iscam_model(model)){
     if(is_iscam_model_list(model)){
       stop("`model` is not an iscam model object, it is an iscam model ",
-           "list object")
+           "list object",
+           call. = FALSE)
     }
-    stop("`model` is not an iscam model object")
+    stop("`model` is not an iscam model object",
+         call. = FALSE)
   }
 
   # Set up model description for the title
@@ -71,7 +86,13 @@ plot_age_fits_mcmc <- function(model,
     select(-c(gear, area, group)) %>%
     pivot_longer(-c(year, sample_size, sex), names_to = "age", values_to = "prop") %>%
     mutate(age = as.numeric(age)) %>%
-    mutate(sex = ifelse(sex %in% c(0, 2), "Female", "Male"))
+    mutate(sex = `if`(sex %in% c(0, 2),
+                      `if`(fr(),
+                           "Femme",
+                           "Female"),
+                      `if`(fr(),
+                           "Homme",
+                           "Male")))
   sample_size <- comps %>%
     distinct(year, sex, sample_size)
   comps <- comps %>%
@@ -80,8 +101,28 @@ plot_age_fits_mcmc <- function(model,
   vals <- model$mcmccalcs$agefit_quants %>%
     filter(gear == gear_name) %>%
     select(-gear) %>%
-    mutate(sex = ifelse(sex %in% c(0, 2), "Female", "Male"))
+    mutate(sex = `if`(sex %in% c(0, 2),
+                      `if`(fr(),
+                           "Femme",
+                           "Female"),
+                      `if`(fr(),
+                           "Homme",
+                           "Male")))
 
+  if(!is.null(yrs)){
+    if(!any(c("numeric", "integer") %in% class(yrs))){
+      stop("`yrs` must be a numeric or integer type",
+           call. = FALSE)
+    }
+    if(!all(min(yrs) %in% vals$year & min(yrs) %in% comps$year)){
+      stop("Not all `yrs` exist in the `comps` and `fits` years",
+           call. = FALSE)
+    }
+    comps <- comps %>%
+      filter(year %in% yrs)
+    vals <- vals %>%
+      filter(year %in% yrs)
+  }
   prob_cols <- paste0(prettyNum(probs * 100), "%")
   quant_vals <- unique(vals$quant)
   quants <- imap_chr(prob_cols, ~{
@@ -129,12 +170,12 @@ plot_age_fits_mcmc <- function(model,
   }
   g <- g +
     facet_grid(year ~ sex) +
-    xlab("Age") +
-    ylab("Proportion")
+    xlab(en2fr("Age")) +
+    ylab(en2fr("Proportion"))
 
   if(!is.null(text_title_size)){
     subtitle <- ifelse(model$dat$age_gear_names[gear] %in% model$dat$index_gear_names,
-                       paste(model$dat$age_gear_names[gear], "Index"),
+                       paste(model$dat$age_gear_names[gear], en2fr("Index")),
                        model$dat$age_gear_names[gear])
     g <- g + ggtitle(model_desc,
                      subtitle = subtitle) +
