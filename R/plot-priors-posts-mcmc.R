@@ -32,11 +32,14 @@ plot_priors_posts_mcmc <- function(model,
                                                 "bo",
                                                 "vartheta",
                                                 "tau",
-                                                "sigma",
-                                                "bmsy"),
+                                                "sigma"),
                                    priors_only = FALSE,
                                    text_title_size = 12,
                                    ...){
+
+  if(is_iscam_model_list(model) && length(model) == 1){
+    model <- model[[1]]
+  }
 
   if(!is_iscam_model(model)){
     if(is_iscam_model_list(model)){
@@ -55,7 +58,11 @@ plot_priors_posts_mcmc <- function(model,
 
   # Remove selectivity parameters, bo, vartheta, sigma, tau, bmsy from the posteriors
   mc <- mc %>%
-    select(-contains(param_rm))
+    select(-contains(param_rm)) %>%
+    select(-contains("msy")) %>%
+    select(-matches("SSB")) %>%
+    select(-matches("f"))
+
   post_nms <- names(mc)
 
   # Remove fixed parameters, and upper and lower bound, and phase information,
@@ -97,6 +104,7 @@ plot_priors_posts_mcmc <- function(model,
   if(!fem_m_est){
     post_nms <- post_nms[post_nms != "log_m_sex2"]
   }
+
   if(nrow(prior_specs) != length(post_nms)){
     stop("Number of rows in prior_specs and length of post_names are not the same, debug function")
   }

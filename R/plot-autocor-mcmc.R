@@ -18,6 +18,10 @@ plot_autocor_mcmc <- function(model,
                               text_title_size = 12,
                               ...){
 
+  if(is_iscam_model_list(model) && length(model) == 1){
+    model <- model[[1]]
+  }
+
   if(!is_iscam_model(model)){
     if(is_iscam_model_list(model)){
       stop("`model` is not an iscam model object, it is an iscam model ",

@@ -26,11 +26,12 @@ plot_age_resids_mcmc(
 
 \item{gear}{The number of the gear to plot}
 
-\item{type}{The type of residual plot to create. Options are "age",
-"year", and "birth_year"}
+\item{type}{The type of residual plot to create. Options are "age", "year",
+and "birth_year"}
 
-\item{probs}{A 3-element vector of probabilities that appear in the output data frames
-This is provided in case the data frames have more than three different quantile levels}
+\item{probs}{A 3-element vector of probabilities that appear in the
+output data frames. This is provided in case the data frames have more than
+three different quantile levels}
 
 \item{comp_color}{Color for the age comp data lines and points}
 
@@ -38,17 +39,20 @@ This is provided in case the data frames have more than three different quantile
 
 \item{ci_type}{One of "line", "ribbon", "both" to show the credible interval}
 
-\item{ci_linetype}{See \code{linetype} in \link{ggplot2}. Only used if \code{ci_type} is "line" or "both"}
+\item{ci_linetype}{See \code{linetype} in \link{ggplot2}. Only used if \code{ci_type} is
+"line" or "both"}
 
 \item{ci_color}{Color for the lines or ribbon for the credible intervals}
 
-\item{ci_alpha}{Opacity between 0 and 1 for the credible intervals ribbons. Only used if
-\code{ci_type} is "ribbon" or "both"}
+\item{ci_alpha}{Opacity between 0 and 1 for the credible intervals ribbons.
+Only used if \code{ci_type} is "ribbon" or "both"}
 
-\item{ylim}{For residual plots, set the y-axis limits with this two-element vector}
+\item{ylim}{For residual plots, set the y-axis limits with this two-element
+vector}
 
-\item{leg_loc}{A two-element vector describing the X-Y values between 0 and 1 to anchor
-the legend to. eg. c(1, 1) is the top right corner and c(0, 0) is the bottom left corner}
+\item{leg_loc}{A two-element vector describing the X-Y values between 0 and
+1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
+is the bottom left corner}
 
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 }

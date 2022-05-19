@@ -6,7 +6,7 @@
 \usage{
 plot_priors_posts_mcmc(
   model,
-  param_rm = c("sel", "bo", "vartheta", "tau", "sigma", "bmsy"),
+  param_rm = c("sel", "bo", "vartheta", "tau", "sigma"),
   priors_only = FALSE,
   text_title_size = 12,
   ...

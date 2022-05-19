@@ -22,17 +22,19 @@ plot_age_resids_mpd(
 
 \item{gear}{The number of the gear to plot}
 
-\item{type}{The type of residual plot to create. Options are "age",
-"year", and "birth_year"}
+\item{type}{The type of residual plot to create. Options are "age", "year",
+and "birth_year"}
 
 \item{comp_color}{Color for the age comp data lines and points}
 
 \item{comp_point_size}{Size of the age comp data points}
 
-\item{ylim}{For residual plots, set the y-axis limits with this two-element vector}
+\item{ylim}{For residual plots, set the y-axis limits with this two-element
+vector}
 
-\item{leg_loc}{A two-element vector describing the X-Y values between 0 and 1 to anchor
-the legend to. eg. c(1, 1) is the top right corner and c(0, 0) is the bottom left corner}
+\item{leg_loc}{A two-element vector describing the X-Y values between 0 and
+1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
+is the bottom left corner}
 
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 }
