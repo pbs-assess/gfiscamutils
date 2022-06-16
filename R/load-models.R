@@ -1326,7 +1326,7 @@ mcmc_thin <- function(mcmc_dat,
   mcmc_obj <- apply(mcmc_dat, 2, mcmc)
   mcmc_window <- NULL
   for(col in 1:ncol(mcmc_obj)){
-    tmp <- window(mcmc_obj[,col],
+    tmp <- window(mcmc_obj[, col],
                   start = burnin + 1,
                   thin = thin)
     mcmc_window <- cbind(mcmc_window, tmp)

@@ -36,6 +36,10 @@ plot_selex_mcmc <- function(model,
   ci_type <- match.arg(ci_type)
   ci_linetype <- match.arg(ci_linetype)
 
+  if(is_iscam_model_list(model) && length(model) == 1){
+    model <- model[[1]]
+  }
+
   if(class(model) != mdl_cls){
     if(class(model) != mdl_lst_cls){
       stop("`model` is not a gfiscamutils::mdl_cls class (",mdl_cls, ")")
@@ -216,8 +220,7 @@ plot_selex_mcmc <- function(model,
     g <- g +
       theme(legend.justification = leg_loc,
             legend.position = leg_loc,
-            legend.background = element_rect(fill = "white", color = "white")) +
-      labs(color = legend_title)
+            legend.background = element_rect(fill = "white", color = "white"))
   }
 
   if(angle_x_labels){

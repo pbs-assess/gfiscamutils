@@ -25,6 +25,10 @@ plot_selex_gear_mcmc <- function(model,
   ci_type <- match.arg(ci_type)
   ci_linetype <- match.arg(ci_linetype)
 
+  if(is_iscam_model_list(model) && length(model) == 1){
+    model <- model[[1]]
+  }
+
   if(class(model) != mdl_cls){
     if(class(model) != mdl_lst_cls){
       stop("`model` is not a gfiscamutils::mdl_cls class (",mdl_cls, "), ",
