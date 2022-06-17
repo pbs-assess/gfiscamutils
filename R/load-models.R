@@ -1030,7 +1030,7 @@ read_par_file <- function(file = NULL){
   })
   names(tmp) <- gsub("# +", "", data[param_nm_inds])
 
-  tmp$num_params <- format(conv_check[1], digits = 0, scientific = FALSE)
+  tmp$num_params <- as.integer(conv_check[1])
   tmp$obj_fun_val <- format(conv_check[2], digits = 6, scientific = FALSE)
   tmp$max_gradient <- format(conv_check[3], digits = 8, scientific = FALSE)
   tmp
