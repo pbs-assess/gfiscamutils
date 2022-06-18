@@ -8,7 +8,7 @@
 #' @param model An iscam model object (class [mdl_cls])
 #' @param type The type of gear to include in the table.
 #'
-#' @return
+#' @return A data frame which is the lookup table
 #' @export
 gear_lu_table <- function(model,
                           type = c("all", "age", "index", "fleet")){

@@ -12,7 +12,8 @@ set_dirs(
   bridge_models_dir = "001-bridge-models",
   bridge_models_dirs = NULL,
   sens_models_dir = "002-sens-models",
-  sens_models_dirs = NULL
+  sens_models_dirs = NULL,
+  check_dir_exists = TRUE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ contains the sensitivity model directories}
 
 \item{sens_models_dirs}{A vector of subdirectory names in \code{models_dir/sens_models_dir}
 that each contain an individual iSCAM sensitivity model}
+
+\item{check_dir_exists}{If \code{TRUE}, check to make sure that all directories exist}
 }
 \value{
 A list of seven items, the first two are the same as the input arguments with the same name.

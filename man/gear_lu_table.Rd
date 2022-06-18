@@ -13,7 +13,7 @@ gear_lu_table(model, type = c("all", "age", "index", "fleet"))
 \item{type}{The type of gear to include in the table.}
 }
 \value{
-
+A data frame which is the lookup table
 }
 \description{
 Create a gear lookup table showing which gear numbers are associated with

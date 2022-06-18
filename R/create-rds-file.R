@@ -12,18 +12,20 @@ create_rds_file <- function(model_dir = NULL,
 
   stopifnot(!is.null(model_dir))
 
-  if(!dir.exists(model_dir)){
-    stop("The directory ", model_dir, " does not exist")
-  }
-
   # The RDS file will have the same name as the directory it is in
   # rds_file <- file.path(model_dir, paste0(basename(model_dir), ".rds"))
   # The RDS file will have the same name as the directory it the model was in
   # and be placed one dir up so all RDS files are in one dir
   if(basename(model_dir) == "base"){
+    if(!dir.exists(model_dir)){
+      stop("The directory ", model_dir, " does not exist")
+    }
     rds_file <- file.path(model_dir, paste0(basename(model_dir), ".rds"))
   }else{
     prev_dir <- gsub("^(\\S+)/\\S+$", "\\1", model_dir)
+    if(!dir.exists(prev_dir)){
+      stop("The directory ", prev_dir, " does not exist")
+    }
     rds_file <- file.path(prev_dir, paste0(basename(model_dir), ".rds"))
   }
   if(file.exists(rds_file)){

@@ -13,6 +13,7 @@
 #' contains the sensitivity model directories
 #' @param sens_models_dirs A vector of subdirectory names in `models_dir/sens_models_dir`
 #'  that each contain an individual iSCAM sensitivity model
+#' @param check_dir_exists If `TRUE`, check to make sure that all directories exist
 #'
 #' @return A list of seven items, the first two are the same as the input arguments with the same name.
 #' The 3rd is the full path of the base model.
@@ -28,27 +29,28 @@ set_dirs <- function(nongit_dir = file.path(dirname(here()), paste0(basename(her
                      bridge_models_dir = "001-bridge-models",
                      bridge_models_dirs = NULL,
                      sens_models_dir = "002-sens-models",
-                     sens_models_dirs = NULL){
+                     sens_models_dirs = NULL,
+                     check_dir_exists = TRUE){
 
   stopifnot(!is.null(nongit_dir))
-  if(!dir.exists(nongit_dir)){
+  if(!dir.exists(nongit_dir) && check_dir_exists){
     stop("Non-Git directory does not exist:\n",
          nongit_dir, call. = FALSE)
   }
   stopifnot(!is.null(models_dir))
-  if(!dir.exists(models_dir)){
+  if(!dir.exists(models_dir) && check_dir_exists){
     stop("Models directory does not exist:\n",
          models_dir, call. = FALSE)
   }
   stopifnot(!is.null(base_model_dir))
   base_model_dir_full <- file.path(models_dir, base_model_dir)
-  if(!dir.exists(base_model_dir_full)){
+  if(!dir.exists(base_model_dir_full) && check_dir_exists){
     stop("Base model directory does not exist:\n",
          base_model_dir_full, call. = FALSE)
   }
 
   bridge_models_dir_full <- file.path(models_dir, bridge_models_dir)
-  if(!dir.exists(bridge_models_dir_full)){
+  if(!dir.exists(bridge_models_dir_full) && check_dir_exists){
     stop("Bridge models directory does not exist:\n",
          bridge_models_dir_full, call. = FALSE)
   }
@@ -57,7 +59,7 @@ set_dirs <- function(nongit_dir = file.path(dirname(here()), paste0(basename(her
     bridge_models_dirs_full <- map(bridge_models_dirs, ~{
       x <- file.path(bridge_models_dir_full, .x)
       dir_existence <- map_lgl(x, ~{dir.exists(.x)})
-      if(!all(dir_existence)){
+      if(!all(dir_existence) && check_dir_exists){
         stop("Some Sensitivity model directories do not exist:\n",
              paste0(x[!dir_existence], collapse = "\n"),
              call. = FALSE)
@@ -68,7 +70,7 @@ set_dirs <- function(nongit_dir = file.path(dirname(here()), paste0(basename(her
 
   stopifnot(!is.null(sens_models_dir))
   sens_models_dir_full <- file.path(models_dir, sens_models_dir)
-  if(!dir.exists(sens_models_dir_full)){
+  if(!dir.exists(sens_models_dir_full) && check_dir_exists){
     stop("Sensitivity models directory does not exist:\n",
          sens_models_dir_full, call. = FALSE)
   }
@@ -77,7 +79,7 @@ set_dirs <- function(nongit_dir = file.path(dirname(here()), paste0(basename(her
     sens_models_dirs_full <- map(sens_models_dirs, ~{
       x <- file.path(sens_models_dir_full, .x)
       dir_existence <- map_lgl(x, ~{dir.exists(.x)})
-      if(!all(dir_existence)){
+      if(!all(dir_existence) && check_dir_exists){
         stop("Some Sensitivity model directories do not exist:\n",
              paste0(x[!dir_existence], collapse = "\n"),
              call. = FALSE)

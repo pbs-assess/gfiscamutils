@@ -17,6 +17,10 @@ load_iscam_files <- function(model_dir,
 
   model <- list()
   model$path <- model_dir
+  if(!dir.exists(model_dir)){
+    stop("The directory ", model_dir, " does not exist")
+  }
+
   # Get the names of the input files
   inp_files <- fetch_file_names(model_dir, iscam.starter.file)
   model$dat.file <- inp_files[[1]]
