@@ -60,8 +60,7 @@ model}
 
 \item{leg_loc}{A two-element vector describing the X-Y values between 0 and
 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
-is the bottom left corner. It can also be the string "facet" in which case
-the legend will appear in the empty facet if it exists.}
+is the bottom left corner}
 
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 }

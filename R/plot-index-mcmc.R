@@ -18,10 +18,6 @@
 #' @param fit_line_width The model fit error bar and connecting line width
 #' @param fit_point_size The model fit point size
 #' @param errbar_width The width of the top and bottom crossbar of the errorbars
-#' @param leg_loc A two-element vector describing the X-Y values between 0 and
-#' 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
-#' is the bottom left corner. It can also be the string "facet" in which case
-#' the legend will appear in the empty facet if it exists.
 #'
 #' @importFrom RColorBrewer brewer.pal.info
 #' @importFrom tibble enframe
@@ -48,20 +44,20 @@ plot_index_mcmc <- function(models,
                             fit_point_size = 2,
                             errbar_width = 0.5,
                             leg_loc = c(1, 1),
+                            text_title_size = 12,
                             angle_x_labels = FALSE){
 
   type <- match.arg(type)
 
-  if(class(models) == mdl_cls){
+  single_model <- FALSE
+  if(is_iscam_model(models)){
+    single_model <- TRUE
     models <- list(models)
     class(models) <- mdl_lst_cls
   }
 
-  if(class(models) != mdl_lst_cls){
-    stop("The `models` list is not a gfiscamutils::mdl_lst_cls class. If you are trying to plot ",
-         "a single model, modify it like this first:\n\n",
-         "model <- list(model)\n",
-         "class(model) <- mdl_lst_cls\n")
+  if(!is_iscam_model_list(models)){
+    stop("The `models` list is not a gfiscamutils::mdl_lst_cls class.")
   }
 
   if(!palette %in% rownames(brewer.pal.info)){
@@ -259,12 +255,14 @@ plot_index_mcmc <- function(models,
                         ymax = upperci),
                     width = errbar_width,
                     size = fit_line_width) +
-      xlab("Year") +
+      xlab(en2fr("Year")) +
       ylab(ifelse(has_dcpue,
                   ifelse(only_dcpue,
-                         "Index (kg/hr)",
-                         "Index ('000 t, kg/hr for Discard CPUE)"),
-                  "Index ('000 t)")) +
+                         ifelse(fr(), "Indice (kg/heure)", "Index (kg/hr)"),
+                         ifelse(fr(),
+                                "Indice ('000 t, kg/heure pour la CPUE des rejets)",
+                                "Index ('000 t, kg/hr for Discard CPUE)")),
+                  ifelse(fr(), "Indice ('000 t)", "Index ('000 t)"))) +
       scale_color_manual(values = model_colors) +
       guides(color = guide_legend(title = legend_title)) +
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
@@ -284,8 +282,10 @@ plot_index_mcmc <- function(models,
                     size = fit_line_width) +
       facet_wrap(~survey_name,
                  scales = "free_y") +
-      xlab("Year") +
-      ylab("Log standardized residual") +
+      xlab(en2fr("Year")) +
+      ylab(ifelse(fr(),
+                  "Résidu normalisé logarithmique",
+                  "Log standardized residual")) +
       scale_color_manual(values = model_colors) +
       guides(color = guide_legend(title = legend_title)) +
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
@@ -294,6 +294,12 @@ plot_index_mcmc <- function(models,
   if(is.null(leg_loc)){
     g <- g +
       theme(legend.position = "none")
+    if(single_model){
+      if(!is.null(text_title_size)){
+        g <- g + ggtitle(names(models)) +
+          theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
+      }
+    }
   }else if(leg_loc[1] == "facet"){
     g <- g %>% move_legend_to_empty_facet()
   }else{
