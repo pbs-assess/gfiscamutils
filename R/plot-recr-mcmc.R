@@ -117,6 +117,9 @@ plot_recr_mcmc <- function(models,
 
   # Match the given probs with their respective quant columns
   prob_cols <- paste0(prettyNum(probs * 100), "%")
+  # In case the decimals have been changed to commas, change them back
+  prob_cols <- gsub(",", ".", prob_cols)
+
   quants <- imap_chr(prob_cols, ~{
     mtch <- grep(.x, names(ts_quants), value = TRUE)
     if(!length(mtch)){
@@ -156,8 +159,8 @@ plot_recr_mcmc <- function(models,
                y = !!sym(quants[2]),
                ymin = !!sym(quants[1]),
                ymax = !!sym(quants[3]))) +
-    xlab("Year") +
-    ylab("Recruitment (millions)") +
+    xlab(en2fr("Year")) +
+    ylab(ifelse(fr(), "Recrutement (millions)", "Recruitment (millions)")) +
     scale_color_manual(values = model_colors)
 
   if(show_ro){
@@ -274,8 +277,10 @@ plot_recr_mcmc <- function(models,
     g <- g +
       theme(legend.position = "none")
     if(single_model){
-      g <- g + ggtitle(names(models)) +
-        theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
+      if(!is.null(text_title_size)){
+        g <- g + ggtitle(names(models)) +
+          theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
+      }
     }
   }else{
     g <- g +

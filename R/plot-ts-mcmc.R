@@ -333,8 +333,10 @@ plot_ts_mcmc <- function(models,
     coord_cartesian(ylim = ylim)
 
   if(single_model){
-    g <- g + ggtitle(names(models)) +
-      theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
+    if(!is.null(text_title_size)){
+      g <- g + ggtitle(names(models)) +
+        theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
+    }
     leg_loc <- NULL
   }
 

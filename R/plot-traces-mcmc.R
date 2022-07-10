@@ -51,8 +51,11 @@ plot_traces_mcmc <- function(model,
 
   if(!is.null(plot_sel)){
     if(plot_sel){
+      # Choose only selectivity columns and remove any with the same
+      # values (fixed)
       mc <- mc %>%
-        select(contains("sel"))
+        select(contains("sel")) |>
+        map_df(~{`if`(var(.x) == 0, NULL, .x)})
     }else{
       mc <- mc %>%
         select(-contains("sel"))
