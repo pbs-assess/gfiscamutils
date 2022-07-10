@@ -7,8 +7,7 @@
 table_catch(
   catch_df,
   start_yr = NULL,
-  avail_gears = FALSE,
-  gear_rm = available_gears,
+  area = NULL,
   gear_col_widths = "5em",
   scale_factor = 1000,
   ...
@@ -19,11 +18,9 @@ table_catch(
 
 \item{start_yr}{The year to start the table or \code{NULL} to include all data}
 
-\item{avail_gears}{If \code{TRUE}, return a vector of the names of gears you can
-provide to \code{gear_rm}. If \code{FALSE}, return the \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
-
-\item{gear_rm}{A vector of gear types to remove from the table. Call this
-function with \code{avail_gears} set to \code{TRUE} for a listing of available gears}
+\item{area}{If \code{NULL}, sum together all catch by year for all areas found
+in \code{catch_df}. Otherwise, a single area name (eg. 3CD or 5ABCDE). If the
+area name is not in \code{catch_df$area}, an error will be thrown}
 
 \item{gear_col_widths}{Width to make the columns for the gear types}
 
@@ -31,15 +28,6 @@ function with \code{avail_gears} set to \code{TRUE} for a listing of available g
 in tonnes}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
-
-\item{by_gear}{If \code{TRUE} the table will contain a column for each gear
-except for those found in \code{gear_rm}. If \code{FALSE} only a total column will be
-shown, unless \code{by_area} is \code{TRUE}, then a total column for each area will
-be shown}
-
-\item{by_area}{If \code{TRUE}, the table will contain a column for each area
-except for those found in \code{area_rm}. If \code{FALSE} only a total column will be
-shown, unless \code{by_gear} is \code{TRUE}}
 }
 \value{
 A \code{\link[csasdown:csas_table]{csasdown::csas_table()}}
