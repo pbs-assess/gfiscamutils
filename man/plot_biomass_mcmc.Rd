@@ -20,6 +20,7 @@ plot_biomass_mcmc(
   bmsy_refpts = c(0.4, 0.8),
   bo_refpt_colors = c("red", "green"),
   bmsy_refpt_colors = c("salmon", "darkgreen"),
+  angle_x_labels = FALSE,
   ...
 )
 }
@@ -73,6 +74,8 @@ for B0. Used to display reference point lines if \code{show_bo_lines} is \code{T
 
 \item{bmsy_refpt_colors}{A vector of two colors representing the LRP and USR
 for BMSY. Used to display reference point lines if \code{show_bmsy_lines} is \code{TRUE}}
+
+\item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 
 \item{...}{Arguments passed to \code{\link[=plot_ts_mcmc]{plot_ts_mcmc()}}}
 }

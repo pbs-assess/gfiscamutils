@@ -43,6 +43,7 @@
 #' for B0. Used to display reference point lines if `show_bo_lines` is `TRUE`
 #' @param bmsy_refpt_colors A vector of two colors representing the LRP and USR
 #' for BMSY. Used to display reference point lines if `show_bmsy_lines` is `TRUE`
+#' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
 #' @param ... Arguments passed to [plot_ts_mcmc()]
 #'
 #' @importFrom tibble rownames_to_column
@@ -65,6 +66,7 @@ plot_biomass_mcmc <- function(models,
                               bmsy_refpts = c(0.4, 0.8),
                               bo_refpt_colors = c("red", "green"),
                               bmsy_refpt_colors = c("salmon", "darkgreen"),
+                              angle_x_labels = FALSE,
                               ...){
 
   g <- plot_ts_mcmc(models,
@@ -360,6 +362,11 @@ plot_biomass_mcmc <- function(models,
   if(!rel && show_bo){
     g <- g +
       geom_pointrange(data = tso_quants, aes(color = model))
+  }
+
+  if(angle_x_labels){
+    g <- g +
+      theme(axis.text.x = element_text(angle = 45, hjust = 0.55, vjust = 0.5))
   }
 
   # Move the B0 and BMSY lines and shaded areas behind the models
