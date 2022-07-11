@@ -155,6 +155,7 @@ plot_age_fits_mcmc <- function(model,
   g <- ggplot(comps, aes(x = factor(age), ymax = prop, ymin = 0)) +
     geom_linerange(color = comp_color) +
     geom_point(aes(y = prop), color = comp_color, size = comp_point_size) +
+    geom_point(data = med_vals, aes(y = prop, group = year), color = ci_color) +
     geom_line(data = med_vals, aes(y = prop, group = year), color = ci_color)
 
   if(ci_type %in% c("line", "both")){
