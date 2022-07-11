@@ -17,6 +17,7 @@ plot_age_resids_mcmc(
   ci_alpha = 0.3,
   ylim = c(-3, 3),
   text_title_size = 12,
+  text_title_inc_mdl_nm = FALSE,
   leg_loc = c(1, 1),
   angle_x_labels = FALSE
 )
@@ -50,6 +51,11 @@ Only used if \code{ci_type} is "ribbon" or "both"}
 \item{ylim}{For residual plots, set the y-axis limits with this two-element
 vector}
 
+\item{text_title_inc_mdl_nm}{Logical. If \code{TRUE}, make the model name the
+main title and the gear the subtitle. If \code{FALSE}, do not show the model
+name, and make the gear the main title (if \code{text_title_size} is \code{NULL},
+no title will be shown)}
+
 \item{leg_loc}{A two-element vector describing the X-Y values between 0 and
 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
 is the bottom left corner}
@@ -63,11 +69,6 @@ A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
 Plot MCMC age residuals for an iSCAM model
 }
 \seealso{
-Other Age plotting functions: 
-\code{\link{plot_age_fits_mcmc}()},
-\code{\link{plot_age_fits_mpd}()},
-\code{\link{plot_age_resids_mpd}()}
-
 Other Age plotting functions: 
 \code{\link{plot_age_fits_mcmc}()},
 \code{\link{plot_age_fits_mpd}()},

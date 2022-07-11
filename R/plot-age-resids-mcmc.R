@@ -3,7 +3,6 @@
 #' @inheritParams plot_age_fits_mcmc
 #' @family Age plotting functions
 #'
-#' @family Age plotting functions
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_age_resids_mcmc <- function(model,
@@ -20,6 +19,7 @@ plot_age_resids_mcmc <- function(model,
                                  ci_alpha = 0.3,
                                  ylim = c(-3, 3),
                                  text_title_size = 12,
+                                 text_title_inc_mdl_nm = FALSE,
                                  leg_loc = c(1, 1),
                                  angle_x_labels = FALSE){
 
@@ -57,7 +57,10 @@ plot_age_resids_mcmc <- function(model,
     select(-c(gear, area, group)) %>%
     pivot_longer(-c(year, sample_size, sex), names_to = "age", values_to = "prop") %>%
     mutate(age = as.numeric(age)) %>%
-    mutate(sex = ifelse(sex %in% c(0, 2), "Female", "Male"))
+    mutate(sex = ifelse(sex %in% c(0, 2),
+                        en2fr("Female"),
+                        en2fr("Male")))
+
   sample_size <- comps %>%
     distinct(year, sex, sample_size)
   comps <- comps %>%
@@ -66,9 +69,14 @@ plot_age_resids_mcmc <- function(model,
   vals <- model$mcmccalcs$ageresids_quants %>%
     filter(gear == gear_name) %>%
     select(-gear) %>%
-    mutate(sex = ifelse(sex %in% c(0, 2), "Female", "Male"))
+    mutate(sex = ifelse(sex %in% c(0, 2),
+                        en2fr("Female"),
+                        en2fr("Male")))
 
   prob_cols <- paste0(prettyNum(probs * 100), "%")
+  # In case the decimals have been changed to commas, change them back
+  prob_cols <- gsub(",", ".", prob_cols)
+
   quant_vals <- unique(vals$quant)
   quants <- imap_chr(prob_cols, ~{
     mtch <- grep(.x, quant_vals, value = TRUE)
@@ -113,18 +121,25 @@ plot_age_resids_mcmc <- function(model,
                  outlier.size = 0.5) +
     scale_fill_manual(values = c("#FF000050", "#0000FF50")) +
     geom_hline(aes(yintercept = 0), color = "red", linetype = "dashed", size = 0.3) +
-    ylab("Standardized residuals") +
-    xlab(ifelse(type == "birth_year", "Year of birth", firstup(type)))
+    ylab(ifelse(fr(), "Résidus normalisés logarithmiques", "Log standardized residuals")) +
+    xlab(ifelse(type == "birth_year",
+                ifelse(fr(), "Année de naissance", "Year of birth"),
+                en2fr(firstup(type))))
 
   if(!is.null(ylim)){
     g <- g + coord_cartesian(ylim = ylim)
   }
 
   if(!is.null(text_title_size)){
-    g <- g + ggtitle(model_desc,
-                     subtitle = paste0(model$dat$age_gear_names[gear], " Index")) +
-      theme(plot.title = element_text(hjust = 0.5, size = text_title_size),
-            plot.subtitle = element_text(hjust = 0.5, size = text_title_size))
+    if(text_title_inc_mdl_nm){
+      g <- g + ggtitle(model_desc,
+                       subtitle = model$dat$age_gear_names[gear]) +
+        theme(plot.title = element_text(hjust = 0.5, size = text_title_size),
+              plot.subtitle = element_text(hjust = 0.5, size = text_title_size))
+    }else{
+      g <- g + ggtitle(gear_name) +
+        theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
+    }
   }
 
   if(is.null(leg_loc)){
@@ -135,7 +150,7 @@ plot_age_resids_mcmc <- function(model,
       theme(legend.position = leg_loc,
             legend.justification = leg_loc,
             legend.background = element_rect(fill = "white", color = "white")) +
-      labs(fill = "Sex")
+      labs(fill = en2fr("Sex"))
   }
 
   if(angle_x_labels){

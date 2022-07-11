@@ -16,6 +16,7 @@ plot_age_fits_mcmc(
   ci_color = "red",
   ci_alpha = 0.3,
   text_title_size = 12,
+  text_title_inc_mdl_nm = FALSE,
   angle_x_labels = FALSE
 )
 }
@@ -45,6 +46,11 @@ If \code{NULL}, all years will be included}
 
 \item{ci_alpha}{Opacity between 0 and 1 for the credible intervals ribbons.
 Only used if \code{ci_type} is "ribbon" or "both"}
+
+\item{text_title_inc_mdl_nm}{Logical. If \code{TRUE}, make the model name the
+main title and the gear the subtitle. If \code{FALSE}, do not show the model
+name, and make the gear the main title (if \code{text_title_size} is \code{NULL},
+no title will be shown)}
 
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 

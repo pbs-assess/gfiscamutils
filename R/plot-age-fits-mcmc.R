@@ -25,6 +25,10 @@
 #' @param title_text_size Add the model description as a title with this font
 #' size. The text comes from the `model_desc` attribute of `model`. If this is
 #' `NULL`, don't show a title
+#' @param text_title_inc_mdl_nm Logical. If `TRUE`, make the model name the
+#' main title and the gear the subtitle. If `FALSE`, do not show the model
+#' name, and make the gear the main title (if `text_title_size` is `NULL`,
+#' no title will be shown)
 #' @param leg_loc A two-element vector describing the X-Y values between 0 and
 #' 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
 #' is the bottom left corner
@@ -45,6 +49,7 @@ plot_age_fits_mcmc <- function(model,
                                ci_color = "red",
                                ci_alpha = 0.3,
                                text_title_size = 12,
+                               text_title_inc_mdl_nm = FALSE,
                                angle_x_labels = FALSE){
 
   ci_type <- match.arg(ci_type)
@@ -87,12 +92,9 @@ plot_age_fits_mcmc <- function(model,
     pivot_longer(-c(year, sample_size, sex), names_to = "age", values_to = "prop") %>%
     mutate(age = as.numeric(age)) %>%
     mutate(sex = ifelse(sex %in% c(0, 2),
-                        ifelse(fr(),
-                               "Femme",
-                               "Female"),
-                        ifelse(fr(),
-                               "Homme",
-                               "Male")))
+                        en2fr("Female"),
+                        en2fr("Male")))
+
   sample_size <- comps %>%
     distinct(year, sex, sample_size)
   comps <- comps %>%
@@ -102,12 +104,8 @@ plot_age_fits_mcmc <- function(model,
     filter(gear == gear_name) %>%
     select(-gear) %>%
     mutate(sex = ifelse(sex %in% c(0, 2),
-                        ifelse(fr(),
-                               "Femme",
-                               "Female"),
-                        ifelse(fr(),
-                               "Homme",
-                               "Male")))
+                        en2fr("Female"),
+                        en2fr("Male")))
 
   if(!is.null(yrs)){
     if(!any(c("numeric", "integer") %in% class(yrs))){
@@ -178,13 +176,18 @@ plot_age_fits_mcmc <- function(model,
     ylab(en2fr("Proportion"))
 
   if(!is.null(text_title_size)){
-    subtitle <- ifelse(model$dat$age_gear_names[gear] %in% model$dat$index_gear_names,
-                       paste(model$dat$age_gear_names[gear], en2fr("Index")),
-                       model$dat$age_gear_names[gear])
-    g <- g + ggtitle(model_desc,
-                     subtitle = subtitle) +
-      theme(plot.title = element_text(hjust = 0.5, size = text_title_size),
-            plot.subtitle = element_text(hjust = 0.5, size = text_title_size))
+    if(text_title_inc_mdl_nm){
+      subtitle <- ifelse(model$dat$age_gear_names[gear] %in% model$dat$index_gear_names,
+                         paste(model$dat$age_gear_names[gear], en2fr("Index")),
+                         model$dat$age_gear_names[gear])
+      g <- g + ggtitle(model_desc,
+                       subtitle = model$dat$age_gear_names[gear]) +
+        theme(plot.title = element_text(hjust = 0.5, size = text_title_size),
+              plot.subtitle = element_text(hjust = 0.5, size = text_title_size))
+    }else{
+      g <- g + ggtitle(gear_name) +
+        theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
+    }
   }
 
   if(angle_x_labels){
