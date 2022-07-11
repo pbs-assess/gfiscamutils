@@ -50,7 +50,7 @@ create_rds_file <- function(model_dir = NULL,
   # }
 
   saveRDS(model, file = rds_file)
-  message("Created a new RDS file in ", model_dir, "\n")
+  message("Created a new RDS file:\n", rds_file, "\n")
   invisible()
 }
 
