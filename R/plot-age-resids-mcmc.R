@@ -124,7 +124,8 @@ plot_age_resids_mcmc <- function(model,
     ylab(ifelse(fr(), "Résidus normalisés logarithmiques", "Log standardized residuals")) +
     xlab(ifelse(type == "birth_year",
                 ifelse(fr(), "Année de naissance", "Year of birth"),
-                en2fr(firstup(type))))
+                en2fr(firstup(type)))) +
+    scale_y_continuous(breaks = seq(-5, 5, by = 0.5))
 
   if(!is.null(ylim)){
     g <- g + coord_cartesian(ylim = ylim)

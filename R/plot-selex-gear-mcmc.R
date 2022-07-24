@@ -29,23 +29,19 @@ plot_selex_gear_mcmc <- function(model,
     model <- model[[1]]
   }
 
-  if(class(model) != mdl_cls){
-    if(class(model) != mdl_lst_cls){
-      stop("`model` is not a gfiscamutils::mdl_cls class (",mdl_cls, "), ",
-           "it is a list of models (",mdl_cls, "). Call the function ",
-           "again passing only a single model")
+  if(!is_iscam_model(model)){
+    if(is_iscam_model_list(model)){
+      stop("`model` is not an iscam model object, it is an iscam model ",
+           "list object",
+           call. = FALSE)
     }
-    stop("`model` is not a gfiscamutils::mdl_cls class (",mdl_cls, ")")
+    stop("`model` is not an iscam model object",
+         call. = FALSE)
   }
 
-  if(length(gear) != 1){
-    stop("Exactly one `gear` number must be supplied")
-  }
-  if(class(gear) != "numeric" && gear != "integer"){
-    stop("`gear` must be a number")
-  }
-  if(gear < 1){
-    stop("`gear` must be a positive number 1 or greater")
+  if(gear < 1 || gear > length(model$mpd$a_obs)){
+    stop("gear must be between 1 and ", length(model$mpd$a_obs),
+         call. = FALSE)
   }
 
   if(length(probs) != 3){
@@ -107,6 +103,7 @@ plot_selex_gear_mcmc <- function(model,
                    values_to = "value") %>%
       mutate(age = as.numeric(age))
   }
+
   vals <- vals %>%
     rename(Sex = sex)
   lo_vals <- get_val(vals, quants[1]) %>%
