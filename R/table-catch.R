@@ -44,7 +44,8 @@ table_catch <- function(catch_df,
   }
 
   catch_df <- catch_df |>
-    pivot_wider(names_from = "gear", values_from = "value")
+    pivot_wider(names_from = "gear", values_from = "value") |>
+    ungroup()
 
   if(is.null(start_yr)){
     start_yr <- min(catch_df$year)
@@ -56,35 +57,31 @@ table_catch <- function(catch_df,
     }
   }
 
-  browser()
-  tab <- catch_df |>
-    filter(year >= start_yr) |>
-    rename(Year = year)
-browser()
-  # Add 'Total Landings' column
-  total <- tab |>
-    select(-Year, -Discarded) |>
-    mutate(total = rowSums(.)) |>
-    select(total) |>
-    rename(`Total Landings` = total)
-  tab <- tab |>
-    bind_cols(total)
+  # Sum all non-discarded to make landings sum column
+  years <- catch_df |>
+    select(year)
+  discarded <- catch_df |>
+    select(Discarded)
+  landed <- catch_df |>
+    select(-c(year, Discarded)) |>
+    rowSums(na.rm = TRUE) |>
+    enframe(name = NULL)
 
-  # Convert values and swap last two cols
+  # Re-build the catch_df data frame
+  tab <- bind_cols(years, landed)
+  tab <- bind_cols(tab, discarded)
+
   tab <- tab |>
-    mutate_at(vars(-Year), ~{. / scale_factor})
-  ord <- 1:ncol(tab)
-  tmp_ord <- ord
-  ord[length(ord) - 1] <- ord[length(ord)]
-  ord[length(ord)] <- tmp_ord[length(ord) - 1]
-  tab <- tab[, ord]
+    filter(year >= start_yr) |>
+    rename(Year = year,
+           Landings = value) |>
+    mutate(Landings = Landings / scale_factor,
+           Discarded = Discarded / scale_factor)
 
   # Replace NA's in the table with dashes
   tab[is.na(tab)] <- "--"
 
-  if(fr()){
-    names(tab) <- en2fr(names(tab))
-  }
+  names(tab) <- en2fr(names(tab))
 
   out <- csas_table(tab,
                     format = "latex",
