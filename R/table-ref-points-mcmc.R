@@ -24,7 +24,7 @@ table_ref_points_mcmc <- function(models,
                                   bmsy_refpts = c(0.4, 0.8),
                                   digits = 2,
                                   probs = c(0.025, 0.5, 0.975),
-                                  model_col_widths = "5em",
+                                  model_col_widths = NULL,
                                   ord = NULL,
                                   ...){
 
@@ -55,8 +55,8 @@ table_ref_points_mcmc <- function(models,
 
   tab_lst <- imap(models, ~{
 
-    j <- .x$mcmccalcs$params_quants %>%
-      t() %>%
+    j <- .x$mcmccalcs$params_quants |>
+      t() |>
       as_tibble(rownames = "param")
 
     quants <- imap_chr(prob_cols, ~{
@@ -68,71 +68,71 @@ table_ref_points_mcmc <- function(models,
       mtch
     })
     # Select out the 'parameters' to use for the table
-    j <- j %>%
+    j <- j |>
       filter(grepl("^sbo$|^bmsy$|^fmsy_|^umsy_|^msy", param))
     end_yr <- .x$dat$end.yr
 
     # Add fishing mortality in the final year
-    ft <- .x$mcmccalcs$ft_quants %>%
+    ft <- .x$mcmccalcs$ft_quants |>
       imap_dfr(~{
-        tmp <- .x %>%
-          as_tibble(rownames = "quants") %>%
-          filter(quants != "MPD") %>%
-          select(quants, !!sym(as.character(end_yr))) %>%
-          t() %>%
+        tmp <- .x |>
+          as_tibble(rownames = "quants") |>
+          filter(quants != "MPD") |>
+          select(quants, !!sym(as.character(end_yr))) |>
+          t() |>
           as_tibble(rownames = "param")
         names(tmp)[-1] <- tmp[1, -1]
         tmp <- tmp[-1, ]
 
-        tmp %>%
-          mutate(param = paste0("f_fleet", .y, "_", param)) %>%
+        tmp |>
+          mutate(param = paste0("f_fleet", .y, "_", param)) |>
           mutate_at(vars(-param), ~{parse_number(.,
             locale = locale(decimal_mark = getOption("OutDec")))})
       })
     # Add spawning biomass in the final year and next year
-    sbt <- .x$mcmccalcs$sbt_quants %>%
-      as_tibble(rownames = "quants") %>%
-      filter(quants != "MPD") %>%
+    sbt <- .x$mcmccalcs$sbt_quants |>
+      as_tibble(rownames = "quants") |>
+      filter(quants != "MPD") |>
       select(quants,
              !!sym(as.character(end_yr)),
-             !!sym(as.character(end_yr + 1))) %>%
-      t() %>%
+             !!sym(as.character(end_yr + 1))) |>
+      t() |>
       as_tibble(rownames = "param")
     names(sbt)[-1] <- sbt[1, -1]
-    sbt <- sbt[-1, ] %>%
-      mutate(param = paste0("sbt_", param)) %>%
+    sbt <- sbt[-1, ] |>
+      mutate(param = paste0("sbt_", param)) |>
       mutate_at(vars(-param), ~{parse_number(.,
         locale = locale(decimal_mark = getOption("OutDec")))})
-    j <- j %>%
-      bind_rows(ft) %>%
+    j <- j |>
+      bind_rows(ft) |>
       bind_rows(sbt)
     # Add ref point calculations for B0 and BMSY
     bo_refpt_df <- map(bo_refpts, ~{
       nm <- paste0(.x, "B0")
-      row <- j %>% filter(param == "sbo")
+      row <- j |> filter(param == "sbo")
       row$param <- nm
-      row %>% mutate_at(vars(-param), function(refpt = .x){.x * refpt})
-    }) %>%
+      row |> mutate_at(vars(-param), function(refpt = .x){.x * refpt})
+    }) |>
       bind_rows()
-    j <- j %>%
+    j <- j |>
       bind_rows(bo_refpt_df)
     bmsy_refpt_df <- map(bmsy_refpts, ~{
       nm <- paste0(.x, "BMSY")
-      row <- j %>% filter(param == "bmsy")
+      row <- j |> filter(param == "bmsy")
       row$param <- nm
-      row %>% mutate_at(vars(-param), function(refpt = .x){.x * refpt})
-    }) %>%
+      row |> mutate_at(vars(-param), function(refpt = .x){.x * refpt})
+    }) |>
       bind_rows()
-    j <- j %>%
+    j <- j |>
       bind_rows(bmsy_refpt_df)
 
-    median_df <<- j %>%
-      mutate(val = f(!!sym(quants[2]), digits)) %>%
+    median_df <<- j |>
+      mutate(val = f(!!sym(quants[2]), digits)) |>
       select(param, val)
-    ci_df <<- j %>%
+    ci_df <<- j |>
       mutate(val = paste0(trimws(f(!!sym(quants[1]), digits)),
                           "-",
-                          trimws(f(!!sym(quants[3]), digits)))) %>%
+                          trimws(f(!!sym(quants[3]), digits)))) |>
       select(param, val)
 
     if(type == "median" || length(models) == 1){
@@ -153,7 +153,7 @@ table_ref_points_mcmc <- function(models,
 
   if(length(models) == 1){
     # Add the credible interval column
-    tab <- full_join(tab, ci_df, by = "param") %>%
+    tab <- full_join(tab, ci_df, by = "param") |>
       mutate(param = get_fancy_names(param))
     if(fr()){
       names(tab) <- c("Point de référence", "Médiane", "Intervalle crédible")
@@ -161,8 +161,8 @@ table_ref_points_mcmc <- function(models,
       names(tab) <- c("Reference point", "Median", "Credible interval")
     }
   }else{
-    tab <- tab %>%
-      mutate(param = get_fancy_names(param)) %>%
+    tab <- tab |>
+      mutate(param = get_fancy_names(param)) |>
       rename(!!sym(param_col_name) := param)
     names(tab)[-1] <- names(models)
   }
@@ -182,6 +182,7 @@ table_ref_points_mcmc <- function(models,
     }
     tab <- tab[ord, ]
   }
+
   out <- csas_table(tab,
                     format = "latex",
                     align = rep("r", ncol(tab)),
@@ -189,7 +190,7 @@ table_ref_points_mcmc <- function(models,
                     ...)
 
   if(!is.null(model_col_widths)){
-    out <- out %>%
+    out <- out |>
       column_spec(2:ncol(tab), width = model_col_widths)
   }
 
