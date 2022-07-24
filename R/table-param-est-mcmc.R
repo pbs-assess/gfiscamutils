@@ -19,7 +19,7 @@ table_param_est_mcmc <- function(models,
                                  type = c("median", "ci"),
                                  digits = 2,
                                  probs = c(0.025, 0.5, 0.975),
-                                 model_col_widths = "5em",
+                                 model_col_widths = NULL,
                                  ...){
 
   type <- match.arg(type)
@@ -49,8 +49,8 @@ table_param_est_mcmc <- function(models,
   prob_cols <- gsub(",", ".", prob_cols)
 
   tab_lst <- imap(models, ~{
-    j <- .x$mcmccalcs$params_quants %>%
-      t() %>%
+    j <- .x$mcmccalcs$params_quants |>
+      t() |>
       as_tibble(rownames = "param")
 
     quants <- imap_chr(prob_cols, ~{
@@ -67,7 +67,7 @@ table_param_est_mcmc <- function(models,
       # numbers for names
       q_real_nms <- .x$dat$index_gear_names
       q_inds <- grep("^q_gear", df$param)
-      q_param_nms <- df[q_inds, "param"] %>% pull()
+      q_param_nms <- df[q_inds, "param"] |> pull()
       df[q_inds, "param"] <- paste0("q_{",
                                     q_real_nms[as.numeric(gsub("q_gear([0-9]+)",
                                                                "\\1", q_param_nms))],
@@ -76,7 +76,7 @@ table_param_est_mcmc <- function(models,
       # numbers for names
       sel_real_nms <- .x$dat$gear_names
       sel_inds <- grep("^sel_", df$param)
-      sel_param_nms <- j[sel_inds, "param"] %>% pull()
+      sel_param_nms <- j[sel_inds, "param"] |> pull()
       pat <- "sel_(age|sd)50_(male|female)_gear([0-9]+)"
       age_sd <- gsub(pat, "\\1", sel_param_nms)
       sex <- gsub(pat, "\\2", sel_param_nms)
@@ -86,15 +86,15 @@ table_param_est_mcmc <- function(models,
       df
     }
 
-    median_df <<- j %>%
-      mutate(val = f(!!sym(quants[2]), digits)) %>%
-      select(param, val) %>%
+    median_df <<- j |>
+      mutate(val = f(!!sym(quants[2]), digits)) |>
+      select(param, val) |>
       change_param_names()
-    ci_df <<- j %>%
+    ci_df <<- j |>
       mutate(val = paste0(trimws(f(!!sym(quants[1]), digits)),
                           "-",
-                          trimws(f(!!sym(quants[3]), digits)))) %>%
-      select(param, val) %>%
+                          trimws(f(!!sym(quants[3]), digits)))) |>
+      select(param, val) |>
       change_param_names()
 
     if(type == "median" || length(models) == 1){
@@ -106,12 +106,12 @@ table_param_est_mcmc <- function(models,
   })
 
   # Fetch vector of all parameter names used in all models
-  param_names <- tab_lst %>%
+  param_names <- tab_lst |>
     map(~{
       .x$param
-    }) %>%
-    flatten %>%
-    unique %>%
+    }) |>
+    flatten() |>
+    unique() |>
     map_chr(~{.x})
   # Sort the param names, leading params first, then q's then sel's
   params_q <- grepl("^q_", param_names)
@@ -119,7 +119,7 @@ table_param_est_mcmc <- function(models,
   params_lead <- param_names[!(params_q | params_sel)]
   params_q <- sort(param_names[params_q])
   params_sel <- sort(param_names[params_sel])
-  tab <- c(params_lead, params_q, params_sel) %>%
+  tab <- c(params_lead, params_q, params_sel) |>
     enframe(name = NULL, value = "param")
 
   # Left join them all, one by one
@@ -128,16 +128,16 @@ table_param_est_mcmc <- function(models,
   }
   # Remove some values (non-estimated parameters of calculated values)
   remove_pat <- "(^s?bo$)|^bmsy$|(^msy_)|(^fmsy)|(^umsy)|^SSB$|^f$"
-  tab <- tab %>%
+  tab <- tab |>
     filter(!grepl(remove_pat, param))
-  median_df <- median_df %>%
+  median_df <- median_df |>
     filter(!grepl(remove_pat, param))
-  ci_df <- ci_df %>%
+  ci_df <- ci_df |>
     filter(!grepl(remove_pat, param))
 
   if(length(models) == 1){
     # Add the credible interval column
-    tab <- full_join(tab, ci_df, by = "param") %>%
+    tab <- full_join(tab, ci_df, by = "param") |>
       mutate(param = get_fancy_names(param))
     if(fr()){
       names(tab) <- c(param_col_name, "Médiane", "Intervalle crédible")
@@ -146,8 +146,8 @@ table_param_est_mcmc <- function(models,
     }
   }else{
     # Convert parameter names to fancy names for typesetting
-    tab <- tab %>%
-      mutate(param = get_fancy_names(param)) %>%
+    tab <- tab |>
+      mutate(param = get_fancy_names(param)) |>
       rename(!!sym(param_col_name) := param)
     names(tab)[-1] <- names(models)
   }
@@ -162,7 +162,7 @@ table_param_est_mcmc <- function(models,
                     ...)
 
   if(!is.null(model_col_widths)){
-    out <- out %>%
+    out <- out |>
       column_spec(2:ncol(tab), width = model_col_widths)
   }
 
