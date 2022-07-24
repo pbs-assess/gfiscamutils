@@ -55,6 +55,9 @@ table_index_values <- function(model,
     header_vec <- c(header_vec, header)
   }
 
+  tmp_nms_inds <- which(names(tab) != "CV")
+  names(tab)[tmp_nms_inds] <- en2fr(names(tab)[tmp_nms_inds])
+
   out <- csas_table(tab,
                     format = "latex",
                     align = rep("r", ncol(tab)),

@@ -20,19 +20,33 @@ table_param_settings <- function(model,
   params <- model$ctl$params |>
     as_tibble(rownames = "param")
 
-  params_out <- params |>
-    mutate(param = case_when(param == "log_ro" ~ "Log recruitment [$ln(R0)$]",
-                             param == "h" ~ "Steepness [$h$]",
-                             param == "log_m" ~ "Log natural mortality [$ln(M)$]",
-                             param == "log_m_male" ~ "Log natural mortality (male) [$ln(M_{male})$]",
-                             param == "log_m_female" ~ "Log natural mortality (female) [$ln(M_{female})$]",
-                             param == "log_rbar" ~ "Log mean recruitment [$ln(\\overline{R})$]",
-                             param == "log_rinit" ~ "Log initial recruitment [$\\overline{R}_{\\mli{init}}$]",
-                             param == "rho" ~ "Variance ratio, rho [$\\rho$]",
-                             param == "vartheta" ~ "Inverse total variance, kappa [$\\kappa$]",
-                             TRUE ~ "")) |>
-    select(param)
-
+  if(fr()){
+    params_out <- params |>
+      mutate(param = case_when(param == "log_ro" ~ "Le recrutement de log [$ln(R0)$]",
+                               param == "h" ~ "La pente [$h$]",
+                               param == "log_m" ~ "La mortalité naturelle de log [$ln(M)$]",
+                               param == "log_m_male" ~ "La mortalité naturelle de log (homme) [$ln(M_{male})$]",
+                               param == "log_m_female" ~ "La mortalité naturelle de log (femme) [$ln(M_{female})$]",
+                               param == "log_rbar" ~ "Le recrutement moyen de log [$ln(\\overline{R})$]",
+                               param == "log_rinit" ~ "Le recrutement initial de log [$\\overline{R}_{\\mli{init}}$]",
+                               param == "rho" ~ "Le ratio de variance [$\\rho$]",
+                               param == "vartheta" ~ "La variance totale inverse [$\\vartheta^2$]",
+                               TRUE ~ "")) |>
+      select(param)
+  }else{
+    params_out <- params |>
+      mutate(param = case_when(param == "log_ro" ~ "Log recruitment [$ln(R0)$]",
+                               param == "h" ~ "Steepness [$h$]",
+                               param == "log_m" ~ "Log natural mortality [$ln(M)$]",
+                               param == "log_m_male" ~ "Log natural mortality (male) [$ln(M_{male})$]",
+                               param == "log_m_female" ~ "Log natural mortality (female) [$ln(M_{female})$]",
+                               param == "log_rbar" ~ "Log mean recruitment [$ln(\\overline{R})$]",
+                               param == "log_rinit" ~ "Log initial recruitment [$\\overline{R}_{\\mli{init}}$]",
+                               param == "rho" ~ "Variance ratio [$\\rho$]",
+                               param == "vartheta" ~ "Inverse total variance [$\\vartheta^2$]",
+                               TRUE ~ "")) |>
+      select(param)
+  }
   # Row-by-row loop
   j <- params |>
     pmap_dfr(function(...) {
@@ -40,24 +54,37 @@ table_param_settings <- function(model,
       row <- current
       if(row$phz < 1){
         tibble(numest = 0,
-               bounds = "Fixed",
+               bounds = ifelse(fr(),
+                               "Fixé",
+                               "Fixed"),
                prior = paste0("$", f(row$ival, 3), "$"))
       }else if(row$prior == 0){
         tibble(numest = 1,
                bounds = paste0("[", row$lb, ", ", row$ub, "]"),
-               prior = "Uniform")
+               prior = ifelse(fr(),
+                              "Uniforme",
+                              "Uniform"))
       }else if(row$prior == 1){
         tibble(numest = 1,
                bounds = paste0("[", row$lb, ", ", row$ub, "]"),
-               prior = paste0("Normal($\\mu=\\ln(", round(exp(row$p1), 1), "), \\sigma=", row$p2, "$)"))
+               prior = paste0(ifelse(fr(),
+                                     "Normale($\\mu=\\ln(",
+                                     "Normal($\\mu=\\ln("),
+                              round(exp(row$p1), 1), "), \\sigma=", row$p2, "$)"))
       }else if(row$prior == 2){
         tibble(numest = 1,
                bounds = paste0("[", row$lb, ", ", row$ub, "]"),
-               prior = paste0("Lognormal($\\ln(", row$p1, "), ", row$p2, "$)"))
+               prior = paste0(ifelse(fr(),
+                                     "Lognormale($\\ln(",
+                                     "Lognormal($\\ln("),
+                              row$p1, "), ", row$p2, "$)"))
       }else if(row$prior == 3){
         tibble(numest = 1,
                bounds = paste0("[", row$lb, ", ", row$ub, "]"),
-               prior = paste0("Beta($\\alpha=", row$p1, ", \\beta=", row$p2, "$)"))
+               prior = paste0(ifelse(fr(),
+                                     "Bêta($\\alpha=",
+                                     "Beta($\\alpha="),
+                              row$p1, ", \\beta=", row$p2, "$)"))
       }else if(row$prior == 4){
         tibble(numest = 1,
                bounds = paste0("[", row$lb, ", ", row$ub, "]"),
@@ -66,7 +93,9 @@ table_param_settings <- function(model,
     })
   params_out <- params_out |>
     bind_cols(j) |>
-    mutate(numest = ifelse(param == "Log natural mortality [$ln(M)$]" & numest != 0, model$dat$num.sex, numest))
+    mutate(numest = ifelse((param == "Log natural mortality [$ln(M)$]" |
+                              param == "La mortalité naturelle de log [$ln(M)$]") &
+                             numest != 0, model$dat$num.sex, numest))
 
   sel <- model$ctl$sel |> as_tibble(rownames = "param")
   indices <- model$dat$indices |>
@@ -89,19 +118,27 @@ table_param_settings <- function(model,
     sum()
   # Hardwired bounds of 0,1 for age-at-50% and 0,Inf for age-at-50% SD
   params_out <- params_out |>
-    add_row(param = "Fishery age at 50\\% logistic selectivity ($\\hat{a}_k$)",
+    add_row(param = ifelse(fr(),
+                           "Âge de la pêche à une sélectivité logistique de 50 \\% ($\\hat{a}_k$)",
+                           "Fishery age at 50\\% logistic selectivity ($\\hat{a}_k$)"),
             numest = fish_est,
             bounds = "[0, 1]",
             prior = "None") |>
-    add_row(param = "Fishery SD of logistic selectivity ($\\hat{\\gamma}_k$)",
+    add_row(param = ifelse(fr(),
+                           "Pêche SD de la sélectivité logistique ($\\hat{\\gamma}_k$)",
+                           "Fishery SD of logistic selectivity ($\\hat{\\gamma}_k$)"),
             numest = fish_est,
             bounds = "[0, 1]",
             prior = "None") |>
-    add_row(param = "Survey age at 50\\% logistic selectivity ($\\hat{a}_k$)",
+    add_row(param = ifelse(fr(),
+                           "Âge de l'enquête à 50 \\% de sélectivité logistique ($\\hat{a}_k$)",
+                           "Survey age at 50\\% logistic selectivity ($\\hat{a}_k$)"),
             numest = surv_est,
             bounds = "[0, 1]",
             prior = "None") |>
-    add_row(param = "Survey SD of logistic selectivity ($\\hat{\\gamma}_k$)",
+    add_row(param = ifelse(fr(),
+                           "Enquête SD de la sélectivité logistique ($\\hat{\\gamma}_k$)",
+                           "Survey SD of logistic selectivity ($\\hat{\\gamma}_k$)"),
             numest = surv_est,
             bounds = "[0, 1]",
             prior = "None")
@@ -110,10 +147,15 @@ table_param_settings <- function(model,
   q <- model$ctl$surv.q
   num_inds <- model$ctl$num.indices
   params_out <- params_out |>
-    add_row(param = "Survey catchability ($q_k$)",
+    add_row(param = ifelse(fr(),
+                           "La capturabilité dans les relevés ($q_k$)",
+                           "Survey catchability ($q_k$)"),
             numest = num_inds,
             bounds = "[0, 1]",
-            prior = paste0("Normal($",  round(exp(q[2, 1]), 1), ", ", round(q[3, 1], 1) ,"$)"))
+            prior = paste0(ifelse(fr(),
+                                  "Normale($",
+                                  "Normal($"),
+                           round(exp(q[2, 1]), 1), ", ", round(q[3, 1], 1) ,"$)"))
 
   # Fishing mortality and recruitment parameters
   par <- model$par
@@ -121,23 +163,37 @@ table_param_settings <- function(model,
   num_rec_params <- length(par$log_rec_devs)
   num_init_rec_params <- length(par$init_log_rec_devs)
   params_out <- params_out |>
-    add_row(param = "Log fishing mortality values ($\\Gamma_{k,t}$)",
+    add_row(param = ifelse(fr(),
+                           "Valeurs logarithmiques de la mortalité par pêche  ($\\Gamma_{k,t}$)",
+                           "Log fishing mortality values ($\\Gamma_{k,t}$)"),
             numest = num_f_params,
             bounds = "[-30, 3]",
             prior = "[-30, 3]") |>
-    add_row(param = "Log recruitment deviations ($\\omega_t$)",
+    add_row(param = ifelse(fr(),
+                           "Écarts logarithmiques de recrutement ($\\omega_t$)",
+                           "Log recruitment deviations ($\\omega_t$)"),
             numest = num_rec_params,
             bounds = "None",
-            prior = "Normal($0, \\tau$)") |>
-    add_row(param = "Initial log recruitment deviations ($\\omega_{init,t}$)",
+            prior = ifelse(fr(),
+                           "Normale($0, \\tau$)",
+                           "Normal($0, \\tau$)")) |>
+    add_row(param = ifelse(fr(),
+                           "Écarts initiaux de recrutement logarithmique ($\\omega_{init,t}$)",
+                           "Initial log recruitment deviations ($\\omega_{init,t}$)"),
             numest = num_init_rec_params,
-            bounds = "None",
-            prior = "Normal($0, \\tau$)")
+            bounds = ifelse(fr(),
+                            "Aucun",
+                            "None"),
+            prior = ifelse(fr(),
+                           "Normale($0, \\tau$)",
+                           "Normal($0, \\tau$)"))
 
-  names(params_out) <- c("Parameter",
-                         "Number estimated",
-                         "Bounds [low, high]",
-                         "Prior (mean, SD) (single value = fixed)")
+  names(params_out) <- c(en2fr("Parameter"),
+                         en2fr("Number estimated"),
+                         en2fr("Bounds [low, high]"),
+                         ifelse(fr(),
+                                "Priorité (moyenne, SD) (valeur unique = fixe)",
+                                "Prior (mean, SD) (single value = fixed)"))
 
   tab <- csas_table(params_out,
                     col.names = names(params_out),
