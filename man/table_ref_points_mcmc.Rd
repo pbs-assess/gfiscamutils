@@ -11,7 +11,7 @@ table_ref_points_mcmc(
   bmsy_refpts = c(0.4, 0.8),
   digits = 2,
   probs = c(0.025, 0.5, 0.975),
-  model_col_widths = "5em",
+  model_col_widths = NULL,
   ord = NULL,
   ...
 )

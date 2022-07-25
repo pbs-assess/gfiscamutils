@@ -5,6 +5,9 @@
 #' biomass, recruitment, depletion, and fishing mortality
 #'
 #' @inheritParams table_param_est_mcmc
+#' @param model_desc A description for the models to be shown in multicolumn
+#' headings in the table (if more than one model only). If `NULL`, names will
+#' be created (Model 1, Model 2, etc.)
 #' @param value An output value to produce the table for. Can be
 #' 'sbt' (spawning biomass), 'rt' (recruitment), 'ft' (fishing mortality),
 #' 'ut' (exploitation rate), or 'depl' (depletion)
@@ -14,15 +17,14 @@
 #' @return A [csasdown::csas_table()]
 #' @export
 table_ts_values_mcmc <- function(models,
+                                 model_desc = NULL,
                                  value = c("sbt", "rt", "ft", "ut", "depl"),
-                                 type = c("median", "ci"),
                                  start_yr = NULL,
                                  digits = 2,
                                  probs = c(0.025, 0.5, 0.975),
                                  model_col_widths = NULL,
                                  ...){
 
-  type <- match.arg(type)
   value <- match.arg(value)
 
   if(is_iscam_model(models)){
@@ -36,7 +38,8 @@ table_ts_values_mcmc <- function(models,
   }
 
   if(length(probs) != 3){
-    stop("`probs` has length ", length(probs), " but must be a vector of three values ",
+    stop("`probs` has length ", length(probs), " but must be a vector ",
+         "of three values ",
          "representing lower CI, median, and upper CI",
          call. = FALSE)
   }
@@ -47,61 +50,67 @@ table_ts_values_mcmc <- function(models,
 
   val_nm <- paste0(value, "_quants")
 
-  tab_lst <- imap(models, ~{
-    j <- .x$mcmccalcs[[val_nm]] %>%
-      t() %>%
-      as_tibble(rownames = "year")
+  model_val_df <- imap(models, function(model, model_ind){
+    val_lst <- model$mcmccalcs[[val_nm]]
+    if(!"list" %in% class(val_lst)){
+      val_lst <- list(val_lst)
+    }
 
-    quants <- imap_chr(prob_cols, ~{
-      mtch <- grep(.x, names(j), value = TRUE)
-      if(!length(mtch)){
-        stop("One of the values in `probs` does not appear in the MCMC output data\n",
-             .x, call. = FALSE)
+    val_df <- imap(val_lst, function(val_gear, val_gear_ind){
+      val_gear <- val_gear |>
+        t() |>
+        as_tibble(rownames = "year")
+
+      if(val_gear_ind != 1){
+        # Only the first data frame retains year because they are all column-
+        # bound after and we only want one year column
+        val_gear <- val_gear |>
+          select(-year)
       }
-      mtch
-    })
 
-    median_df <<- j %>%
-      mutate(val = f(!!sym(quants[2]), digits)) %>%
-      select(year, val)
-    ci_df <<- j %>%
-      mutate(val = paste0(trimws(f(!!sym(quants[1]), digits)),
-                          "-",
-                          trimws(f(!!sym(quants[3]), digits)))) %>%
-      select(year, val)
+      # Guarantee the probs values are present in the output quant value tables
+      walk(prob_cols, function(prob){
+        mtch <- any(grepl(prob, names(val_gear)))
+        if(!mtch){
+          stop("One of the values in `probs` does not appear in the MCMC ",
+               "output data\n",
+               prob, call. = FALSE)
+        }
+      })
 
-    if(type == "median" || length(models) == 1){
-      out <- median_df
-    }else{
-      out <- ci_df
+      val_gear |>
+        select(-MPD) |>
+        mutate(Median = f(!!sym(prob_cols[2]), digits),
+               `Credible interval` = paste0(trimws(f(!!sym(prob_cols[1]), digits)),
+                                            "--",
+                                            trimws(f(!!sym(prob_cols[3]), digits)))) |>
+        select(-c(!!sym(prob_cols[1]), !!sym(prob_cols[2]), !!sym(prob_cols[3])))
+    }) |>
+      map_dfc(~{.x})
+
+    if(model_ind != 1){
+      # Only the first data frame retains year because they are all column-
+      # bound after and we only want one year column
+      val_df <- val_df |>
+        select(-year)
     }
-    out
-  })
+    val_df
+  }) |>
+  map_dfc(~{.x})
 
-  # Make sure all data frames have the same number of rows
-  if(length(models) > 1 && var(tab_lst |> map_dbl(~{nrow(.x)})) !=0){
-    stop("The input models do not have the same number of years in the ",
-         "$mcmccalcs$rt_quants data frames", call. = FALSE)
-  }
-
-  # Left join them all, one by one
-  tab <- tab_lst[[1]]
-  if(length(models) > 1){
-    for(i in 2:length(tab_lst)){
-      tab <- full_join(tab, tab_lst[[i]], by = "year")
-    }
-  }
-  if(length(models) == 1){
-    # Add the credible interval column
-    tab <- full_join(tab, ci_df, by = "year")
-    if(fr()){
-      names(tab) <- c("Année", "Médiane", "Intervalle crédible")
-    }else{
-      names(tab) <- c("Year", "Median", "Credible interval")
-    }
+  if(!"list" %in% class(models[[1]]$mcmccalcs[[val_nm]])){
+    len_gears <- 1
   }else{
-    names(tab) <- c(ifelse(fr(), "Année", "Year"), names(models))
+    len_gears <- length(models[[1]]$mcmccalcs[[val_nm]])
   }
+
+  rep_num <- length(models) * len_gears
+  names(model_val_df) <- c(en2fr("Year"),
+                           rep(c(en2fr("Median"),
+                                 en2fr("Credible interval")),
+                               rep_num))
+
+  tab <- model_val_df
 
   # Replace NA's in the table with dashes
   tab[is.na(tab)] <- "--"
@@ -126,6 +135,45 @@ table_ts_values_mcmc <- function(models,
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
                     ...)
+
+  if(len_gears > 1){
+    gear_names <- models[[1]]$dat$fleet_gear_names
+    if(length(gear_names) != len_gears){
+      stop("The list of fleet names at the beginning of the iSCAM dat file ",
+           "is not the same length as the number of gears found for the ",
+           "value '", value, "' in the model", call. = FALSE)
+    }
+    gear_header_vec <- c(" " = 1)
+    for(i in seq_along(models)){
+      for(j in seq_len(len_gears)){
+        header <- 2
+        if(value == "ft"){
+          names(header) <- paste0("$F_{", gear_names[j], "}$")
+        }else if(value == "ut"){
+          names(header) <- paste0("$U_{", gear_names[j], "}$")
+        }
+        gear_header_vec <- c(gear_header_vec, header)
+      }
+    }
+
+    out <- out |>
+      add_header_above(header = gear_header_vec, escape = FALSE)
+  }
+
+  if(length(models) > 1){
+    model_header_vec <- c(" " = 1)
+    for(i in seq_along(models)){
+      header <- 2 * len_gears
+      if(is.null(model_desc)){
+        names(header) <- paste0("Model ", i)
+      }else{
+        names(header) <- model_desc[i]
+      }
+      model_header_vec <- c(model_header_vec, header)
+    }
+    out <- out |>
+      add_header_above(header = model_header_vec, escape = FALSE)
+  }
 
   if(!is.null(model_col_widths)){
     out <- out |>

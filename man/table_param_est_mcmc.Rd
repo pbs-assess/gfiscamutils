@@ -9,7 +9,7 @@ table_param_est_mcmc(
   type = c("median", "ci"),
   digits = 2,
   probs = c(0.025, 0.5, 0.975),
-  model_col_widths = "5em",
+  model_col_widths = NULL,
   ...
 )
 }

@@ -4,12 +4,13 @@
 \alias{table_param_settings}
 \title{Create a table summarizing parameterization of an iSCAM model}
 \usage{
-table_param_settings(model, french = FALSE, ...)
+table_param_settings(model, col_widths = "5em", ...)
 }
 \arguments{
 \item{model}{A single output model}
 
-\item{french}{If \code{TRUE} translate to French}
+\item{col_widths}{The width of all columns other than the first. If \code{NULL},
+do not set}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }

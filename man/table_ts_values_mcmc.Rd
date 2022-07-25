@@ -6,22 +6,23 @@
 \usage{
 table_ts_values_mcmc(
   models,
+  model_desc = NULL,
   value = c("sbt", "rt", "ft", "ut", "depl"),
-  type = c("median", "ci"),
   start_yr = NULL,
   digits = 2,
   probs = c(0.025, 0.5, 0.975),
-  model_col_widths = "5em",
+  model_col_widths = NULL,
   ...
 )
 }
 \arguments{
+\item{model_desc}{A description for the models to be shown in multicolumn
+headings in the table (if more than one model only). If \code{NULL}, names will
+be created (Model 1, Model 2, etc.)}
+
 \item{value}{An output value to produce the table for. Can be
 'sbt' (spawning biomass), 'rt' (recruitment), 'ft' (fishing mortality),
 'ut' (exploitation rate), or 'depl' (depletion)}
-
-\item{type}{Use 'median' to show median parameter values or 'ci' for a
-dash-separated range for the credible interval}
 
 \item{start_yr}{Year to start the table with. If \code{NULL}, all years will
 be included}

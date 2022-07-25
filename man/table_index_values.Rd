@@ -4,7 +4,7 @@
 \alias{table_index_values}
 \title{Title}
 \usage{
-table_index_values(model, col_widths = "5em", ...)
+table_index_values(model, col_widths = "5em", digits = 2, ...)
 }
 \arguments{
 \item{...}{}
