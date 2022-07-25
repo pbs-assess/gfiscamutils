@@ -19,7 +19,7 @@ table_ts_values_mcmc <- function(models,
                                  start_yr = NULL,
                                  digits = 2,
                                  probs = c(0.025, 0.5, 0.975),
-                                 model_col_widths = "5em",
+                                 model_col_widths = NULL,
                                  ...){
 
   type <- match.arg(type)
@@ -79,7 +79,7 @@ table_ts_values_mcmc <- function(models,
   })
 
   # Make sure all data frames have the same number of rows
-  if(length(models) > 1 && var(tab_lst %>% map_dbl(~{nrow(.x)})) !=0){
+  if(length(models) > 1 && var(tab_lst |> map_dbl(~{nrow(.x)})) !=0){
     stop("The input models do not have the same number of years in the ",
          "$mcmccalcs$rt_quants data frames", call. = FALSE)
   }
@@ -107,13 +107,18 @@ table_ts_values_mcmc <- function(models,
   tab[is.na(tab)] <- "--"
 
   if(!is.null(start_yr)){
-    yrs <- unique(tab$year)
+    yrs <- tab[en2fr("Year")] |> unlist() |> as.numeric()
     if(!start_yr %in% yrs){
       stop("`start_yr` not in the range of years in the model output values",
            call. = FALSE)
     }
-    tab <- tab %>%
-      filter(year >= start_yr)
+    if(fr()){
+      tab <- tab |>
+        filter(Année >= start_yr)
+    }else{
+      tab <- tab |>
+        filter(Year >= start_yr)
+    }
   }
 
   out <- csas_table(tab,
@@ -123,7 +128,7 @@ table_ts_values_mcmc <- function(models,
                     ...)
 
   if(!is.null(model_col_widths)){
-    out <- out %>%
+    out <- out |>
       column_spec(2:ncol(tab), width = model_col_widths)
   }
 
