@@ -196,7 +196,9 @@ calc_mcmc <- function(model,
     #  the MPD values as well. Returns a list of dataframes
     mc_dat_q <- imap(mc_dat, ~{
       # Remove columns with all NAs
-      .x <- .x[, colSums(is.na(.x)) != nrow(.x)]
+      #.x <- .x[, colSums(is.na(.x)) != nrow(.x)]
+      # Replace NAs with zeros
+      .x[is.na(.x)] <- 0
       q <- apply(.x, 2, quantile, prob = probs, na.rm = TRUE)
       # Suppress warning that the MPD is longer than the MCMC, this happens when
       # there are NAs in the final years in the MCMC
