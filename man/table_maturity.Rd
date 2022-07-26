@@ -2,23 +2,80 @@
 % Please edit documentation in R/table-maturity.R
 \name{table_maturity}
 \alias{table_maturity}
-\title{Table of maturity estimates based on data only}
+\title{Table of the Age-at-50\% maturity and shape parameter values
+(sd50) for input into iSCAM}
 \usage{
-table_maturity(surv_samples, col_widths = NULL, return_df = FALSE, ...)
+table_maturity(
+  surv_samples = NULL,
+  surv_series = 1:4,
+  maturity_code = 5,
+  maturity_convention_code = 4,
+  usability_codes = NULL,
+  start_year = NULL,
+  end_year = NULL,
+  col_widths = NULL,
+  return_df = FALSE,
+  ...
+)
 }
 \arguments{
 \item{surv_samples}{A \code{survey_samples} list as output by
 \code{\link[gfdata:get_data]{gfdata::get_survey_samples()}}}
 
-\item{col_widths}{Widths for columns, except the Parameter column}
+\item{surv_series}{A vector of integers representing the survey ids to use
+1:4 = c("SYN QCS", "OTHER HS MSA", "SYN HS", "SYN WCVI")}
 
-\item{return_df}{Logical. If \code{TRUE}, return the \link{data.frame} and not
+\item{maturity_code}{cutoff value for maturity code. See table in \code{details}
+section. This value and above is considered mature and below this value
+is considered immature}
+
+\item{maturity_convention_code}{Type of maturity scale to use. Flatfish is
+code 4 (default)}
+
+\item{usability_codes}{The codes to use as described in the 'usability'
+table in \code{gfbiosql}. Run this to see all the codes:
+\link[gfdata:runsql("gfbiosql", "select * from usability")]{gfdata::runsql("gfbiosql", "select * from usability")}}
+
+\item{start_year}{First year to include. If \code{NULL}, start year of data will
+be used}
+
+\item{end_year}{Last year to include}
+
+\item{col_widths}{Widths for columns, except the Parameter column
 the \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 
-\item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
+\item{return_df}{Logical. If \code{TRUE}, return the \link{data.frame} and not}
 
-\item{digits}{Number of decimal places for the values in the table}
+\item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
+}
+\value{
+Either a \link{data.frame} or a \code{\link[csasdown:csas_table]{csasdown::csas_table()}}, depending on
+the value of \code{return_df}
 }
 \description{
-Table of maturity estimates based on data only
+Table of the Age-at-50\% maturity and shape parameter values
+(sd50) for input into iSCAM
+}
+\details{
+iSCAM takes these values as inputs in the DAT file and creates a vector
+of maturities-at-age by calling \code{plogis(a50, sd50)} where \code{a50} and \code{sd50}
+are the outputs of this function, \code{sd50} is actually the shape parameter,
+not a true standard deviation of values.
+
+The maturity code table for maturity_convention_code 4 (flatfish):
+MATURITY_CODE,SPECIMEN_SEX_CODE,MATURITY_NAME,MATURITY_DESC
+1, 1, IMMATURE, "TESTES VERY SMALL, STRING-LIKE AND SOMEWHAT TRANSLUCENT OR PINKISH IN COLOUR"
+1, 2, IMMATURE, "OVARIES VERY SMALL, TRANSLUCENT OR PINKISH  AND SOMEWHAT GELATINOUS IN TEXTURE"
+2, 1, MATURING, "TESTES ENLARGING, A DISTINCT BULGE EVIDENT BUT STILL TRANSLUCENT OR PINKISH IN COLOUR"
+2, 2, MATURING, "OVARIES RELATIVELY SMALL, PINKISH-YELLOW OR CREAM IN COLOUR, GRANULAR IN TEXTURE.  NO DISTINCT EGGS VISIBLE"
+3, 1, DEVELOPING, "TESTES ENLARGING, BROWN-WHITE OR WHITE IN COLOUR, FIRM IN TEXTURE"
+3, 2, DEVELOPING, "OVARIES LARGE, CREAM OR YELLOW IN COLOUR CONTAINING OPAQUE EGGS THAT CAN BE DISTINGUISED BY DIRECT OBSERVATION.  SEX MAY BE DETERMINED EXTERNALLY"
+4, 1, RIPE, "TESTES LARGE, WHITE AND EASILY BROKEN. NO SPERM EVIDENT"
+4, 2, GRAVID, "OVARIES CONTAINING PARTLY OR WHOLLY TRANSLUCENT EGGS.  SEX EASILY DETERMINED EXTERNALLY"
+5, 1, SPAWNING, "TESTES LARGE, WHITE AND SPERM EVIDENT"
+5, 2, RIPE, "OVARIES CONTAINING ENTIRELY TRANSLUCENT, MATURE OVA.  EGGS LOOSE AND WILL RUN FROM OVIDUCTS UNDER SLIGHT PRESSURE"
+6, 1, SPENT, "TESTES FLACCID, SHRUNKEN AND YELLOW-BROWN IN COLOUR. SPERM DUCTS ENLARGED AND A SMALL AMOUNT OF SPRM MAY BE PRESENT"
+6, 2, SPENT, "OVARIES LARGE, FLACCID AND PURPLE IN COLOUR; A FEW TRANSLUCENT EGGS MAY BE LEFT.  OVARIAN MEMBRANE VERY VASCULAR (BLOODSHOT) AND SAC-LIKE"
+7, 1, RESTING, "TESTES FIRM, SMALL AND YELLOW-BROWN IN COLOUR.  SPERM DUCTS SMALL"
+7, 2, RESTING, "OVARIES CONTRACTED AND FIRM, PINKISH GREY TO CREAM-YELLOW IN COLOUR AND MAY APPEAR GRANULAR IN TEXTURE BUT NO DISTINCT EGGS ARE VISIBLE"
 }
