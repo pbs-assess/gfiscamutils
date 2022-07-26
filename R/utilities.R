@@ -1,3 +1,29 @@
+#' Create a one-row tibble from a vector of values
+#'
+#' @param vec A vector
+#'
+#' @return A [tibble::tibble()] with one row
+#' @export
+vec2df <- function(vec, nms = NULL){
+
+  if(!is.null(nms) && length(vec) != length(nms)){
+    stop("The number of names supplied does not match the number ",
+         "of elements in `vec`", call. = FALSE)
+    names(df) <- nms
+  }
+
+  df <- vec |>
+    enframe(name = NULL) |>
+    t() |>
+    as_tibble()
+
+  if(!is.null(df)){
+    names(df) <- nms
+  }
+
+  df
+}
+
 #' Create a gear lookup table showing which gear numbers are associated with
 #' which gear names for the various type of gears
 #'
