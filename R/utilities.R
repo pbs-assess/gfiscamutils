@@ -546,16 +546,61 @@ c.model.list <- function(...){
 #' the variance is partitioned into observation errors (σ^2) (`sigma`^2) and
 #' process errors (τ^2) (`tau`^2).
 #'
-#' @param rho parameter rho from iscam model
-#' @param vartheta parameter vartheta from iscam model
+#' @param rho Parameter rho from iscam model
+#' @param vartheta Parameter vartheta from iscam model
+#' (actually vartheta squared in the iSCAM equation T5.2)
 #'
-#' @return a list of length 2, the calculated tau and sigma parameters
+#' @return A vector of two values, sigma and tau
 #' @export
 calc_sig_tau <- function(rho, vartheta){
 
   tau <- sqrt((1 - rho) / vartheta)
   sigma <- sqrt(rho / vartheta)
-  list(tau, sigma)
+  c(sigma = sigma, tau = tau)
+}
+
+#' Calculation of rho and vartheta from sigma and tau
+#'
+#' @param sig Parameter sigma
+#' @param tau Parameter tau
+#'
+#' @seealso calc_sig_tau
+#'
+#' @return A vector of two values, rho and vartheta
+#' @export
+calc_rho_vartheta <- function(sig, tau){
+  rho <- sig ^ 2 / (tau ^ 2 + sig ^2)
+  vartheta <- (1 - rho) / tau ^ 2
+  c(rho = rho, vartheta = vartheta)
+}
+
+#' Calculate the shape parameters (alpha and beta) for a Beta distribution
+#' given the mean and standard deviation
+#'
+#' @param mu Mean of the distribution
+#' @param sd Standard deviation of the distribution
+#'
+#' @return A vector of two values, alpha and beta
+#' @export
+calc_beta_params <- function(mu, cv) {
+  sd <- mu * cv
+  alpha <- ((1 - mu) / sd ^ 2 - 1 / mu) * mu ^ 2
+  beta <- alpha * (1 / mu - 1)
+  c(alpha = alpha, beta = beta)
+}
+
+#' Calculate the mean and CV for a Beta distribution given the alpha and
+#' beta shape parameters
+#'
+#' @param alpha Shape parameter 1
+#' @param beta Shape parameter 2
+#'
+#' @return A vector of two values, mean and CV
+#' @export
+calc_beta_mean_cv <- function(alpha, beta) {
+  mu <- alpha / (alpha + beta)
+  sd <- sqrt(alpha * beta / ((alpha + beta) ^ 2 * (alpha + beta + 1)))
+  c(mean = mu, cv = sd / mu)
 }
 
 #' Read ADMB-generated psv file

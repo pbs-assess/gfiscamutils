@@ -7,12 +7,13 @@
 calc_sig_tau(rho, vartheta)
 }
 \arguments{
-\item{rho}{parameter rho from iscam model}
+\item{rho}{Parameter rho from iscam model}
 
-\item{vartheta}{parameter vartheta from iscam model}
+\item{vartheta}{Parameter vartheta from iscam model
+(actually vartheta squared in the iSCAM equation T5.2)}
 }
 \value{
-a list of length 2, the calculated tau and sigma parameters
+A vector of two values, sigma and tau
 }
 \description{
 Calculation of sigma and tau from rho and vartheta
