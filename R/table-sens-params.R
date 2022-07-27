@@ -1,37 +1,33 @@
-#' Create a table of parameter estimates for multiple models
+#' Create a table summarizing changes for sensitivity models
 #'
-#' @description
-#' Make a table of the sensitivity parameter information as found in
-#' the CSV file in the data directory
-#'
-#' @rdname make.parameters.table
-#'
-#' @return an xtable
+#' @return A [csasdown::csas_table()]
 #' @export
-#' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align latex.perc latex.cmidr
-#' @importFrom xtable xtable
-table_sens_params <- function(tab,
-                              xcaption = "default",
-                              xlabel   = "default",
-                              font.size = 9,
-                              space.size = 10,
-                              placement = "H"){
+table_sens_param_changes <- function(sens_desc_vec,
+                                     sens_change_vec,
+                                     col_widths = NULL,
+                                     ...){
 
+  if(length(sens_desc_vec) != length(sens_change_vec)){
+    stop("Lengths of the input vectors must be the same",
+         call. = FALSE)
+  }
 
-  tab <- sub("\\|", ",", as.matrix(tab))
-  colnames(tab) <- c(latex.bold("Scenario"),
-                     latex.bold("Description"),
-                     latex.bold("Parameters"))
+  desc <- enframe(unlist(sens_desc_vec), name = NULL) |>
+    `names<-`(en2fr("Description"))
+  changes <- enframe(unlist(sens_change_vec), name = NULL) |>
+    `names<-`(en2fr("Changes"))
+  tab <- bind_cols(desc, changes)
 
-  size.string <- latex.size.str(font.size, space.size)
-  print(xtable(tab,
-               caption = xcaption,
-               label = xlabel,
-               align = get.align(ncol(tab))),
-        caption.placement = "top",
-        include.rownames = FALSE,
-        sanitize.text.function = function(x){x},
-        size = size.string,
-        table.placement = placement,
-        booktabs = TRUE)
+  out <- csas_table(tab,
+                    format = "latex",
+                    align = rep("r", ncol(tab)),
+                    col_names_align = rep("r", ncol(tab)),
+                    ...)
+
+  if(!is.null(col_widths)){
+    out <- out |>
+      column_spec(2:ncol(tab), width = col_widths)
+  }
+
+  out
 }
