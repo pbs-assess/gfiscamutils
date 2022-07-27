@@ -134,7 +134,15 @@ table_maturity <- function(surv_samples = NULL,
   # Determine if the output contains one sex (female) or two
   nsex <- length(kk)
 
-  out_df <- tibble("Sex" = `if`(nsex == 1, "Female", c("Male", "Female")))
+  if(fr()){
+    out_df <- tibble("Sexe" = `if`(nsex == 1,
+                                   en2fr("Female"),
+                                   c(en2fr("Male"), en2fr("Female"))))
+  }else{
+    out_df <- tibble("Sex" = `if`(nsex == 1,
+                                  "Female",
+                                  c("Male", "Female")))
+  }
   mat_vals_df <- map_df(kk, ~{
     vec2df(.x$par, c("A50", "SD50"))
   })
@@ -146,7 +154,10 @@ table_maturity <- function(surv_samples = NULL,
     return(out_df)
   }
 
-  names(out_df) <- c("Sex", "$A_{50}$", "$SD_{50}$", "Number of specimens")
+  names(out_df) <- c(en2fr("Sex"), "$A_{50}$", "$SD_{50}$",
+                     ifelse(fr(),
+                            "Nombre de spécimens",
+                            "Number of specimens"))
   out <- csas_table(out_df,
                     format = "latex",
                     align = rep("r", ncol(out_df)),
