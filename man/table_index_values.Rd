@@ -2,13 +2,21 @@
 % Please edit documentation in R/table-index-values.R
 \name{table_index_values}
 \alias{table_index_values}
-\title{Title}
+\title{Create a table of index data values}
 \usage{
 table_index_values(model, col_widths = "5em", digits = 2, ...)
 }
 \arguments{
-\item{...}{}
+\item{model}{An iSCAM model object as created in \code{\link[=load_iscam_files]{load_iscam_files()}}}
+
+\item{col_widths}{Widths for columns, except the Parameter column
+the \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
+
+\item{...}{Arguments passed to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
+}
+\value{
+A \code{\link[csasdown:csas_table]{csasdown::csas_table()}} object
 }
 \description{
-Title
+Create a table of index data values
 }

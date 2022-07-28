@@ -84,7 +84,7 @@ plot_age_fits_mcmc <- function(model,
 
   nsex <- model$dat$num.sex
   ages <- as.character(model$dat$start.age:model$dat$end.age)
-  gear_names <- model$dat$age_gear_names
+  gear_names <- tolower(model$dat$age_gear_names)
   gear_name <- gear_names[gear]
 
   comps <- model$mpd$a_obs[[gear]] %>%
@@ -101,7 +101,7 @@ plot_age_fits_mcmc <- function(model,
     select(-sample_size)
 
   vals <- model$mcmccalcs$agefit_quants %>%
-    filter(gear == gear_name) %>%
+    filter(tolower(gear) == gear_name) %>%
     select(-gear) %>%
     mutate(sex = ifelse(sex %in% c(0, 2),
                         en2fr("Female"),

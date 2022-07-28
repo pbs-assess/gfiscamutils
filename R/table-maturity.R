@@ -35,7 +35,7 @@
 #' code 4 (default)
 #' @param usability_codes The codes to use as described in the 'usability'
 #' table in `gfbiosql`. Run this to see all the codes:
-#' [gfdata::runsql("gfbiosql", "select * from usability")]
+#' 'gfdata::runsql("gfbiosql", "select * from usability")'
 #' @param start_year First year to include. If `NULL`, start year of data will
 #' be used
 #' @param end_year Last year to include

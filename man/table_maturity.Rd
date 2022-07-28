@@ -34,7 +34,7 @@ code 4 (default)}
 
 \item{usability_codes}{The codes to use as described in the 'usability'
 table in \code{gfbiosql}. Run this to see all the codes:
-\link[gfdata:runsql("gfbiosql", "select * from usability")]{gfdata::runsql("gfbiosql", "select * from usability")}}
+'gfdata::runsql("gfbiosql", "select * from usability")'}
 
 \item{start_year}{First year to include. If \code{NULL}, start year of data will
 be used}

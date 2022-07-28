@@ -4,10 +4,15 @@
 \alias{table_sens_param_changes}
 \title{Create a table summarizing changes for sensitivity models}
 \usage{
-table_sens_param_changes(sens_desc_vec, sens_change_vec)
+table_sens_param_changes(
+  sens_desc_vec,
+  sens_change_vec,
+  col_widths = NULL,
+  ...
+)
 }
 \value{
-an xtable
+A \code{\link[csasdown:csas_table]{csasdown::csas_table()}}
 }
 \description{
 Create a table summarizing changes for sensitivity models

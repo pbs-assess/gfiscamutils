@@ -1,3 +1,32 @@
+#' Read in model RDS files, modify the path attribute, and save
+#'
+#' @param model_fns A vector of model RDS filenames to modify
+#' @param paths A vector of paths to replace in the files. Must be the
+#' same length as `model_fns`
+#'
+#' @export
+modify_model_path <- function(model_fns, paths){
+
+  if(is.null(model_fns) || is.null(model_fns)){
+    stop("Neither `model_fns` nor `paths` can be `NULL`", call. = FALSE)
+  }
+
+  if(length(model_fns) != length(paths)){
+    stop("`model_fns` and `paths` must be the same length", call. = FALSE)
+  }
+
+  map2(model_fns, paths, function(fn, pth){
+    if(file.exists(fn)){
+      model <- readRDS(fn)
+      model$path <- pth
+      saveRDS(model, fn)
+      message("Updated path for file '", fn, "'\n")
+    }else{
+      warning("File '", fn, "' does not exist", call. = FALSE)
+    }
+  })
+}
+
 #' Create a one-row tibble from a vector of values
 #'
 #' @param vec A vector

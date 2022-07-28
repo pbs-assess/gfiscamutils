@@ -1,14 +1,13 @@
-#' Title
+#' Create a table of index data values
 #'
-#' @param model
-#' @param col_widths
-#' @param ...
+#' @param model An iSCAM model object as created in [load_iscam_files()]
+#' @param col_widths Widths for columns, except the Parameter column
+#' the [csasdown::csas_table()]
+#' @param ... Arguments passed to [csasdown::csas_table()]
 #'
-#' @return
+#' @return A [csasdown::csas_table()] object
 #' @importFrom dplyr arrange
 #' @export
-#'
-#' @examples
 table_index_values <- function(model,
                                col_widths = "5em",
                                digits = 2,
