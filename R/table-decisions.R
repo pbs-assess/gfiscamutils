@@ -106,6 +106,7 @@ table_decisions <- function(model,
   }
 
   csas_table(tab,
+             format = "latex",
              bold_header = FALSE,
              align = rep("r", ncol(tab)),
              col_names_align = rep("r", ncol(tab)),

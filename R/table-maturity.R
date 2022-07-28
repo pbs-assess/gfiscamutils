@@ -158,6 +158,7 @@ table_maturity <- function(surv_samples = NULL,
                      ifelse(fr(),
                             "Nombre de spécimens",
                             "Number of specimens"))
+
   out <- csas_table(out_df,
                     format = "latex",
                     align = rep("r", ncol(out_df)),
