@@ -304,7 +304,7 @@ calc_mcmc <- function(model,
 #' @export
 #' @examples
 #' \dontrun{
-#' delete_files_ext(file.path(drs$models_dir, "001-bridge-models"))
+#' delete_files_ext(file.path(drs$models_dir, "01-bridge-models"))
 #' }
 delete_files_ext <- function(path = NULL, ext = "rds"){
   stopifnot(!is.null(path))
