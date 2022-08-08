@@ -9,9 +9,9 @@ set_dirs(
   nongit_dir = file.path(dirname(here()), paste0(basename(here()), "-nongit")),
   models_dir = file.path(nongit_dir, "models"),
   base_model_dir = "base",
-  bridge_models_dir = "001-bridge-models",
+  bridge_models_dir = "01-bridge-models",
   bridge_models_dirs = NULL,
-  sens_models_dir = "002-sens-models",
+  sens_models_dir = "02-sens-models",
   sens_models_dirs = NULL,
   check_dir_exists = TRUE
 )
