@@ -36,6 +36,7 @@ replace_gear_names <- function(models,
     stop("Length of `old_gear_abbrevs` is not equal to the length of ",
          "`new_gear_abbrevs`", call. = FALSE)
   }
+  cls <- class(models)
   mdls <- imap(models, function(model, model_name){
     if(!is.null(old_gear_names)){
       map2(old_gear_names, new_gear_names, ~{
@@ -94,4 +95,6 @@ replace_gear_names <- function(models,
     }
     model
   })
+  class(mdls) <- cls
+  mdls
 }
