@@ -18,6 +18,9 @@ plot_vuln_mcmc <- function(...,
                            angle_x_labels = FALSE){
   if(inc_sbt){
     model <- list(...)[[1]]
+    if(!is_iscam_model(model)){
+      stop("The `model` is not a ", mdl_cls, " class", call. = FALSE)
+    }
     num_vbt <- length(model$mcmccalcs$vbt)
     # Hack the vbt series into sbt series in new model objects so that
     # we can use the `plot_ts_mcmc()` function to make this plot

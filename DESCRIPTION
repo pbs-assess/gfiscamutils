@@ -29,6 +29,7 @@ Imports:
   grid,
   here,
   kableExtra,
+  latex2exp,
   lemon,
   PBSmodelling,
   purrr,

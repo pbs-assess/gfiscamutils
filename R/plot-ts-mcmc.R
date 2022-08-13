@@ -274,7 +274,8 @@ plot_ts_mcmc <- function(models,
                ymax = !!sym(quants[3]))) +
     xlab(x_label) +
     ylab(y_label) +
-    scale_color_manual(values = model_colors)
+    scale_color_manual(values = model_colors,
+                       labels = map(models, ~{tex(as.character(attributes(.x)$model_desc))}))
 
   if(first_model_ribbon){
     first_model_nm <- as.character(var_quants$model[1])
@@ -334,7 +335,7 @@ plot_ts_mcmc <- function(models,
 
   if(single_model){
     if(!is.null(text_title_size)){
-      g <- g + ggtitle(names(models)) +
+      g <- g + ggtitle(tex(names(models))) +
         theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
     }
     leg_loc <- NULL

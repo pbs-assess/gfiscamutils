@@ -1,3 +1,15 @@
+#' Create an expression from a string that may have a latex string in it
+#'
+#' @param text The string
+#'
+#' @return An object with classes `latexexpression` and `expression`. See
+#' [latex2exp::TeX()]
+#' @importFrom latex2exp TeX
+#' @export
+tex <- function(text){
+  unname(TeX(text))
+}
+
 #' Read in model RDS files, modify the path attribute, and save
 #'
 #' @param model_fns A vector of model RDS filenames to modify

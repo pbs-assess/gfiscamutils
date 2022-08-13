@@ -278,7 +278,7 @@ plot_recr_mcmc <- function(models,
       theme(legend.position = "none")
     if(single_model){
       if(!is.null(text_title_size)){
-        g <- g + ggtitle(names(models)) +
+        g <- g + ggtitle(tex(names(models))) +
           theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
       }
     }

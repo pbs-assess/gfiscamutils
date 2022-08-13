@@ -201,7 +201,7 @@ plot_priors_posts_mcmc <- function(model,
     plot_grid(plotlist = g_lst, ...)
   }else{
     title <- ggdraw() +
-      draw_label(model_desc,
+      draw_label(tex(model_desc),
                  size = text_title_size,
                  x = 0.5)
     p <- plot_grid(plotlist = g_lst, ...)

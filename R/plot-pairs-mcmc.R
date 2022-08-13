@@ -190,7 +190,7 @@ plot_pairs_mcmc <- function(model,
     theme(strip.text.y.right = element_text(angle = 0))
 
   if(!is.null(text_title_size)){
-    g <- g + ggtitle(model_desc) +
+    g <- g + ggtitle(tex(model_desc)) +
       theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
   }
 
