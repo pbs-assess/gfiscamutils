@@ -267,17 +267,28 @@ plot_index_mcmc <- function(models,
       guides(color = guide_legend(title = legend_title)) +
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
   }else if(type == "resids"){
+    # Standardize residuals
+    vals <- vals |>
+      group_by(survey_name) |>
+      mutate(std_lower = sd(lowerci),
+             std_value = sd(biomass),
+             std_upper = sd(upperci)) |>
+      ungroup() |>
+      mutate(low_resid = lowerci / std_lower,
+             value_resid = biomass / std_value,
+             upper_resid = upperci / std_upper)
+
     g <- vals %>%
       ggplot(aes(x = year,
-                 y = biomass,
+                 y = value_resid,
                  color = model)) +
       stat_identity(yintercept = 0,
                     geom = "hline",
                     inherit.aes = FALSE,
                     linetype = "longdash") +
       geom_point(size = fit_point_size) +
-      geom_errorbar(aes(ymin = lowerci,
-                        ymax = upperci),
+      geom_errorbar(aes(ymin = low_resid,
+                        ymax = upper_resid),
                     width = errbar_width,
                     size = fit_line_width) +
       facet_wrap(~survey_name,
