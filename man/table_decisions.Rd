@@ -10,6 +10,7 @@ table_decisions(
   bmsy_refpts = c(0.4, 0.8),
   bold_header = FALSE,
   digits = 2,
+  ret_df = FALSE,
   ...
 )
 }
@@ -23,6 +24,9 @@ point and Upper stock reference. Values are 0.2B0 and 0.4B0 by default}
 point and Upper stock reference. Values are 0.4BMSY and 0.8BMSY by default}
 
 \item{digits}{Number of decimal places for the values in the table}
+
+\item{ret_df}{Logical. If \code{TRUE} return a data frame with the values,
+instead of the \code{\link[knitr:kable]{knitr::kable()}} formatted table}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }

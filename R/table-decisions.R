@@ -9,6 +9,8 @@
 #' @param bmsy_refpts Vector of two proportional values for the limit reference
 #' point and Upper stock reference. Values are 0.4BMSY and 0.8BMSY by default
 #' @param digits Number of decimal places for the values in the table
+#' @param ret_df Logical. If `TRUE` return a data frame with the values,
+#' instead of the [knitr::kable()] formatted table
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
 #' @return A [csasdown::csas_table()]
@@ -19,6 +21,7 @@ table_decisions <- function(model,
                             bmsy_refpts = c(0.4, 0.8),
                             bold_header = FALSE,
                             digits = 2,
+                            ret_df = FALSE,
                             ...){
 
   if(!mdl_cls %in% class(model)){
@@ -81,10 +84,10 @@ table_decisions <- function(model,
                                   paste0(bo_refpts[2], "B\\textsubscript{0})")),
                                 make.bold = bold_header),
                       latex.mlc(c(paste0("P(B\\textsubscript{", end_yr, "}<"),
-                                  paste0(bo_refpts[1], "B\\textsubscript{MSY})")),
+                                  paste0(bmsy_refpts[1], "B\\textsubscript{MSY})")),
                                 make.bold = bold_header),
                       latex.mlc(c(paste0("P(B\\textsubscript{", end_yr, "}<"),
-                                  paste0(bo_refpts[2], "B\\textsubscript{MSY})")),
+                                  paste0(bmsy_refpts[2], "B\\textsubscript{MSY})")),
                                 make.bold = bold_header),
                       latex.mlc(c(paste0("P(B\\textsubscript{", end_yr, "}<"),
                                   paste0("B\\textsubscript{", end_yr_minus1, "})")),
@@ -94,6 +97,24 @@ table_decisions <- function(model,
     bind_rows() %>%
     mutate_at(.vars = vars(-TAC), ~{f(.x, digits)}) %>%
     mutate(TAC = f(TAC, 0))
+
+  if(ret_df){
+    yr <- str_extract(names(tab), "20[0-9]{2}")
+    yr <- unique(yr)
+    yr <- as.numeric(yr[!is.na(yr)])
+    refs <- str_extract(names(tab), "0\\.[24]")
+    bo_refpts <- gsub("\\.", "", as.character(bo_refpts))
+    bmsy_refpts <- gsub("\\.", "", as.character(bmsy_refpts))
+    names(tab) <- c("tac",
+                    paste0(yr, "_", bo_refpts[1], "bo"),
+                    paste0(yr, "_", bo_refpts[2], "bo"),
+                    paste0(yr, "_", bmsy_refpts[1], "bmsy"),
+                    paste0(yr, "_", bmsy_refpts[2], "bmsy"),
+                    paste0(yr, "_", yr - 1))
+    tab <- tab |>
+      mutate(tac = as.numeric(tac))
+    return(tab)
+  }
 
   if(fr()){
     names(tab)[names(tab) == "TAC"] <- latex.mlc(c("Prise",
