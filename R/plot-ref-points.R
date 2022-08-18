@@ -30,12 +30,10 @@ plot_ref_points <- function(model,
     names(k) <- "unity"
     j <- bind_cols(k, j)
     names(j)[2] <- "value"
-    ggplot(j, aes(x = unity, y = value)) +
-      geom_boxplot() +
-      expand_limits(y = 0) +
-      theme(axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            plot.title = element_text(hjust = 0.5)) +
+    ggplot(j, aes(x = value)) +
+      ggplot2::geom_histogram() +
+      expand_limits(x = 0) +
+      theme(plot.title = element_text(hjust = 0.5)) +
       ylab("") +
       xlab("") +
       ggtitle(ref_desc[.x])
