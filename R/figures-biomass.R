@@ -304,9 +304,10 @@ biomass.plot.mpd <- function(model,
                function(x){
                  x$mpd$sbo
                })
+  yr_vec <- assess_yr:(assess_yr - length(models.names) + 1)
   names(bo) <- models.names
   bo <- t(bind_cols(bo))
-  bo <- cbind(rownames(bo), bo, min(bt$Year))
+  bo <- cbind(rownames(bo), bo, yr_vec)
   colnames(bo) <- c("Sensitivity", "Biomass", "Year")
   bo <- bo %>%
     as.tibble() %>%
@@ -345,12 +346,11 @@ biomass.plot.mpd <- function(model,
   }
 
   if(!depl){
-    if(!is.na(xlim[1])){
-      bo$Year <- xlim[1]
-    }
+    # if(!is.na(xlim[1])){
+    #   bo$Year <- xlim[1]
+    # }
     p <- p + geom_point(data = bo,
                         size = 2,
-                        position = position_dodge(width = offset),
                         mapping = aes(color = Sensitivity),
                         show.legend = FALSE,
                         na.rm = TRUE,
