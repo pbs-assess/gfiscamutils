@@ -180,12 +180,17 @@ plot_biomass_mcmc <- function(models,
                       xmax = end_yr),
                   alpha = refpts_alpha,
                   fill = bo_refpt_colors) +
-        geom_hline(data = tso_multiples,
+        geom_hline(data = tso_multiples[1, ],
                    aes(yintercept = !!sym(quants[2])),
-                   color = bo_refpt_colors,
+                   color = bo_refpt_colors[1],
                    lty = 1,
+                   lwd = 1) +
+        geom_hline(data = tso_multiples[2, ],
+                   aes(yintercept = !!sym(quants[2])),
+                   color = bo_refpt_colors[2],
+                   lty = 2,
                    lwd = 1)
-    }else{
+        }else{
       g <- g +
         geom_hline(data = tso_multiples,
                    aes(yintercept = !!sym(quants[1])),
@@ -238,10 +243,15 @@ plot_biomass_mcmc <- function(models,
                       xmax = end_yr),
                   alpha = refpts_alpha,
                   fill = bmsy_refpt_colors) +
-        geom_hline(data = bmsy_multiples,
+        geom_hline(data = bmsy_multiples[1, ],
                    aes(yintercept = !!sym(quants[2])),
-                   color = bmsy_refpt_colors,
+                   color = bmsy_refpt_colors[1],
                    lty = 1,
+                   lwd = 1) +
+        geom_hline(data = bmsy_multiples[2, ],
+                   aes(yintercept = !!sym(quants[2])),
+                   color = bmsy_refpt_colors[2],
+                   lty = 2,
                    lwd = 1)
     }else{
       g <- g +
