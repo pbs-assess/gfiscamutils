@@ -16,6 +16,7 @@ mcmc.fishing.mort.u.file <- "iscam_ut_mcmc.csv"
 mcmc.vuln.biomass.file <- "iscam_vbt_mcmc.csv"
 mcmc.index.fits.file <- "iscam_index_fits_mcmc.csv"
 mcmc.index.resids.file <- "iscam_index_residuals_mcmc.csv"
+mcmc.index.standardized.resids.file <- "iscam_index_standardized_residuals_mcmc.csv"
 mcmc.age.fits.file <- "iscam_age_fits_mcmc.csv"
 mcmc.age.resids.file <- "iscam_age_residuals_mcmc.csv"
 mcmc.sel.file <- "iscam_selectivity_mcmc.csv"
@@ -78,6 +79,7 @@ use_data(mcmc.fishing.mort.u.file, overwrite = TRUE)
 use_data(mcmc.vuln.biomass.file, overwrite = TRUE)
 use_data(mcmc.index.fits.file,  overwrite = TRUE)
 use_data(mcmc.index.resids.file,  overwrite = TRUE)
+use_data(mcmc.index.standardized.resids.file,  overwrite = TRUE)
 use_data(mcmc.age.fits.file, overwrite = TRUE)
 use_data(mcmc.age.resids.file, overwrite = TRUE)
 use_data(mcmc.sel.file, overwrite = TRUE)

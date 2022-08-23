@@ -146,11 +146,10 @@ plot_index_mcmc <- function(models,
       select(year, biomass, lowerci, upperci, survey_name)
   })
 
-
   vals <- imap(models, ~{
     ind_vals <- if(type == "fits")
       .x$mcmccalcs$it_quants else
-        .x$mcmccalcs$epsilon_quants
+        .x$mcmccalcs$std_epsilon_quants
     if(is.null(ind_vals)){
       return(NULL)
     }
@@ -267,28 +266,18 @@ plot_index_mcmc <- function(models,
       guides(color = guide_legend(title = legend_title)) +
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
   }else if(type == "resids"){
-    # Standardize residuals
-    vals <- vals |>
-      group_by(survey_name) |>
-      mutate(std_lower = sd(lowerci),
-             std_value = sd(biomass),
-             std_upper = sd(upperci)) |>
-      ungroup() |>
-      mutate(low_resid = lowerci / std_lower,
-             value_resid = biomass / std_value,
-             upper_resid = upperci / std_upper)
 
     g <- vals %>%
       ggplot(aes(x = year,
-                 y = value_resid,
+                 y = biomass,
                  color = model)) +
       stat_identity(yintercept = 0,
                     geom = "hline",
                     inherit.aes = FALSE,
                     linetype = "longdash") +
       geom_point(size = fit_point_size) +
-      geom_errorbar(aes(ymin = low_resid,
-                        ymax = upper_resid),
+      geom_errorbar(aes(ymin = lowerci,
+                        ymax = upperci),
                     width = errbar_width,
                     size = fit_line_width) +
       facet_wrap(~survey_name,

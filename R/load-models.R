@@ -254,20 +254,39 @@ calc_mcmc <- function(model,
     names(mc$epsilon) <- names(mc$it)
     out$epsilon_quants <- imap(mc$epsilon, ~{
       imap(.x, ~{
-        quantile(.x, probs = probs, na.rm = TRUE) %>%
-          t() %>%
-          as.data.frame() %>%
-          as_tibble() %>%
-          mutate(year = .y)
-      }) %>%
-        bind_rows() %>%
+        quantile(.x, probs = probs, na.rm = TRUE) |>
+          t() |>
+          as.data.frame() |>
+          as_tibble() |>
+          mutate(year = .y) |>
+          select(year, everything()) |>
+          `names<-`(c("year", "lowerci", "biomass", "upperci"))
+      }) |>
+        bind_rows() |>
         mutate(survey_name = .y)
-    }) %>%
-      bind_rows() %>%
-      rename(lowerci = !!sym(prob_cols[1]),
-             biomass = !!sym(prob_cols[2]),
-             upperci = !!sym(prob_cols[3])) %>%
-      select(survey_name, year, biomass, lowerci, upperci) %>%
+    }) |>
+      bind_rows() |>
+      select(survey_name, year, everything()) %>%
+      mutate(year = as.numeric(year))
+  }
+
+  if(!is.null(mc$std_epsilon)){
+    names(mc$std_epsilon) <- names(mc$it)
+    out$std_epsilon_quants <- imap(mc$std_epsilon, ~{
+      imap(.x, ~{
+        quantile(.x, probs = probs, na.rm = TRUE) |>
+          t() |>
+          as.data.frame() |>
+          as_tibble() |>
+          mutate(year = .y) |>
+          select(year, everything()) |>
+          `names<-`(c("year", "lowerci", "biomass", "upperci"))
+      }) |>
+        bind_rows() |>
+        mutate(survey_name = .y)
+    }) |>
+      bind_rows() |>
+      select(survey_name, year, everything()) %>%
       mutate(year = as.numeric(year))
   }
 
@@ -1109,6 +1128,7 @@ read_mcmc <- function(model,
                  list(mcmc.vuln.biomass.file, "list", "fleet"),
                  list(mcmc.index.fits.file, "list", "gear"),
                  list(mcmc.index.resids.file, "list", "gear"),
+                 list(mcmc.index.standardized.resids.file, "list", "gear"),
                  list(mcmc.age.fits.file, "specialage", "gear"),
                  list(mcmc.age.resids.file, "specialage", "gear"),
                  list(mcmc.sel.file, "specialsel", "gear"),
@@ -1117,7 +1137,7 @@ read_mcmc <- function(model,
   # Names given to the return list elements. Must be same length as `fn_lst`
   nms <- c("params", "sbt", "rt", "rdev", "ft",
            "m", "ut", "vbt",
-           "it", "epsilon",
+           "it", "epsilon", "std_epsilon",
            "agefits", "ageresids",
            "selest", "proj")
 
@@ -1186,7 +1206,7 @@ read_mcmc <- function(model,
         d <- read.csv(fn)
         d <- list_by(d, by = .x[[3]])
         # Set column names for indices to actual years instead of numbers 1:ncol
-        if(nms[.y] == "it" || nms[.y] == "epsilon"){
+        if(nms[.y] == "it" || nms[.y] == "epsilon" || nms[.y] == "std_epsilon"){
           # Set names and years for index fits
           d <- imap(d, ~{
             as_tibble(.x) %>%
