@@ -371,60 +371,61 @@ get_fancy_names <- function(names){
     # Variants on reference point values (0.2B0, 0.8BMSY, FMSY_fleet, UMSY_fleet, etc)
     if(length(grep("^[0-9\\.]+B0$", .x))){
       refpt <- gsub("([0-9\\.]+)B0", "\\1", .x)
-      return(paste0("$", refpt, "B_0$"))
+      return(paste0("$", refpt, "B_\\mathrm{0}$"))
     }
     if(length(grep("^[0-9,]+B0$", .x))){
       refpt <- gsub("([0-9,]+)B0", "\\1", .x)
-      return(paste0("$", refpt, "B_0$"))
+      return(paste0("$", refpt, "B_\\mathrm{0}$"))
     }
     if(length(grep("^[0-9\\.]+BMSY$", .x))){
       refpt <- gsub("([0-9\\.]+)BMSY", "\\1", .x)
-      return(paste0("$", refpt, "B_{MSY}$"))
+      return(paste0("$", refpt, "B_\\mathrm{MSY}$"))
     }
     if(length(grep("^[0-9,]+BMSY$", .x))){
       refpt <- gsub("([0-9,]+)BMSY", "\\1", .x)
-      return(paste0("$", refpt, "B_{MSY}$"))
+      return(paste0("$", refpt, "B_\\mathrm{MSY}$"))
     }
     if(length(grep("^msy_fleet[0-9]+$", .x))){
       fleet <- gsub("^msy_fleet([0-9]+)$", "\\1", .x)
-      return(paste0("$MSY_", fleet, "$"))
+      return(paste0("$MSY_\\mathrm{", fleet, "}$"))
     }
     if(length(grep("^fmsy_fleet[0-9]+$", .x))){
       fleet <- gsub("^fmsy_fleet([0-9]+)$", "\\1", .x)
-      return(paste0("$F_{MSY_", fleet, "}$"))
+      return(paste0("$F_\\mathrm{MSY_", fleet, "}$"))
     }
     if(length(grep("^umsy_fleet[0-9]+$", .x))){
       fleet <- gsub("^umsy_fleet([0-9]+)$", "\\1", .x)
-      return(paste0("$U_{MSY_", fleet, "}$"))
+      return(paste0("$U_\\mathrm{MSY_", fleet, "}$"))
     }
     if(length(grep("^f_fleet[0-9]+_[0-9]+$", .x))){
       fleet <- gsub("^f_fleet([0-9]+)_[0-9]+$", "\\1", .x)
       year <- gsub("^f_fleet[0-9]+_([0-9]+)$", "\\1", .x)
-      return(paste0("$F_{", year, "_", fleet, "}$"))
+      return(paste0("$F_\\mathrm{", year, "_", fleet, "}$"))
     }
     if(length(grep("^sbt_[0-9]+$", .x))){
       year <- gsub("^sbt_([0-9]+)$", "\\1", .x)
-      return(paste0("$SB_{", year, "}$"))
+      return(paste0("$SB_\\mathrm{", year, "}$"))
     }
     # Catchability parameters
     if(length(grep("^q_\\{.*\\}$", .x))){
-      return(paste0("$", .x, "$"))
+      x <- gsub("(\\{.*\\})", "\\\\mathrm\\1", .x)
+      return(paste0("$", x, "$"))
     }
     if(length(grep("^q_gear[0-9]+$", .x))){
       digit <- as.numeric(sub("^q_gear([0-9]+)$", "\\1", .x))
-      return(paste0("$q_{", digit, "}$"))
+      return(paste0("$q_\\mathrm{", digit, "}$"))
     }
     if(length(grep("^q[0-9]+$", .x))){
       digit <- as.numeric(sub("^q([0-9]+)$", "\\1", .x))
-      return(paste0("$q_{", digit, "}$"))
+      return(paste0("$q_\\mathrm{", digit, "}$"))
     }
     if(length(grep("^log_q_gear[0-9]+$", .x))){
       digit <- as.numeric(sub("^log_q_gear([0-9]+)$", "\\1", .x))
-      return(paste0("$log(q_{", digit, "})$"))
+      return(paste0("$\\log(q_\\mathrm{", digit, "})$"))
     }
     if(length(grep("^log_q[0-9]+$", .x))){
       digit <- as.numeric(sub("^log_q([0-9]+)$", "\\1", .x))
-      return(paste0("$log(q_{", digit, "})$"))
+      return(paste0("$\\log(q_\\mathrm{", digit, "})$"))
     }
 
     # Selectivity parameters
@@ -443,7 +444,7 @@ get_fancy_names <- function(names){
                              "female"))
         flt <- sub("female_gear|male_gear", "\\1", j)
         sexflt <- paste0(sex, ",", flt)
-        paste0("$\\hat{a}_{", sexflt, "}$")
+        paste0("$\\hat{a}_\\mathrm{", sexflt, "}$")
       }else if(length(grep("sel_sd50", nm))){
         j <- sub("sel_sd50_", "", nm)
         sex <- sub("_gear[0-9]+", "", j)
@@ -456,7 +457,7 @@ get_fancy_names <- function(names){
                              "female"))
         flt <- sub("female_gear|male_gear", "", j)
         sexflt <- paste0(sex, ",", flt)
-        paste0("$\\hat{\\gamma}_{", sexflt, "}$")
+        paste0("$\\hat{\\gamma}_\\mathrm{", sexflt, "}$")
       }else if(length(grep("sel_(age|sd)_", nm))){
         pat <- "^sel_(age|sd)_(male|female)_(\\{.*\\})$"
         age_sd <- gsub(pat, "\\1", nm)
@@ -471,9 +472,9 @@ get_fancy_names <- function(names){
         flt <- gsub(pat, "\\3", nm)
         sexflt <- paste0(sex, ",", flt)
         if(age_sd == "age"){
-          paste0("$\\hat{a}_{", sexflt, "}$")
+          paste0("$\\hat{a}_\\mathrm{", sexflt, "}$")
         }else if(age_sd == "sd"){
-          paste0("$\\hat{\\gamma}_{", sexflt, "}$")
+          paste0("$\\hat{\\gamma}_\\mathrm{", sexflt, "}$")
         }else{
           stop("age_sd in selectivity parameter name is something other than 'age' or 'sd'",
                call. = FALSE)
@@ -489,61 +490,61 @@ get_fancy_names <- function(names){
     }
 
     switch(.x,
-           "ro" = "$R_0$",
-           "log_ro" = "$log(R_0)$",
+           "ro" = "$R_\\mathrm{0}$",
+           "log_ro" = "$log(R_\\mathrm{0})$",
            "rbar" = "$\\overline{R}$",
            "log_rbar"  = "$log(\\overline{R})$",
-           "rinit" = "$\\overline{R}_{init}$",
-           "log_rinit" = "$log(\\overline{R}_{init}$)",
+           "rinit" = "$\\overline{R}_\\mathrm{init}$",
+           "log_rinit" = "$log(\\overline{R}_\\mathrm{init}$)",
            "h" = "$h$",
            "f" = "$F$",
            "m" = "$M$",
            "vartheta" = "$\\vartheta$",
            "rho" = "$\\rho$",
-           "bo" = "$B_0$",
-           "sbo" = "$SB_0$",
+           "bo" = "$B_\\mathrm{0}$",
+           "sbo" = "$SB_\\mathrm{0}$",
            "ssb" = "$SSB$",
            "SSB" = "$SSB$",
-           "m1" = ifelse(fr(), "$M_{homme}$", "$M_{male}$"),
-           "m2" = ifelse(fr(), "$M_{femme}$", "$M_{female}$"),
-           "m_sex1" = ifelse(fr(), "$M_{homme}$", "$M_{male}$"),
-           "m_sex2" = ifelse(fr(), "$M_{femme}$", "$M_{female}$"),
-           "log_m_sex1" = ifelse(fr(), "$log(M_{homme})$", "$log(M_{male})$"),
-           "log_m_sex2" = ifelse(fr(), "$log(M_{femme})$", "$log(M_{female})$"),
-           "bmsy" = "$B_{MSY}$",
+           "m1" = ifelse(fr(), "$M_\\mathrm{homme}$", "$M_\\mathrm{male}$"),
+           "m2" = ifelse(fr(), "$M_\\mathrm{femme}$", "$M_\\mathrm{female}$"),
+           "m_sex1" = ifelse(fr(), "$M_\\mathrm{homme}$", "$M_\\mathrm{male}$"),
+           "m_sex2" = ifelse(fr(), "$M_\\mathrm{femme}$", "$M_\\mathrm{female}$"),
+           "log_m_sex1" = ifelse(fr(), "$log(M_\\mathrm{homme})$", "$log(M_\\mathrm{male})$"),
+           "log_m_sex2" = ifelse(fr(), "$log(M_\\mathrm{femme})$", "$log(M_\\mathrm{female})$"),
+           "bmsy" = "$B_\\mathrm{MSY}$",
            "msy" = "$MSY$",
-           "msy1" = "$MSY_1$",
-           "msy2" = "$MSY_2$",
-           "msy3" = "$MSY_3$",
-           "msy4" = "$MSY_4$",
-           "msy5" = "$MSY_5$",
-           "msy_fleet1" = "$MSY_1$",
-           "msy_fleet2" = "$MSY_2$",
-           "msy_fleet3" = "$MSY_3$",
-           "msy_fleet4" = "$MSY_4$",
-           "msy_fleet5" = "$MSY_5$",
-           "fmsy" = "$F_{MSY}$",
-           "fmsy1" = "$F_{MSY_1}$",
-           "fmsy2" = "$F_{MSY_2}$",
-           "fmsy3" = "$F_{MSY_3}$",
-           "fmsy4" = "$F_{MSY_4}$",
-           "fmsy5" = "$F_{MSY_5}$",
-           "fmsy_fleet1" = "$F_{MSY_1}$",
-           "fmsy_fleet2" = "$F_{MSY_2}$",
-           "fmsy_fleet3" = "$F_{MSY_3}$",
-           "fmsy_fleet4" = "$F_{MSY_4}$",
-           "fmsy_fleet5" = "$F_{MSY_5}$",
-           "umsy" = "$U_{MSY}$",
-           "umsy1" = "$U_{MSY_1}$",
-           "umsy2" = "$U_{MSY_2}$",
-           "umsy3" = "$U_{MSY_3}$",
-           "umsy4" = "$U_{MSY_4}$",
-           "umsy5" = "$U_{MSY_51}$",
-           "umsy_fleet1" = "$U_{MSY_1}$",
-           "umsy_fleet2" = "$U_{MSY_2}$",
-           "umsy_fleet3" = "$U_{MSY_3}$",
-           "umsy_fleet4" = "$U_{MSY_4}$",
-           "umsy_fleet5" = "$U_{MSY_5}$")
+           "msy1" = "$MSY_\\mathrm{1}$",
+           "msy2" = "$MSY_\\mathrm{2}$",
+           "msy3" = "$MSY_\\mathrm{3}$",
+           "msy4" = "$MSY_\\mathrm{4}$",
+           "msy5" = "$MSY_\\mathrm{5}$",
+           "msy_fleet1" = "$MSY_\\mathrm{1}$",
+           "msy_fleet2" = "$MSY_\\mathrm{2}$",
+           "msy_fleet3" = "$MSY_\\mathrm{3}$",
+           "msy_fleet4" = "$MSY_\\mathrm{4}$",
+           "msy_fleet5" = "$MSY_\\mathrm{5}$",
+           "fmsy" = "$F_\\mathrm{MSY}$",
+           "fmsy1" = "$F_\\mathrm{MSY_1}$",
+           "fmsy2" = "$F_\\mathrm{MSY_2}$",
+           "fmsy3" = "$F_\\mathrm{MSY_3}$",
+           "fmsy4" = "$F_\\mathrm{MSY_4}$",
+           "fmsy5" = "$F_\\mathrm{MSY_5}$",
+           "fmsy_fleet1" = "$F_\\mathrm{MSY_1}$",
+           "fmsy_fleet2" = "$F_\\mathrm{MSY_2}$",
+           "fmsy_fleet3" = "$F_\\mathrm{MSY_3}$",
+           "fmsy_fleet4" = "$F_\\mathrm{MSY_4}$",
+           "fmsy_fleet5" = "$F_\\mathrm{MSY_5}$",
+           "umsy" = "$U_\\mathrm{MSY}$",
+           "umsy1" = "$U_\\mathrm{MSY_1}$",
+           "umsy2" = "$U_\\mathrm{MSY_2}$",
+           "umsy3" = "$U_\\mathrm{MSY_3}$",
+           "umsy4" = "$U_\\mathrm{MSY_4}$",
+           "umsy5" = "$U_\\mathrm{MSY_51}$",
+           "umsy_fleet1" = "$U_\\mathrm{MSY_1}$",
+           "umsy_fleet2" = "$U_\\mathrm{MSY_2}$",
+           "umsy_fleet3" = "$U_\\mathrm{MSY_3}$",
+           "umsy_fleet4" = "$U_\\mathrm{MSY_4}$",
+           "umsy_fleet5" = "$U_\\mathrm{MSY_5}$")
   })
 
 }
