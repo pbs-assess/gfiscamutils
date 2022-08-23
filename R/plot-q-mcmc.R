@@ -91,7 +91,6 @@ plot_q_mcmc <- function(models,
     surv_names <- surv_names[gear]
   }
 
-  browser()
   q_quants <- imap(models, ~{
     j <- .x$mcmccalcs$q_quants %>%
       t() %>%
