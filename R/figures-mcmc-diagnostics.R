@@ -439,6 +439,6 @@ make.pairs.plot <- function(model,
         diag.panel = panel.hist,
         lower.panel = panel.smooth,
         gap = 0.0)
-  mtext(text = "Parameter value", side = 1, line = 0, outer = TRUE)
+  mtext(text = "Parameter value", side = 1, line = -1, outer = TRUE)
   mtext(text = "Parameter value", side = 2, line = -1, outer = TRUE)
 }
