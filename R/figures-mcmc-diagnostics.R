@@ -157,6 +157,8 @@ make.priors.posts.plot <- function(model,
                 col = "wheat")
     }
   }
+  mtext(text = "Parameter value", side = 1, line = 1, outer = TRUE)
+  mtext(text = "Frequency", side = 2, line = -0.5, outer = TRUE)
 }
 
 #' Plot posterior histograms
@@ -241,6 +243,8 @@ make.traces.plot <- function(model,
          ylab = "",
          xlab = "",
          axes = FALSE)
+    mtext(text = "Iteration", side = 1, line = 1, outer = TRUE)
+    mtext(text = "Parameter value", side = 2, line = -1, outer = TRUE)
     box()
     at <- labels <- seq(0,
                         nrow(mc),
@@ -255,11 +259,14 @@ make.traces.plot <- function(model,
 #' Plot the autocorrelation of estimated parameters
 #'
 #' @param model An iscam model object
+#' @param mcmc_burnin Number for burnin
+#' @param lag_max Maximum value at which to calculate acf
 #'
 #' @return Nothing
 #' @export
 make.autocor.plot <- function(model,
-                              mcmc_burnin = 1000){
+                              mcmc_burnin = 1000,
+                              lag_max = 100){
 
   if(class(model) == model.lst.class){
     model <- model[[1]]
@@ -279,7 +286,7 @@ make.autocor.plot <- function(model,
     name <- colnames(mc)[param]
     name <- get.latex.name(name)
     autocorr.plot(mcmc.autocor,
-                  lag.max = 100,
+                  lag.max = lag_max,
                   main = name,
                   auto.layout = FALSE)
   }
@@ -334,6 +341,8 @@ autocorr.plot <- function(x,
            ylab = "",
            xlab = "Lag",
            ylim = c(-1, 1), ...)
+      mtext(text = "Lag", side = 1, line = 1, outer = TRUE)
+      mtext(text = "Autocorrelation", side = 2, line = -1, outer = TRUE)
       title(paste0(varnames(x)[j],
                   ifelse(is.null(chanames(x)),
                          "",
@@ -430,4 +439,6 @@ make.pairs.plot <- function(model,
         diag.panel = panel.hist,
         lower.panel = panel.smooth,
         gap = 0.0)
+  mtext(text = "Parameter value", side = 1, line = 0, outer = TRUE)
+  mtext(text = "Parameter value", side = 2, line = -1, outer = TRUE)
 }

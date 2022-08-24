@@ -4,10 +4,14 @@
 \alias{make.autocor.plot}
 \title{Plot the autocorrelation of estimated parameters}
 \usage{
-make.autocor.plot(model, mcmc_burnin = 1000)
+make.autocor.plot(model, mcmc_burnin = 1000, lag_max)
 }
 \arguments{
 \item{model}{An iscam model object}
+
+\item{mcmc_burnin}{Number for burnin}
+
+\item{lag_max}{Maximum value at which to calculate acf}
 }
 \value{
 Nothing
