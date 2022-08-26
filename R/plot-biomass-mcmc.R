@@ -174,12 +174,15 @@ plot_biomass_mcmc <- function(models,
     }
 
     if(refpts_ribbon){
+      if(rel){
+        g <- g +
+          geom_rect(data = tso_multiples,
+                    aes(xmin = ifelse(rel || !show_bo, start_yr, bo_yr),
+                        xmax = end_yr),
+                    alpha = refpts_alpha,
+                    fill = bo_refpt_colors)
+      }
       g <- g +
-        geom_rect(data = tso_multiples,
-                  aes(xmin = ifelse(rel || !show_bo, start_yr, bo_yr),
-                      xmax = end_yr),
-                  alpha = refpts_alpha,
-                  fill = bo_refpt_colors) +
         geom_hline(data = tso_multiples[1, ],
                    aes(yintercept = !!sym(quants[2])),
                    color = bo_refpt_colors[1],
@@ -190,20 +193,26 @@ plot_biomass_mcmc <- function(models,
                    color = bo_refpt_colors[2],
                    lty = 2,
                    lwd = 1)
-        }else{
+    }else{
+      if(rel){
+        g <- g +
+          geom_hline(data = tso_multiples,
+                     aes(yintercept = !!sym(quants[1])),
+                     color = bo_refpt_colors,
+                     lty = 4,
+                     lwd = 1) +
+          geom_hline(data = tso_multiples,
+                     aes(yintercept = !!sym(quants[3])),
+                     color = bo_refpt_colors,
+                     lty = 4,
+                     lwd = 1)
+      }
       g <- g +
-        geom_hline(data = tso_multiples,
-                   aes(yintercept = !!sym(quants[1])),
-                   color = bo_refpt_colors,
-                   lty = 4) +
         geom_hline(data = tso_multiples,
                    aes(yintercept = !!sym(quants[2])),
                    color = bo_refpt_colors,
-                   lty = 1) +
-        geom_hline(data = tso_multiples,
-                   aes(yintercept = !!sym(quants[3])),
-                   color = bo_refpt_colors,
-                   lty = 4)
+                   lty = c(1, 2),
+                   lwd = 1)
     }
   }
 
