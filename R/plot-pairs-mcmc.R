@@ -21,7 +21,10 @@ plot_pairs_mcmc <- function(model,
                             param_rm = c("rho",
                                          "vartheta"),
                             list_param_names = FALSE,
-                            text_title_size = 12){
+                            text_title_size = 12,
+                            point_size = 1,
+                            tick_label_size = 5,
+                            tick_label_angle = 45){
 
   if(is_iscam_model_list(model) && length(model) == 1){
     model <- model[[1]]
@@ -73,6 +76,7 @@ plot_pairs_mcmc <- function(model,
         select(-param_rm)
     }
   }
+
   nms <- imap(names(mc), ~{
     get_fancy_expr(.x, subst = TRUE)
   })
@@ -158,14 +162,11 @@ plot_pairs_mcmc <- function(model,
     }
 
     ggplot(data = data, mapping = mapping) +
-      geom_point(color = I("blue")) +
+      geom_point(color = I("blue"), size = point_size) +
       geom_smooth(method = "lm", color = I("black"),
                   ...) +
       scale_y_continuous(labels = round_axis_vals) +
-      scale_x_continuous(labels = round_axis_vals) +
-      theme(#axis.ticks = element_blank(),
-        axis.text.y = element_text(size = 8),
-        axis.text.x = element_text(size = 8))
+      scale_x_continuous(labels = round_axis_vals)
   }
 
   # Plot for the panels in the diagonals of the pairs plot
@@ -187,7 +188,10 @@ plot_pairs_mcmc <- function(model,
                diag = list(continuous = diagonals),
                lower = list(continuous = lower_triangle)) +
     # Rotate the right-hand parameter names so they are the same as the rest
-    theme(strip.text.y.right = element_text(angle = 0))
+    # and reduce the size and angle the x and y axis tick labels so they are readable
+    theme(strip.text.y.right = element_text(angle = 0)) +
+    theme(axis.text.x = element_text(size = tick_label_size, angle = tick_label_angle),
+          axis.text.y = element_text(size = tick_label_size, angle = tick_label_angle))
 
   if(!is.null(text_title_size)){
     g <- g + ggtitle(tex(model_desc)) +
