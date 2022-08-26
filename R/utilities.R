@@ -297,12 +297,14 @@ get_fancy_expr <- function(name, subst = FALSE){
       j <- sub("selage", "", nm)
       sex <- sub("[0-9]+_", "\\1", j)
       flt <- sub("_female|_male", "\\1", j)
+      sex <- ifelse(sex == "female", "f", "m")
       sexflt <- paste0(firstup(sex), ",", flt)
       bquote(hat(italic(a))[.(sexflt)])
     }else if(length(grep("selsd", nm))){
       j <- sub("selsd", "", nm)
       sex <- sub("[0-9]+_", "\\1", j)
       flt <- sub("_female|_male", "\\1", j)
+      sex <- ifelse(sex == "female", "f", "m")
       sexflt <- paste0(firstup(sex), ",", flt)
       bquote(hat(italic(gamma))[.(sexflt)])
     }else{
