@@ -9,7 +9,10 @@ plot_pairs_mcmc(
   plot_sel = NULL,
   param_rm = c("rho", "vartheta"),
   list_param_names = FALSE,
-  text_title_size = 12
+  text_title_size = 12,
+  point_size = 1,
+  tick_label_size = 5,
+  tick_label_angle = 45
 )
 }
 \arguments{
@@ -25,6 +28,12 @@ in the output, a warning will be issued. If \code{NULL}, nothing is removed}
 \item{list_param_names}{Logical. If \code{TRUE}, list the parameter names that will be plot
 by this function, but do not actually plot it. This is to help you to use the
 \code{param_rm} argument, so you know what the names to be removed can be}
+
+\item{point_size}{Size of the points on each pairs panel in the lower triangle}
+
+\item{tick_label_size}{Size of the tick labels on both axes}
+
+\item{tick_label_angle}{Angle of tick labels on both axes}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object made from the \code{\link[GGally:ggpairs]{GGally::ggpairs()}} function

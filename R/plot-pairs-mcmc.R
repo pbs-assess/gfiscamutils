@@ -12,6 +12,10 @@
 #' @inheritParams plot_traces_mcmc
 #' @family MCMC diagnostics plots
 #'
+#' @param point_size Size of the points on each pairs panel in the lower triangle
+#' @param tick_label_size Size of the tick labels on both axes
+#' @param tick_label_angle Angle of tick labels on both axes
+#'
 #' @return A [ggplot2::ggplot()] object made from the [GGally::ggpairs()] function
 #' @importFrom GGally ggpairs ggally_cor wrap ggally_text ggally_densityDiag
 #' @importFrom ggplot2 layer_scales
