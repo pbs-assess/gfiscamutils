@@ -21,6 +21,7 @@ plot_biomass_mcmc(
   bo_refpt_colors = c("red", "green"),
   bmsy_refpt_colors = c("salmon", "darkgreen"),
   angle_x_labels = FALSE,
+  ylim = NULL,
   ...
 )
 }
@@ -76,6 +77,10 @@ for B0. Used to display reference point lines if \code{show_bo_lines} is \code{T
 for BMSY. Used to display reference point lines if \code{show_bmsy_lines} is \code{TRUE}}
 
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
+
+\item{ylim}{A vector of two values, representing the minimum and maximum
+values for the plot on the y-axis. If \code{NULL}, defaults will be zero for the
+minimum and the ceiling of the maximum value (including CI)}
 
 \item{...}{Arguments passed to \code{\link[=plot_ts_mcmc]{plot_ts_mcmc()}}}
 }
