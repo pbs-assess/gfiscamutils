@@ -44,6 +44,9 @@
 #' @param bmsy_refpt_colors A vector of two colors representing the LRP and USR
 #' for BMSY. Used to display reference point lines if `show_bmsy_lines` is `TRUE`
 #' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
+#' @param ylim A vector of two values, representing the minimum and maximum
+#' values for the plot on the y-axis. If `NULL`, defaults will be zero for the
+#' minimum and the ceiling of the maximum value (including CI)
 #' @param ... Arguments passed to [plot_ts_mcmc()]
 #'
 #' @importFrom tibble rownames_to_column
@@ -67,6 +70,7 @@ plot_biomass_mcmc <- function(models,
                               bo_refpt_colors = c("red", "green"),
                               bmsy_refpt_colors = c("salmon", "darkgreen"),
                               angle_x_labels = FALSE,
+                              ylim = NULL,
                               ...){
 
   g <- plot_ts_mcmc(models,
@@ -174,7 +178,7 @@ plot_biomass_mcmc <- function(models,
     }
 
     if(refpts_ribbon){
-      if(rel){
+      if(!rel){
         g <- g +
           geom_rect(data = tso_multiples,
                     aes(xmin = ifelse(rel || !show_bo, start_yr, bo_yr),
@@ -194,7 +198,7 @@ plot_biomass_mcmc <- function(models,
                    lty = 2,
                    lwd = 1)
     }else{
-      if(rel){
+      if(!rel){
         g <- g +
           geom_hline(data = tso_multiples,
                      aes(yintercept = !!sym(quants[1])),
@@ -280,23 +284,18 @@ plot_biomass_mcmc <- function(models,
   }
 
   # Create tags for B0 lines, and breaks and labels for y-axis
-  if(rel){
-    ymax <- max(select(g$data, -c(model, year)))
+  if(is.null(ylim)){
+    if(rel){
+      ymax <- max(select(g$data, -c(model, year)))
+    }else{
+      ymax <- max(select(g$data, -c(model, year)),
+                  select(tso_quants, -c(model, year)))
+    }
+    upper_bound <- ceiling(ymax)
+    lims <- c(0, upper_bound)
   }else{
-    ymax <- max(select(g$data, -c(model, year)),
-                select(tso_quants, -c(model, year)))
-  }
-  if(ymax <= 1){
-    upper_bound <- 1
-    lims <- c(0, 1)
-  }else if(ymax <= 2){
-    upper_bound <- 2
-    lims <- c(0, 2)
-  }else{
-    upper_bound <- ifelse(ymax <= 10,
-                          max(ymax %/% 2) * 2 + 2,
-                          max(ymax %/% 100) * 100 + 100)
-    lims <- c(0, ymax + (10 - ymax %% 10))
+    upper_bound <- ylim[2]
+    lims <- ylim
   }
   brk <- seq(0, upper_bound, upper_bound / 10)
   lbl <- brk
