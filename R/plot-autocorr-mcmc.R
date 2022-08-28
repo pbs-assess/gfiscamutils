@@ -5,18 +5,21 @@
 #'
 #' @inheritParams plot_traces_mcmc
 #' @family MCMC diagnostics plots
+#' @param ... Arguments passed to [base::plot()]
 #'
-#' @return A [ggplot2::ggplot()] object made from the [forecast::ggAcf()] function
-#' @importFrom forecast ggAcf
+#' @return Nothing. Plots a grid of autocorrelation plots
 #' @export
-plot_autocor_mcmc <- function(model,
-                              plot_sel = NULL,
-                              param_rm = c("rho",
-                                           "vartheta"),
-                              lag = 100,
-                              list_param_names = FALSE,
-                              text_title_size = 12,
-                              ...){
+plot_autocorr_mcmc <- function(model,
+                               plot_sel = NULL,
+                               param_rm = c("rho",
+                                            "vartheta"),
+                               list_param_names = FALSE,
+                               text_title_size = 12,
+                               rows_cols = c(5, 4),
+                               ...){
+
+  oldpar <- par()
+  on.exit(par(oldpar))
 
   if(is_iscam_model_list(model) && length(model) == 1){
     model <- model[[1]]
@@ -72,30 +75,18 @@ plot_autocor_mcmc <- function(model,
     }
   }
 
-  g_lst <- imap(names(mc), ~{
-    param_name <- get_fancy_expr(.x)
+  par(mfrow = rows_cols,
+      oma = c(2, 3, 1, 1),
+      mai = c(0.2, 0.4, 0.3, 0.2))
+
+  walk(names(mc), function(param, ...){
+    param_name <- get_fancy_expr(param)
     param_dat <- mc %>%
-      select(.x)
-
-    g <- ggAcf(param_dat, lag.max = lag) +
-      ggtitle(param_name) +
-      ylab("") +
-      xlab("") +
-      theme(axis.text.x = element_blank(),
-            axis.text.y = element_blank(),
-            plot.title = element_text(face = "bold.italic", hjust = 0.5))
-
-    })
-
-  if(is.null(text_title_size)){
-    plot_grid(plotlist = g_lst, ...)
-  }else{
-    title <- ggdraw() +
-      draw_label(tex(model_desc),
-                 size = text_title_size,
-                 x = 0.5)
-    p <- plot_grid(plotlist = g_lst, ...)
-    plot_grid(title, p, ncol = 1, rel_heights = c(0.05, 1), ...)
-  }
-
+      select(param)
+    autocorr_plot(param_dat,
+                  main = param_name,
+                  auto_layout = FALSE,
+                  ...)
+  }, ...)
+  invisible()
 }

@@ -49,7 +49,7 @@ triangular area
 }
 \seealso{
 Other MCMC diagnostics plots: 
-\code{\link{plot_autocor_mcmc}()},
+\code{\link{plot_autocorr_mcmc}()},
 \code{\link{plot_priors_posts_mcmc}()},
 \code{\link{plot_traces_mcmc}()}
 }

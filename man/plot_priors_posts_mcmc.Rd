@@ -50,7 +50,7 @@ on the vertical lines
 }
 \seealso{
 Other MCMC diagnostics plots: 
-\code{\link{plot_autocor_mcmc}()},
+\code{\link{plot_autocorr_mcmc}()},
 \code{\link{plot_pairs_mcmc}()},
 \code{\link{plot_traces_mcmc}()}
 }

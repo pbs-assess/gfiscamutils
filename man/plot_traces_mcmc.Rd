@@ -43,7 +43,7 @@ Trace plots for parameters in an MCMC run
 }
 \seealso{
 Other MCMC diagnostics plots: 
-\code{\link{plot_autocor_mcmc}()},
+\code{\link{plot_autocorr_mcmc}()},
 \code{\link{plot_pairs_mcmc}()},
 \code{\link{plot_priors_posts_mcmc}()}
 }
