@@ -4,11 +4,12 @@
 \alias{calc_special_quants}
 \title{Calculate age fits / age residuals and selectivity estimates quantiles}
 \usage{
-calc_special_quants(lst, probs = c(0.025, 0.5, 0.975))
+calc_special_quants(lst, type = c("age", "sel"), probs = c(0.025, 0.5, 0.975))
 }
 \description{
 @param lst A list as output by \code{\link[=load_special]{load_special()}}
 of either MCMC age fits, age residuals, or selectivity estimates
+@param type The type of quantiles to calculate
 @param probs A vector of three values for quantiles calculations
 @export
 }

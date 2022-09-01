@@ -203,18 +203,38 @@ is_iscam_model_group <- function(lst){
 #'
 #'  @param lst A list as output by [load_special()]
 #'  of either MCMC age fits, age residuals, or selectivity estimates
+#'  @param type The type of quantiles to calculate
 #'  @param probs A vector of three values for quantiles calculations
 #'  @export
 calc_special_quants <- function(lst,
+                                type = c("age", "sel"),
                                 probs = c(0.025, 0.5, 0.975)){
 
-  if("year" %in% names(lst)){
-    year <- sym("year")
-  }else if("start_year" %in% names(lst)){
-    year <- sym("start_year")
-  }else{
-    stop("`lst` does not contain column `year` or `start_year`")
+  type <- match.arg(type)
+
+  if(type == "age" && !"year" %in% names(lst)){
+    stop("`lst` does not contain column `year` for type `age`",
+         call. = FALSE)
+  }else if(type == "sel" && !"start_year" %in% names(lst)){
+    stop("`lst` does not contain column `start_year` for type `sel`",
+         call. = FALSE)
   }
+
+
+  if(type == "sel"){
+    a_hat <- lst |>
+      calc_quantiles_by_group(grp_col = c("gear", "block", "start_year", "end_year", "sex"),
+                              col = "a_hat")
+    g_hat <- lst |>
+      calc_quantiles_by_group(grp_col = c("gear", "block", "start_year", "end_year", "sex"),
+                              col = "g_hat")
+    browser()
+
+  }else{
+
+  }
+
+
   gear_lst <- lst %>% split(~gear)
   imap(gear_lst, ~{
     sex_lst <- split(.x, ~sex)
@@ -226,7 +246,21 @@ calc_special_quants <- function(lst,
       # following calls simpler. They are appended to the resulting data frame
       # afterwards
       bare_df <- .x %>%
-        select(-c(gear, post, sex))
+        select(-c(gear, posterior, sex))
+      if(type == "age"){
+        bare_df <- bare_df |>
+          mutate(param1 = as.numeric(param1),
+                 param2 = as.numeric(param2),
+                 !!year := as.numeric(!!year))
+
+      }else{
+        bare_df <- bare_df |>
+          mutate(year = as.numeric(!!year),
+                 param1 = as.numeric(param1),
+                 param2 = as.numeric(param2),
+                 !!year := as.numeric(!!year))
+
+      }
       lower <- bare_df %>%
         group_by(!!year) %>%
         summarize_all(quantile, probs = probs[1]) %>%
