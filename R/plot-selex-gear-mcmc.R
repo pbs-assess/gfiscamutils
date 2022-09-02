@@ -60,7 +60,7 @@ plot_selex_gear_mcmc <- function(model,
     mutate(sex = ifelse(sex %in% c(0, 2), "Female", "Male"))
 
   prob_cols <- paste0(prettyNum(probs * 100), "%")
-  quant_vals <- unique(vals$quant)
+  quant_vals <- unique(vals$quants)
   quants <- imap_chr(prob_cols, ~{
     mtch <- grep(.x, quant_vals, value = TRUE)
     if(!length(mtch)){
@@ -69,12 +69,12 @@ plot_selex_gear_mcmc <- function(model,
     mtch
   })
 
-  ages <- as.character(model$mpd$age)
+  ages <- as.character(model$dat$start.age:model$dat$end.age)
 
   # Rename the parameter columns because the ages columns would
   # have these same names
   vals <- vals %>%
-    rename(p1 = `1`, p2 = `2`)
+    rename(p1 = "a_hat", p2 = "g_hat")
 
   # Filter out the gear
   gear_name <- model$dat$gear_names[gear]
@@ -88,23 +88,28 @@ plot_selex_gear_mcmc <- function(model,
     stop("`gear` ", gear_name, " was not found in the model selectivity output")
   }
 
+  if(length(unique(vals$block)) < 2){
+    stop("The gear `", gear_name, "` does not have at least two year blocks for ",
+         "selectivity. Use `plot_selex_mcmc()` for this gear", call. = FALSE)
+  }
+
   # Add age columns with logistic selectivity calculations
   for(i in ages){
     vals <- vals %>%
-      mutate(!!sym(i) := 1 / (1 + exp(-(as.numeric(i) - p1) / p2)))
+      mutate(!!sym(i) := 1 / (1 + exp(-p2 * (as.numeric(i) - p1))))
   }
 
   get_val <- function(d, q){
     d %>%
-      filter(quant == q) %>%
-      select(-quant) %>%
-      pivot_longer(-c(gear, start_year, end_year, Sex, p1, p2),
+      filter(quants == q) %>%
+      select(-quants) %>%
+      pivot_longer(-c(gear, block, start_year, end_year, Sex, p1, p2),
                    names_to = "age",
                    values_to = "value") %>%
       mutate(age = as.numeric(age))
   }
 
-  vals <- vals %>%
+  vals <- vals |>
     rename(Sex = sex)
   lo_vals <- get_val(vals, quants[1]) %>%
     mutate(lo_value = value) %>%

@@ -1,4 +1,4 @@
-#' Read in an ISCAM data file, replce all instances of the old name
+#' Read in an ISCAM data file, replace all instances of the old name
 #' with the new name and save the file, overwriting it
 #'
 #' @param fn The iSCAM data file

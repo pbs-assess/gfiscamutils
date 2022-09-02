@@ -2,7 +2,7 @@
 % Please edit documentation in R/rename_gear_iscam.R
 \name{rename_gear_iscam}
 \alias{rename_gear_iscam}
-\title{Read in an ISCAM data file, replce all instances of the old name
+\title{Read in an ISCAM data file, replace all instances of the old name
 with the new name and save the file, overwriting it}
 \usage{
 rename_gear_iscam(fn, old_gear_name = NULL, new_gear_name = NULL)
@@ -18,6 +18,6 @@ rename_gear_iscam(fn, old_gear_name = NULL, new_gear_name = NULL)
 Nothing
 }
 \description{
-Read in an ISCAM data file, replce all instances of the old name
+Read in an ISCAM data file, replace all instances of the old name
 with the new name and save the file, overwriting it
 }

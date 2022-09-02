@@ -60,6 +60,7 @@ plot_selex_mcmc <- function(model,
     stop("MCMC selectivity estimates not found for this model, see\n",
          "  `model$mcmc$selest` which is created in `read_mcmc()` and `load_special()`")
   }
+
   # Remove male "estimates" for models with number of sexes == 1. iSCAM outputs the
   # parameter values even if they were not estimated so they are gibberish
   if(model$dat$num.sex == 1){
@@ -87,9 +88,8 @@ plot_selex_mcmc <- function(model,
       filter(gear %in% gear_names[!!gear])
     gear_names <- gear_names[gear]
   }
-
   prob_cols <- paste0(prettyNum(probs * 100), "%")
-  quant_vals <- unique(vals$quant)
+  quant_vals <- unique(vals$quants)
   quants <- imap_chr(prob_cols, ~{
     mtch <- grep(.x, quant_vals, value = TRUE)
     if(!length(mtch)){
@@ -103,7 +103,7 @@ plot_selex_mcmc <- function(model,
   # Rename the parameter columns because the ages columns would
   # have these same names
   vals <- vals %>%
-    rename(p1 = `1`, p2 = `2`)
+    rename(p1 = "a_hat", p2 = "g_hat")
 
   # Remove gears with TV selectivity and give a warning
   vals <- vals %>%
@@ -125,13 +125,13 @@ plot_selex_mcmc <- function(model,
   # Add age columns with logistic selectivity calculations
   for(i in ages){
     vals <- vals %>%
-      mutate(!!sym(i) := 1 / (1 + exp(-(as.numeric(i) - p1) / p2)))
+      mutate(!!sym(i) := 1 / (1 + exp(-p2 * (as.numeric(i) - p1))))
   }
 
   get_val <- function(d, q){
     d %>%
-      filter(quant == q) %>%
-      select(-quant) %>%
+      filter(quants == q) %>%
+      select(-quants) %>%
       pivot_longer(-c(gear, start_year, end_year, Sex, p1, p2),
                    names_to = "age",
                    values_to = "value") %>%
