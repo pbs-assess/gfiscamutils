@@ -10,39 +10,48 @@ calc_quantiles(
   df = NULL,
   col = NULL,
   probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
-  include_mean = TRUE
+  include_mean = FALSE
 )
 
 calc_quantiles_by_group(
   df = NULL,
-  grp_col = NULL,
-  col = NULL,
-  grp_names = grp_col,
-  probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
-  include_mean = TRUE
+  grp_cols = NULL,
+  cols = NULL,
+  cols_rm = "posterior",
+  grp_names = grp_cols,
+  probs = c(0.025, 0.5, 0.975),
+  include_mean = FALSE
 )
 }
 \arguments{
-\item{df}{A \link{data.frame} with columns with names given by \code{grp_col}
+\item{df}{A \link{data.frame} with columns with names given by \code{grp_cols}
 and \code{col}}
 
-\item{col}{The column name to use as values to calculate quantiles for}
+\item{col}{A column name on which to perform the calculations. Must be in
+\code{df} or an error will be thrown}
 
 \item{probs}{A vector of quantiles to pass to \code{\link[stats:quantile]{stats::quantile()}}}
 
 \item{include_mean}{If TRUE, include the mean in the output}
 
-\item{grp_col}{The column name to use for grouping the data}
+\item{grp_cols}{A vector of column names to use for grouping the data}
 
-\item{grp_names}{The column name to use for labeling the grouped column.
-By default it is the same as the grouping column (\code{grp_col}).}
+\item{cols}{The column names to use as values to calculate quantiles for.
+If \code{NULL}, all columns not in \code{grp_cols} will be calculated and the
+quantiles will appear in a column}
+
+\item{cols_rm}{A vector of names of columns to remove from the calculations.
+Only used if \code{cols} is \code{NULL}}
+
+\item{grp_names}{The column namesto use for labeling the grouped columns.
+By default it is the same as the grouping columns (\code{grp_cols}).}
 }
 \value{
 A \link{data.frame} with a new column for each value in the
 \code{probs} vector
 
 A \link{data.frame} containing the quantile values with one row per
-group represented by \code{grp_col}
+group represented by \code{grp_cols}
 }
 \description{
 Calculate and insert columns containing arbitrary quantiles for a
@@ -105,7 +114,7 @@ pq <- tribble(
 probs <- c(0.05, 0.25, 0.5, 0.75, 0.95)
 
 j <- calc_quantiles_by_group(pq,
-                             grp_col = "year",
+                             grp_cols = "year",
                              col = "val",
                              probs = probs)
 }

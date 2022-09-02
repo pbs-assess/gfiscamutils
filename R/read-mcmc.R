@@ -68,9 +68,9 @@ read_mcmc <- function(model,
                  list(mcmc.index.fits.file, "list", "gear"),
                  list(mcmc.index.resids.file, "list", "gear"),
                  list(mcmc.index.standardized.resids.file, "list", "gear"),
-                 list(mcmc.age.fits.file, "df_age", "gear"),
-                 list(mcmc.age.resids.file, "df_age", "gear"),
-                 list(mcmc.sel.file, "df_sel", "gear"),
+                 list(mcmc.age.fits.file, "df_longer_age", "gear"),
+                 list(mcmc.age.resids.file, "df_longer_age", "gear"),
+                 list(mcmc.sel.file, "df_longer_sel", "gear"),
                  list(mcmc.proj.file, "projections"))
 
   # Names given to the return list elements. Must be same length as `fn_lst`
@@ -88,13 +88,13 @@ read_mcmc <- function(model,
     d <- NULL
     fn <- file.path(mcmc_dir, .x[1])
     if(file.exists(fn)){
-      if(.x[[2]] == "df_sel"){
+      if(.x[[2]] == "df_longer_sel"){
         d <- load_longer(fn,
                          type = "sel",
                          gear_names = model$dat$gear_names,
                          burnin = burnin,
                          thin = thin)
-      }else if(.x[[2]] == "df_age"){
+      }else if(.x[[2]] == "df_longer_age"){
         d <- load_longer(fn,
                          type = "age",
                          gear_names = model$dat$age_gear_names,

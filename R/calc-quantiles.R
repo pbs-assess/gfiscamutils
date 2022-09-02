@@ -50,10 +50,11 @@
 calc_quantiles <- function(df = NULL,
                            col = NULL,
                            probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
-                           include_mean = TRUE){
+                           include_mean = FALSE){
 
   stopifnot(col %in% names(df))
   stopifnot(class(df[[col]]) == "numeric")
+
   col_sym <- sym(col)
   out <- summarize_at(df,
                       vars(!!col_sym),
@@ -74,19 +75,25 @@ calc_quantiles <- function(df = NULL,
 #'
 #' @rdname calc_quantiles
 #'
-#' @param df A [data.frame] with columns with names given by `grp_col`
+#' @param df A [data.frame] with columns with names given by `grp_cols`
 #' and `col`
-#' @param grp_col A vector of column names to use for grouping the data
-#' @param col The column name to use as values to calculate quantiles for
+#' @param grp_cols A vector of column names to use for grouping the data
+#' @param cols The column names to use as values to calculate quantiles for.
+#' If `NULL`, all columns not in `grp_cols` will be calculated and the
+#' quantiles will appear in a column
+#' @param cols_rm A vector of names of columns to remove from the calculations.
+#' Only used if `cols` is `NULL`
 #' @param probs A vector of quantiles to pass to [stats::quantile()]
 #' @param include_mean If TRUE, include the mean in the output
-#' @param grp_names The column name to use for labeling the grouped column.
-#' By default it is the same as the grouping column (`grp_col`).
+#' @param grp_names The column namesto use for labeling the grouped columns.
+#' By default it is the same as the grouping columns (`grp_cols`).
 #'
 #' @return A [data.frame] containing the quantile values with one row per
-#' group represented by `grp_col`
+#' group represented by `grp_cols`
 #' @importFrom rlang sym syms
-#' @importFrom dplyr group_map summarize_at summarize_all vars distinct bind_cols
+#' @importFrom dplyr group_map summarize_at summarize_all vars distinct
+#' @importFrom dplyr full_join bind_cols
+#' @importFrom tidyr pivot_longer
 #' @export
 #'
 #' @examples
@@ -114,22 +121,31 @@ calc_quantiles <- function(df = NULL,
 #' probs <- c(0.05, 0.25, 0.5, 0.75, 0.95)
 #'
 #' j <- calc_quantiles_by_group(pq,
-#'                              grp_col = "year",
+#'                              grp_cols = "year",
 #'                              col = "val",
 #'                              probs = probs)
 calc_quantiles_by_group <- function(df = NULL,
-                                    grp_col = NULL,
-                                    col = NULL,
-                                    grp_names = grp_col,
-                                    probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
-                                    include_mean = TRUE){
+                                    grp_cols = NULL,
+                                    cols = NULL,
+                                    cols_rm = "posterior",
+                                    grp_names = grp_cols,
+                                    probs = c(0.025, 0.5, 0.975),
+                                    include_mean = FALSE){
 
-  stopifnot(all(grp_col %in% names(df)))
-  stopifnot(col %in% names(df))
+  # Note that if any of these contain `NULL`, `all()` will return `TRUE`
+  stopifnot(all(grp_cols %in% names(df)))
+  stopifnot(all(cols %in% names(df)))
+  stopifnot(all(cols_rm %in% names(df)))
 
-  grp_col_sym <- syms(grp_col)
+  grp_cols_sym <- syms(grp_cols)
   grp_names_sym <- syms(grp_names)
-  col_sym <- sym(col)
+
+  if(is.null(cols)){
+    cols <- names(df)[!names(df) %in% grp_cols]
+    if(!is.null(cols_rm)){
+      cols <- cols[!cols %in% cols_rm]
+    }
+  }
   grp_vals <- df |>
     select(!!!grp_names) |>
     distinct()
@@ -144,17 +160,28 @@ calc_quantiles_by_group <- function(df = NULL,
     mutate(gear = factor(gear)) |>
     mutate(gear = forcats::fct_relevel(gear, lvls))
 
-  j <- df |>
-    group_by(!!!grp_col_sym) |>
-    group_map(~ calc_quantiles(.x,
-                               col = col,
-                               probs = probs,
-                               include_mean = include_mean)) |>
-    map_df(~{.x})
+  lst_df <- map(cols, function(col){
+    df |>
+      group_by(!!!grp_cols_sym) |>
+      group_map(~ calc_quantiles(.x,
+                                 col = col,
+                                 probs = probs,
+                                 include_mean = include_mean)) |>
+      map_df(~{.x}) |>
+      bind_cols(grp_vals) |>
+      select(!!!grp_names_sym, everything()) |>
+      ungroup() |>
+      pivot_longer(cols = -c(grp_names), names_to = "quants", values_to = col)
+  })
 
-  # Bind the grouping columns back on
-  j |>
-    bind_cols(grp_vals) |>
-    select(!!!grp_names_sym, everything()) |>
-    ungroup()
+  # Join all the tables together
+  df <- lst_df[[1]]
+  walk(lst_df[-1], ~{
+    df <<- df |> dplyr::full_join(.x, c(grp_names, "quants"))
+  })
+
+  # Convert the quantiles to percentages, will produce NA warning if "avg"
+  # is present even though there are no NAs in the output table
+  df |>
+    mutate(quants = ifelse(quants == "avg", "avg", paste0(round(as.numeric(quants) * 100, 2), "%")))
 }

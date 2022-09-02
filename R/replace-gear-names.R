@@ -40,7 +40,7 @@ replace_gear_names <- function(models,
   mdls <- imap(models, function(model, model_name){
     if(!is.null(old_gear_names)){
       map2(old_gear_names, new_gear_names, ~{
-        inds <- grepl(.x, model$dat$gear_names)
+      inds <- grepl(.x, model$dat$gear_names)
         if(any(inds)){
           model$dat$gear_names[inds] <<- .y
         }

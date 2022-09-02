@@ -206,9 +206,9 @@ is_iscam_model_group <- function(lst){
 #'  @param type The type of quantiles to calculate
 #'  @param probs A vector of three values for quantiles calculations
 #'  @export
-calc_special_quants <- function(lst,
-                                type = c("age", "sel"),
-                                probs = c(0.025, 0.5, 0.975)){
+calc_longer_quants <- function(lst,
+                               type = c("age", "sel"),
+                               probs = c(0.025, 0.5, 0.975)){
 
   type <- match.arg(type)
 
@@ -220,72 +220,14 @@ calc_special_quants <- function(lst,
          call. = FALSE)
   }
 
-
   if(type == "sel"){
-    a_hat <- lst |>
-      calc_quantiles_by_group(grp_col = c("gear", "block", "start_year", "end_year", "sex"),
-                              col = "a_hat")
-    g_hat <- lst |>
-      calc_quantiles_by_group(grp_col = c("gear", "block", "start_year", "end_year", "sex"),
-                              col = "g_hat")
-    browser()
-
+    df <- lst |>
+      calc_quantiles_by_group(grp_cols = c("gear", "block", "start_year", "end_year", "sex"))
   }else{
-
+    df <- lst |>
+      calc_quantiles_by_group(grp_cols = c("gear", "year", "sex"))
   }
-
-
-  gear_lst <- lst %>% split(~gear)
-  imap(gear_lst, ~{
-    sex_lst <- split(.x, ~sex)
-    sexes <- as.numeric(names(sex_lst))
-    # Remove names so that .y in the following loop is an iterator, not the name
-    names(sex_lst) <- NULL
-    imap(sex_lst, ~{
-      # Making a 'bare-bones' data frame by removing these columns makes the
-      # following calls simpler. They are appended to the resulting data frame
-      # afterwards
-      bare_df <- .x %>%
-        select(-c(gear, posterior, sex))
-      if(type == "age"){
-        bare_df <- bare_df |>
-          mutate(param1 = as.numeric(param1),
-                 param2 = as.numeric(param2),
-                 !!year := as.numeric(!!year))
-
-      }else{
-        bare_df <- bare_df |>
-          mutate(year = as.numeric(!!year),
-                 param1 = as.numeric(param1),
-                 param2 = as.numeric(param2),
-                 !!year := as.numeric(!!year))
-
-      }
-      lower <- bare_df %>%
-        group_by(!!year) %>%
-        summarize_all(quantile, probs = probs[1]) %>%
-        ungroup() %>%
-        mutate(quant = paste0(probs[1] * 100, "%"))
-      med <- bare_df %>%
-        group_by(!!year) %>%
-        summarize_all(quantile, probs = probs[2]) %>%
-        ungroup() %>%
-        mutate(quant = paste0(probs[2] * 100, "%"))
-      upper <- bare_df %>%
-        group_by(!!year) %>%
-        summarize_all(quantile, probs = probs[3]) %>%
-        ungroup() %>%
-        mutate(quant = paste0(probs[3] * 100, "%"))
-
-      bind_rows(lower, med, upper) %>%
-        mutate(sex = sexes[.y]) %>%
-        select(year, sex, quant, everything())
-    }) %>%
-      bind_rows() %>%
-      mutate(gear = .y) %>%
-      select(gear, everything())
-  }) %>%
-    bind_rows()
+  df
 }
 
 #' Get a properly-typeset version of the parameter name
