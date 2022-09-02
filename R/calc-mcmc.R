@@ -32,7 +32,7 @@ calc_mcmc <- function(model,
   if(class(probs) != "numeric"){
     stop("`probs` must be a numeric vector")
   }
-  if(any(probs < 0 || probs > 1)){
+  if(any(probs < 0 | probs > 1)){
     stop("`probs` values must all be between 0 and 1")
   }
   if(probs[1] >= probs[2] || probs[2] >= probs[3]){
