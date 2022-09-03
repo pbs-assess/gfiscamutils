@@ -87,22 +87,22 @@ plot_age_fits_mcmc <- function(model,
   gear_names <- tolower(model$dat$age_gear_names)
   gear_name <- gear_names[gear]
 
-  comps <- model$mpd$a_obs[[gear]] %>%
-    select(-c(gear, area, group)) %>%
-    pivot_longer(-c(year, sample_size, sex), names_to = "age", values_to = "prop") %>%
-    mutate(age = as.numeric(age)) %>%
+  comps <- model$mpd$a_obs[[gear]] |>
+    select(-c(gear, area, group)) |>
+    pivot_longer(-c(year, sample_size, sex), names_to = "age", values_to = "prop") |>
+    mutate(age = as.numeric(age)) |>
     mutate(sex = ifelse(sex %in% c(0, 2),
                         en2fr("Female"),
                         en2fr("Male")))
 
-  sample_size <- comps %>%
+  sample_size <- comps |>
     distinct(year, sex, sample_size)
-  comps <- comps %>%
+  comps <- comps |>
     select(-sample_size)
 
-  vals <- model$mcmccalcs$agefit_quants %>%
-    filter(tolower(gear) == gear_name) %>%
-    select(-gear) %>%
+  vals <- model$mcmccalcs$agefit_quants |>
+    filter(tolower(gear) == gear_name) |>
+    select(-gear) |>
     mutate(sex = ifelse(sex %in% c(0, 2),
                         en2fr("Female"),
                         en2fr("Male")))
@@ -116,16 +116,17 @@ plot_age_fits_mcmc <- function(model,
       stop("Not all `yrs` exist in the `comps` and `fits` years",
            call. = FALSE)
     }
-    comps <- comps %>%
+    comps <- comps |>
       filter(year %in% yrs)
-    vals <- vals %>%
+    vals <- vals |>
       filter(year %in% yrs)
   }
+
   prob_cols <- paste0(prettyNum(probs * 100), "%")
   # In case the decimals have been changed to commas, change them back
   prob_cols <- gsub(",", ".", prob_cols)
 
-  quant_vals <- unique(vals$quant)
+  quant_vals <- unique(vals$quants)
   quants <- imap_chr(prob_cols, ~{
     mtch <- grep(.x, quant_vals, value = TRUE)
     if(!length(mtch)){
@@ -135,19 +136,19 @@ plot_age_fits_mcmc <- function(model,
   })
 
   get_val <- function(d, q){
-    d %>%
-      filter(quant == q) %>%
-      select(-quant) %>%
-      pivot_longer(-c(year, sex), names_to = "age", values_to = "prop") %>%
+    d |>
+      filter(quants == q) |>
+      select(-quants) |>
+      pivot_longer(-c(year, sex), names_to = "age", values_to = "prop") |>
       mutate(age = as.numeric(age))
   }
-  lo_vals <- get_val(vals, quants[1]) %>%
+  lo_vals <- get_val(vals, quants[1]) |>
     mutate(lo_prop = prop)
   med_vals <- get_val(vals, quants[2])
-  hi_vals <- get_val(vals, quants[3]) %>%
+  hi_vals <- get_val(vals, quants[3]) |>
     mutate(hi_prop = prop)
-  rib_vals <- lo_vals %>%
-    left_join(hi_vals, by = c("year", "sex", "age")) %>%
+  rib_vals <- lo_vals |>
+    left_join(hi_vals, by = c("year", "sex", "age")) |>
     select(-c(prop.x, prop.y))
 
   g <- ggplot(comps, aes(x = factor(age), ymax = prop, ymin = 0)) +
