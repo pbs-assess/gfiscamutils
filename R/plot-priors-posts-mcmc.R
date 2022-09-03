@@ -122,11 +122,13 @@ plot_priors_posts_mcmc <- function(model,
     func <- function(x){xx$fn(x, xx$p1, xx$p2)}
     if(specs$prior == 0){
       # Uniform
+      minx <- min(xx$p1, xx$p)
+      maxx <- max(xx$p2, xx$p)
       g <- plot_distribution(fun = dunif,
-                             xlim = c(xx$p1, xx$p2),
+                             xlim = c(minx, maxx),
                              title = xx$nm,
                              alpha = 0.9,
-                             param_lst = list(min = xx$p1, max = xx$p2),
+                             param_lst = list(min = minx, max = maxx),
                              show_mean_line = FALSE,
                              show_sd_lines = FALSE)
       if(!priors_only){
@@ -141,8 +143,10 @@ plot_priors_posts_mcmc <- function(model,
       }
     }else if(specs$prior == 1){
       # Normal
+      minx <- min(-3, xx$p)
+      maxx <- max(3, xx$p)
       g <- plot_distribution(fun = dnorm,
-                             xlim = c(-3, 3),
+                             xlim = c(minx, maxx),
                              title = xx$nm,
                              alpha = 0.9,
                              param_lst = list(mean = xx$p1, sd = xx$p2),
@@ -175,9 +179,9 @@ plot_priors_posts_mcmc <- function(model,
                          alpha = 0.5,
                          bins = 30)
       }
-    }else if(specs$prior %in% 3:4){
+    }else if(specs$prior == 3){
       # Beta
-      g <- plot_distribution(fun = ifelse(specs$prior == 3, dbeta, dgamma),
+      g <- plot_distribution(fun = dbeta,
                              xlim = c(0.5, 1),
                              title = xx$nm,
                              alpha = 0.9,
@@ -193,7 +197,28 @@ plot_priors_posts_mcmc <- function(model,
                          alpha = 0.5,
                          bins = 30)
       }
+    }else if(specs$prior == 4){
+      # Gamma
+      minx <- min(0, xx$p)
+      maxx <- max(5, xx$p)
+      g <- plot_distribution(fun = dgamma,
+                             xlim = c(minx, maxx),
+                             title = xx$nm,
+                             alpha = 0.9,
+                             param_lst = list(shape = xx$p1, scale = xx$p2),
+                             show_mode_line = TRUE)
+      if(!priors_only){
+        g_dat <- ggplot_build(g)
+        ymax <- max(g_dat$data[[1]]$ymax)
+        g <- g +
+          geom_histogram(data = data.frame(xx$p), aes(x = xx.p, y = ..ncount.. * ymax),
+                         color = "black",
+                         fill = "khaki1",
+                         alpha = 0.5,
+                         bins = 30)
+      }
     }
+
     g
   })
 
