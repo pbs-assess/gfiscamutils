@@ -3,6 +3,7 @@
 #' @param model An iscam model object (class [mdl_cls])
 #'
 #' @return A [cowplot::plot_grid()] of [ggplot2::ggplot()] box plots
+#' @importFrom ggplot2 geom_histogram
 #' @export
 plot_ref_points <- function(model,
                             ref_pts = c("sbo",
@@ -16,7 +17,9 @@ plot_ref_points <- function(model,
                                          expression(italic(MSY)[1]),
                                          expression(italic(MSY)[2]),
                                          expression(italic(UMSY)[1]),
-                                         expression(italic(UMSY)[2]))){
+                                         expression(italic(UMSY)[2])),
+                            color = "black",
+                            fill = "steelblue"){
 
   ref_pts_syms <- syms(ref_pts)
 
@@ -31,7 +34,8 @@ plot_ref_points <- function(model,
     j <- bind_cols(k, j)
     names(j)[2] <- "value"
     ggplot(j, aes(x = value)) +
-      ggplot2::geom_histogram() +
+      geom_histogram(color = color,
+                     fill = fill) +
       expand_limits(x = 0) +
       theme(plot.title = element_text(hjust = 0.5)) +
       ylab("") +
