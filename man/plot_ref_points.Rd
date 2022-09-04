@@ -10,6 +10,7 @@ plot_ref_points(
   ref_desc = c(expression(italic(SB)[0]), expression(italic(B)[MSY]),
     expression(italic(MSY)[1]), expression(italic(MSY)[2]), expression(italic(UMSY)[1]),
     expression(italic(UMSY)[2])),
+  color = "black",
   fill = "steelblue"
 )
 }
