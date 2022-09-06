@@ -1,3 +1,23 @@
+#' Replace gear names in objects in an iSCAM output list, from an RDS file
+#' and re-save the file
+#'
+#' @param fn The RDS file to modify
+#' @param ... Arguments passed to [replace_gear_names()]
+#'
+#' @return Nothing
+#' @export
+replace_gear_name_and_save <- function(fn, ...){
+
+  if(!file.exists(fn)){
+    stop("The file `", fn, "` does not exist", call. = FALSE)
+  }
+
+  model <- readRDS(fn)
+  model <- replace_gear_names(model, ...)
+  saveRDS(model, fn)
+  invisible()
+}
+
 #' Change the gear names in already-loaded models
 #'
 #' @description
