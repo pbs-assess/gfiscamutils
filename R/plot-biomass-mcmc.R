@@ -378,6 +378,12 @@ plot_biomass_mcmc <- function(models,
   }
 
   if(!rel && show_bo){
+    # If the upper bound of the line is past the upper bound of the plot,
+    # the line will fail to plot so modify the line limit in the data
+    tso_quants <- tso_quants |>
+      mutate(!!sym(quants[3]) := ifelse(!!sym(quants[3]) > upper_bound,
+                                        upper_bound,
+                                        !!sym(quants[3])))
     g <- g +
       geom_pointrange(data = tso_quants, aes(color = model))
   }
