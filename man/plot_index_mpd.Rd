@@ -13,7 +13,7 @@ plot_index_mpd(
   end_year = 2021,
   append_base_txt = NULL,
   legend_title = "Models",
-  palette = "Paired",
+  palette = iscam_palette,
   base_color = "black",
   dodge = 0.3,
   index_line_width = 0.5,

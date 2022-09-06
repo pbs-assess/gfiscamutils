@@ -3,6 +3,9 @@ mdl_cls <- "iscam_model"
 mdl_lst_cls <- "iscam_model_list"
 mdl_grp_cls <- "iscam_model_group"
 
+# Colors
+iscam_palette <- "Dark2"
+
 # iscam files with names that don't change depending on model
 rep.file <- "iscam.rep"
 par.file <- "iscam.par"
@@ -47,12 +50,12 @@ output.files <- c(rep.file,
                   "mcmc",
                   "sims")
 
-## iscam program filenames
+# iscam program filenames
 iscam.exe.file <- "iscam.exe"
 iscam.starter.file <- "iscam.dat"
 retro.dir <- "retrospectives"
 
-## Model run command line outputs
+# Model run command line outputs
 log.file <-  "runoutput.log"
 .dos.pipe.stdout <- "1>"
 .dos.pipe.stderr <- "2>&1"
@@ -67,6 +70,9 @@ dos.append.to.log <- paste(.dos.append.stdout, log.file, .dos.append.stderr)
 use_data(mdl_cls, overwrite = TRUE)
 use_data(mdl_lst_cls, overwrite = TRUE)
 use_data(mdl_grp_cls, overwrite = TRUE)
+
+use_data(iscam_palette, overwrite = TRUE)
+
 use_data(rep.file, overwrite = TRUE)
 use_data(par.file, overwrite = TRUE)
 use_data(mcmc.file, overwrite = TRUE)
@@ -87,6 +93,7 @@ use_data(mcmc.proj.file, overwrite = TRUE)
 use_data(mpd.proj.file, overwrite = TRUE)
 use_data(output.files, overwrite = TRUE)
 use_data(retro.dir, overwrite = TRUE)
+
 use_data(iscam.exe.file, overwrite = TRUE)
 use_data(iscam.starter.file, overwrite = TRUE)
 use_data(retro.dir, overwrite = TRUE)

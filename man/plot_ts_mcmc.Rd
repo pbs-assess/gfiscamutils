@@ -8,7 +8,7 @@ plot_ts_mcmc(
   models,
   quant_df = "sbt",
   facet_wrap_var = c("none", "sex", "gear"),
-  palette = "Paired",
+  palette = iscam_palette,
   base_color = "black",
   legend_title = ifelse(fr(), "Modèles", "Models"),
   x_label = ifelse(fr(), "Année", "Year"),

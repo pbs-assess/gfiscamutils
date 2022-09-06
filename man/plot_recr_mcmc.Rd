@@ -15,7 +15,7 @@ plot_recr_mcmc(
   point_size = 2,
   ro_ribbon = TRUE,
   ro_alpha = 0.3,
-  palette = "Paired",
+  palette = iscam_palette,
   base_color = "black",
   r_dodge = 0.1,
   x_space = 0.5,

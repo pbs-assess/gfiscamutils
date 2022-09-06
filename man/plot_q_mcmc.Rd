@@ -9,7 +9,7 @@ plot_q_mcmc(
   gear = 1,
   probs = c(0.025, 0.5, 0.975),
   base_color = "black",
-  palette = "Paired",
+  palette = iscam_palette,
   ci_type = c("both", "line", "ribbon"),
   ci_linetype = c("dotted", "solid", "dashed", "dotdash", "longdash", "twodash"),
   ci_color = "red",

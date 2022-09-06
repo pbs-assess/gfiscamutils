@@ -36,6 +36,14 @@ NULL
 #' Model lists are assigned this class in [model_setup()]
 "mdl_grp_cls"
 
+#' The iSCAM model palette to use for plots by default
+#'
+#' @description
+#' This variable is the default palette to use for all plots in this
+#' package. It must be defined as one of the list given by
+#' [RColorBrewer::brewer.pal.info]
+"iscam_palette"
+
 # from: https://github.com/jennybc/googlesheets/blob/master/R/googlesheets.R
 # quiets concerns of R CMD check re: the .'s that appear in pipelines
 if(getRversion() >= "2.15.1") utils::globalVariables(c("."))
