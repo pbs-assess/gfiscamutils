@@ -19,13 +19,13 @@ calc_logs <- function(mc,
                                      "^q_gear[1-9]+$")){
 
   nm <- colnames(mc)
-  grp <- lapply(log.params,
-                function(x){
-                  grep(x, nm)})
-  inds.lst <- grp[sapply(grp,
-                         function(x){
-                           length(x) > 0})]
-  inds <- unique(do.call(c, inds.lst))
+
+  inds <- map(log.params, ~{
+    grep(.x, nm)
+  }) %>%
+    `[`(lengths(.) > 0) |>
+    unlist()
+
   colnames(mc)[inds] <- paste0("log_", colnames(mc)[inds])
   mc[,inds] <- apply(mc[,inds],
                      2,
