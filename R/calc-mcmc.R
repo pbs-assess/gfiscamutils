@@ -32,7 +32,7 @@ calc_mcmc <- function(model,
   if(class(probs) != "numeric"){
     stop("`probs` must be a numeric vector")
   }
-  if(any(probs < 0 | probs > 1)){
+  if(any(probs < 0 || probs > 1)){
     stop("`probs` values must all be between 0 and 1")
   }
   if(probs[1] >= probs[2] || probs[2] >= probs[3]){
@@ -67,6 +67,9 @@ calc_mcmc <- function(model,
   quantify <- function(mc_d, mpd_d = NULL){
     # Apply the quantile function to all columns in a data frame and bind
     # the MPD value
+    mc_d <- mc_d |>
+      as_tibble() |>
+      map_df(~{as.numeric(.x)})
     j <- apply(mc_d, 2, quantile, prob = probs)
     if(!is.null(mpd_d)){
       j <- rbind(j, mpd_d)
@@ -229,6 +232,9 @@ calc_mcmc <- function(model,
 
   if(load_proj){
     # Burn in and calculate quantiles for each TAC level
+    mc$proj <- distinct(mc$proj) |>
+      filter(TAC != "TAC")
+
     out$proj <- mc$proj %>%
       split(~TAC) %>%
       map(~{mcmc_thin(.x, burnin = burnin, thin = thin)})
