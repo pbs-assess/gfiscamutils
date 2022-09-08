@@ -21,7 +21,7 @@ plot_recr_mcmc(
   x_space = 0.5,
   append_base_txt = NULL,
   ind_letter = NULL,
-  leg_loc = NULL,
+  leg_loc = c(1, 1),
   probs = c(0.025, 0.5, 0.975),
   text_title_size = 12,
   angle_x_labels = FALSE,
