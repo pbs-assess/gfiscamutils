@@ -16,6 +16,7 @@ tex <- function(text){
 #' @param paths A vector of paths to replace in the files. Must be the
 #' same length as `model_fns`
 #'
+#' @importFrom purrr walk2
 #' @export
 modify_model_path <- function(model_fns, paths){
 
@@ -27,10 +28,11 @@ modify_model_path <- function(model_fns, paths){
     stop("`model_fns` and `paths` must be the same length", call. = FALSE)
   }
 
-  map2(model_fns, paths, function(fn, pth){
+  walk2(model_fns, paths, function(fn, pth){
     if(file.exists(fn)){
       model <- readRDS(fn)
       model$path <- pth
+      model$mcmcpath <- file.path(pth, "mcmc")
       saveRDS(model, fn)
       message("Updated path for file '", fn, "'\n")
     }else{
