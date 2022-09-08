@@ -69,13 +69,19 @@ table_decisions <- function(model,
 
   proj <- model$mcmccalcs$proj
   tab <- map(proj, ~{
-    out <- c(.x$TAC[1],
-             length(which(.x[, b_ey] < bo_refvals[[1]])) / nrow(.x),
-             length(which(.x[, b_ey] < bo_refvals[[2]])) / nrow(.x),
-             length(which(.x[, b_ey] < bmsy_refvals[[1]])) / nrow(.x),
-             length(which(.x[, b_ey] < bmsy_refvals[[2]])) / nrow(.x),
-             length(which(.x[, b_ey] < .x[, b_ey_minus1])) / nrow(.x))
-    enframe(out) %>%
+
+    x <- .x |>
+      as_tibble() |>
+      map_df(~{if(is.character(.x)) as.numeric(.x) else .x})
+
+    out <- c(x$TAC[1],
+             length(which(x[, b_ey] < bo_refvals[[1]])) / nrow(x),
+             length(which(x[, b_ey] < bo_refvals[[2]])) / nrow(x),
+             length(which(x[, b_ey] < bmsy_refvals[[1]])) / nrow(x),
+             length(which(x[, b_ey] < bmsy_refvals[[2]])) / nrow(x),
+             length(which(x[, b_ey] < x[, b_ey_minus1])) / nrow(x))
+
+    enframe(out) |>
       mutate(name = c("TAC",
                       latex.mlc(c(paste0("P(B\\textsubscript{", end_yr, "}<"),
                                   paste0(bo_refpts[1], "B\\textsubscript{0})")),
@@ -91,11 +97,11 @@ table_decisions <- function(model,
                                 make.bold = bold_header),
                       latex.mlc(c(paste0("P(B\\textsubscript{", end_yr, "}<"),
                                   paste0("B\\textsubscript{", end_yr_minus1, "})")),
-                                make.bold = bold_header))) %>%
+                                make.bold = bold_header))) |>
                pivot_wider(names_from = "name", values_from = "value")
-  }) %>%
-    bind_rows() %>%
-    mutate_at(.vars = vars(-TAC), ~{f(.x, digits)}) %>%
+  }) |>
+    bind_rows() |>
+    mutate_at(.vars = vars(-TAC), ~{f(.x, digits)}) |>
     mutate(TAC = f(TAC, 0))
 
   if(ret_df){
