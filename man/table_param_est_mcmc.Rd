@@ -5,8 +5,7 @@
 \title{Create a table of parameter estimates for iSCAM models}
 \usage{
 table_param_est_mcmc(
-  models,
-  type = c("median", "ci"),
+  model,
   digits = 2,
   probs = c(0.025, 0.5, 0.975),
   model_col_widths = NULL,
@@ -14,8 +13,7 @@ table_param_est_mcmc(
 )
 }
 \arguments{
-\item{type}{Use 'median' to show median parameter values or 'ci' for a
-dash-separated range for the credible interval}
+\item{model}{An iscam model object (class \link{mdl_cls})}
 
 \item{digits}{Number of decimal places for the values in the table}
 
@@ -26,8 +24,6 @@ different quantile levels}
 \item{model_col_widths}{Widths for columns, except the Parameter column}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
-
-\item{model}{An iscam model object (class \link{mdl_cls})}
 }
 \value{
 A \code{\link[csasdown:csas_table]{csasdown::csas_table()}}

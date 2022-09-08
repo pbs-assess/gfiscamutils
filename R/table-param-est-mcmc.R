@@ -4,8 +4,6 @@
 #' Create a table parameter estimates and priors for iSCAM models
 #'
 #' @param model An iscam model object (class [mdl_cls])
-#' @param type Use 'median' to show median parameter values or 'ci' for a
-#' dash-separated range for the credible interval
 #' @param digits Number of decimal places for the values in the table
 #' @param probs A 3-element vector of probabilities that appear in the output
 #' data frames. This is provided in case the data frames have more than three
@@ -15,22 +13,14 @@
 #'
 #' @return A [csasdown::csas_table()]
 #' @export
-table_param_est_mcmc <- function(models,
-                                 type = c("median", "ci"),
+table_param_est_mcmc <- function(model,
                                  digits = 2,
                                  probs = c(0.025, 0.5, 0.975),
                                  model_col_widths = NULL,
                                  ...){
 
-  type <- match.arg(type)
-
-  if(is_iscam_model(models)){
-    models <- list(models)
-    class(models) <- mdl_lst_cls
-  }
-
-  if(!is_iscam_model_list(models)){
-    stop("`models` does not have class `gfiscamutils::mdl_lst_cls`.",
+  if(!is_iscam_model(model)){
+    stop("`model` does not have class `gfiscamutils::mdl_cls`.",
          call. = FALSE)
   }
 
@@ -40,130 +30,142 @@ table_param_est_mcmc <- function(models,
          call. = FALSE)
   }
 
-  param_col_name <- ifelse(fr(), "Paramètre", "Parameter")
-  val_col_name <- ifelse(fr(), "Valeur", "Value")
-
   # Match the given probs with their respective quant columns
   prob_cols <- paste0(prettyNum(probs * 100), "%")
   # In case the decimals have been changed to commas, change them back
   prob_cols <- gsub(",", ".", prob_cols)
 
-  tab_lst <- imap(models, ~{
-    j <- .x$mcmccalcs$params_quants |>
-      t() |>
-      as_tibble(rownames = "param")
+  params_quants <- model$mcmccalcs$params_quants |>
+    t() |>
+    as_tibble(rownames = "param")
 
-    quants <- imap_chr(prob_cols, ~{
-      mtch <- grep(.x, names(j), value = TRUE)
-      if(!length(mtch)){
-        stop("One of the values in `probs` does not appear in the MCMC output data\n",
-             .x, call. = FALSE)
-      }
-      mtch
-    })
 
-    change_param_names <- function(df){
-      # Change q's to have names instead of numbers because each model has different
-      # numbers for names
-      q_real_nms <- .x$dat$index_gear_names
-      q_inds <- grep("^q_gear", df$param)
-      q_param_nms <- df[q_inds, "param"] |> pull()
-      df[q_inds, "param"] <- paste0("q_{",
-                                    q_real_nms[as.numeric(gsub("q_gear([0-9]+)",
-                                                               "\\1", q_param_nms))],
-                                    "}")
-      # Change sel's to have names instead of numbers because each model has different
-      # numbers for names
-      sel_real_nms <- .x$dat$gear_names
-      sel_inds <- grep("^sel_", df$param)
-      sel_param_nms <- j[sel_inds, "param"] |> pull()
-      pat <- "sel_(age|sd)50_(male|female)_gear([0-9]+)"
-      age_sd <- gsub(pat, "\\1", sel_param_nms)
-      sex <- gsub(pat, "\\2", sel_param_nms)
-      gear <- sel_real_nms[as.numeric(gsub(pat, "\\3", sel_param_nms))]
-      gear <- gear[!is.na(gear)]
-      df[sel_inds, "param"] <- paste0("sel_", age_sd, "_", sex, "_{", gear, "}")
-      df
+  sel_pat <- "^sel_(age|sd)50_(male|female)_gear([0-9]+)_block([0-9]+)$"
+
+  params_quants <- params_quants |>
+    mutate(is_selex = ifelse(grepl("^sel", param),
+                             TRUE,
+                             FALSE))
+
+  year_range <- paste0(model$dat$start.yr, "-", model$dat$end.yr)
+
+  non_selex_df <- params_quants |>
+    filter(!is_selex) |>
+    select(-is_selex) |>
+    mutate(gear = "--", sex = "--", `Year range` = year_range)
+
+  # Deal with the M parameters
+  m_inds <- grep("^m_sex[0-2]*", non_selex_df$param)
+  if(length(m_inds)){
+    non_selex_df <- non_selex_df |>
+      mutate(sex = ifelse(param == "m_sex1",
+                          "male",
+                          sex),
+             sex = ifelse(param == "m_sex2",
+                          "female",
+                          sex),
+             param = ifelse(param == "m_sex1",
+                            "m1",
+                            param),
+             param = ifelse(param == "m_sex2",
+                            "m2",
+                            param))
+
+    m_param_nms <- non_selex_df |>
+      filter(grepl("^m[0-9]+$", param)) |>
+      pull(param)
+    m_sex_inds <- as.numeric(gsub("m([0-9]+)", "\\1", m_param_nms))
+  }
+  # Deal with q parameters
+  q_real_nms <- model$dat$index_gear_names
+  q_inds <- grep("^q_gear", non_selex_df$param)
+  if(length(q_inds)){
+    q_param_nms <- non_selex_df |>
+      filter(grepl("^q_gear", param)) |>
+      pull(param)
+    q_gear_inds <- as.numeric(gsub("q_gear([0-9]+)", "\\1", q_param_nms))
+    non_selex_df[q_inds, "gear"] <- q_real_nms[q_gear_inds]
+  }
+  # Deal with MSY parameters
+  flt_real_nms <- model$dat$fleet_gear_names
+  flt_inds <- grep("fleet", non_selex_df$param)
+  if(length(flt_inds)){
+    flt_param_nms <- non_selex_df |>
+      filter(grepl("fleet", param)) |>
+      pull(param)
+    flt_gear_inds <- as.numeric(gsub(".*_fleet([0-9]+)$", "\\1", flt_param_nms))
+    non_selex_df[flt_inds, "gear"] <- flt_real_nms[flt_gear_inds]
+  }
+  # Deal with selectivity parameters
+  non_selex_df <- non_selex_df |>
+    mutate(param = get_fancy_names(param))
+
+  selex_df <- params_quants |>
+    filter(is_selex) |>
+    select(-is_selex) |>
+    mutate(gear = gear_names[as.numeric(gsub(sel_pat, "\\3", param))]) |>
+    mutate(sex = gsub(sel_pat, "\\2", param)) |>
+    mutate(block = as.numeric(gsub(sel_pat, "\\4", param))) |>
+    mutate(gear_num = as.numeric(gsub(sel_pat, "\\3", param)))
+
+  sel_nms <- selex_df$param
+
+  block_year_ranges <- model$mcmccalcs$selest_quants |>
+    select(gear, block, start_year, end_year) |>
+    distinct() |>
+    mutate(`Year range` = paste0(start_year, "-", end_year)) |>
+    select(-c(start_year, end_year))
+
+  selex_df <- selex_df |>
+    left_join(block_year_ranges, by = c("gear", "block")) |>
+    mutate(param = gsub("^sel_(age|sd)50(.*)$", "\\1", param))
+
+  selex_df <- selex_df |>
+    mutate(param = ifelse(param =="age",
+                          paste0("$\\hat{a}_\\mathrm{", gear_num, ",", substr(sex, 1, 1), ",", block, "}$"),
+                          ifelse(param == "sd",
+                                 paste0("$\\hat{\\gamma}_\\mathrm{", gear_num, ",", substr(sex, 1, 1), ",", block, "}$"),
+                                 param))) |>
+    select(-gear_num) |>
+    select(-block)
+
+  params_quants <- non_selex_df |>
+    bind_rows(selex_df) |>
+    select(param, gear, sex, `Year range`, everything())
+
+  nms <- names(params_quants)
+
+  nms[1:3] <- c(ifelse(fr(), "Paramètre", "Parameter"),
+                ifelse(fr(), "Engrenage", "Gear"),
+                ifelse(fr(), "Sexe", "Sex"))
+
+  if(fr()){
+    nms <- gsub("%", " %", nms)
+  }
+  names(params_quants) <- nms
+
+  quants <- imap_chr(prob_cols, ~{
+    mtch <- grep(.x, names(params_quants), value = TRUE)
+    if(!length(mtch)){
+      stop("One of the values in `probs` does not appear in the MCMC output data\n",
+           .x, call. = FALSE)
     }
-
-    median_df <<- j |>
-      mutate(val = f(!!sym(quants[2]), digits)) |>
-      select(param, val) |>
-      change_param_names()
-    ci_df <<- j |>
-      mutate(val = paste0(trimws(f(!!sym(quants[1]), digits)),
-                          "-",
-                          trimws(f(!!sym(quants[3]), digits)))) |>
-      select(param, val) |>
-      change_param_names()
-
-    if(type == "median" || length(models) == 1){
-      out <- median_df
-    }else{
-      out <- ci_df
-    }
-    out
+    mtch
   })
 
-  # Fetch vector of all parameter names used in all models
-  param_names <- tab_lst |>
-    map(~{
-      .x$param
-    }) |>
-    flatten() |>
-    unique() |>
-    map_chr(~{.x})
-  # Sort the param names, leading params first, then q's then sel's
-  params_q <- grepl("^q_", param_names)
-  params_sel <- grepl("^sel_", param_names)
-  params_lead <- param_names[!(params_q | params_sel)]
-  params_q <- sort(param_names[params_q])
-  params_sel <- sort(param_names[params_sel])
-  tab <- c(params_lead, params_q, params_sel) |>
-    enframe(name = NULL, value = "param")
+  names(params_quants) <- gsub("%", "\\\\%", names(params_quants))
 
-  # Left join them all, one by one
-  for(i in tab_lst){
-    tab <- full_join(tab, i, by = "param")
-  }
-  # Remove some values (non-estimated parameters of calculated values)
-  remove_pat <- "(^s?bo$)|^bmsy$|(^msy_)|(^fmsy)|(^umsy)|^SSB$|^f$"
-  tab <- tab |>
-    filter(!grepl(remove_pat, param))
-  median_df <- median_df |>
-    filter(!grepl(remove_pat, param))
-  ci_df <- ci_df |>
-    filter(!grepl(remove_pat, param))
+  params_quants <-  mutate_if(params_quants, is.numeric, ~{f(., digits)})
 
-  if(length(models) == 1){
-    # Add the credible interval column
-    tab <- full_join(tab, ci_df, by = "param") |>
-      mutate(param = get_fancy_names(param))
-    if(fr()){
-      names(tab) <- c(param_col_name, "Médiane", "Intervalle crédible")
-    }else{
-      names(tab) <- c(param_col_name, "Median", "Credible interval")
-    }
-  }else{
-    # Convert parameter names to fancy names for typesetting
-    tab <- tab |>
-      mutate(param = get_fancy_names(param)) |>
-      rename(!!sym(param_col_name) := param)
-    names(tab)[-1] <- names(models)
-  }
-
-  # Replace NA's in the table with dashes
-  tab[is.na(tab)] <- "--"
-
-  out <- csas_table(tab,
+  out <- csas_table(params_quants,
                     format = "latex",
-                    align = rep("r", ncol(tab)),
-                    col_names_align = rep("r", ncol(tab)),
+                    align = rep("r", ncol(params_quants)),
+                    col_names_align = rep("r", ncol(params_quants)),
                     ...)
 
   if(!is.null(model_col_widths)){
     out <- out |>
-      column_spec(2:ncol(tab), width = model_col_widths)
+      column_spec(2:ncol(params_quants), width = model_col_widths)
   }
 
   out
