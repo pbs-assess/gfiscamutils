@@ -2,20 +2,22 @@
 % Please edit documentation in R/mcmc-thin.R
 \name{mcmc_thin}
 \alias{mcmc_thin}
-\title{Apply burnin and thinning to the MCMC posteriors}
+\title{Apply burnin and thinning to an MCMC posteriors data frame}
 \usage{
 mcmc_thin(mcmc_dat, burnin, thin)
 }
 \arguments{
 \item{mcmc_dat}{A data frame of the MCMC posteriors}
 
-\item{burnin}{The number of samples to burn away from the beginning of the MCMC}
+\item{burnin}{The number of samples to burn away from the beginning of
+the \code{mcmc_dat} data frame}
 
-\item{thin}{The thinning to apply to the MCMC posterior samples}
+\item{thin}{The thinning, or extract every Nth row from \code{mcmc_dat} AFTER
+\code{burnin} has been removed from it}
 }
 \value{
-an mcmc window object (CODA package)
+The modified \code{mcmc_dat} data frame
 }
 \description{
-Apply burnin and thinning to the MCMC posteriors
+Apply burnin and thinning to an MCMC posteriors data frame
 }

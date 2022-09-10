@@ -48,10 +48,10 @@ load_longer <- function(fn,
     stop("Column `", year_colname, "` not found in the file `", fn, "`", call. = FALSE)
   }
 
-  df <- d |>
-    group_by(gear, sex, !!year) |>
-    slice(seq_len(burnin)) |>
-    slice(seq(1, burnin, thin)) |>
+  df <- d %>%
+    group_by(gear, sex, !!year) %>%
+    slice((burnin + 1):nrow(.)) %>%
+    slice(seq(1, nrow(.), thin)) %>%
     ungroup()
 
   if(!is.null(end_yr)){

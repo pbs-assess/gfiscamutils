@@ -271,22 +271,21 @@ get_fancy_expr <- function(name, subst = FALSE){
   # @param nm The parameter name starting with selage or selsd
   # @return The fancy name or `NULL`
   get_sel_name <- function(nm){
-    if(length(grep("selage", nm))){
-      j <- sub("selage", "", nm)
-      sex <- sub("[0-9]+_", "\\1", j)
-      flt <- sub("_female|_male", "\\1", j)
-      sex <- ifelse(sex == "female", "f", "m")
-      sexflt <- paste0(firstup(sex), ",", flt)
-      bquote(hat(italic(a))[.(sexflt)])
-    }else if(length(grep("selsd", nm))){
-      j <- sub("selsd", "", nm)
-      sex <- sub("[0-9]+_", "\\1", j)
-      flt <- sub("_female|_male", "\\1", j)
-      sex <- ifelse(sex == "female", "f", "m")
-      sexflt <- paste0(firstup(sex), ",", flt)
-      bquote(hat(italic(gamma))[.(sexflt)])
+
+    sel_pat <- "^sel(age|sd)([0-9]+)_(male|female)_block([0-9]+)$"
+    is_age <- gsub(sel_pat, "\\1", nm) == "age"
+    is_sd <- gsub(sel_pat, "\\1", nm) == "sd"
+    flt <- gsub(sel_pat, "\\2", nm)
+    sex <- ifelse(gsub(sel_pat, "\\3", nm) == "female", "f", "m")
+    blk <- gsub(sel_pat, "\\4", nm)
+    flt_sex_blk <- paste0(flt, ",", sex, ",", blk)
+
+    if(is_age){
+      bquote(hat(italic(a))[.(flt_sex_blk)])
+    }else if(is_sd){
+      bquote(hat(italic(gamma))[.(flt_sex_blk)])
     }else{
-      NULL
+      "ConvErr"
     }
   }
 
