@@ -30,7 +30,6 @@
 plot_priors_posts_mcmc <- function(model,
                                    param_rm = c("sel",
                                                 "bo",
-                                                "vartheta",
                                                 "tau",
                                                 "sigma"),
                                    priors_only = FALSE,
@@ -112,7 +111,7 @@ plot_priors_posts_mcmc <- function(model,
   g_lst <- imap(post_nms, ~{
     specs <- prior_specs[.y, ]
     prior_fn <- f_nms[[as.numeric(specs$prior + 1)]]
-    xx <- list(p = mc[, .y],
+    xx <- list(p = pull(mc, .y),
                p1 = as.numeric(specs$p1),
                p2 = as.numeric(specs$p2),
                fn = prior_fn,
