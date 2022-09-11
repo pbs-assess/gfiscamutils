@@ -84,7 +84,7 @@ plot_pairs_mcmc <- function(model,
   nms <- imap(names(mc), ~{
     get_fancy_expr(.x, subst = TRUE)
   })
-  mc <- mc[1:50, ]
+
   names(mc) <- nms
 
   # Plot for the panels in the upper triangle of the pairs plot
