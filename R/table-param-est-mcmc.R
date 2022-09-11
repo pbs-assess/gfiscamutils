@@ -9,6 +9,8 @@
 #' data frames. This is provided in case the data frames have more than three
 #' different quantile levels
 #' @param model_col_widths Widths for columns, except the Parameter column
+#' @param ret_df If `TRUE`, return a data frame. If `FALSE` return a
+#' [csasdown::csas_table()]
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
 #' @return A [csasdown::csas_table()]
@@ -17,6 +19,7 @@ table_param_est_mcmc <- function(model,
                                  digits = 2,
                                  probs = c(0.025, 0.5, 0.975),
                                  model_col_widths = NULL,
+                                 ret_df = FALSE,
                                  ...){
 
   if(!is_iscam_model(model)){
@@ -157,6 +160,9 @@ table_param_est_mcmc <- function(model,
 
   params_quants <-  mutate_if(params_quants, is.numeric, ~{f(., digits)})
 
+  if(ret_df){
+    return(params_quants)
+  }
   out <- csas_table(params_quants,
                     format = "latex",
                     align = rep("r", ncol(params_quants)),
