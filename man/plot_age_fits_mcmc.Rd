@@ -17,7 +17,8 @@ plot_age_fits_mcmc(
   ci_alpha = 0.3,
   text_title_size = 12,
   text_title_inc_mdl_nm = FALSE,
-  angle_x_labels = FALSE
+  angle_x_labels = FALSE,
+  show_sample_size_f_only = TRUE
 )
 }
 \arguments{
@@ -53,6 +54,10 @@ name, and make the gear the main title (if \code{text_title_size} is \code{NULL}
 no title will be shown)}
 
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
+
+\item{show_sample_size_f_only}{If \code{TRUE}, show the sample size in the female
+panels only. If \code{FALSE}, show the sample size in both male and female panels.
+Included for cases where the sample size is shared or repeated for both sexes.}
 
 \item{type}{The type of residual plot to create. Options are "age", "year",
 and "birth_year"}

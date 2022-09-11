@@ -33,6 +33,9 @@
 #' 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
 #' is the bottom left corner
 #' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
+#' @param show_sample_size_f_only If `TRUE`, show the sample size in the female
+#' panels only. If `FALSE`, show the sample size in both male and female panels.
+#' Included for cases where the sample size is shared or repeated for both sexes.
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export
@@ -50,7 +53,8 @@ plot_age_fits_mcmc <- function(model,
                                ci_alpha = 0.3,
                                text_title_size = 12,
                                text_title_inc_mdl_nm = FALSE,
-                               angle_x_labels = FALSE){
+                               angle_x_labels = FALSE,
+                               show_sample_size_f_only = TRUE){
 
   ci_type <- match.arg(ci_type)
   ci_linetype <- match.arg(ci_linetype)
@@ -96,7 +100,17 @@ plot_age_fits_mcmc <- function(model,
                         en2fr("Male")))
 
   sample_size <- comps |>
-    distinct(year, sex, sample_size)
+    distinct(year, sex, sample_size) |>
+    mutate(x = 17,
+           y = 0.2,
+           prop = 0, # Not used but necessary to add sample size text to plot
+           sample_size = paste0("n = ", sample_size))
+
+  if(show_sample_size_f_only){
+    sample_size <- sample_size |>
+      mutate(sample_size = ifelse(sex == en2fr("Male"), "", sample_size))
+  }
+
   comps <- comps |>
     select(-sample_size)
 
@@ -190,6 +204,9 @@ plot_age_fits_mcmc <- function(model,
         theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
     }
   }
+
+  # Add sample sizes
+  g <- g + geom_text(sample_size, mapping = aes(x = x, y = y, label = sample_size))
 
   if(angle_x_labels){
     g <- g +
