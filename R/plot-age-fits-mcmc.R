@@ -130,6 +130,8 @@ plot_age_fits_mcmc <- function(model,
       stop("Not all `yrs` exist in the `comps` and `fits` years",
            call. = FALSE)
     }
+    sample_size <- sample_size |>
+      filter(year %in% yrs)
     comps <- comps |>
       filter(year %in% yrs)
     vals <- vals |>
