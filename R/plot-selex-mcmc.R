@@ -9,6 +9,11 @@
 #' @param probs A 3-element vector of probabilities that appear in the output data frames
 #' This is provided in case the data frames have more than three different quantile levels
 #' @param show_maturity If `TRUE`, overlay the maturity ogive on the selectivity plots
+#' @param ages A character vector from 1 to the maximum age to show on
+#' the plot. Defaults to the max age in the model. This may be needed when
+#' The selectivity goes past the maximum age, so that we may see the
+#' selectivity curve
+#' @param breaks A vector representing the tick locations on the x-axis
 #' @param ci_type One of "line", "ribbon", "both" to show the credible interval
 #' @param ci_linetype See `linetype` in [ggplot2]. Only used if `ci_type` is "line" or "both"
 #' @param ci_alpha Opacity between 0 and 1 for the credible intervals ribbons. Only used if
@@ -25,6 +30,8 @@ plot_selex_mcmc <- function(model,
                             gear = NULL,
                             probs = c(0.025, 0.5, 0.975),
                             show_maturity = FALSE,
+                            ages = as.character(model$dat$start.age:model$dat$end.age),
+                            breaks = seq(0, model$dat$end.age, 5),
                             ci_type = c("both", "line", "ribbon"),
                             ci_linetype = c("dotted", "solid",
                                             "dashed", "dotdash",
@@ -35,6 +42,10 @@ plot_selex_mcmc <- function(model,
 
   ci_type <- match.arg(ci_type)
   ci_linetype <- match.arg(ci_linetype)
+
+  if(!is.character(ages)){
+    ages <- as.character(ages)
+  }
 
   if(is_iscam_model_list(model) && length(model) == 1){
     model <- model[[1]]
@@ -54,7 +65,7 @@ plot_selex_mcmc <- function(model,
   }
 
   # Extract selectivity parameters
-  vals <- model$mcmccalcs$selest_quants
+  vals <- model$mcmc$selest
 
   if(is.null(vals)){
     stop("MCMC selectivity estimates not found for this model, see\n",
@@ -88,17 +99,6 @@ plot_selex_mcmc <- function(model,
       filter(gear %in% gear_names[!!gear])
     gear_names <- gear_names[gear]
   }
-  prob_cols <- paste0(prettyNum(probs * 100), "%")
-  quant_vals <- unique(vals$quants)
-  quants <- imap_chr(prob_cols, ~{
-    mtch <- grep(.x, quant_vals, value = TRUE)
-    if(!length(mtch)){
-      stop("One of the values in `probs` does not appear in the MCMC output data: ", .x)
-    }
-    mtch
-  })
-
-  ages <- as.character(model$dat$start.age:model$dat$end.age)
 
   # Rename the parameter columns because the ages columns would
   # have these same names
@@ -125,7 +125,7 @@ plot_selex_mcmc <- function(model,
   # Add age columns with logistic selectivity calculations
   for(i in ages){
     vals <- vals %>%
-      mutate(!!sym(i) := 1 / (1 + exp(-p2 * (as.numeric(i) - p1))))
+      mutate(!!sym(i) := 1 / (1 + exp(-(as.numeric(i) - p1) / p2)))
   }
 
   get_val <- function(d, q){
@@ -139,19 +139,53 @@ plot_selex_mcmc <- function(model,
   }
   vals <- vals %>%
     rename(Sex = sex)
-  lo_vals <- get_val(vals, quants[1]) %>%
-    mutate(lo_value = value) %>%
-    mutate(gear = fct_relevel(gear, gear_names))
-  med_vals <- get_val(vals, quants[2]) %>%
-    mutate(gear = fct_relevel(gear, gear_names))
-  hi_vals <- get_val(vals, quants[3]) %>%
-    mutate(hi_value = value) %>%
-    mutate(gear = fct_relevel(gear, gear_names))
+
+  # Re-order the posteriors by group in order of a_hat smallest to largest
+  gear_lst <- vals |>
+    split(~ gear)
+  vals <- gear_lst |>
+    map_dfr(function(gear_df){
+      sex_lst <- gear_df |>
+        split(~ Sex)
+      sex_lst <- map_dfr(sex_lst, function(sex_df){
+        sex_df[order(sex_df$p1), ]
+      })
+  }) |>
+    select(-c(posterior, block, start_year, end_year, p1, p2)) |>
+    select(gear, Sex, everything())
+
+  num_posts <- nrow(model$mcmc$params)
+  probs <- as.integer(probs * num_posts)
+
+  make_longer <- function(d){
+    d |>
+      pivot_longer(-c(gear, Sex),
+                   names_to = "age",
+                   values_to = "value") |>
+      mutate(age = as.numeric(age))
+  }
+
+  lo_vals <- vals |>
+    group_by(gear, Sex) |>
+    slice(probs[1]) |>
+    make_longer() |>
+    rename(lo_value = value)
+
+  med_vals <- vals |>
+    group_by(gear, Sex) |>
+    slice(probs[2]) |>
+    make_longer()
+
+  hi_vals <- vals |>
+    group_by(gear, Sex) |>
+    slice(probs[3]) |>
+    make_longer() |>
+    rename(hi_value = value)
+
   rib_vals <- lo_vals %>%
     left_join(hi_vals,
-              by = c("gear", "start_year", "end_year", "Sex", "age")) %>%
-    select(-c(p1.x, p1.y, p2.x, p2.y, value.x)) %>%
-    rename(value = value.y)
+              by = c("gear", "Sex", "age")) |>
+    mutate(value = lo_value)
 
   g <- ggplot(med_vals, aes(x = factor(age),
                             y = value,
@@ -162,7 +196,7 @@ plot_selex_mcmc <- function(model,
     geom_point() +
     xlab("Age") +
     ylab("Selectivity") +
-    scale_x_discrete(breaks = seq(0, max(as.numeric(ages)), 5)) +
+    scale_x_discrete(breaks = breaks) +
     scale_color_manual(values = c("red", "blue"))
 
   if(ci_type %in% c("ribbon", "both")){

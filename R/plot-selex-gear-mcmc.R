@@ -8,10 +8,6 @@
 #' @family Selectivity plotting functions
 #'
 #' @param gear The gear number in the model
-#' @param ages A character vector from 1 to the maximum age to show on
-#' the plot. Defaults to the max age in the model. This may be needed when
-#' The selectivity goes past the maximum age, so that we may see the
-#' selectivity curve
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom ggplot2 geom_function
@@ -21,6 +17,7 @@ plot_selex_gear_mcmc <- function(model,
                                  probs = c(0.025, 0.5, 0.975),
                                  show_maturity = FALSE,
                                  ages = as.character(model$dat$start.age:model$dat$end.age),
+                                 breaks = seq(0, model$dat$end.age, 5),
                                  ci_type = c("both", "line", "ribbon"),
                                  ci_linetype = c("dotted", "solid",
                                                  "dashed", "dotdash",
@@ -65,6 +62,13 @@ plot_selex_gear_mcmc <- function(model,
   if(is.null(vals)){
     stop("MCMC selectivity estimates not found, see `model$mcmc$selest` ",
          "which is created in `read_mcmc()` and `load_special()`")
+  }
+
+  # Remove male "estimates" for models with number of sexes == 1. iSCAM outputs the
+  # parameter values even if they were not estimated so they are gibberish
+  if(model$dat$num.sex == 1){
+    vals <- vals %>%
+      filter(sex != 1)
   }
 
   vals <- vals |>
@@ -157,7 +161,7 @@ plot_selex_gear_mcmc <- function(model,
     geom_point() +
     xlab("Age") +
     ylab("Selectivity") +
-    scale_x_discrete(breaks = seq(0, max(as.numeric(ages)), 5)) +
+    scale_x_discrete(breaks = breaks) +
     scale_color_manual(values = c("red", "blue"))
 
   if(ci_type %in% c("ribbon", "both")){

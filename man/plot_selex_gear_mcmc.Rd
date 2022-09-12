@@ -10,6 +10,7 @@ plot_selex_gear_mcmc(
   probs = c(0.025, 0.5, 0.975),
   show_maturity = FALSE,
   ages = as.character(model$dat$start.age:model$dat$end.age),
+  breaks = seq(0, model$dat$end.age, 5),
   ci_type = c("both", "line", "ribbon"),
   ci_linetype = c("dotted", "solid", "dashed", "dotdash", "longdash", "twodash"),
   ci_alpha = 0.3,
@@ -30,6 +31,8 @@ This is provided in case the data frames have more than three different quantile
 the plot. Defaults to the max age in the model. This may be needed when
 The selectivity goes past the maximum age, so that we may see the
 selectivity curve}
+
+\item{breaks}{A vector representing the tick locations on the x-axis}
 
 \item{ci_type}{One of "line", "ribbon", "both" to show the credible interval}
 
