@@ -10,6 +10,7 @@ table_catch(
   by_area = FALSE,
   gear_col_widths = "5em",
   scale_factor = 1000,
+  ret_df = FALSE,
   ...
 )
 }
@@ -25,6 +26,9 @@ table_catch(
 
 \item{scale_factor}{Value to divide all the catches by to make the table
 in tonnes}
+
+\item{ret_df}{If \code{TRUE} return a data frame, if \code{FALSE}, return an
+\code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }
