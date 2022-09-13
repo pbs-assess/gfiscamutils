@@ -13,6 +13,8 @@ set_dirs(
   bridge_models_dirs = NULL,
   sens_models_dir = "02-sens-models",
   sens_models_dirs = NULL,
+  retro_models_dir = "03-retrospective-models",
+  retro_models_dirs = NULL,
   check_dir_exists = TRUE
 )
 }
@@ -36,6 +38,12 @@ contains the sensitivity model directories}
 \item{sens_models_dirs}{A vector of subdirectory names in \code{models_dir/sens_models_dir}
 that each contain an individual iSCAM sensitivity model}
 
+\item{retro_models_dir}{Name of the subdirectory of \code{models_dir} that
+contains the retrospective model directories}
+
+\item{retro_models_dirs}{A vector of subdirectory names in \code{models_dir/retro_models_dir}
+that each contain an individual iSCAM base model retrospective model}
+
 \item{check_dir_exists}{If \code{TRUE}, check to make sure that all directories exist}
 }
 \value{
@@ -45,6 +53,8 @@ The 4th is the full path of the bridge models directory.
 The 5th contains a vector of the full paths to the bridge models which are inside the 4th directory.
 The 6th is the full path of the sensitivity models directory.
 The 7th contains a vector of the full paths to the sensitivity models which are inside the 6th directory.
+The 8th is the full path of the retrospective models directory.
+The 9th contains a vector of the full paths to the retrospectives models which are inside the 8th directory.
 }
 \description{
 Set main directories for the project. Check existence of all directories and report.

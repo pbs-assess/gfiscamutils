@@ -9,6 +9,7 @@ model_setup(
   main_dirs = NULL,
   bridge_models_text = NULL,
   sens_models_text = NULL,
+  retro_models_text = NULL,
   ...
 )
 }
@@ -19,6 +20,9 @@ model_setup(
 model plots, one name for each model, where the list elements represent a group of models}
 
 \item{sens_models_text}{A list of vectors of text strings to show in the legends for sensitivity
+model plots, one name for each model, where the list elements represent a group of models}
+
+\item{retro_models_text}{A list of vectors of text strings to show in the legends for retrospective
 model plots, one name for each model, where the list elements represent a group of models}
 
 \item{...}{Arguments to pass to \code{\link[=create_rds_file]{create_rds_file()}}}
@@ -36,31 +40,33 @@ sensitivity model groups
 \examples{
 \dontrun{
 library(gfiscamutils)
-bridge_models_dirs <- list(c("01-base",
+bridge_models_dirs <- list(c("01-base-2015",
                              "02-bridge-update-data"),
-                           c("01-base",
-                             "03-bridge-update-survey"))
-bridge_models_text <- list(c("base model",
+                           c("03-bridge-update-likelihood",
+                             "04-bridge-update-survey"))
+bridge_models_text <- list(c("base model from 2015",
                              "Add new data"),
-                           c("base model",
+                           c("Use new lieklihood method",
                              "Add new survey index point"))
-sens_models_dirs <- list(c("01-base",
-                           "10-high-m",
+sens_models_dirs <- list(c("10-high-m",
                            "11-low-m"),
-                         c("01-base",
-                           "12-high-sigma-r"))
-sens_models_text <- list(c("base model",
-                           "Increase prior for M",
+                         c("12-high-sigma-r"))
+sens_models_text <- list(c("Increase prior for M",
                            "Decrease prior for M"),
-                         c("base model",
-                           "Increase prior for sigma R"))
+                         c("Increase prior for sigma R"))
 drs <- set_dirs(base_model_dir = "base",
                 bridge_models_dirs = bridge_models_dirs,
                 sens_model_dirs = sens_model_dirs)
-delete_files_ext(drs$models, ext = "rds") # If you want to delete all rds files
+retro_models_dirs <- list(c("01-retrospective-1-year",
+                            "02-retrospective-2-year",
+                            "03-retrospective-3-year"))
+retro_models_text <- list(c("Base model - 1 year",
+                            "Base model - 2 years",
+                            "Base model - 3 years"))
 model_setup <- function(drs,
                         bridge_models_text = bridge_models_text,
                         sens_models_text = sens_models_text,
+                        retro_models_text = retro_models_text,
                         overwrite_rds_files = TRUE)
 }
 }

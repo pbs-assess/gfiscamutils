@@ -13,6 +13,10 @@
 #' contains the sensitivity model directories
 #' @param sens_models_dirs A vector of subdirectory names in `models_dir/sens_models_dir`
 #'  that each contain an individual iSCAM sensitivity model
+#' @param retro_models_dir Name of the subdirectory of `models_dir` that
+#' contains the retrospective model directories
+#' @param retro_models_dirs A vector of subdirectory names in `models_dir/retro_models_dir`
+#'  that each contain an individual iSCAM base model retrospective model
 #' @param check_dir_exists If `TRUE`, check to make sure that all directories exist
 #'
 #' @return A list of seven items, the first two are the same as the input arguments with the same name.
@@ -21,6 +25,8 @@
 #' The 5th contains a vector of the full paths to the bridge models which are inside the 4th directory.
 #' The 6th is the full path of the sensitivity models directory.
 #' The 7th contains a vector of the full paths to the sensitivity models which are inside the 6th directory.
+#' The 8th is the full path of the retrospective models directory.
+#' The 9th contains a vector of the full paths to the retrospectives models which are inside the 8th directory.
 #' @importFrom purrr map_lgl
 #' @export
 set_dirs <- function(nongit_dir = file.path(dirname(here()), paste0(basename(here()), "-nongit")),
@@ -30,6 +36,8 @@ set_dirs <- function(nongit_dir = file.path(dirname(here()), paste0(basename(her
                      bridge_models_dirs = NULL,
                      sens_models_dir = "02-sens-models",
                      sens_models_dirs = NULL,
+                     retro_models_dir = "03-retrospective-models",
+                     retro_models_dirs = NULL,
                      check_dir_exists = TRUE){
 
   stopifnot(!is.null(nongit_dir))
@@ -88,13 +96,35 @@ set_dirs <- function(nongit_dir = file.path(dirname(here()), paste0(basename(her
     })
   }
 
+  stopifnot(!is.null(retro_models_dir))
+  retro_models_dir_full <- file.path(models_dir, retro_models_dir)
+  if(!dir.exists(retro_models_dir_full) && check_dir_exists){
+    stop("Retrospective models directory does not exist:\n",
+         retro_models_dir_full, call. = FALSE)
+  }
+  retro_models_dirs_full <- NULL
+  if(!is.null(retro_models_dirs)){
+    retro_models_dirs_full <- map(retro_models_dirs, ~{
+      x <- file.path(retro_models_dir_full, .x)
+      dir_existence <- map_lgl(x, ~{dir.exists(.x)})
+      if(!all(dir_existence) && check_dir_exists){
+        stop("Some Retrospective model directories do not exist:\n",
+             paste0(x[!dir_existence], collapse = "\n"),
+             call. = FALSE)
+      }
+      c(base_model_dir_full, x)
+    })
+  }
+
   list(nongit_dir = nongit_dir,
        models_dir = models_dir,
        base_model_dir = base_model_dir_full,
        bridge_models_dir = file.path(models_dir, bridge_models_dir),
        bridge_models_dirs = bridge_models_dirs_full,
        sens_models_dir = file.path(models_dir, sens_models_dir),
-       sens_models_dirs = sens_models_dirs_full)
+       sens_models_dirs = sens_models_dirs_full,
+       retro_models_dir = file.path(models_dir, retro_models_dir),
+       retro_models_dirs = retro_models_dirs_full)
 }
 
 #' Load models and set up lists and classes for the base model, bridge model groups, and
@@ -104,6 +134,8 @@ set_dirs <- function(nongit_dir = file.path(dirname(here()), paste0(basename(her
 #' @param bridge_models_text A list of vectors of text strings to show in the legends for bridge
 #' model plots, one name for each model, where the list elements represent a group of models
 #' @param sens_models_text A list of vectors of text strings to show in the legends for sensitivity
+#' model plots, one name for each model, where the list elements represent a group of models
+#' @param retro_models_text A list of vectors of text strings to show in the legends for retrospective
 #' model plots, one name for each model, where the list elements represent a group of models
 #' @param ... Arguments to pass to [create_rds_file()]
 #'
@@ -117,36 +149,39 @@ set_dirs <- function(nongit_dir = file.path(dirname(here()), paste0(basename(her
 #' @examples
 #' \dontrun{
 #' library(gfiscamutils)
-#' bridge_models_dirs <- list(c("01-base",
+#' bridge_models_dirs <- list(c("01-base-2015",
 #'                              "02-bridge-update-data"),
-#'                            c("01-base",
-#'                              "03-bridge-update-survey"))
-#' bridge_models_text <- list(c("base model",
+#'                            c("03-bridge-update-likelihood",
+#'                              "04-bridge-update-survey"))
+#' bridge_models_text <- list(c("base model from 2015",
 #'                              "Add new data"),
-#'                            c("base model",
+#'                            c("Use new lieklihood method",
 #'                              "Add new survey index point"))
-#' sens_models_dirs <- list(c("01-base",
-#'                            "10-high-m",
+#' sens_models_dirs <- list(c("10-high-m",
 #'                            "11-low-m"),
-#'                          c("01-base",
-#'                            "12-high-sigma-r"))
-#' sens_models_text <- list(c("base model",
-#'                            "Increase prior for M",
+#'                          c("12-high-sigma-r"))
+#' sens_models_text <- list(c("Increase prior for M",
 #'                            "Decrease prior for M"),
-#'                          c("base model",
-#'                            "Increase prior for sigma R"))
+#'                          c("Increase prior for sigma R"))
 #' drs <- set_dirs(base_model_dir = "base",
 #'                 bridge_models_dirs = bridge_models_dirs,
 #'                 sens_model_dirs = sens_model_dirs)
-#' delete_files_ext(drs$models, ext = "rds") # If you want to delete all rds files
+#' retro_models_dirs <- list(c("01-retrospective-1-year",
+#'                             "02-retrospective-2-year",
+#'                             "03-retrospective-3-year"))
+#' retro_models_text <- list(c("Base model - 1 year",
+#'                             "Base model - 2 years",
+#'                             "Base model - 3 years"))
 #' model_setup <- function(drs,
 #'                         bridge_models_text = bridge_models_text,
 #'                         sens_models_text = sens_models_text,
+#'                         retro_models_text = retro_models_text,
 #'                         overwrite_rds_files = TRUE)
 #' }
 model_setup <- function(main_dirs = NULL,
                         bridge_models_text = NULL,
                         sens_models_text = NULL,
+                        retro_models_text = NULL,
                         ...){
 
   if(is.null(main_dirs[1])){
@@ -154,28 +189,38 @@ model_setup <- function(main_dirs = NULL,
   }
 
   if(is.null(bridge_models_text[1])){
-    warning("bridge_models_text is NULL. Using bridge model directory names for plot legends")
+    warning("`bridge_models_text` is `NULL`. Using bridge model directory names for plot legends")
     bridge_models_text <- basename(main_dirs$bridge_models_dirs)
-    bridge_models_text <- bridge_models_text %>% map(~{factor(.x, levels = .x)})
+    bridge_models_text <- bridge_models_text |>
+      map(~{factor(.x, levels = .x)})
   }
 
   if(is.null(sens_models_text[1])){
-    warning("sens_models_text is NULL. Using sens model directory names for plot legends")
+    warning("`sens_models_text` is `NULL`. Using sens model directory names for plot legends")
     sens_models_text <- basename(main_dirs$sens_models_dirs)
-    sens_models_text <- sens_models_text %>% map(~{factor(.x, levels = .x)})
+    sens_models_text <- sens_models_text |>
+      map(~{factor(.x, levels = .x)})
+  }
+
+  if(is.null(retro_models_text[1])){
+    warning("`retro_models_text` is `NULL`. Using retro model directory names for plot legends")
+    retro_models_text <- basename(main_dirs$retro_models_dirs)
+    retro_models_text <- retro_models_text |>
+      map(~{factor(.x, levels = .x)})
   }
 
   # model_list is a list of three lists, one for the base model, one for the bridge models,
   # and one for the sensitivity models
   model_list <- list(base_model_groups = list(main_dirs$base_model_dir),
                      bridge_model_groups = main_dirs$bridge_models_dirs,
-                     sens_model_groups = main_dirs$sens_models_dirs)
+                     sens_model_groups = main_dirs$sens_models_dirs,
+                     retro_model_groups = main_dirs$retro_models_dirs)
 
   model_names_list <- list(base_model_groups = ifelse(fr(), "Modèle de base", "Base model"),
                            bridge_model_groups = bridge_models_text,
-                           sens_model_groups = sens_models_text)
+                           sens_model_groups = sens_models_text,
+                           retro_model_groups = retro_models_text)
 
-  #plan("multisession")
   j <- imap(model_list, function(.x, .y, ...){
     models <- NULL
     if(!is.null(.x)){
@@ -206,7 +251,6 @@ model_setup <- function(main_dirs = NULL,
       })
     }
   }, ...)
-  #plan()
 
   base_model <- j[[1]][[1]]
   bridge_grps <- j[[2]]
@@ -217,8 +261,13 @@ model_setup <- function(main_dirs = NULL,
   if(!is.null(sens_grps)){
     class(sens_grps) <- mdl_grp_cls
   }
+  retro_grps <- j[[4]]
+  if(!is.null(retro_grps)){
+    class(retro_grps) <- mdl_grp_cls
+  }
 
   list(base_model = base_model,
        bridge_grps = bridge_grps,
-       sens_grps = sens_grps)
+       sens_grps = sens_grps,
+       retro_grps = retro_grps)
 }
