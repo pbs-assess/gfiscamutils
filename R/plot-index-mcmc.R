@@ -230,6 +230,9 @@ plot_index_mcmc <- function(models,
   has_dcpue <- "Discard CPUE" %in% unique(surv_indices$survey_name)
   only_dcpue <- has_dcpue && length(unique(surv_indices$survey_name)) == 1
 
+  # Remove zeroes from the fit data frame
+  vals <- vals |> filter(biomass != 0 & lowerci != 0 & upperci !=0)
+
   if(type == "fits"){
     g <- ggplot(surv_indices,
                 aes(x = year, y = biomass)) +

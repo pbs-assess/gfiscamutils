@@ -1,3 +1,20 @@
+#' Translate from English to French
+#'
+#' @details
+#' If options(french) has been set, the translation will happen,
+#' If options(french) is `NULL` or `FALSE`, no translation will happen
+#'
+#' @param x A character vector to translate
+#' @param ... Arguments to pass to [rosettafish::en2fr()]
+#'
+#' @return The possibly translated character vector
+#' @importFrom rosettafish en2fr
+#' @importFrom csasdown fr
+#' @export
+tr <- function(x, ...){
+  en2fr(x, translate = fr(), ...)
+}
+
 #' Create an expression from a string that may have a latex string in it
 #'
 #' @param text The string
