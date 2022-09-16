@@ -128,6 +128,8 @@ plot_index_mcmc <- function(models,
     surv_names <- surv_names[gear]
   }
 
+  surv_abbrevs[surv_abbrevs == "HS MSA"] <- "OTHER HS MSA"
+
   # Add survey names to the table with a left join by survey_abbrev
   surv_abbrevs_df <- surv_abbrevs %>%
     enframe(name = NULL)
@@ -136,9 +138,11 @@ plot_index_mcmc <- function(models,
   surv_df <- surv_abbrevs_df %>%
     cbind(surv_names_df) %>%
     `names<-`(c("survey_abbrev", "survey_name"))
-  surv_index_df <- surv_index %>%
-    filter(year %in% start_year:end_year) %>%
-    filter(survey_abbrev %in% !!surv_abbrevs) %>%
+
+  surv_index_df <- surv_index |>
+    filter(year %in% start_year:end_year) |>
+    filter(survey_abbrev %in% !!surv_abbrevs) |>
+    #filter(grepl(paste(surv_abbrevs, collapse = "|"), survey_abbrev)) %>%
     left_join(surv_df, by = "survey_abbrev")
 
   surv_indices <- map_df(surv_abbrevs, ~{
@@ -176,6 +180,7 @@ plot_index_mcmc <- function(models,
   # Remove any missing indices from the `surv_names` vector and
   # the `surv_indices` data frame
   surv_names <- surv_names[surv_names %in% unique(vals$survey_name)]
+
   surv_indices <- surv_indices %>%
     filter(survey_name %in% unique(vals$survey_name)) %>%
     mutate(survey_name = fct_relevel(survey_name, !!surv_names))
