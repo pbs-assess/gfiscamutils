@@ -1,3 +1,79 @@
+#' Get a vector of values (median, CI interval, and end year) for
+#' a parameter of your choice
+#'
+#' @param model An iSCAM model object as created in [load_iscam_files()]
+#' @param param The name of a parameter
+#' @param digits The number of digits to return in all numerical output
+#'
+#' @return A vector of 3 values, as stated in the decription
+#' @export
+get_parvals <- function(model, param, digits = 0){
+
+  mcmccalcs <- model$mcmccalcs
+  if(param == "bo"){
+    bo <- as_tibble(mcmccalcs$params_quants)$bo
+    med <- f(bo[2], digits)
+    ci <- paste0(f(bo[1], digits),
+                 "--",
+                 f(bo[3], digits),
+                 " (width ",
+                 f(bo[3] - bo[1], digits), ")")
+    endyr <- max(names(as_tibble(mcmccalcs$sbt_quants)))
+  }else{
+    quant_col <- paste0(param, "_quants")
+    if(is.null(mcmccalcs[[quant_col]])){
+      endyr <- NA
+      med <- NA
+      ci <- NA
+    }else{
+      endyr <- max(names(as_tibble(mcmccalcs[[quant_col]])))
+      parm <- as_tibble(mcmccalcs[[quant_col]])
+      end_out <- pull(parm[endyr])
+      med <- f(end_out[2], digits)
+      ci <- paste0(f(end_out[1], digits),
+                   "--",
+                   f(end_out[3], digits),
+                   " (width ",
+                   f(end_out[3] - end_out[1], digits), ")")
+
+    }
+  }
+  c(med = med, ci = ci, endyr = endyr)
+}
+
+
+#' Get a set of parameter values from the models within the model group lists
+#'
+#' @param model_grp_lst Example: models$bridge_grps or models$sens_grps
+#' @param remove_first If `TRUE`, remove the first model within each group
+#' (sens groups have base model as the first one)
+#' @param frac_digits The number of digits to report for values less than one
+#' such as depletion
+#' @param large_digits The number of digits to report for large numbers like
+#' spawning biomass or B0
+#'
+#' @return A group list of parameter values
+#' @export
+get_group_parvals <- function(model_grp_lst,
+                              remove_first = FALSE,
+                              frac_digits = 2,
+                              large_digits = 0){
+
+  map(model_grp_lst, function(grp){
+    models <- map2(grp, seq_along(grp), ~{
+      if(.y == 1 && remove_first){
+        return(NULL)
+      }
+      list(bo = get_parvals(.x, param = "bo", digits = large_digits),
+           sbt = get_parvals(.x, param = "sbt", digits = large_digits),
+           depl = get_parvals(.x, param = "depl", digits = frac_digits),
+           m_female = get_parvals(.x, param = "m_female", digits = frac_digits),
+           m_male = get_parvals(.x, param = "m_male", digits = frac_digits))
+    })
+    models[lengths(models) > 1]
+  })
+}
+
 #' Translate from English to French
 #'
 #' @details
