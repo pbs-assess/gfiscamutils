@@ -10,14 +10,15 @@
 get_parvals <- function(model, param, digits = 0){
 
   mcmccalcs <- model$mcmccalcs
-  if(param == "bo"){
-    bo <- as_tibble(mcmccalcs$params_quants)$bo
-    med <- f(bo[2], digits)
-    ci <- paste0(f(bo[1], digits),
+  p_quants <- as_tibble(mcmccalcs$params_quants)
+  if(param %in% names(p_quants)){
+    val <- p_quants[[param]]
+    med <- f(val[2], digits)
+    ci <- paste0(f(val[1], digits),
                  "--",
-                 f(bo[3], digits),
+                 f(val[3], digits),
                  " (width ",
-                 f(bo[3] - bo[1], digits), ")")
+                 f(val[3] - val[1], digits), ")")
     endyr <- max(names(as_tibble(mcmccalcs$sbt_quants)))
   }else{
     quant_col <- paste0(param, "_quants")
@@ -65,10 +66,12 @@ get_group_parvals <- function(model_grp_lst,
         return(NULL)
       }
       list(bo = get_parvals(.x, param = "bo", digits = large_digits),
+           sbo = get_parvals(.x, param = "sbo", digits = large_digits),
            sbt = get_parvals(.x, param = "sbt", digits = large_digits),
            depl = get_parvals(.x, param = "depl", digits = frac_digits),
            m_female = get_parvals(.x, param = "m_female", digits = frac_digits),
-           m_male = get_parvals(.x, param = "m_male", digits = frac_digits))
+           m_male = get_parvals(.x, param = "m_male", digits = frac_digits),
+           h = get_parvals(.x, param = "h", digits = frac_digits))
     })
     models[lengths(models) > 1]
   })
