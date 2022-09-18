@@ -82,7 +82,6 @@ plot_q_mcmc <- function(models,
     flatten() %>%
     map_chr(~{.x}) %>%
     unique()
-  browser()
 
   if(length(surv_names) != length(surv_abbrevs)){
     stop("The total number of unique 'IndexGears' and 'IndexAbbrevs' defined in the data files ",
@@ -102,6 +101,14 @@ plot_q_mcmc <- function(models,
   }
   surv_abbrevs[surv_abbrevs == "HS MSA"] <- "OTHER HS MSA"
 
+  # Add survey names to the table with a left join by survey_abbrev
+  surv_abbrevs_df <- surv_abbrevs %>%
+    enframe(name = NULL)
+  surv_names_df <- surv_names %>%
+    enframe(name = NULL)
+  surv_df <- surv_abbrevs_df %>%
+    cbind(surv_names_df) %>%
+    `names<-`(c("survey_abbrev", "survey_name"))
 
   q_quants <- imap(models, ~{
     j <- .x$mcmccalcs$q_quants %>%
@@ -113,8 +120,16 @@ plot_q_mcmc <- function(models,
     bind_rows %>%
     select(model, everything()) %>%
     mutate(model = as.factor(model)) %>%
-    mutate(gear = as.factor(gear)) %>%
+    rename(survey_abbrev = gear) |>
     mutate(model = fct_relevel(model, names(models)))
+
+  q_quants <- q_quants |>
+    left_join(surv_df, by = "survey_abbrev") |>
+    select(-survey_abbrev) |>
+    mutate(survey_name = factor(survey_name)) |>
+    rename(gear = survey_name) |>
+    select(model, gear, everything()) |>
+    mutate(gear = fct_relevel(gear,  surv_names))
 
   # Match the given probs with their respective quant columns
   prob_cols <- paste0(prettyNum(probs * 100), "%")
@@ -142,7 +157,9 @@ plot_q_mcmc <- function(models,
     xlab(x_label) +
     ylab(y_label) +
     scale_color_manual(values = model_colors) +
-    theme(axis.text.x = element_blank())
+    guides(color = guide_legend(title = legend_title)) +
+    theme(axis.text.x = element_blank(),
+          axis.ticks.x = element_blank())
 
   g <- g +
     geom_pointrange(aes(color = model)) +
