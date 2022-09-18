@@ -16,20 +16,15 @@
 #' @export
 plot_q_mcmc <- function(models,
                         gear = 1,
+                        append_base_txt = NULL,
+                        legend_title = "Models",
                         probs = c(0.025, 0.5, 0.975),
                         base_color = "black",
                         palette = iscam_palette,
-                        ci_type = c("both", "line", "ribbon"),
-                        ci_linetype =  c("dotted", "solid",
-                                         "dashed", "dotdash",
-                                         "longdash", "twodash"),
-                        ci_color = "red",
                         ci_alpha = 0.3,
+                        leg_loc = c(1, 1),
                         text_title_size = 12,
                         angle_x_labels = FALSE){
-
-  ci_type <- match.arg(ci_type)
-  ci_linetype <- match.arg(ci_linetype)
 
   single_model <- FALSE
   if(is_iscam_model(models)){
@@ -58,27 +53,42 @@ plot_q_mcmc <- function(models,
          call. = FALSE)
   }
 
-  max_num_gears <- map_dbl(models, ~{
-    length(.x$mpd$a_obs)
-  }) %>%
-    max()
-  if(any(gear < 1) || any(gear > max_num_gears)){
-    stop("all `gear` values must be between 1 and ", max_num_gears,
-         call. = FALSE)
+  if(!is.null(append_base_txt)){
+    length(append_base_txt) <- length(models)
+    # If `append_base_txt` is shorter than the number of models, append empty strings
+    # for remainder of items
+    append_base_txt[which(is.na(append_base_txt))] <- ""
   }
 
-  if(length(probs) != 3){
-    stop("`probs` has length ", length(probs), " but must be a vector of three values ",
-         "representing lower CI, median, and upper CI")
-  }
+  # Set up model names for the legend/title
+  names(models) <- map_chr(models, ~{
+    as.character(attributes(.x)$model_desc)
+  })
+  names(models) <- paste0(names(models), append_base_txt)
 
+  # surv_abbrev will be in order of the gears in the models
+  surv_abbrev_lst <- map(models, ~{
+    .x$dat$index_abbrevs
+  })
   surv_name_lst <- map(models, ~{
     .x$dat$index_gear_names
   })
+
+  surv_abbrevs <- surv_abbrev_lst %>%
+    flatten() %>%
+    map_chr(~{.x}) %>%
+    unique()
   surv_names <- surv_name_lst %>%
     flatten() %>%
     map_chr(~{.x}) %>%
     unique()
+  browser()
+
+  if(length(surv_names) != length(surv_abbrevs)){
+    stop("The total number of unique 'IndexGears' and 'IndexAbbrevs' defined in the data files ",
+         "for the `models` do not match. It is likely you defined some of these slightly ",
+         "differently in different data files. They must match exactly.")
+  }
 
   if(!is.null(gear)){
     valid_gear_nums <- seq_along(surv_names)
@@ -90,6 +100,8 @@ plot_q_mcmc <- function(models,
     surv_abbrevs <- surv_abbrevs[gear]
     surv_names <- surv_names[gear]
   }
+  surv_abbrevs[surv_abbrevs == "HS MSA"] <- "OTHER HS MSA"
+
 
   q_quants <- imap(models, ~{
     j <- .x$mcmccalcs$q_quants %>%
@@ -134,8 +146,26 @@ plot_q_mcmc <- function(models,
 
   g <- g +
     geom_pointrange(aes(color = model)) +
-    facet_wrap(~gear)
-  #browser()
+    facet_wrap(~gear, scales = "free")
+
+  if(is.null(leg_loc)){
+    g <- g +
+      theme(legend.position = "none")
+    if(single_model){
+      if(!is.null(text_title_size)){
+        g <- g + ggtitle(tex(names(models))) +
+          theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
+      }
+    }
+  }else if(leg_loc[1] == "facet"){
+    g <- g %>% move_legend_to_empty_facet()
+  }else{
+    g <- g +
+      theme(legend.justification = leg_loc,
+            legend.position = leg_loc,
+            legend.background = element_rect(fill = "white", color = "white")) +
+      labs(color = legend_title)
+  }
 
   g
 }
