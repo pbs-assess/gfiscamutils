@@ -1,3 +1,52 @@
+#' Extract the number of parameters estimated in a model
+#'
+#' @details
+#' The number is based on the iSCAM PAR file, with checks in the
+#' control file for positiev (phz) which were means they were estimated
+#' and not fixed
+#'
+#' @param model An iSCAM model object as created in [load_iscam_files()]
+#'
+#' @return The number of estimated parameters
+#' @export
+get_num_params_est <- function(model){
+
+  if(is.null(model$par)){
+    stop("`model$par` is NULL. The PAR file for the model in ",
+         model$path, " was not loaded in correctly",
+         call. = FALSE)
+  }
+  num_pars_lst <- imap(model$par, function(param, param_nm){
+    if(param_nm %in% c("num_params",
+                       "obj_fun_val",
+                       "max_gradient",
+                       "log_m_nodes:")){
+      return(0)
+    }
+
+    if(grepl("^theta", param_nm)){
+      theta_num <- as.numeric(gsub("^theta\\[([0-9]+)\\]:$", "\\1", param_nm))
+      theta_row <- model$ctl$params[theta_num, ]
+      return(as.numeric(theta_row["phz"] > 0))
+    }
+    if(grepl("^sel_par", param_nm)){
+      sel_par_sex <- gsub("^sel_par_(f|m)\\[([0-9]+)\\]:$", "\\1", param_nm)
+      sel_par_num <- as.numeric(gsub("^sel_par_(f|m)\\[([0-9]+)\\]:$", "\\2", param_nm))
+      sel_par_row <- model$ctl$sel[, sel_par_num]
+      if(sel_par_row["estphase"] > 0){
+        sel_pars <- unlist(map(param, ~{strsplit(as.character(trimws(.x)), split = " ")[[1]]}))
+        return(length(sel_pars))
+      }else{
+        return(0)
+      }
+    }
+    pars <- unlist(map(param, ~{strsplit(as.character(trimws(.x)), split = " ")[[1]]}))
+    length(pars)
+  })
+
+  sum(unlist(num_pars_lst[lengths(num_pars_lst) > 0]))
+}
+
 #' Get a vector of values (median, CI interval, and end year) for
 #' a parameter of your choice
 #'
