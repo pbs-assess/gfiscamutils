@@ -36,6 +36,8 @@
 #' @param show_sample_size_f_only If `TRUE`, show the sample size in the female
 #' panels only. If `FALSE`, show the sample size in both male and female panels.
 #' Included for cases where the sample size is shared or repeated for both sexes.
+#' @param sample_size_x The x value (age) to place the sample size label
+#' @param sample_size_y The y value (0-1) to place the sample size label
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export
@@ -54,7 +56,9 @@ plot_age_fits_mcmc <- function(model,
                                text_title_size = 12,
                                text_title_inc_mdl_nm = FALSE,
                                angle_x_labels = FALSE,
-                               show_sample_size_f_only = TRUE){
+                               show_sample_size_f_only = TRUE,
+                               sample_size_x = 17,
+                               sample_size_y = 0.2){
 
   ci_type <- match.arg(ci_type)
   ci_linetype <- match.arg(ci_linetype)
@@ -96,19 +100,19 @@ plot_age_fits_mcmc <- function(model,
     pivot_longer(-c(year, sample_size, sex), names_to = "age", values_to = "prop") |>
     mutate(age = as.numeric(age)) |>
     mutate(sex = ifelse(sex %in% c(0, 2),
-                        en2fr("Female"),
-                        en2fr("Male")))
+                        tr("Female"),
+                        tr("Male")))
 
   sample_size <- comps |>
     distinct(year, sex, sample_size) |>
-    mutate(x = 17,
-           y = 0.2,
+    mutate(x = sample_size_x,
+           y = sample_size_y,
            prop = 0, # Not used but necessary to add sample size text to plot
            sample_size = paste0("n = ", sample_size))
 
   if(show_sample_size_f_only){
     sample_size <- sample_size |>
-      mutate(sample_size = ifelse(sex == en2fr("Male"), "", sample_size))
+      mutate(sample_size = ifelse(sex == tr("Male"), "", sample_size))
   }
 
   comps <- comps |>
@@ -118,8 +122,8 @@ plot_age_fits_mcmc <- function(model,
     filter(tolower(gear) == gear_name) |>
     select(-gear) |>
     mutate(sex = ifelse(sex %in% c(0, 2),
-                        en2fr("Female"),
-                        en2fr("Male")))
+                        tr("Female"),
+                        tr("Male")))
 
   if(!is.null(yrs)){
     if(!any(c("numeric", "integer") %in% class(yrs))){
@@ -189,13 +193,13 @@ plot_age_fits_mcmc <- function(model,
   }
   g <- g +
     facet_grid(year ~ sex) +
-    xlab(en2fr("Age")) +
-    ylab(en2fr("Proportion"))
+    xlab(tr("Age")) +
+    ylab(tr("Proportion"))
 
   if(!is.null(text_title_size)){
     if(text_title_inc_mdl_nm){
       subtitle <- ifelse(model$dat$age_gear_names[gear] %in% model$dat$index_gear_names,
-                         paste(model$dat$age_gear_names[gear], en2fr("Index")),
+                         paste(model$dat$age_gear_names[gear], tr("Index")),
                          model$dat$age_gear_names[gear])
       g <- g + ggtitle(model_desc,
                        subtitle = model$dat$age_gear_names[gear]) +
