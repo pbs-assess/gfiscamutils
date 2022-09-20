@@ -23,6 +23,8 @@ plot_index_mcmc(
   fit_point_size = 2,
   errbar_width = 0.5,
   leg_loc = c(1, 1),
+  leg_size = NULL,
+  leg_text_size = NULL,
   text_title_size = 12,
   angle_x_labels = FALSE
 )
@@ -65,6 +67,11 @@ model}
 \item{leg_loc}{A two-element vector describing the X-Y values between 0 and
 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
 is the bottom left corner}
+
+\item{leg_size}{Legend size from 0-1. Changes all parts of legend}
+
+\item{leg_text_size}{Legend text size. Use in combination with \code{leg_size} to
+make legends fit in non-empty facets}
 
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 }
