@@ -40,8 +40,9 @@ table_param_est_mcmc <- function(model,
 
   params_quants <- model$mcmccalcs$params_quants |>
     t() |>
-    as_tibble(rownames = "param")
-
+    as_tibble(rownames = "param") |>
+    filter(param != "f") |>
+    filter(param != "SSB")
 
   sel_pat <- "^sel_(age|sd)50_(male|female)_gear([0-9]+)_block([0-9]+)$"
 

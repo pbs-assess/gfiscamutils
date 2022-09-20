@@ -263,7 +263,7 @@ plot_index_mcmc <- function(models,
                         ymax = upperci),
                     width = errbar_width,
                     size = fit_line_width) +
-      xlab(en2fr("Year")) +
+      xlab(tr("Year")) +
       ylab(ifelse(has_dcpue,
                   ifelse(only_dcpue,
                          ifelse(fr(), "Indice (kg/heure)", "Index (kg/hr)"),
@@ -291,7 +291,7 @@ plot_index_mcmc <- function(models,
                     size = fit_line_width) +
       facet_wrap(~survey_name,
                  scales = "free_y") +
-      xlab(en2fr("Year")) +
+      xlab(tr("Year")) +
       ylab(ifelse(fr(),
                   "Résidu normalisé logarithmique",
                   "Log standardized residual")) +

@@ -8,7 +8,6 @@
 #' @export
 #' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align latex.perc latex.cmidr
 #' @importFrom xtable xtable
-#' @importFrom rosettafish en2fr
 table_bio_depl <- function(model,
                            syr,
                            digits = 3,
@@ -36,8 +35,8 @@ table_bio_depl <- function(model,
   ## Remove the projection year (last row)
   tab <- tab[-nrow(tab),]
 
-  col.names <- en2fr(colnames(tab), translate, allow_missing = TRUE )
-  col.names[1] <- en2fr("Year", translate)
+  col.names <- tr(colnames(tab))
+  col.names[1] <- tr("Year")
   col.names <- latex.bold(latex.perc(col.names))
   colnames(tab) <- col.names
 
@@ -47,11 +46,11 @@ table_bio_depl <- function(model,
                                latex.amp(),
                                latex.mcol(4,
                                           "c",
-                                          latex.bold(en2fr("Spawning biomass", translate))),
+                                          latex.bold(tr("Spawning biomass", translate))),
                                latex.amp(),
                                latex.mcol(4,
                                           "c",
-                                          latex.bold(en2fr("Depletion", translate))),
+                                          latex.bold(tr("Depletion", translate))),
                                latex.nline,
                                latex.cmidr("2-5", "lr"),
                                " ",

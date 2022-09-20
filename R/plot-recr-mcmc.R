@@ -159,7 +159,7 @@ plot_recr_mcmc <- function(models,
                y = !!sym(quants[2]),
                ymin = !!sym(quants[1]),
                ymax = !!sym(quants[3]))) +
-    xlab(en2fr("Year")) +
+    xlab(tr("Year")) +
     ylab(ifelse(fr(), "Recrutement (millions)", "Recruitment (millions)")) +
     scale_color_manual(values = model_colors)
 

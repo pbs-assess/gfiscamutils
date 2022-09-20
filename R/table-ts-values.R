@@ -105,9 +105,9 @@ table_ts_values_mcmc <- function(models,
   }
 
   rep_num <- length(models) * len_gears
-  names(model_val_df) <- c(en2fr("Year"),
-                           rep(c(en2fr("Median"),
-                                 en2fr("Credible interval")),
+  names(model_val_df) <- c(tr("Year"),
+                           rep(c(tr("Median"),
+                                 tr("Credible interval")),
                                rep_num))
 
   tab <- model_val_df
@@ -116,7 +116,7 @@ table_ts_values_mcmc <- function(models,
   tab[is.na(tab)] <- "--"
 
   if(!is.null(start_yr)){
-    yrs <- tab[en2fr("Year")] |> unlist() |> as.numeric()
+    yrs <- tab[tr("Year")] |> unlist() |> as.numeric()
     if(!start_yr %in% yrs){
       stop("`start_yr` not in the range of years in the model output values",
            call. = FALSE)

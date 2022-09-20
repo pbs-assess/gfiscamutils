@@ -7,13 +7,13 @@
 plot_q_mcmc(
   models,
   gear = 1,
+  append_base_txt = NULL,
+  legend_title = "Models",
   probs = c(0.025, 0.5, 0.975),
   base_color = "black",
   palette = iscam_palette,
-  ci_type = c("both", "line", "ribbon"),
-  ci_linetype = c("dotted", "solid", "dashed", "dotdash", "longdash", "twodash"),
-  ci_color = "red",
   ci_alpha = 0.3,
+  leg_loc = c(1, 1),
   text_title_size = 12,
   angle_x_labels = FALSE
 )
@@ -22,6 +22,11 @@ plot_q_mcmc(
 \item{models}{A list of iscam model objects (class \link{mdl_lst_cls})}
 
 \item{gear}{The number of the gear to plot}
+
+\item{append_base_txt}{A vector of strings to append to the model names for
+display on the plot legend or title}
+
+\item{legend_title}{Title for legend}
 
 \item{probs}{A 3-element vector of probabilities that appear in the output
 data frames. This is provided in case the data frames have more than three
@@ -32,6 +37,10 @@ different quantile levels}
 model}
 
 \item{palette}{A palette value that is in \link[RColorBrewer:ColorBrewer]{RColorBrewer::brewer.pal.info}}
+
+\item{leg_loc}{A two-element vector describing the X-Y values between 0 and
+1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
+is the bottom left corner}
 
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 }

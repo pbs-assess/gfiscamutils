@@ -118,6 +118,7 @@ plot_selex_mcmc <- function(model,
       }
       return(.x)
     })
+
   # Remove NULL list elements (fixed parameters)
   vals <- vals[!sapply(vals, is.null)] %>%
     bind_rows()
@@ -165,6 +166,9 @@ plot_selex_mcmc <- function(model,
       mutate(age = as.numeric(age))
   }
 
+  vals <- vals |>
+    mutate(gear = factor(gear)) |>
+    mutate(gear = fct_relevel(gear, gear_names))
   lo_vals <- vals |>
     group_by(gear, Sex) |>
     slice(probs[1]) |>

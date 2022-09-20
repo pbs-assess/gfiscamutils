@@ -188,9 +188,9 @@ table_param_settings <- function(model,
                            "Normale($0, \\tau$)",
                            "Normal($0, \\tau$)"))
 
-  names(params_out) <- c(en2fr("Parameter"),
-                         en2fr("Number estimated"),
-                         en2fr("Bounds [low, high]"),
+  names(params_out) <- c(tr("Parameter"),
+                         tr("Number estimated"),
+                         tr("Bounds [low, high]"),
                          ifelse(fr(),
                                 "Priorité (moyenne, SD) (valeur unique = fixe)",
                                 "Prior (mean, SD) (single value = fixed)"))

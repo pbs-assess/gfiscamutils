@@ -81,7 +81,7 @@ table_catch <- function(catch_df,
     return(tab)
   }
 
-  names(tab) <- en2fr(names(tab))
+  names(tab) <- tr(names(tab))
 
   out <- csas_table(tab,
                     format = "latex",
@@ -206,9 +206,9 @@ table_catch_fleet <- function(catch_df_lst = NULL,
     header_vec <- c(header_vec, header)
   }
 
-  names(tab) <- en2fr(names(tab))
+  names(tab) <- tr(names(tab))
   fleet_nm <- length(fleets) * 2
-  names(fleet_nm) <- en2fr("Fleet")
+  names(fleet_nm) <- tr("Fleet")
   fleet_header_vec <- c(" " = 1, fleet_nm)
   out <- csas_table(tab,
                     format = "latex",
@@ -296,9 +296,9 @@ table_catch_area <- function(catch_df,
     header_vec <- c(header_vec, header)
   }
 
-  names(tab) <- en2fr(names(tab))
+  names(tab) <- tr(names(tab))
   area_nm <- length(areas) * 2
-  names(area_nm) <- en2fr("Area")
+  names(area_nm) <- tr("Area")
   area_header_vec <- c(" " = 1, area_nm)
   out <- csas_table(tab,
                     format = "latex",

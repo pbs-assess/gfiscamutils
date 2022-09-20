@@ -136,8 +136,8 @@ table_maturity <- function(surv_samples = NULL,
 
   if(fr()){
     out_df <- tibble("Sexe" = `if`(nsex == 1,
-                                   en2fr("Female"),
-                                   c(en2fr("Male"), en2fr("Female"))))
+                                   tr("Female"),
+                                   c(tr("Male"), tr("Female"))))
   }else{
     out_df <- tibble("Sex" = `if`(nsex == 1,
                                   "Female",
@@ -154,7 +154,7 @@ table_maturity <- function(surv_samples = NULL,
     return(out_df)
   }
 
-  names(out_df) <- c(en2fr("Sex"), "$A_{50}$", "$SD_{50}$",
+  names(out_df) <- c(tr("Sex"), "$A_{50}$", "$SD_{50}$",
                      ifelse(fr(),
                             "Nombre de spécimens",
                             "Number of specimens"))

@@ -18,7 +18,9 @@ plot_age_fits_mcmc(
   text_title_size = 12,
   text_title_inc_mdl_nm = FALSE,
   angle_x_labels = FALSE,
-  show_sample_size_f_only = TRUE
+  show_sample_size_f_only = TRUE,
+  sample_size_x = 17,
+  sample_size_y = 0.2
 )
 }
 \arguments{
@@ -58,6 +60,10 @@ no title will be shown)}
 \item{show_sample_size_f_only}{If \code{TRUE}, show the sample size in the female
 panels only. If \code{FALSE}, show the sample size in both male and female panels.
 Included for cases where the sample size is shared or repeated for both sexes.}
+
+\item{sample_size_x}{The x value (age) to place the sample size label}
+
+\item{sample_size_y}{The y value (0-1) to place the sample size label}
 
 \item{type}{The type of residual plot to create. Options are "age", "year",
 and "birth_year"}

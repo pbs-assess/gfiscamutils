@@ -58,8 +58,8 @@ plot_age_resids_mcmc <- function(model,
     pivot_longer(-c(year, sample_size, sex), names_to = "age", values_to = "prop") |>
     mutate(age = as.numeric(age)) |>
     mutate(sex = ifelse(sex %in% c(0, 2),
-                        en2fr("Female"),
-                        en2fr("Male")))
+                        tr("Female"),
+                        tr("Male")))
 
   sample_size <- comps |>
     distinct(year, sex, sample_size)
@@ -70,8 +70,8 @@ plot_age_resids_mcmc <- function(model,
     filter(tolower(gear) == gear_name) |>
     select(-gear) |>
     mutate(sex = ifelse(sex %in% c(0, 2),
-                        en2fr("Female"),
-                        en2fr("Male")))
+                        tr("Female"),
+                        tr("Male")))
 
   prob_cols <- paste0(prettyNum(probs * 100), "%")
   # In case the decimals have been changed to commas, change them back
@@ -124,7 +124,7 @@ plot_age_resids_mcmc <- function(model,
     ylab(ifelse(fr(), "Résidus normalisés logarithmiques", "Log standardized residuals")) +
     xlab(ifelse(type == "birth_year",
                 ifelse(fr(), "Année de naissance", "Year of birth"),
-                en2fr(firstup(type)))) +
+                tr(firstup(type)))) +
     scale_y_continuous(breaks = seq(-5, 5, by = 0.5))
 
   if(!is.null(ylim)){
@@ -151,7 +151,7 @@ plot_age_resids_mcmc <- function(model,
       theme(legend.position = leg_loc,
             legend.justification = leg_loc,
             legend.background = element_rect(fill = "white", color = "white")) +
-      labs(fill = en2fr("Sex"))
+      labs(fill = tr("Sex"))
   }
 
   if(angle_x_labels){

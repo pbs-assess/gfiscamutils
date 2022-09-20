@@ -13,9 +13,9 @@ table_sens_param_changes <- function(sens_desc_vec,
   }
 
   desc <- enframe(unlist(sens_desc_vec), name = NULL) |>
-    `names<-`(en2fr("Description"))
+    `names<-`(tr("Description"))
   changes <- enframe(unlist(sens_change_vec), name = NULL) |>
-    `names<-`(en2fr("Changes"))
+    `names<-`(tr("Changes"))
   tab <- bind_cols(desc, changes)
 
   out <- csas_table(tab,

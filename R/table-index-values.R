@@ -55,7 +55,7 @@ table_index_values <- function(model,
   }
 
   tmp_nms_inds <- which(names(tab) != "CV")
-  names(tab)[tmp_nms_inds] <- en2fr(names(tab)[tmp_nms_inds])
+  names(tab)[tmp_nms_inds] <- tr(names(tab)[tmp_nms_inds])
 
   out <- csas_table(tab,
                     format = "latex",
