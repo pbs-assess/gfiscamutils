@@ -29,8 +29,8 @@ table_param_settings <- function(model,
                                param == "log_m_female" ~ "La mortalité naturelle de log (femme) [$\\ln(M_\\mathrm{female})$]",
                                param == "log_rbar" ~ "Le recrutement moyen de log [$\\ln(\\overline{R})$]",
                                param == "log_rinit" ~ "Le recrutement initial de log [$\\overline{R}_\\mathrm{init}$]",
-                               param == "rho" ~ "Le ratio de variance [$\\rho$]",
-                               param == "vartheta" ~ "La variance totale inverse [$\\vartheta^2$]",
+                               param == "rho" ~ "Rapport de variance, erreur d'observation [$\\rho$]",
+                               param == "vartheta" ~ "La variance totale [$\\vartheta^2$]",
                                TRUE ~ "")) |>
       select(param)
   }else{
@@ -42,8 +42,8 @@ table_param_settings <- function(model,
                                param == "log_m_female" ~ "Log natural mortality (female) [$\\ln(M_\\mathrm{female})$]",
                                param == "log_rbar" ~ "Log mean recruitment [$\\ln(\\overline{R})$]",
                                param == "log_rinit" ~ "Log initial recruitment [$\\overline{R}_\\mathrm{init}$]",
-                               param == "rho" ~ "Variance ratio [$\\rho$]",
-                               param == "vartheta" ~ "Inverse total variance [$\\vartheta^2$]",
+                               param == "rho" ~ "Variance ratio, observation error [$\\rho$]",
+                               param == "vartheta" ~ "Total variance [$\\vartheta^2$]",
                                TRUE ~ "")) |>
       select(param)
   }
@@ -159,9 +159,9 @@ table_param_settings <- function(model,
 
   # Fishing mortality and recruitment parameters
   par <- model$par
-  num_f_params <- length(par$log_ft_pars)
-  num_rec_params <- length(par$log_rec_devs)
-  num_init_rec_params <- length(par$init_log_rec_devs)
+  num_f_params <- length(unlist(map(par$`log_ft_pars:`, ~{strsplit(as.character(trimws(.x)), split = " ")[[1]]})))
+  num_rec_params <- length(unlist(map(par$`log_rec_devs:`, ~{strsplit(as.character(trimws(.x)), split = " ")[[1]]})))
+  num_init_rec_params <- length(unlist(map(par$`init_log_rec_devs:`, ~{strsplit(as.character(trimws(.x)), split = " ")[[1]]})))
   params_out <- params_out |>
     add_row(param = ifelse(fr(),
                            "Valeurs logarithmiques de la mortalité par pêche  ($\\Gamma_\\mathrm{k,t}$)",
