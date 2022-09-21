@@ -67,7 +67,8 @@ get_parvals <- function(model, param, digits = 0){
                  "--",
                  f(val[3], digits),
                  " (width ",
-                 f(val[3] - val[1], digits), ")")
+                 f(round(val[3], digits) - round(val[1], digits), digits),
+                 ")")
     endyr <- max(names(as_tibble(mcmccalcs$sbt_quants)))
   }else{
     quant_col <- paste0(param, "_quants")
