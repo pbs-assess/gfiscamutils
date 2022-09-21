@@ -178,7 +178,9 @@ plot_recr_mcmc <- function(models,
                   fill = ro_color) +
         geom_hline(data = tso_base,
                    aes(yintercept = !!sym(quants[2])),
-                   color = ro_color, lty = 1, lwd = 1)
+                   color = ro_color,
+                   lty = 1,
+                   lwd = 1)
     }else{
       g <- g +
         geom_hline(data = tso_base,
@@ -270,7 +272,11 @@ plot_recr_mcmc <- function(models,
     tso_quants <- tso_quants %>%
       mutate(year = year + (row_number() - 1) * r_dodge)
     g <- g +
-      geom_pointrange(data = tso_quants, aes(color = model))
+      geom_pointrange(data = tso_quants,
+                      aes(color = model),
+                      lwd = line_width,
+                      fatten = point_size,
+                      size = point_size)
   }
 
   if(is.null(leg_loc)){

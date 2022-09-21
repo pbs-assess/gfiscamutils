@@ -71,6 +71,8 @@ plot_biomass_mcmc <- function(models,
                               bmsy_refpt_colors = c("salmon", "darkgreen"),
                               angle_x_labels = FALSE,
                               ylim = NULL,
+                              line_width = 1,
+                              point_size = 2,
                               ...){
 
   g <- plot_ts_mcmc(models,
@@ -83,6 +85,8 @@ plot_biomass_mcmc <- function(models,
                     x_space = x_space,
                     y_space = y_space,
                     probs = probs,
+                    line_width = line_width,
+                    point_size = point_size,
                     ...)
 
   if(is_iscam_model(models)){
@@ -384,8 +388,13 @@ plot_biomass_mcmc <- function(models,
       mutate(!!sym(quants[3]) := ifelse(!!sym(quants[3]) > upper_bound,
                                         upper_bound,
                                         !!sym(quants[3])))
+
     g <- g +
-      geom_pointrange(data = tso_quants, aes(color = model))
+      geom_pointrange(data = tso_quants,
+                      aes(color = model),
+                      lwd = line_width,
+                      fatten = point_size,
+                      size = point_size)
   }
 
   if(angle_x_labels){
