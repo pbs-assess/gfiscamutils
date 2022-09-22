@@ -106,6 +106,7 @@ table_catch <- function(catch_df,
 #' which have had [gfplot::tidy_catch()] applied
 #' @param fleet_nms A vector of names for the fleets, to appear on the table.
 #' Must be the same length as `catch_df_lst`
+#' @export
 table_catch_fleet <- function(catch_df_lst = NULL,
                               fleet_nms = NULL,
                               start_yr = NULL,
@@ -231,6 +232,7 @@ table_catch_fleet <- function(catch_df_lst = NULL,
 #'
 #' @keywords internal
 #' @inheritParams table_catch
+#' @export
 table_catch_area <- function(catch_df,
                              start_yr = NULL,
                              gear_col_widths = "5em",

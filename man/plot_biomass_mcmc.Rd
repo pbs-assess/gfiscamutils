@@ -22,6 +22,8 @@ plot_biomass_mcmc(
   bmsy_refpt_colors = c("salmon", "darkgreen"),
   angle_x_labels = FALSE,
   ylim = NULL,
+  line_width = 1,
+  point_size = 2,
   ...
 )
 }
@@ -81,6 +83,10 @@ for BMSY. Used to display reference point lines if \code{show_bmsy_lines} is \co
 \item{ylim}{A vector of two values, representing the minimum and maximum
 values for the plot on the y-axis. If \code{NULL}, defaults will be zero for the
 minimum and the ceiling of the maximum value (including CI)}
+
+\item{line_width}{Width of all median lines on the plot}
+
+\item{point_size}{Point size for all median points on the plot}
 
 \item{...}{Arguments passed to \code{\link[=plot_ts_mcmc]{plot_ts_mcmc()}}}
 }
