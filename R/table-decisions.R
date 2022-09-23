@@ -22,6 +22,7 @@ table_decisions <- function(model,
                             bold_header = FALSE,
                             digits = 2,
                             ret_df = FALSE,
+                            col_widths = NULL,
                             ...){
 
   if(!mdl_cls %in% class(model)){
@@ -56,7 +57,7 @@ table_decisions <- function(model,
   b_ey_minus1 <- paste0("B", end_yr_minus1)
   b_ey_minus2 <- paste0("B", end_yr_minus2)
 
-  bo_raw <- model$mcmccalcs$params$bo
+  bo_raw <- model$mcmccalcs$params$sbo
   bmsy_raw <- model$mcmccalcs$params$bmsy
   bo_refvals <- map(bo_refpts, ~{
     bo_raw * .x
@@ -74,31 +75,28 @@ table_decisions <- function(model,
       as_tibble() |>
       map_df(~{if(is.character(.x)) as.numeric(.x) else .x})
 
+    # Calculate depletion for this year B_year / B_0
+    x <- x |>
+      mutate(depl = x[, b_ey] / bo_raw)
+
     out <- c(x$TAC[1],
-             length(which(x[, b_ey] < bo_refvals[[1]])) / nrow(x),
-             length(which(x[, b_ey] < bo_refvals[[2]])) / nrow(x),
-             length(which(x[, b_ey] < bmsy_refvals[[1]])) / nrow(x),
-             length(which(x[, b_ey] < bmsy_refvals[[2]])) / nrow(x),
+             length(which(x$depl < bo_refpts[[1]])) / nrow(x),
+             length(which(x$depl < bo_refpts[[2]])) / nrow(x),
+             #length(which(x[, b_ey] < bo_refvals[[1]])) / nrow(x),
+             #length(which(x[, b_ey] < bo_refvals[[2]])) / nrow(x),
+             #length(which(x[, b_ey] < bmsy_refvals[[1]])) / nrow(x),
+             #length(which(x[, b_ey] < bmsy_refvals[[2]])) / nrow(x),
              length(which(x[, b_ey] < x[, b_ey_minus1])) / nrow(x))
 
     enframe(out) |>
       mutate(name = c("TAC",
-                      latex.mlc(c(paste0("P(B\\textsubscript{", end_yr, "}<"),
-                                  paste0(bo_refpts[1], "B\\textsubscript{0})")),
-                                make.bold = bold_header),
-                      latex.mlc(c(paste0("P(B\\textsubscript{", end_yr, "}<"),
-                                  paste0(bo_refpts[2], "B\\textsubscript{0})")),
-                                make.bold = bold_header),
-                      latex.mlc(c(paste0("P(B\\textsubscript{", end_yr, "}<"),
-                                  paste0(bmsy_refpts[1], "B\\textsubscript{MSY})")),
-                                make.bold = bold_header),
-                      latex.mlc(c(paste0("P(B\\textsubscript{", end_yr, "}<"),
-                                  paste0(bmsy_refpts[2], "B\\textsubscript{MSY})")),
-                                make.bold = bold_header),
-                      latex.mlc(c(paste0("P(B\\textsubscript{", end_yr, "}<"),
-                                  paste0("B\\textsubscript{", end_yr_minus1, "})")),
-                                make.bold = bold_header))) |>
-               pivot_wider(names_from = "name", values_from = "value")
+                      paste0("P(B\\textsubscript{", end_yr, "} < ",
+                             bo_refpts[1], "B\\textsubscript{0})"),
+                      paste0("P(B\\textsubscript{", end_yr, "} < ",
+                             bo_refpts[2], "B\\textsubscript{0})"),
+                      paste0("P(B\\textsubscript{", end_yr, "} < ",
+                             "B\\textsubscript{", end_yr_minus1, "})"))) |>
+      pivot_wider(names_from = "name", values_from = "value")
   }) |>
     bind_rows() |>
     mutate_at(.vars = vars(-TAC), ~{f(.x, digits)}) |>
@@ -114,8 +112,6 @@ table_decisions <- function(model,
     names(tab) <- c("tac",
                     paste0(yr, "_", bo_refpts[1], "bo"),
                     paste0(yr, "_", bo_refpts[2], "bo"),
-                    paste0(yr, "_", bmsy_refpts[1], "bmsy"),
-                    paste0(yr, "_", bmsy_refpts[2], "bmsy"),
                     paste0(yr, "_", yr - 1))
     tab <- tab |>
       mutate(tac = as.numeric(tac))
@@ -132,10 +128,17 @@ table_decisions <- function(model,
                                                  make.bold = bold_header)
   }
 
-  csas_table(tab,
-             format = "latex",
-             bold_header = FALSE,
-             align = rep("r", ncol(tab)),
-             col_names_align = rep("r", ncol(tab)),
-             ...)
+  out <- csas_table(tab,
+                    format = "latex",
+                    bold_header = FALSE,
+                    align = rep("r", ncol(tab)),
+                    col_names_align = rep("r", ncol(tab)),
+                    ...)
+
+  if(!is.null(col_widths)){
+    out <- out |>
+      column_spec(1:ncol(tab), width = col_widths)
+  }
+
+  out
 }
