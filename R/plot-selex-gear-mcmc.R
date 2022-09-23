@@ -16,6 +16,7 @@ plot_selex_gear_mcmc <- function(model,
                                  gear = 1,
                                  probs = c(0.025, 0.5, 0.975),
                                  show_maturity = FALSE,
+                                 show_ci = TRUE,
                                  ages = as.character(model$dat$start.age:model$dat$end.age),
                                  breaks = seq(0, model$dat$end.age, 5),
                                  ci_type = c("both", "line", "ribbon"),
@@ -164,7 +165,7 @@ plot_selex_gear_mcmc <- function(model,
     scale_x_discrete(breaks = breaks) +
     scale_color_manual(values = c("red", "blue"))
 
-  if(ci_type %in% c("ribbon", "both")){
+  if(show_ci && ci_type %in% c("ribbon", "both")){
     g <- g +
       geom_ribbon(data = rib_vals,
                   aes(ymin = lo_value,
@@ -174,7 +175,7 @@ plot_selex_gear_mcmc <- function(model,
                   color = NA)
   }
 
-  if(ci_type %in% c("line", "both")){
+  if(show_ci &&ci_type %in% c("line", "both")){
     g <- g +
       geom_line(data = lo_vals, aes(y = lo_value,
                                     group = Sex,
