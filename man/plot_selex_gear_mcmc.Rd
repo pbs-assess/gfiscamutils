@@ -9,6 +9,7 @@ plot_selex_gear_mcmc(
   gear = 1,
   probs = c(0.025, 0.5, 0.975),
   show_maturity = FALSE,
+  show_ci = TRUE,
   ages = as.character(model$dat$start.age:model$dat$end.age),
   breaks = seq(0, model$dat$end.age, 5),
   ci_type = c("both", "line", "ribbon"),

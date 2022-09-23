@@ -276,7 +276,8 @@ plot_index_mcmc <- function(models,
                                 "Indice ('000 t, kg/heure pour la CPUE des rejets)",
                                 "Index ('000 t, kg/hr for Discard CPUE)")),
                   ifelse(fr(), "Indice ('000 t)", "Index ('000 t)"))) +
-      scale_color_manual(values = model_colors) +
+      scale_color_manual(values = model_colors,
+                         labels = map(models, ~{tex(as.character(attributes(.x)$model_desc))})) +
       guides(color = guide_legend(title = legend_title)) +
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
   }else if(type == "resids"){
@@ -300,7 +301,6 @@ plot_index_mcmc <- function(models,
       ylab(ifelse(fr(),
                   "Résidu normalisé logarithmique",
                   "Log standardized residual")) +
-      scale_color_manual(values = model_colors) +
       guides(color = guide_legend(title = legend_title)) +
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
   }
