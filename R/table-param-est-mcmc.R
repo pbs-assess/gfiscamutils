@@ -91,6 +91,7 @@ table_param_est_mcmc <- function(model,
     non_selex_df[q_inds, "gear"] <- q_real_nms[q_gear_inds]
   }
   # Deal with MSY parameters
+  gear_names <- model$dat$gear_names
   flt_real_nms <- model$dat$fleet_gear_names
   flt_inds <- grep("fleet", non_selex_df$param)
   if(length(flt_inds)){
