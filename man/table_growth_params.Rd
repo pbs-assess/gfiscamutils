@@ -5,7 +5,7 @@
 \title{Create table of the growth parameters for input into the ISCAM model}
 \usage{
 table_growth_params(
-  surv_samples = NULL,
+  params_fn = file.path(dirname(here()), "arrowtooth-nongit/data/growth.rds"),
   col_widths = NULL,
   ret_df = FALSE,
   digits = 2,
@@ -13,8 +13,8 @@ table_growth_params(
 )
 }
 \arguments{
-\item{surv_samples}{A \code{survey_samples} list as output by
-\code{\link[gfdata:get_data]{gfdata::get_survey_samples()}}}
+\item{params_fn}{A filename (RDS file) to read in, containing the data frame
+output by export_mat_lw_age(survey_samples_syn, write_file = FALSE)}
 
 \item{col_widths}{Widths for columns, except the Parameter column
 the \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
@@ -35,21 +35,4 @@ iSCAM takes these values as inputs in the DAT file and creates a vector
 of maturities-at-age by calling \code{plogis(a50, sd50)} where \code{a50} and \code{sd50}
 are the outputs of this function, \code{sd50} is actually the shape parameter,
 not a true standard deviation of values.
-
-The maturity code table for maturity_convention_code 4 (flatfish):
-MATURITY_CODE,SPECIMEN_SEX_CODE,MATURITY_NAME,MATURITY_DESC
-1, 1, IMMATURE, "TESTES VERY SMALL, STRING-LIKE AND SOMEWHAT TRANSLUCENT OR PINKISH IN COLOUR"
-1, 2, IMMATURE, "OVARIES VERY SMALL, TRANSLUCENT OR PINKISH  AND SOMEWHAT GELATINOUS IN TEXTURE"
-2, 1, MATURING, "TESTES ENLARGING, A DISTINCT BULGE EVIDENT BUT STILL TRANSLUCENT OR PINKISH IN COLOUR"
-2, 2, MATURING, "OVARIES RELATIVELY SMALL, PINKISH-YELLOW OR CREAM IN COLOUR, GRANULAR IN TEXTURE.  NO DISTINCT EGGS VISIBLE"
-3, 1, DEVELOPING, "TESTES ENLARGING, BROWN-WHITE OR WHITE IN COLOUR, FIRM IN TEXTURE"
-3, 2, DEVELOPING, "OVARIES LARGE, CREAM OR YELLOW IN COLOUR CONTAINING OPAQUE EGGS THAT CAN BE DISTINGUISED BY DIRECT OBSERVATION.  SEX MAY BE DETERMINED EXTERNALLY"
-4, 1, RIPE, "TESTES LARGE, WHITE AND EASILY BROKEN. NO SPERM EVIDENT"
-4, 2, GRAVID, "OVARIES CONTAINING PARTLY OR WHOLLY TRANSLUCENT EGGS.  SEX EASILY DETERMINED EXTERNALLY"
-5, 1, SPAWNING, "TESTES LARGE, WHITE AND SPERM EVIDENT"
-5, 2, RIPE, "OVARIES CONTAINING ENTIRELY TRANSLUCENT, MATURE OVA.  EGGS LOOSE AND WILL RUN FROM OVIDUCTS UNDER SLIGHT PRESSURE"
-6, 1, SPENT, "TESTES FLACCID, SHRUNKEN AND YELLOW-BROWN IN COLOUR. SPERM DUCTS ENLARGED AND A SMALL AMOUNT OF SPRM MAY BE PRESENT"
-6, 2, SPENT, "OVARIES LARGE, FLACCID AND PURPLE IN COLOUR; A FEW TRANSLUCENT EGGS MAY BE LEFT.  OVARIAN MEMBRANE VERY VASCULAR (BLOODSHOT) AND SAC-LIKE"
-7, 1, RESTING, "TESTES FIRM, SMALL AND YELLOW-BROWN IN COLOUR.  SPERM DUCTS SMALL"
-7, 2, RESTING, "OVARIES CONTRACTED AND FIRM, PINKISH GREY TO CREAM-YELLOW IN COLOUR AND MAY APPEAR GRANULAR IN TEXTURE BUT NO DISTINCT EGGS ARE VISIBLE"
 }
