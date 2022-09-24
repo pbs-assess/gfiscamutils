@@ -99,8 +99,8 @@ export_mat_lw_age <- function(surv_samples,
   lw_m <- fit_length_weight(surv_samples, sex = "male")
   mal_pars <- c(mal_pars, exp(lw_m$pars$log_a), lw_m$pars$b)
 
-  # a50 is only here to compare with the a50_non_log output using browser()
-  a50 <- fit_mat_ogive(surv_samples, type = "age")
+  # a50 is here to compare with the a50_non_log output using browser()
+  #a50 <- fit_mat_ogive(surv_samples, type = "age")
 
   # Age-at-50% fits
   if(!is.null(maturity_convention_code) && !is.null(maturity_code)){
