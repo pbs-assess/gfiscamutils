@@ -2,33 +2,39 @@
 % Please edit documentation in R/table-growth-params.R
 \name{table_growth_params}
 \alias{table_growth_params}
-\title{Create table of the growth parameters for input into the ISCAM model}
+\title{Create table of the growth parameters which were input into the ISCAM model}
 \usage{
 table_growth_params(
-  params_fn = file.path(dirname(here()), "arrowtooth-nongit/data/growth.rds"),
+  model,
   col_widths = NULL,
   ret_df = FALSE,
   digits = 2,
+  alpha_digits = 7,
   ...
 )
 }
 \arguments{
-\item{params_fn}{A filename (RDS file) to read in, containing the data frame
-output by \code{export_mat_lw_age(survey_samples_syn, write_file = FALSE)}}
+\item{model}{An iscam model object (class \link{mdl_cls})}
 
 \item{col_widths}{Widths for columns, except the Parameter column
 the \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 
 \item{ret_df}{Logical. If \code{TRUE}, return the \link{data.frame} and not}
 
+\item{digits}{The number of decimal places to report on all except the
+\code{alpha} parameter}
+
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
+
+\item{alpha_digitws}{The number of decimal places to report on the \code{alpha}
+parameter}
 }
 \value{
 Either a \link{data.frame} or a \code{\link[csasdown:csas_table]{csasdown::csas_table()}}, depending on
 the value of \code{return_df}
 }
 \description{
-Create table of the growth parameters for input into the ISCAM model
+Create table of the growth parameters which were input into the ISCAM model
 }
 \details{
 iSCAM takes these values as inputs in the DAT file and creates a vector

@@ -1,4 +1,4 @@
-#' Create table of the growth parameters for input into the ISCAM model
+#' Create table of the growth parameters which were input into the ISCAM model
 #'
 #' @details
 #' iSCAM takes these values as inputs in the DAT file and creates a vector
@@ -6,41 +6,64 @@
 #' are the outputs of this function, `sd50` is actually the shape parameter,
 #' not a true standard deviation of values.
 #'
-#' @param params_fn A filename (RDS file) to read in, containing the data frame
-#' output by `export_mat_lw_age(survey_samples_syn, write_file = FALSE)`
+#' @param model An iscam model object (class [mdl_cls])
 #' @param col_widths Widths for columns, except the Parameter column
 #' the [csasdown::csas_table()]
 #' @param ret_df Logical. If `TRUE`, return the [data.frame] and not
+#' @param digits The number of decimal places to report on all except the
+#' `alpha` parameter
+#' @param alpha_digitws The number of decimal places to report on the `alpha`
+#' parameter
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
 #' @return Either a [data.frame] or a [csasdown::csas_table()], depending on
 #' the value of `return_df`
 #' @importFrom purrr map_dfr
 #' @export
-table_growth_params <- function(params_fn = file.path(dirname(here()),
-                                                      "arrowtooth-nongit/data/growth.rds"),
+table_growth_params <- function(model,
                                 col_widths = NULL,
                                 ret_df = FALSE,
                                 digits = 2,
+                                alpha_digits = 7,
                                 ...){
 
-  params <- readRDS(params_fn) |>
-    select(comments, everything()) |>
-    rename(Parameter = comments,
-           Female = female,
-           Male = male)
-  params$Parameter <- firstup(gsub("^# -(.*)$", "\\1", params$Parameter))
-  params$Parameter <- gsub("linf", "$l_{\\\\infty}$", params$Parameter)
-  params$Parameter <- gsub("\\(k\\)", "\\($k$\\)", params$Parameter)
-  params$Parameter <- gsub("tt0", "$tt_0$", params$Parameter)
-  params$Parameter <- gsub("alpha", "$\\\\alpha$", params$Parameter)
-  params$Parameter <- gsub("beta", "$\\\\beta$", params$Parameter)
-  params$Parameter <- gsub("%", "$\\\\%$", params$Parameter)
+  if(is_iscam_model_list(model) && length(model) == 1){
+    model <- model[[1]]
+  }
 
-  j <- pmap(params, ~{
+  if(!is_iscam_model(model)){
+    if(is_iscam_model_list(model)){
+      stop("`model` is not an iscam model object, it is an iscam model ",
+           "list object")
+    }
+    stop("`model` is not an iscam model object")
+  }
+
+  param_names <- enframe(c("Asymptotic length ($l_{inf}$)",
+                           "Brody growth coefficient ($k$)",
+                           "Theoretical age at zero length ($t_0$)",
+                           "Scalar in length-weight allometry ($\\alpha$)",
+                           "Power parameter in length-weight allometry ($\\beta$)",
+                           "Age at 50\\% maturity ($\\dot{a}$)",
+                           "SD at 50\\% maturity ($\\dot{\\gamma}$)"),
+                         name = NULL) |>
+    rename(Parameter = value)
+
+  d <- model$dat
+  params <- bind_cols(param_names,
+                      map_dfr(list(a = vec2df(d$linf) |> setNames(c("Female", "Male")),
+                                   b = vec2df(d$k) |> setNames(c("Female", "Male")),
+                                   c = vec2df(d$to) |> setNames(c("Female", "Male")),
+                                   d = vec2df(d$lw.alpha) |> setNames(c("Female", "Male")),
+                                   e = vec2df(d$lw.beta) |> setNames(c("Female", "Male")),
+                                   f = vec2df(d$age.at.50.mat) |> setNames(c("Female", "Male")),
+                                   g = vec2df(d$sd.at.50.mat) |> setNames(c("Female", "Male"))),
+                              ~{.x}))
+
+  rounded_vals <- pmap(params, ~{
     mtch <- grepl("alpha", ..1)
     if(mtch){
-      return(c(f(..2, 7), f(..3, 7)))
+      return(c(f(..2, 7), f(..3, alpha_digits)))
     }
     c(f(..2, digits), f(..3, digits))
   }) |>
@@ -49,7 +72,7 @@ table_growth_params <- function(params_fn = file.path(dirname(here()),
     t() |>
     as_tibble()
 
-  params[, 2:3] <- j
+  params[, 2:3] <- rounded_vals
 
   if(ret_df){
     return(params)
