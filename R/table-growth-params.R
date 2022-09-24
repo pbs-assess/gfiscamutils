@@ -7,7 +7,7 @@
 #' not a true standard deviation of values.
 #'
 #' @param params_fn A filename (RDS file) to read in, containing the data frame
-#' output by export_mat_lw_age(survey_samples_syn, write_file = FALSE)
+#' output by `export_mat_lw_age(survey_samples_syn, write_file = FALSE)`
 #' @param col_widths Widths for columns, except the Parameter column
 #' the [csasdown::csas_table()]
 #' @param ret_df Logical. If `TRUE`, return the [data.frame] and not

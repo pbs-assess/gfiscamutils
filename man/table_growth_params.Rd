@@ -14,7 +14,7 @@ table_growth_params(
 }
 \arguments{
 \item{params_fn}{A filename (RDS file) to read in, containing the data frame
-output by export_mat_lw_age(survey_samples_syn, write_file = FALSE)}
+output by \code{export_mat_lw_age(survey_samples_syn, write_file = FALSE)}}
 
 \item{col_widths}{Widths for columns, except the Parameter column
 the \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
