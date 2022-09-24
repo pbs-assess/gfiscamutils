@@ -4,13 +4,13 @@
 \alias{plot_catch_fleet}
 \title{Plot catch by fleet}
 \usage{
-plot_catch_fleet(catch_lst, xlim)
+plot_catch_fleet(catch_lst, fleet_nms, ...)
 }
 \arguments{
 \item{catch_lst}{A list of catch data frames, as output from
 \code{\link[gfdata:get_data]{gfdata::get_catch()}}}
 
-\item{xlim}{The x-axis limits (vector of two)}
+\item{...}{Arguments passed to \code{\link[gfplot:plot_catch]{gfplot::plot_catch()}}}
 }
 \value{
 Nothing
