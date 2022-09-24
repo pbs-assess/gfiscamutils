@@ -11,6 +11,7 @@ table_decisions(
   bold_header = FALSE,
   digits = 2,
   ret_df = FALSE,
+  col_widths = NULL,
   ...
 )
 }
