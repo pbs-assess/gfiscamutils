@@ -4,10 +4,13 @@
 \alias{table_param_settings}
 \title{Create a table summarizing parameterization of an iSCAM model}
 \usage{
-table_param_settings(model, col_widths = "5em", ...)
+table_param_settings(model, ret_df = FALSE, col_widths = "5em", ...)
 }
 \arguments{
 \item{model}{A single output model}
+
+\item{ret_df}{Logical. If \code{TRUE} return a data frame with the values,
+instead of the \code{\link[knitr:kable]{knitr::kable()}} formatted table}
 
 \item{col_widths}{The width of all columns other than the first. If \code{NULL},
 do not set}

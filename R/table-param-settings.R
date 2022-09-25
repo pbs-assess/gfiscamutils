@@ -5,6 +5,8 @@
 #' parameterizations
 #'
 #' @param model A single output model
+#' @param ret_df Logical. If `TRUE` return a data frame with the values,
+#' instead of the [knitr::kable()] formatted table
 #' @param col_widths The width of all columns other than the first. If `NULL`,
 #' do not set
 #' @param ... Arguments to pass to [csasdown::csas_table()]
@@ -14,6 +16,7 @@
 #' @importFrom purrr pmap_dfr
 #' @importFrom dplyr add_row
 table_param_settings <- function(model,
+                                 ret_df = FALSE,
                                  col_widths = "5em",
                                  ...){
 
@@ -123,25 +126,25 @@ table_param_settings <- function(model,
                            "Fishery age at 50\\% logistic selectivity ($\\hat{a}_k$)"),
             numest = fish_est,
             bounds = "[0, 1]",
-            prior = "None") |>
+            prior = "Uniform") |>
     add_row(param = ifelse(fr(),
                            "Pêche SD de la sélectivité logistique ($\\hat{\\gamma}_\\mathrm{k}$)",
                            "Fishery SD of logistic selectivity ($\\hat{\\gamma}_\\mathrm{k}$)"),
             numest = fish_est,
             bounds = "[0, 1]",
-            prior = "None") |>
+            prior = "Uniform") |>
     add_row(param = ifelse(fr(),
                            "Âge de l'enquête à 50 \\% de sélectivité logistique ($\\hat{a}_\\mathrm{k}$)",
                            "Survey age at 50\\% logistic selectivity ($\\hat{a}_\\mathrm{k}$)"),
             numest = surv_est,
             bounds = "[0, 1]",
-            prior = "None") |>
+            prior = "Uniform") |>
     add_row(param = ifelse(fr(),
                            "Enquête SD de la sélectivité logistique ($\\hat{\\gamma}_\\mathrm{k}$)",
                            "Survey SD of logistic selectivity ($\\hat{\\gamma}_\\mathrm{k}$)"),
             numest = surv_est,
             bounds = "[0, 1]",
-            prior = "None")
+            prior = "Uniform")
 
   # Catchability
   q <- model$ctl$surv.q
@@ -195,6 +198,9 @@ table_param_settings <- function(model,
                                 "Priorité (moyenne, SD) (valeur unique = fixe)",
                                 "Prior (mean, SD) (single value = fixed)"))
 
+  if(ret_df){
+    return(params_out)
+  }
   tab <- csas_table(params_out,
                     col.names = names(params_out),
                     align = c("l", rep("r", ncol(params_out) - 1)),
