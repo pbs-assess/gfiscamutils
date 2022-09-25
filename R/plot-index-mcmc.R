@@ -284,15 +284,16 @@ plot_index_mcmc <- function(models,
 
     g <- vals %>%
       ggplot(aes(x = year,
-                 y = biomass,
-                 color = model)) +
+                 y = biomass)) +
       stat_identity(yintercept = 0,
                     geom = "hline",
                     inherit.aes = FALSE,
                     linetype = "longdash") +
-      geom_point(size = fit_point_size) +
+      geom_point(aes(color = model),
+                 size = fit_point_size) +
       geom_errorbar(aes(ymin = lowerci,
-                        ymax = upperci),
+                        ymax = upperci,
+                        color = model),
                     width = errbar_width,
                     size = fit_line_width) +
       facet_wrap(~survey_name,
@@ -301,6 +302,8 @@ plot_index_mcmc <- function(models,
       ylab(ifelse(fr(),
                   "Résidu normalisé logarithmique",
                   "Log standardized residual")) +
+      scale_color_manual(values = model_colors,
+                         labels = map(models, ~{tex(as.character(attributes(.x)$model_desc))})) +
       guides(color = guide_legend(title = legend_title)) +
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
   }
