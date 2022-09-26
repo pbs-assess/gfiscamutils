@@ -129,6 +129,10 @@ table_ts_values_mcmc <- function(models,
         filter(Year >= start_yr)
     }
   }
+  if(value == "ut"){
+    tab$Year <- as.character(as.numeric(tab$Year) + 1)
+    tab <- tab[-nrow(tab) , ]
+  }
 
   out <- csas_table(tab,
                     format = "latex",
