@@ -41,6 +41,7 @@ plot_vuln_mcmc <- function(...,
     plot_ts_mcmc(...,
                  quant_df = "vbt_quants",
                  facet_wrap_var = "gear",
-                 y_label = "Vulnerable biomass ('000 t)")
+                 y_label = "Vulnerable biomass ('000 t)",
+                 angle_x_labels = angle_x_labels)
   }
 }
