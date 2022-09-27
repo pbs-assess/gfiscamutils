@@ -99,8 +99,9 @@ plot_traces_mcmc <- function(model,
       ylab("") +
       xlab("") +
       theme(plot.title = element_text(face = "bold.italic", hjust = 0.5),
-            axis.text = element_blank(),
-            axis.ticks = element_blank())
+            plot.margin = margin(r = 0, b = 0, l = 0, unit = "pt")) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 0.55, vjust = 0.5))
+
   })
 
   if(is.null(text_title_size)){
