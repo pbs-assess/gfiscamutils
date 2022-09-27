@@ -98,11 +98,14 @@ plot_traces_mcmc <- function(model,
       ggtitle(param_name) +
       ylab("") +
       xlab("") +
-      theme(plot.title = element_text(face = "bold.italic", hjust = 0.5))
+      theme(plot.title = element_text(face = "bold.italic", hjust = 0.5),
+            axis.text = element_blank(),
+            axis.ticks = element_blank())
   })
 
   if(is.null(text_title_size)){
-    plot_grid(plotlist = g_lst, ...)
+    patchwork::wrap_plots(g_lst)
+    # plot_grid(plotlist = g_lst, ...)
   }else{
     title <- ggdraw() +
       draw_label(tex(model_desc),
