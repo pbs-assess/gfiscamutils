@@ -520,6 +520,11 @@ make.ref.points.table <- function(model.am2,
 
   tab.am2 <- model.am2$mcmccalcs$r.quants
   row.names <- tab.am2[,1]
+  row.names <- gsub(
+    pattern = " - ",
+    replacement = ifelse(translate, " \U00E0 ", " to "),
+    x = row.names
+  )
   if( translate ) {
     row.names <- gsub( pattern="SB", replacement=en2fr("SB", translate),
                        x=row.names )
