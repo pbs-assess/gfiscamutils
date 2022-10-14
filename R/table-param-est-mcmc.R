@@ -63,10 +63,10 @@ table_param_est_mcmc <- function(model,
   if(length(m_inds)){
     non_selex_df <- non_selex_df |>
       mutate(sex = ifelse(param == "m_sex1",
-                          "male",
+                          "female",
                           sex),
              sex = ifelse(param == "m_sex2",
-                          "female",
+                          "male",
                           sex),
              param = ifelse(param == "m_sex1",
                             "m1",

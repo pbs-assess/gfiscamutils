@@ -226,9 +226,9 @@ calc_mcmc <- function(model,
     #                                            probs)
   }
   if(!is.null(mc$selest)){
-    # out$selest_quants <- calc_longer_quants(mc$selest,
-    #                                         type = "sel",
-    #                                         probs)
+    out$selest_quants <- calc_longer_quants(mc$selest,
+                                           type = "sel",
+                                           probs)
   }
 
   if(load_proj){
