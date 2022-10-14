@@ -8,6 +8,9 @@
 #' @param digits Number of digits to show
 #' @param french If `TRUE` translate to French
 #' @param col_widths Widths for columns, except the Parameter column
+#' @param ret_df If `TRUE`, return a data.frame instead of the [csasdown::csas_table()]
+#' @param by_sex If `TRUE`, the table will have two rows per year, one for each sex.
+#' If `FALSE`, the female value will be used
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
 #' @return An [csasdown::csas_table()]
@@ -17,7 +20,21 @@ table_param_phi_mpd <- function(model,
                                 digits = 2,
                                 french = FALSE,
                                 col_widths = "5em",
+                                ret_df = FALSE,
+                                by_sex = FALSE,
                                 ...){
+
+  if(is_iscam_model_list(model) && length(model) == 1){
+    model <- model[[1]]
+  }
+
+  if(!is_iscam_model(model)){
+    if(is_iscam_model_list(model)){
+      stop("`model` is not an iscam model object, it is an iscam model ",
+           "list object")
+    }
+    stop("`model` is not an iscam model object")
+  }
 
   gear_names <- model$dat$age_gear_abbrevs
   # Split matrix into a list of the rows
@@ -47,7 +64,7 @@ table_param_phi_mpd <- function(model,
     out %>%
       mutate(Sex = ifelse(Sex == 0, "Female", ifelse(Sex == 1, "Female", "Male")))%>%
       mutate_at(vars(4:5), ~{format(round(., digits), digits = digits, nsmall = digits)}) %>%
-      mutate_at(vars(3), ~{format(., digits = 0, nsmall = 0)})
+      mutate_at(vars(3), ~{format(., nsmall = 0)})
   })
   # Join all the data frames in the list into one data frame
   xx <- lp_samp[[1]]
@@ -69,11 +86,28 @@ table_param_phi_mpd <- function(model,
   }
   names(out) <- col_names
 
+  if(!by_sex){
+    tmp_nms <- names(out)
+    tmp_nms <- tmp_nms[tmp_nms != "Sex"]
+    names(out) <- as.character(1:ncol(out))
+    out <- out |>
+      filter(`2` == "Female") |>
+      select(-`2`)|>
+      mutate(`1` = as.character(`1`))
+    names(out) <- tmp_nms
+  }
+
+  if(ret_df){
+    return(out)
+  }
+browser()
   tab <- csas_table(out,
-                    col.names = names(out),
+                    format = "latex",
+                    col_names = names(out),
                     align = c("l", rep("r", ncol(out) - 1)),
-                    ...) %>%
-    add_header_above(header_above)
+                    col_names_align = rep("r", ncol(out)),
+                    ...) |>
+    gfiscamutils::add_header_above(header_above)
 
   if(!is.null(col_widths)){
     tab <- tab %>%
