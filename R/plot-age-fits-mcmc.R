@@ -6,9 +6,6 @@
 #' @param gear The number of the gear to plot
 #' @param type The type of residual plot to create. Options are "age", "year",
 #' and "birth_year"
-#' @param probs A 3-element vector of probabilities that appear in the
-#' output data frames. This is provided in case the data frames have more than
-#' three different quantile levels
 #' @param yrs A vector of years to include in the plot. If the maximum extends
 #' past the range of years in the data, the maximum in the data will be used.
 #' If `NULL`, all years will be included
@@ -43,11 +40,10 @@
 #' @export
 plot_age_fits_mcmc <- function(model,
                                gear = 1,
-                               probs = c(0.025, 0.5, 0.975),
                                yrs = NULL,
                                comp_color = "black",
-                               comp_point_size = 0.5,
-                               ci_type = c("both", "line", "ribbon"),
+                               comp_width = 0.5,
+                               comp_alpha = 0.5,
                                ci_linetype =  c("dotted", "solid",
                                                 "dashed", "dotdash",
                                                 "longdash", "twodash"),
@@ -60,7 +56,6 @@ plot_age_fits_mcmc <- function(model,
                                sample_size_x = 17,
                                sample_size_y = 0.2){
 
-  ci_type <- match.arg(ci_type)
   ci_linetype <- match.arg(ci_linetype)
 
   if(is_iscam_model_list(model) && length(model) == 1){
@@ -85,23 +80,21 @@ plot_age_fits_mcmc <- function(model,
          call. = FALSE)
   }
 
-  if(length(probs) != 3){
-    stop("`probs` has length ", length(probs), " but must be a vector of three values ",
-         "representing lower CI, median, and upper CI")
-  }
-
   nsex <- model$dat$num.sex
   ages <- as.character(model$dat$start.age:model$dat$end.age)
   gear_names <- tolower(model$dat$age_gear_names)
   gear_name <- gear_names[gear]
 
   comps <- model$mpd$a_obs[[gear]] |>
+    pivot_longer(ages, names_to = "age") |>
+    group_by(year, sex) |>
+    mutate(prop = value / sum(value)) |>
     select(-c(gear, area, group)) |>
-    pivot_longer(-c(year, sample_size, sex), names_to = "age", values_to = "prop") |>
-    mutate(age = as.numeric(age)) |>
     mutate(sex = ifelse(sex %in% c(0, 2),
                         tr("Female"),
-                        tr("Male")))
+                        tr("Male"))) |>
+    select(-value) |>
+    mutate(age = as.numeric(age))
 
   sample_size <- comps |>
     distinct(year, sex, sample_size) |>
@@ -118,13 +111,19 @@ plot_age_fits_mcmc <- function(model,
   comps <- comps |>
     select(-sample_size)
 
-  vals <- model$mcmccalcs$agefit_quants |>
-    filter(tolower(gear) == gear_name) |>
-    select(-gear) |>
+  fits <- model$mcmc$agefits |>
+    filter(tolower(gear) == tolower(gear_name)) |>
+    pivot_longer(ages, names_to = "age") |>
+    group_by(gear, year, sex, age) |>
+    summarize(lo = quantile(value, probs = 0.025),
+              med = quantile(value, probs = 0.5),
+              hi = quantile(value, probs = 0.975)) |>
     mutate(sex = ifelse(sex %in% c(0, 2),
                         tr("Female"),
-                        tr("Male")))
+                        tr("Male"))) |>
+    mutate(age = as.numeric(age))
 
+  gear_name <- fits$gear |> unique()
   if(!is.null(yrs)){
     if(!any(c("numeric", "integer") %in% class(yrs))){
       stop("`yrs` must be a numeric or integer type",
@@ -138,60 +137,27 @@ plot_age_fits_mcmc <- function(model,
       filter(year %in% yrs)
     comps <- comps |>
       filter(year %in% yrs)
-    vals <- vals |>
+    fits <- fits |>
       filter(year %in% yrs)
   }
 
-  prob_cols <- paste0(prettyNum(probs * 100), "%")
-  # In case the decimals have been changed to commas, change them back
-  prob_cols <- gsub(",", ".", prob_cols)
-
-  quant_vals <- unique(vals$quants)
-  quants <- imap_chr(prob_cols, ~{
-    mtch <- grep(.x, quant_vals, value = TRUE)
-    if(!length(mtch)){
-      stop("One of the values in `probs` does not appear in the MCMC output data: ", .x)
-    }
-    mtch
-  })
-
-  get_val <- function(d, q){
-    d |>
-      filter(quants == q) |>
-      select(-quants) |>
-      pivot_longer(-c(year, sex), names_to = "age", values_to = "prop") |>
-      mutate(age = as.numeric(age))
-  }
-  lo_vals <- get_val(vals, quants[1]) |>
-    mutate(lo_prop = prop)
-  med_vals <- get_val(vals, quants[2])
-  hi_vals <- get_val(vals, quants[3]) |>
-    mutate(hi_prop = prop)
-  rib_vals <- lo_vals |>
-    left_join(hi_vals, by = c("year", "sex", "age")) |>
-    select(-c(prop.x, prop.y))
-
-  g <- ggplot(comps, aes(x = factor(age), ymax = prop, ymin = 0)) +
-    geom_linerange(color = comp_color) +
-    geom_point(aes(y = prop), color = comp_color, size = comp_point_size) +
-    geom_point(data = med_vals, aes(y = prop, group = year), color = ci_color) +
-    geom_line(data = med_vals, aes(y = prop, group = year), color = ci_color)
-
-  if(ci_type %in% c("line", "both")){
-    g <- g +
-      geom_line(data = lo_vals, aes(y = lo_prop, group = year),
-                color = ci_color,
-                linetype = ci_linetype) +
-      geom_line(data = hi_vals, aes(y = hi_prop, group = year),
-                color = ci_color,
-                linetype = ci_linetype)
-  }
-  if(ci_type %in% c("ribbon", "both")){
-    g <- g +
-      geom_ribbon(data = rib_vals, aes(ymin = lo_prop, ymax = hi_prop, group = year),
-                  fill = ci_color, alpha = ci_alpha)
-  }
-  g <- g +
+  g <- ggplot(fits,
+              aes(x = age,
+                  y = med,
+                  ymin = lo,
+                  ymax = hi)) +
+    geom_col(data = comps,
+             mapping = aes(x = as.numeric(age),
+                           y = prop),
+             width = comp_width,
+             alpha = comp_alpha,
+             color = comp_color,
+             inherit.aes = FALSE) +
+    geom_ribbon(fill = ci_color, alpha = ci_alpha) +
+    geom_point() +
+    geom_line() +
+    geom_line(aes(x = age, y = lo), inherit.aes = FALSE, linetype = ci_linetype, color = ci_color) +
+    geom_line(aes(x = age, y = hi), inherit.aes = FALSE, linetype = ci_linetype, color = ci_color) +
     facet_grid(year ~ sex) +
     xlab(tr("Age")) +
     ylab(tr("Proportion"))
@@ -206,13 +172,13 @@ plot_age_fits_mcmc <- function(model,
         theme(plot.title = element_text(hjust = 0.5, size = text_title_size),
               plot.subtitle = element_text(hjust = 0.5, size = text_title_size))
     }else{
-      g <- g + ggtitle(gear_name) +
+      g <- g + ggtitle(firstup(gear_name)) +
         theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
     }
   }
 
   # Add sample sizes
-  g <- g + geom_text(sample_size, mapping = aes(x = x, y = y, label = sample_size))
+  g <- g + geom_text(sample_size, mapping = aes(x = x, y = y, label = sample_size), inherit.aes = FALSE)
 
   if(angle_x_labels){
     g <- g +
