@@ -1,38 +1,31 @@
-#' Plot MCMC age residuals for an iSCAM model
+#' Plot MCMC age residuals bubbles for an iSCAM model
 #'
 #' @inheritParams plot_age_fits_mcmc
 #' @family Age plotting functions
+#' @param include Two-element vector of the minimum and maximum values
+#' to include. Eliminates large outliers which bias the bubble sizes
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_age_resids_mcmc <- function(model,
                                  gear = 1,
-                                 type = c("age", "year", "birth_year"),
-                                 probs = c(0.025, 0.5, 0.975),
-                                 comp_color = "black",
-                                 comp_point_size = 0.5,
-                                 ci_type = c("both", "line", "ribbon"),
-                                 ci_linetype =  c("dotted", "solid",
-                                                  "dashed", "dotdash",
-                                                  "longdash", "twodash"),
-                                 ci_color = "red",
-                                 ci_alpha = 0.3,
-                                 ylim = c(-3, 3),
+                                 include = c(-5, 5),
                                  text_title_size = 12,
                                  text_title_inc_mdl_nm = FALSE,
-                                 leg_loc = c(1, 1),
                                  angle_x_labels = FALSE){
 
-  type <- match.arg(type)
-  ci_type <- match.arg(ci_type)
-  ci_linetype <- match.arg(ci_linetype)
+  if(is_iscam_model_list(model) && length(model) == 1){
+    model <- model[[1]]
+  }
 
   if(!is_iscam_model(model)){
     if(is_iscam_model_list(model)){
       stop("`model` is not an iscam model object, it is an iscam model ",
-           "list object")
+           "list object",
+           call. = FALSE)
     }
-    stop("`model` is not an iscam model object")
+    stop("`model` is not an iscam model object",
+         call. = FALSE)
   }
 
   # Set up model description for the title
@@ -43,93 +36,37 @@ plot_age_resids_mcmc <- function(model,
          call. = FALSE)
   }
 
-  if(length(probs) != 3){
-    stop("`probs` has length ", length(probs), " but must be a vector ",
-         "of three values representing lower CI, median, and upper CI")
-  }
-
   nsex <- model$dat$num.sex
   ages <- as.character(model$dat$start.age:model$dat$end.age)
   gear_names <- tolower(model$dat$age_gear_names)
   gear_name <- gear_names[gear]
 
-  comps <- model$mpd$a_obs[[gear]] |>
-    select(-c(gear, area, group)) |>
-    pivot_longer(-c(year, sample_size, sex), names_to = "age", values_to = "prop") |>
+  resids <- model$mcmc$ageresids |>
+    filter(tolower(gear) == tolower(gear_name)) |>
+    pivot_longer(ages, names_to = "age") |>
+    group_by(gear, year, sex, age) |>
+    summarize(lo = quantile(value, probs = 0.025),
+              med = quantile(value, probs = 0.5),
+              hi = quantile(value, probs = 0.975)) |>
+    mutate(sex = ifelse(sex %in% c(0, 2),
+                        tr("Female"),
+                        tr("Male"))) |>
     mutate(age = as.numeric(age)) |>
-    mutate(sex = ifelse(sex %in% c(0, 2),
-                        tr("Female"),
-                        tr("Male")))
+    mutate(Sign = ifelse(med >= 0, "Positive", "Negative")) |>
+    filter(med >= include[1] & med <= include[2]) |>
+    rename(`Median residual` = med)
 
-  sample_size <- comps |>
-    distinct(year, sex, sample_size)
-  comps <- comps |>
-    select(-sample_size)
+  gear_name <- resids$gear |> unique()
 
-  vals <- model$mcmccalcs$ageresids_quants |>
-    filter(tolower(gear) == gear_name) |>
-    select(-gear) |>
-    mutate(sex = ifelse(sex %in% c(0, 2),
-                        tr("Female"),
-                        tr("Male")))
+  g <- ggplot(resids, aes(x = year, y = age)) +
+    geom_point(aes(size = `Median residual`, color = Sign), alpha = 0.1) +
+    geom_point(aes(size = `Median residual`, color = Sign), pch = 21) +
+    scale_color_manual(values = c("red", "black")) +
+    scale_size_area() +
+    facet_grid(~sex) +
+    xlab(tr("Year")) +
+    ylab(tr("Age"))
 
-  prob_cols <- paste0(prettyNum(probs * 100), "%")
-  # In case the decimals have been changed to commas, change them back
-  prob_cols <- gsub(",", ".", prob_cols)
-
-  quant_vals <- unique(vals$quants)
-  quants <- imap_chr(prob_cols, ~{
-    mtch <- grep(.x, quant_vals, value = TRUE)
-    if(!length(mtch)){
-      stop("One of the values in `probs` does not appear in the MCMC ",
-           "output data: ", .x)
-    }
-    mtch
-  })
-
-  get_val <- function(d, q){
-    d |>
-      filter(quants == q) |>
-      select(-quants) |>
-      pivot_longer(-c(year, sex), names_to = "age", values_to = "prop") |>
-      mutate(age = as.numeric(age))
-  }
-  lo_vals <- get_val(vals, quants[1]) |>
-    mutate(lo_prop = prop)
-  med_vals <- get_val(vals, quants[2])
-  hi_vals <- get_val(vals, quants[3]) |>
-    mutate(hi_prop = prop)
-  rib_vals <- lo_vals |>
-    left_join(hi_vals, by = c("year", "sex", "age")) |>
-    select(-c(prop.x, prop.y))
-
-  med_vals <- med_vals |>
-    mutate(age = factor(age),
-           year = factor(year))
-  if(type == "age"){
-  }else if(type == "year"){
-  }else if(type == "birth_year"){
-    med_vals <- med_vals |>
-      mutate(birth_year = factor(as.numeric(as.character(year)) -
-                                   as.numeric(as.character(age))))
-  }
-
-  g <- ggplot(med_vals, aes(!!sym(type), prop, fill = sex)) +
-    stat_boxplot(geom = "errorbar") +
-    geom_boxplot(outlier.colour = "black",
-                 outlier.shape = 3,
-                 outlier.size = 0.5) +
-    scale_fill_manual(values = c("#FF000050", "#0000FF50")) +
-    geom_hline(aes(yintercept = 0), color = "red", linetype = "dashed", size = 0.3) +
-    ylab(ifelse(fr(), "Résidus normalisés logarithmiques", "Log standardized residuals")) +
-    xlab(ifelse(type == "birth_year",
-                ifelse(fr(), "Année de naissance", "Year of birth"),
-                tr(firstup(type)))) +
-    scale_y_continuous(breaks = seq(-5, 5, by = 0.5))
-
-  if(!is.null(ylim)){
-    g <- g + coord_cartesian(ylim = ylim)
-  }
 
   if(!is.null(text_title_size)){
     if(text_title_inc_mdl_nm){
@@ -141,17 +78,6 @@ plot_age_resids_mcmc <- function(model,
       g <- g + ggtitle(gear_name) +
         theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
     }
-  }
-
-  if(is.null(leg_loc)){
-    g <- g +
-      theme(legend.position = "none")
-  }else{
-    g <- g +
-      theme(legend.position = leg_loc,
-            legend.justification = leg_loc,
-            legend.background = element_rect(fill = "white", color = "white")) +
-      labs(fill = tr("Sex"))
   }
 
   if(angle_x_labels){

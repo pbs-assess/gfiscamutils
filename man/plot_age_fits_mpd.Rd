@@ -34,6 +34,7 @@ Plot MPD age fits for an iSCAM model
 \seealso{
 Other Age plotting functions: 
 \code{\link{plot_age_fits_mcmc}()},
+\code{\link{plot_age_resids_boxes_mcmc}()},
 \code{\link{plot_age_resids_mcmc}()},
 \code{\link{plot_age_resids_mpd}()}
 }

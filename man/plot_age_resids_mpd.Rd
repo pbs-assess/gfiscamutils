@@ -48,6 +48,7 @@ Plot the age fits for an MPD model
 Other Age plotting functions: 
 \code{\link{plot_age_fits_mcmc}()},
 \code{\link{plot_age_fits_mpd}()},
+\code{\link{plot_age_resids_boxes_mcmc}()},
 \code{\link{plot_age_resids_mcmc}()}
 }
 \concept{Age plotting functions}
