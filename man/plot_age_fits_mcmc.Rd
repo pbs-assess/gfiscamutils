@@ -7,11 +7,10 @@
 plot_age_fits_mcmc(
   model,
   gear = 1,
-  probs = c(0.025, 0.5, 0.975),
   yrs = NULL,
   comp_color = "black",
-  comp_point_size = 0.5,
-  ci_type = c("both", "line", "ribbon"),
+  comp_width = 0.5,
+  comp_alpha = 0.5,
   ci_linetype = c("dotted", "solid", "dashed", "dotdash", "longdash", "twodash"),
   ci_color = "red",
   ci_alpha = 0.3,
@@ -28,19 +27,11 @@ plot_age_fits_mcmc(
 
 \item{gear}{The number of the gear to plot}
 
-\item{probs}{A 3-element vector of probabilities that appear in the
-output data frames. This is provided in case the data frames have more than
-three different quantile levels}
-
 \item{yrs}{A vector of years to include in the plot. If the maximum extends
 past the range of years in the data, the maximum in the data will be used.
 If \code{NULL}, all years will be included}
 
 \item{comp_color}{Color for the age comp data lines and points}
-
-\item{comp_point_size}{Size of the age comp data points}
-
-\item{ci_type}{One of "line", "ribbon", "both" to show the credible interval}
 
 \item{ci_linetype}{See \code{linetype} in \link{ggplot2}. Only used if \code{ci_type} is
 "line" or "both"}
@@ -67,6 +58,10 @@ Included for cases where the sample size is shared or repeated for both sexes.}
 
 \item{type}{The type of residual plot to create. Options are "age", "year",
 and "birth_year"}
+
+\item{comp_point_size}{Size of the age comp data points}
+
+\item{ci_type}{One of "line", "ribbon", "both" to show the credible interval}
 
 \item{ylim}{For residual plots, set the y-axis limits with this two-element
 vector}

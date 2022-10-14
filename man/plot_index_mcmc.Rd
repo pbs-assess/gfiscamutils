@@ -86,6 +86,7 @@ Other Time series plotting functions:
 \code{\link{plot_f_mcmc}()},
 \code{\link{plot_index_mpd}()},
 \code{\link{plot_q_mcmc}()},
+\code{\link{plot_rdevs_mcmc}()},
 \code{\link{plot_recr_grid_mcmc}()},
 \code{\link{plot_recr_mcmc}()},
 \code{\link{plot_recr_mpd}()},

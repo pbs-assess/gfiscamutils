@@ -30,10 +30,6 @@ plot_age_resids_mcmc(
 \item{type}{The type of residual plot to create. Options are "age", "year",
 and "birth_year"}
 
-\item{probs}{A 3-element vector of probabilities that appear in the
-output data frames. This is provided in case the data frames have more than
-three different quantile levels}
-
 \item{comp_color}{Color for the age comp data lines and points}
 
 \item{comp_point_size}{Size of the age comp data points}

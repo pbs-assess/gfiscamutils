@@ -4,7 +4,15 @@
 \alias{table_param_phi_mpd}
 \title{Create a table comparing phi parameter}
 \usage{
-table_param_phi_mpd(model, digits = 2, french = FALSE, col_widths = "5em", ...)
+table_param_phi_mpd(
+  model,
+  digits = 2,
+  french = FALSE,
+  col_widths = "5em",
+  ret_df = FALSE,
+  by_sex = FALSE,
+  ...
+)
 }
 \arguments{
 \item{model}{An iSCAM model as output from \code{\link[=load_iscam_files]{load_iscam_files()}}}
@@ -14,6 +22,11 @@ table_param_phi_mpd(model, digits = 2, french = FALSE, col_widths = "5em", ...)
 \item{french}{If \code{TRUE} translate to French}
 
 \item{col_widths}{Widths for columns, except the Parameter column}
+
+\item{ret_df}{If \code{TRUE}, return a data.frame instead of the \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
+
+\item{by_sex}{If \code{TRUE}, the table will have two rows per year, one for each sex.
+If \code{FALSE}, the female value will be used}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }
