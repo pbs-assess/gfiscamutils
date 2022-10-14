@@ -319,6 +319,7 @@ plot_index_mcmc <- function(models,
     }
   }else if(leg_loc[1] == "facet"){
     g <- g %>% move_legend_to_empty_facet()
+  }else if(leg_loc[1] == "outside"){
   }else{
     g <- g +
       theme(legend.justification = leg_loc,
