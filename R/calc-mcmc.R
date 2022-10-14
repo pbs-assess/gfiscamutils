@@ -215,19 +215,20 @@ calc_mcmc <- function(model,
   }
 
   if(!is.null(mc$agefits)){
-    out$agefit_quants <- calc_longer_quants(mc$agefits,
-                                            type = "age",
-                                            probs)
+    # Can't ttrust these functions...
+    # out$agefit_quants <- calc_longer_quants(mc$agefits,
+    #                                         type = "age",
+    #                                         probs)
   }
   if(!is.null(mc$ageresids)){
-    out$ageresids_quants <- calc_longer_quants(mc$ageresids,
-                                               type = "age",
-                                               probs)
+    # out$ageresids_quants <- calc_longer_quants(mc$ageresids,
+    #                                            type = "age",
+    #                                            probs)
   }
   if(!is.null(mc$selest)){
-    out$selest_quants <- calc_longer_quants(mc$selest,
-                                            type = "sel",
-                                            probs)
+    # out$selest_quants <- calc_longer_quants(mc$selest,
+    #                                         type = "sel",
+    #                                         probs)
   }
 
   if(load_proj){

@@ -90,7 +90,7 @@ plot_age_fits_mcmc <- function(model,
     group_by(year, sex) |>
     mutate(prop = value / sum(value)) |>
     select(-c(gear, area, group)) |>
-    mutate(sex = ifelse(sex %in% c(0, 2),
+    mutate(sex = ifelse(sex %in% c(0, 1),
                         tr("Female"),
                         tr("Male"))) |>
     select(-value) |>
@@ -118,7 +118,7 @@ plot_age_fits_mcmc <- function(model,
     summarize(lo = quantile(value, probs = 0.025),
               med = quantile(value, probs = 0.5),
               hi = quantile(value, probs = 0.975)) |>
-    mutate(sex = ifelse(sex %in% c(0, 2),
+    mutate(sex = ifelse(sex %in% c(0, 1),
                         tr("Female"),
                         tr("Male"))) |>
     mutate(age = as.numeric(age))
@@ -129,7 +129,7 @@ plot_age_fits_mcmc <- function(model,
       stop("`yrs` must be a numeric or integer type",
            call. = FALSE)
     }
-    if(!all(min(yrs) %in% vals$year & min(yrs) %in% comps$year)){
+    if(!all(min(yrs) %in% fits$year & min(yrs) %in% comps$year)){
       stop("Not all `yrs` exist in the `comps` and `fits` years",
            call. = FALSE)
     }

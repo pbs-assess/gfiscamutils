@@ -48,7 +48,7 @@ plot_age_resids_mcmc <- function(model,
     summarize(lo = quantile(value, probs = 0.025),
               med = quantile(value, probs = 0.5),
               hi = quantile(value, probs = 0.975)) |>
-    mutate(sex = ifelse(sex %in% c(0, 2),
+    mutate(sex = ifelse(sex %in% c(0, 1),
                         tr("Female"),
                         tr("Male"))) |>
     mutate(age = as.numeric(age)) |>
@@ -66,7 +66,6 @@ plot_age_resids_mcmc <- function(model,
     facet_grid(~sex) +
     xlab(tr("Year")) +
     ylab(tr("Age"))
-
 
   if(!is.null(text_title_size)){
     if(text_title_inc_mdl_nm){
