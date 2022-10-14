@@ -231,11 +231,11 @@ plot_selex_mcmc <- function(model,
   if(show_maturity){
     model$mpd$ma
     if(model$dat$num.sex == 2){
-      a50_male <- model$dat$age.at.50.mat[1]
-      sigma_a50_male <- model$dat$sd.at.50.mat[1]
-      a50_female <- model$dat$age.at.50.mat[2]
-      sigma_a50_female <- model$dat$sd.at.50.mat[2]
-        g <- g +
+      a50_female <- model$dat$age.at.50.mat[1]
+      sigma_a50_female <- model$dat$sd.at.50.mat[1]
+      a50_male <- model$dat$age.at.50.mat[2]
+      sigma_a50_male <- model$dat$sd.at.50.mat[2]
+      g <- g +
         geom_function(fun = function(x){1 / (1 + exp(-(x - a50_male) / sigma_a50_male))},
                       color = "blue",
                       linetype = "dashed")
