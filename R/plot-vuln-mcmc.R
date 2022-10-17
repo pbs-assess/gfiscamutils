@@ -13,11 +13,13 @@
 #' @family Time series plotting functions
 #'
 #' @export
-plot_vuln_mcmc <- function(...,
-                           inc_sbt = FALSE,
+plot_vuln_mcmc <- function(model,
+                           append_base_txt = " Spawning biomass",
+                           xlim = NULL,
+                           ylim = NULL,
                            angle_x_labels = FALSE){
-  if(inc_sbt){
-    model <- list(...)[[1]]
+
+
     if(!is_iscam_model(model)){
       stop("The `model` is not a ", mdl_cls, " class", call. = FALSE)
     }
@@ -36,12 +38,9 @@ plot_vuln_mcmc <- function(...,
     class(models) <- mdl_lst_cls
     plot_ts_mcmc(models,
                  quant_df = "sbt_quants",
-                 angle_x_labels = angle_x_labels)
-  }else{
-    plot_ts_mcmc(...,
-                 quant_df = "vbt_quants",
-                 facet_wrap_var = "gear",
-                 y_label = "Vulnerable biomass ('000 t)",
-                 angle_x_labels = angle_x_labels)
-  }
+                 angle_x_labels = angle_x_labels,
+                 append_base_txt = append_base_txt,
+                 xlim = xlim,
+                 ylim = ylim,
+                 y_label = "Biomass (thousand t)")
 }

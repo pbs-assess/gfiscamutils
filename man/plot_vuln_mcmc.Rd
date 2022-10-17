@@ -4,15 +4,21 @@
 \alias{plot_vuln_mcmc}
 \title{Plot MCMC vulnerable biomass for iSCAM models}
 \usage{
-plot_vuln_mcmc(..., inc_sbt = FALSE, angle_x_labels = FALSE)
+plot_vuln_mcmc(model, xlim = NULL, ylim = NULL, angle_x_labels = FALSE)
 }
 \arguments{
+\item{xlim}{The x limits for the plot. If \code{NULL}, the limits of the data
+will be used}
+
+\item{ylim}{The y limits for the plot. If \code{NULL}, the limits of the data
+will be used}
+
+\item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
+
 \item{inc_sbt}{Logical. If \code{TRUE}, put all gear's vulnerable biomass
 on one plot along with the spawning biomass (sbt). If \code{FALSE}, make
 a panel plot with one vulnerable biomass plot per panel, with no
 spawning biomass}
-
-\item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 }
 \description{
 Plot vulnerable biomass time series plots for MCMC output with credible
