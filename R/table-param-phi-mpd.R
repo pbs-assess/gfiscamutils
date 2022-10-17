@@ -5,20 +5,25 @@
 #' Dirichlet Multinomial for MPD models.
 #'
 #' @param model An iSCAM model as output from [load_iscam_files()]
+#' @param format See argument in [knitr::kable()]
+#' @param yrs A vector of years to include in the table. If `NULL`, all
+#' will be included
 #' @param digits Number of digits to show
 #' @param french If `TRUE` translate to French
 #' @param col_widths Widths for columns, except the Parameter column
-#' @param ret_df If `TRUE`, return a data.frame instead of the [csasdown::csas_table()]
-#' @param by_sex If `TRUE`, the table will have two rows per year, one for each sex.
-#' If `FALSE`, the female value will be used
+#' @param ret_df If `TRUE`, return a data.frame instead of the
+#' [csasdown::csas_table()]
+#' @param by_sex If `TRUE`, the table will have two rows per year, one for
+#' each sex. If `FALSE`, the female value will be used
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
 #' @return An [csasdown::csas_table()]
 #' @importFrom kableExtra add_header_above
 #' @export
 table_param_phi_mpd <- function(model,
+                                format = "latex",
+                                yrs = NULL,
                                 digits = 2,
-                                french = FALSE,
                                 col_widths = "5em",
                                 ret_df = FALSE,
                                 by_sex = FALSE,
@@ -61,10 +66,16 @@ table_param_phi_mpd <- function(model,
                     "n",
                     "neff",
                     "log_phi")
-    out %>%
-      mutate(Sex = ifelse(Sex == 0, "Female", ifelse(Sex == 1, "Female", "Male")))%>%
+
+    out <- out |>
+      mutate(Sex = ifelse(Sex == 0, "Female", ifelse(Sex == 1, "Female", "Male"))) |>
       mutate_at(vars(4:5), ~{format(round(., digits), digits = digits, nsmall = digits)}) %>%
       mutate_at(vars(3), ~{format(., nsmall = 0)})
+    if(!is.null(yrs)){
+      out <- out |>
+        filter(Year %in% yrs)
+    }
+    out
   })
   # Join all the data frames in the list into one data frame
   xx <- lp_samp[[1]]
@@ -79,9 +90,13 @@ table_param_phi_mpd <- function(model,
 
   # Construct extra group headers for gears
   col_names <- c("Year", "Sex")
-  header_above <- c(" " = 2)
+  header_above <- c(" " = 1)
   for(i in seq_along(gear_names)){
-    col_names <- c(col_names, "$N$", "$N_{eff}$", "$log(\\phi)$")
+    if(format == "html"){
+      col_names <- c(col_names, "\\(N\\)", "\\(N_{eff}\\)", "\\(log(\\phi)\\)")
+    }else{
+      col_names <- c(col_names, "$N$", "$N_{eff}$", "$log(\\phi)$")
+    }
     header_above <- c(header_above, setNames(3, gear_names[i]))
   }
   names(out) <- col_names
@@ -100,19 +115,26 @@ table_param_phi_mpd <- function(model,
   if(ret_df){
     return(out)
   }
-browser()
-  tab <- csas_table(out,
-                    format = "latex",
-                    col_names = names(out),
-                    align = c("l", rep("r", ncol(out) - 1)),
-                    col_names_align = rep("r", ncol(out)),
-                    ...) |>
-    gfiscamutils::add_header_above(header_above)
 
-  if(!is.null(col_widths)){
-    tab <- tab %>%
-      column_spec(2:ncol(out), width = col_widths)
+  if(format == "html"){
+    tab <- out |>
+      kable(...) |>
+      add_header_above(header_above)
+  }else{
+    tab <- csas_table(out,
+                      format = format,
+                      col_names = names(out),
+                      align = c("l", rep("r", ncol(out) - 1)),
+                      col_names_align = rep("r", ncol(out)),
+                      ...) |>
+      add_header_above(header_above)
+
+    if(!is.null(col_widths)){
+      tab <- tab %>%
+        column_spec(2:ncol(out), width = col_widths)
+    }
   }
+
   tab
 }
 
