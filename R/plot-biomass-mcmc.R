@@ -402,6 +402,9 @@ plot_biomass_mcmc <- function(models,
       theme(axis.text.x = element_text(angle = 45, hjust = 0.55, vjust = 0.5))
   }
 
+  g <- g +
+    guides(colour = guide_legend(override.aes = list(size = 0.5, fatten = 1)))
+
   # Move the B0 and BMSY lines and shaded areas behind the models
   # This is necessary to have a generic plotting function(plot_ts_mcmc)
   # as that plot has to be made first to make the code simpler
