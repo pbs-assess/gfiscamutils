@@ -135,19 +135,25 @@ plot_ts_mcmc <- function(models,
   names(models) <- map_chr(models, ~{
     as.character(attributes(.x)$model_desc)
   })
+  # Set model names for plotting
   names(models) <- paste0(names(models), append_base_txt)
+  models <- imap(models, ~{
+    attributes(.x)$model_desc <- .y
+    .x
+  })
 
   start_yr <- map_dbl(models, ~{.x$dat$start.yr + 1}) %>% min
   end_yr <- map_dbl(models, ~{.x$dat$end.yr + 1}) %>% max
+
   if(is.null(xlim)){
     xlim <- c(start_yr, end_yr)
   }else{
     if(start_yr > xlim[1]){
-      stop("Start year in xlim comes before the data start year",
+      stop("Start year in xlim comes before the data start year (", start_yr, ")",
            call. = FALSE)
     }
     if(end_yr < xlim[2]){
-      stop("End year in xlim comes after the data end year",
+      stop("End year in xlim comes after the data end year (", end_yr, ")",
            call. = FALSE)
     }
     start_yr <- xlim[1]
