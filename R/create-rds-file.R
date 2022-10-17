@@ -40,15 +40,6 @@ create_rds_file <- function(model_dir = NULL,
   # If this point is reached, no RDs file exists so it has to be built from scratch
   model <- load_iscam_files(model_dir, ...)
 
-  # Load retrospectives. If none are found or there is a problem, model$retros will be NA
-  # model$retropath <- file.path(model_dir, retro.dir)
-  # if(dir.exists(model$retropath)){
-  #   model$retros <- fetch_retrospectives(model$retropath,
-  #                                        retrospective_yrs)
-  # }else{
-  #   model$retros <- NA
-  # }
-
   saveRDS(model, file = rds_file)
   message("Created a new RDS file:\n", rds_file, "\n")
   invisible()
