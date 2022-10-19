@@ -6,6 +6,7 @@
 \usage{
 table_decisions(
   model,
+  format = "latex",
   bo_refpts = c(0.2, 0.4),
   bmsy_refpts = c(0.4, 0.8),
   bold_header = FALSE,
