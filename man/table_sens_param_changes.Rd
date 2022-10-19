@@ -7,6 +7,7 @@
 table_sens_param_changes(
   sens_desc_vec,
   sens_change_vec,
+  ret_df = FALSE,
   col_widths = NULL,
   ...
 )

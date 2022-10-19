@@ -4,6 +4,7 @@
 #' @export
 table_sens_param_changes <- function(sens_desc_vec,
                                      sens_change_vec,
+                                     ret_df = FALSE,
                                      col_widths = NULL,
                                      ...){
 
@@ -17,6 +18,10 @@ table_sens_param_changes <- function(sens_desc_vec,
   changes <- enframe(unlist(sens_change_vec), name = NULL) |>
     `names<-`(tr("Changes"))
   tab <- bind_cols(desc, changes)
+
+  if(ret_df){
+    return(tab)
+  }
 
   out <- csas_table(tab,
                     format = "latex",

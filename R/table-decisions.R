@@ -17,6 +17,7 @@
 #' @export
 #' @importFrom gfutilities f
 table_decisions <- function(model,
+                            format = "latex",
                             bo_refpts = c(0.2, 0.4),
                             bmsy_refpts = c(0.4, 0.8),
                             bold_header = FALSE,
@@ -88,15 +89,27 @@ table_decisions <- function(model,
              #length(which(x[, b_ey] < bmsy_refvals[[2]])) / nrow(x),
              length(which(x[, b_ey] < x[, b_ey_minus1])) / nrow(x))
 
-    enframe(out) |>
-      mutate(name = c("TAC",
-                      paste0("P(B\\textsubscript{", end_yr, "} < ",
-                             bo_refpts[1], "B\\textsubscript{0})"),
-                      paste0("P(B\\textsubscript{", end_yr, "} < ",
-                             bo_refpts[2], "B\\textsubscript{0})"),
-                      paste0("P(B\\textsubscript{", end_yr, "} < ",
-                             "B\\textsubscript{", end_yr_minus1, "})"))) |>
-      pivot_wider(names_from = "name", values_from = "value")
+    if(format == "html"){
+      enframe(out) |>
+        mutate(name = c("TAC",
+                        paste0("\\(P(B_{", end_yr, "} < ",
+                               bo_refpts[1], "B_{0})\\)"),
+                        paste0("\\(P(B_{", end_yr, "} < ",
+                               bo_refpts[2], "B_{0})\\)"),
+                        paste0("\\(P(B_{", end_yr, "} < ",
+                               "B_{", end_yr_minus1, "})\\)"))) |>
+        pivot_wider(names_from = "name", values_from = "value")
+    }else{
+      enframe(out) |>
+        mutate(name = c("TAC",
+                        paste0("P(B\\textsubscript{", end_yr, "} < ",
+                               bo_refpts[1], "B\\textsubscript{0})"),
+                        paste0("P(B\\textsubscript{", end_yr, "} < ",
+                               bo_refpts[2], "B\\textsubscript{0})"),
+                        paste0("P(B\\textsubscript{", end_yr, "} < ",
+                               "B\\textsubscript{", end_yr_minus1, "})"))) |>
+        pivot_wider(names_from = "name", values_from = "value")
+    }
   }) |>
     bind_rows() |>
     mutate_at(.vars = vars(-TAC), ~{f(.x, digits)}) |>
@@ -118,18 +131,25 @@ table_decisions <- function(model,
     return(tab)
   }
 
-  if(fr()){
-    names(tab)[names(tab) == "TAC"] <- latex.mlc(c("Prise",
-                                                   "(milliers de t)"),
-                                                 make.bold = bold_header)
-  }else{
-    names(tab)[names(tab) == "TAC"] <- latex.mlc(c("Catch",
-                                                   "(thousand t)"),
-                                                 make.bold = bold_header)
+  if(format == "latex"){
+    if(fr()){
+      names(tab)[names(tab) == "TAC"] <- latex.mlc(c("Prise",
+                                                     "(milliers de t)"),
+                                                   make.bold = bold_header)
+    }else{
+      names(tab)[names(tab) == "TAC"] <- latex.mlc(c("Catch",
+                                                     "(thousand t)"),
+                                                   make.bold = bold_header)
+    }
+  }else if(format == "html"){
+    if(fr()){
+      names(tab)[names(tab) == "TAC"] <- "Prise (milliers de t)"
+    }else{
+      names(tab)[names(tab) == "TAC"] <- "Catch (thousand t)"
+    }
   }
-
   out <- csas_table(tab,
-                    format = "latex",
+                    format = format,
                     bold_header = FALSE,
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),

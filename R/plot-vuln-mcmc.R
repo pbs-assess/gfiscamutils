@@ -17,6 +17,7 @@ plot_vuln_mcmc <- function(model,
                            append_base_txt = " Spawning biomass",
                            xlim = NULL,
                            ylim = NULL,
+                           leg_loc = NULL,
                            angle_x_labels = FALSE){
 
 
@@ -40,6 +41,7 @@ plot_vuln_mcmc <- function(model,
                  quant_df = "sbt_quants",
                  angle_x_labels = angle_x_labels,
                  append_base_txt = append_base_txt,
+                 leg_loc = leg_loc,
                  xlim = xlim,
                  ylim = ylim,
                  y_label = "Biomass (thousand t)")
