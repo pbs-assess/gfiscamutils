@@ -2,11 +2,9 @@
 #'
 #' @param model An iSCAM model object as created in [load_iscam_files()]
 #' @param burnin The number of MCMC records to remove for burnin period
-#' for projections if `load_proj == TRUE`
 #' @param thin Remove every nth record for thinning of MCMC output
-#' for projections if `load_proj == TRUE`
 #' @param probs The probabilities to use for `quantile()` calculations
-#' @param load_proj Load the projections from the MCMC and do the calculations
+#' @param load_proj Do the calculations for the projections
 #' @param index_scale Number to multiply the index values by so they match the
 #' `survey_index` values
 #' @param ... arguments to pass to [calc_proj_probs()] to construct the
@@ -232,15 +230,61 @@ calc_mcmc <- function(model,
   }
 
   if(load_proj){
+
     # Burn in and calculate quantiles for each TAC level
     mc$proj <- distinct(mc$proj) |>
       filter(TAC != "TAC")
 
-    out$proj <- mc$proj %>%
-      split(~TAC) %>%
+    out$proj <- mc$proj |>
+      rename(catch = TAC) |>
+      split(~catch) |>
       map(~{mcmc_thin(.x, burnin = burnin, thin = thin)})
-    out$proj_quants <- out$proj %>%
-      map(quantify)
+
+    # Extract Biomass values only
+    out$proj_sbt <- out$proj |>
+      map(~{
+        nms <- names(.x)
+        wch_bio <- grep("^B20[0-9]{2}$", nms, value = T)
+        select(.x, c(catch, all_of(wch_bio)))
+      }) |>
+      bind_rows()
+
+    # Add depletion for each B column and make into a single data frame
+    sbo <- out$params$sbo
+    out$proj_depl <- out$proj_sbt |>
+      group_by(catch) |>
+      mutate_at(vars(-catch), ~{.x / sbo}) |>
+      ungroup()
+
+    names(out$proj_sbt) <- gsub("B", "", names(out$proj_sbt))
+    names(out$proj_depl) <- gsub("B", "", names(out$proj_depl))
+
+    perc <- round(probs * 100, 1)
+    perc[2] <- ifelse(perc[2] == 50.0, "50", perc[2])
+    perc <- paste0(perc, "%")
+
+    # Pass in proj_depl or proj_sbt from above
+    calc_proj_quants <- function(proj_df){
+      proj_df |>
+        split(~catch) |>
+        imap(~{
+          x <- .x |> imap(~{
+            if(.y != "catch"){
+              quantile(.x, probs)
+            }
+          })
+          x[lengths(x) == 0] <- NULL
+          yrs <- names(x)
+          x <- x |> bind_rows() |>
+            mutate(year = yrs,
+                   catch = .y) |>
+            select(catch, year, everything())
+        }) |>
+        bind_rows()
+    }
+
+    out$proj_sbt_quants <- calc_proj_quants(out$proj_sbt)
+    out$proj_depl_quants <- calc_proj_quants(out$proj_depl)
 
     # Replace the final year of the sbt with the values obtained from the TAC 0 projection
     out$sbt[, ncol(out$sbt)] <- out$proj$`0`[, 2]
