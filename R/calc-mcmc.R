@@ -240,7 +240,7 @@ calc_mcmc <- function(model,
       split(~catch) |>
       map(~{mcmc_thin(.x, burnin = burnin, thin = thin)})
 
-    # Extract Biomass values only
+    # Extract biomass values only
     out$proj_sbt <- out$proj |>
       map(~{
         nms <- names(.x)
@@ -249,7 +249,7 @@ calc_mcmc <- function(model,
       }) |>
       bind_rows()
 
-    # Add depletion for each B column and make into a single data frame
+    # Calculate depletion values only
     sbo <- out$params$sbo
     out$proj_depl <- out$proj_sbt |>
       group_by(catch) |>
@@ -263,7 +263,7 @@ calc_mcmc <- function(model,
     perc[2] <- ifelse(perc[2] == 50.0, "50", perc[2])
     perc <- paste0(perc, "%")
 
-    # Pass in proj_depl or proj_sbt from above
+    # Pass in proj_depl or proj_sbt from above to proj_df
     calc_proj_quants <- function(proj_df){
       proj_df |>
         split(~catch) |>
@@ -280,7 +280,9 @@ calc_mcmc <- function(model,
                    catch = .y) |>
             select(catch, year, everything())
         }) |>
-        bind_rows()
+        bind_rows() |>
+        mutate(catch = as.numeric(catch),
+               year = as.numeric(year))
     }
 
     out$proj_sbt_quants <- calc_proj_quants(out$proj_sbt)

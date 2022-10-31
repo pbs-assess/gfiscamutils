@@ -20,6 +20,7 @@ point lines and credible intervals can be compared correctly.
 Other Time series plotting functions: 
 \code{\link{plot_biomass_mcmc}()},
 \code{\link{plot_biomass_mpd}()},
+\code{\link{plot_biomass_proj_mcmc}()},
 \code{\link{plot_f_mcmc}()},
 \code{\link{plot_index_mcmc}()},
 \code{\link{plot_index_mpd}()},

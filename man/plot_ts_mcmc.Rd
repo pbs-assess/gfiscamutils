@@ -6,7 +6,7 @@
 \usage{
 plot_ts_mcmc(
   models,
-  quant_df = "sbt",
+  quant_df = "sbt_quants",
   facet_wrap_var = c("none", "sex", "gear"),
   palette = iscam_palette,
   base_color = "black",
@@ -33,8 +33,8 @@ plot_ts_mcmc(
 \arguments{
 \item{models}{A list of iscam model objects (class \link{mdl_lst_cls})}
 
-\item{quant_df}{A value which can be found in the \code{model$mcmccalcs} list
-for each iscam model in the \code{models} list}
+\item{quant_df}{A name of a value which can be found in the
+\code{model$mcmccalcs} list for each iscam model in the \code{models} list}
 
 \item{facet_wrap_var}{A column in the \code{quant_df} data frame which will be
 used to split the output into separate panel plots. If "none", no faceting
@@ -116,6 +116,7 @@ Other Time series plotting functions:
 \code{\link{plot_biomass_grid_mcmc}()},
 \code{\link{plot_biomass_mcmc}()},
 \code{\link{plot_biomass_mpd}()},
+\code{\link{plot_biomass_proj_mcmc}()},
 \code{\link{plot_f_mcmc}()},
 \code{\link{plot_index_mcmc}()},
 \code{\link{plot_index_mpd}()},

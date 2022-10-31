@@ -20,8 +20,8 @@
 #' @family Time series plotting functions
 #'
 #' @param models A list of iscam model objects (class [mdl_lst_cls])
-#' @param quant_df A value which can be found in the `model$mcmccalcs` list
-#' for each iscam model in the `models` list
+#' @param quant_df A name of a value which can be found in the
+#' `model$mcmccalcs` list for each iscam model in the `models` list
 #' @param facet_wrap_var A column in the `quant_df` data frame which will be
 #' used to split the output into separate panel plots. If "none", no faceting
 #' will be done
@@ -63,7 +63,7 @@
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_ts_mcmc <- function(models,
-                         quant_df = "sbt",
+                         quant_df = "sbt_quants",
                          facet_wrap_var = c("none", "sex", "gear"),
                          palette = iscam_palette,
                          base_color = "black",
@@ -109,14 +109,9 @@ plot_ts_mcmc <- function(models,
     stop("`palette` name not found in `RColorBrewer::brewer.pal.info`",
          call. = FALSE)
   }
-
   palette_info <- brewer.pal.info[rownames(brewer.pal.info) == palette, ]
-
-  if(length(models) > palette_info$maxcolors){
-    stop("Cannot plot more than ", palette_info$maxcolors, " models because that is the ",
-         "maximum number for the ", palette, " palette",
-         call. = FALSE)
-  }
+  palette_func <- colorRampPalette(brewer.pal(palette_info$maxcolors, palette))
+  palette_colors <- palette_func(n = length(models))
 
   if(length(probs) != 3){
     stop("`probs` has length ", length(probs), " but must be a vector of three values ",
@@ -142,8 +137,17 @@ plot_ts_mcmc <- function(models,
     .x
   })
 
-  start_yr <- map_dbl(models, ~{.x$dat$start.yr + 1}) %>% min
-  end_yr <- map_dbl(models, ~{.x$dat$end.yr + 1}) %>% max
+  start_yr <- map_dbl(models, ~{
+    .x$dat$start.yr + 1
+    })  |>
+    min()
+  end_yr <- map_dbl(models, ~{
+    # Check to see if projection, if not use max in the data
+    max(.x$mcmccalcs[[quant_df]] |> as_tibble() |> names() |> as.numeric(), .x$mcmccalcs[[quant_df]],
+      .x$dat$end.yr + 1)
+    })  |>
+    max()
+  end_yr <- end_yr + 1
 
   if(is.null(xlim)){
     xlim <- c(start_yr, end_yr)
@@ -269,9 +273,7 @@ plot_ts_mcmc <- function(models,
     bind_rows
 
   # Color values have black prepended as it is the base model
-  model_colors <- c(base_color,
-                    brewer.pal(name = palette,
-                               n = palette_info$maxcolors))
+  model_colors <- c(base_color, palette_colors)
 
   g <- var_quants %>%
     ggplot(aes(x = year,
