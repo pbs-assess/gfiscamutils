@@ -24,7 +24,7 @@ plot_biomass_proj_mcmc <- function(model,
                                    line_width = 1,
                                    point_size = 2,
                                    label_digits = 2,
-                                   label_append_text = " t",
+                                   label_append_text = " kt",
                                    ...){
 
   if(!is_iscam_model(model)){
