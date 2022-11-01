@@ -13,11 +13,14 @@ plot_biomass_proj_mcmc(
   x_space = 0.5,
   y_space = ifelse(rel, 0.05, 0.5),
   show_bo_lines = FALSE,
+  bo_refpts = c(0.2, 0.4),
   bo_refpt_colors = c("red", "green"),
   line_width = 1,
   point_size = 2,
   label_digits = 2,
-  label_append_text = " t",
+  label_append_text = " kt",
+  angle_x_labels = FALSE,
+  ylim = NULL,
   ...
 )
 }
@@ -46,6 +49,11 @@ the plot with. To remove all padding, make this 0}
 \item{label_digits}{Number of digits to show in the catch labels}
 
 \item{label_append_text}{Text to append to the labels}
+
+\item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
+
+\item{ylim}{The y limits for the plot. If \code{NULL}, the limits of the data
+will be used}
 
 \item{...}{Arguments passed to \code{\link[=plot_ts_mcmc]{plot_ts_mcmc()}}}
 }

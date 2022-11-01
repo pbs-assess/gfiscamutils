@@ -20,11 +20,14 @@ plot_biomass_proj_mcmc <- function(model,
                                    x_space = 0.5,
                                    y_space = ifelse(rel, 0.05, 0.5),
                                    show_bo_lines = FALSE,
+                                   bo_refpts = c(0.2, 0.4),
                                    bo_refpt_colors = c("red", "green"),
                                    line_width = 1,
                                    point_size = 2,
                                    label_digits = 2,
                                    label_append_text = " kt",
+                                   angle_x_labels = FALSE,
+                                   ylim = NULL,
                                    ...){
 
   if(!is_iscam_model(model)){
@@ -118,19 +121,74 @@ plot_biomass_proj_mcmc <- function(model,
   g <- g +
     geom_text(aes(x = year, y = value, label = label), data = labels, inherit.aes = FALSE)
 
+  # Create tags for B0 lines, and breaks and labels for y-axis
+  if(is.null(ylim)){
+    if(rel){
+      ymax <- max(select(g$data, -c(model, year)))
+    }else{
+      ymax <- max(select(g$data, -c(model, year)),
+                  select(tso_quants, -c(model, year)))
+    }
+    upper_bound <- ceiling(ymax)
+    lims <- c(0, upper_bound)
+  }else{
+    upper_bound <- ylim[2]
+    lims <- ylim
+  }
+  brk <- seq(0, upper_bound, upper_bound / 10)
+  lbl <- brk
+  cols <- rep("black", length(brk))
+
+
   if(rel && show_bo_lines){
     g <- g +
       geom_hline(aes(yintercept = yintercept),
-                 data = data.frame(yintercept = 0.2),
+                 data = data.frame(yintercept = bo_refpts[1]),
                  color = bo_refpt_colors[1],
                  lty = 1,
                  lwd = 1) +
       geom_hline(aes(yintercept = yintercept),
-                 data = data.frame(yintercept = 0.4),
+                 data = data.frame(yintercept = bo_refpts[2]),
                  color = bo_refpt_colors[2],
                  lty = 2,
                  lwd = 1)
+
+    # Add the text labels to the y-axis ticks for the reference point levels
+    if(any(bo_refpts %in% brk)){
+      wch <- which(brk %in% bo_refpts)
+      brk <- brk[-wch]
+    }
+    brk <- sort(c(brk, bo_refpts))
+    lbl <- brk
+    wch <- which(brk %in% bo_refpts)
+    if(length(wch) != 2){
+      stop("Problem with the `bo_refpts` vector. ",
+           "See function code", call. = FALSE)
+    }
+    lbl[wch][1] <- as.expression(bquote(.(bo_refpts[1]) ~ B[0]))
+    lbl[wch][2] <- as.expression(bquote(.(bo_refpts[2]) ~ B[0]))
+    cols <- rep("black", length(brk))
+    cols[wch] <- bo_refpt_colors
   }
+
+  g <- g +
+    scale_y_continuous(limits = lims,
+                       breaks = brk,
+                       labels = lbl,
+                       expand = expansion(add = y_space)) +
+    theme(axis.text.y = element_text(color = cols),
+          axis.ticks.y = element_line(color = cols))
+
+  if(angle_x_labels){
+    g <- g +
+      theme(axis.text.x = element_text(angle = 45, hjust = 0.55, vjust = 0.5))
+  }
+
+  # Move the B0 and BMSY lines and shaded areas behind the models
+  # This is necessary to have a generic plotting function(plot_ts_mcmc)
+  # as that plot has to be made first to make the code simpler
+  g <- move_layers(g, "GeomHline", 0L)
+  g <- move_layers(g, "GeomRect", 0L)
 
   g
 }
