@@ -6,10 +6,8 @@
 \usage{
 table_decisions(
   model,
-  format = "latex",
+  format = c("latex", "html"),
   bo_refpts = c(0.2, 0.4),
-  bmsy_refpts = c(0.4, 0.8),
-  bold_header = FALSE,
   digits = 2,
   ret_df = FALSE,
   col_widths = NULL,
@@ -19,16 +17,17 @@ table_decisions(
 \arguments{
 \item{model}{An iscam model object (class \link{mdl_cls})}
 
+\item{format}{See \code{format} in \code{\link[knitr:kable]{knitr::kable()}}}
+
 \item{bo_refpts}{Vector of two proportional values for the limit reference
 point and Upper stock reference. Values are 0.2B0 and 0.4B0 by default}
-
-\item{bmsy_refpts}{Vector of two proportional values for the limit reference
-point and Upper stock reference. Values are 0.4BMSY and 0.8BMSY by default}
 
 \item{digits}{Number of decimal places for the values in the table}
 
 \item{ret_df}{Logical. If \code{TRUE} return a data frame with the values,
 instead of the \code{\link[knitr:kable]{knitr::kable()}} formatted table}
+
+\item{col_widths}{Widths of columns, see \code{\link[kableExtra:column_spec]{kableExtra::column_spec()}}}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }
