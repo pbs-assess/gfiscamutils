@@ -9,6 +9,7 @@ plot_ts_mcmc(
   quant_df = "sbt_quants",
   facet_wrap_var = c("none", "sex", "gear"),
   palette = iscam_palette,
+  all_one_color = NULL,
   base_color = "black",
   legend_title = ifelse(fr(), "Modèles", "Models"),
   x_label = ifelse(fr(), "Année", "Year"),
@@ -41,6 +42,9 @@ used to split the output into separate panel plots. If "none", no faceting
 will be done}
 
 \item{palette}{A palette value that is in \link[RColorBrewer:ColorBrewer]{RColorBrewer::brewer.pal.info}}
+
+\item{all_one_color}{If not \code{NULL}, overrides \code{palette} and the color that
+this is defined as will be used for all lines on the plot (all models)}
 
 \item{base_color}{A color to prepend to the brewer colors which are set by
 \code{palette}. This is called \code{base_color} because it is likely to be a base
