@@ -26,6 +26,8 @@
 #' used to split the output into separate panel plots. If "none", no faceting
 #' will be done
 #' @param palette A palette value that is in [RColorBrewer::brewer.pal.info]
+#' @param all_one_color If not `NULL`, overrides `palette` and the color that
+#' this is defined as will be used for all lines on the plot (all models)
 #' @param base_color A color to prepend to the brewer colors which are set by
 #' `palette`. This is called `base_color` because it is likely to be a base
 #' model
@@ -66,6 +68,7 @@ plot_ts_mcmc <- function(models,
                          quant_df = "sbt_quants",
                          facet_wrap_var = c("none", "sex", "gear"),
                          palette = iscam_palette,
+                         all_one_color = NULL,
                          base_color = "black",
                          legend_title = ifelse(fr(),
                                                "Modèles",
@@ -112,6 +115,9 @@ plot_ts_mcmc <- function(models,
   palette_info <- brewer.pal.info[rownames(brewer.pal.info) == palette, ]
   palette_func <- colorRampPalette(brewer.pal(palette_info$maxcolors, palette))
   palette_colors <- palette_func(n = length(models))
+  if(!is.null(all_one_color)){
+    palette_colors <- rep(all_one_color, length(models))
+  }
 
   if(length(probs) != 3){
     stop("`probs` has length ", length(probs), " but must be a vector of three values ",
