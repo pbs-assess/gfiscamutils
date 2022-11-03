@@ -148,10 +148,16 @@ plot_ts_mcmc <- function(models,
     })  |>
     min()
   end_yr <- map_dbl(models, ~{
-    # Check to see if projection, if not use max in the data
-    max(.x$mcmccalcs[[quant_df]] |> as_tibble() |> names() |> as.numeric(), .x$mcmccalcs[[quant_df]],
-      .x$dat$end.yr + 1)
-    })  |>
+    # Use max in the data
+    if(!is.list(.x$mcmccalcs[[quant_df]])){
+      .x$mcmccalcs[[quant_df]] <- list(.x$mcmccalcs[[quant_df]])
+    }
+    map_dbl(.x$mcmccalcs[[quant_df]], function(df){
+      max(df |> as_tibble() |> names() |> as.numeric(),
+          .x$dat$end.yr + 1)
+    }) |>
+      max()
+  }) |>
     max()
   end_yr <- end_yr + 1
 
