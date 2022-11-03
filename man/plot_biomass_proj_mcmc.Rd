@@ -19,6 +19,7 @@ plot_biomass_proj_mcmc(
   point_size = 2,
   label_digits = 2,
   label_append_text = " kt",
+  label_font_size = 8,
   angle_x_labels = FALSE,
   ylim = NULL,
   ...
@@ -49,6 +50,9 @@ the plot with. To remove all padding, make this 0}
 \item{label_digits}{Number of digits to show in the catch labels}
 
 \item{label_append_text}{Text to append to the labels}
+
+\item{label_font_size}{Size of the catch label font. See \code{size} argument in
+\code{\link[ggplot2:geom_text]{ggplot2::geom_text()}}}
 
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 

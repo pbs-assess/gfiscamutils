@@ -10,6 +10,8 @@
 #' as depletion
 #' @param label_digits Number of digits to show in the catch labels
 #' @param label_append_text Text to append to the labels
+#' @param label_font_size Size of the catch label font. See `size` argument in
+#' [ggplot2::geom_text()]
 #' @param ... Arguments passed to [plot_ts_mcmc()]
 #'
 #' @export
@@ -26,6 +28,7 @@ plot_biomass_proj_mcmc <- function(model,
                                    point_size = 2,
                                    label_digits = 2,
                                    label_append_text = " kt",
+                                   label_font_size = 8,
                                    angle_x_labels = FALSE,
                                    ylim = NULL,
                                    ...){
@@ -119,7 +122,13 @@ plot_biomass_proj_mcmc <- function(model,
     mutate(label = paste0(name, label_append_text))
 
   g <- g +
-    geom_text(aes(x = year, y = value, label = label), data = labels, inherit.aes = FALSE)
+    geom_text(aes(x = year,
+                  y = value,
+                  label = label),
+              data = labels,
+              inherit.aes = FALSE,
+              position = position_nudge(x = 0.3, y = 0),
+              size = label_font_size)
 
   # Create tags for B0 lines, and breaks and labels for y-axis
   if(is.null(ylim)){
