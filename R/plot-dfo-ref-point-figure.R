@@ -15,17 +15,12 @@ plot_dfo_ref_point_figure <- function(model,
   yr <- as.numeric(str_extract(biomass_col, pattern = "[0-9]+"))
 
   sbo <- model$mcmccalcs$params$sbo
-  depl_quants_endyr <- model$mcmccalcs$depl_quants[, ncol(model$mcmccalcs$depl_quants)]
-  depl_quants_endyr <- depl_quants_endyr[names(depl_quants_endyr) != "MPD"]
-  depl_quants_endyr <- c(0, depl_quants_endyr)
-  depl_quants_endyr <- vec2df(depl_quants_endyr, nms = c("tac", "lo", "med", "hi"))
-  #
+
   # Make a list by TAC (Catch level)
   tac_lst <- as_tibble(model$mcmc$proj) |>
-    filter(TAC != 50) |>
     split(~TAC)
-  #
-  # This is the depletion quantile table for the year signified in the
+
+  # This is the depletion quantile table for the year given by the
   # argument `biomass_col`
   depl_quants_yr <- map_dfr(tac_lst, ~{
     tac <- unique(.x$TAC)
@@ -45,7 +40,7 @@ plot_dfo_ref_point_figure <- function(model,
     geom_pointrange(aes(ymin = lo, ymax = hi), size = 0.5) +
     scale_x_continuous(labels = as.character(depl_quants_yr$tac), breaks = depl_quants_yr$tac) +
     ylab(paste0("Relative spawning biomass in ", yr)) +
-    xlab(paste0("TAC in ", yr - 1, " (thousand t)")) +
+    xlab(paste0("Catch in ", yr - 1, " (thousand t)")) +
     coord_flip()
   g
 }
