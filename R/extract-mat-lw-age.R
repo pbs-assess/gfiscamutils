@@ -122,12 +122,12 @@ export_mat_lw_age <- function(surv_samples,
     })
 
     mat_model <- function(par, age, prop_mature){
-      prop_m <- 1 / (1 + exp(- par[2] * (age - par[1])))
+      prop_m <- plogis(age, par[1], par[2])
       sum((prop_m - prop_mature) ^ 2)
     }
 
     a50_non_log <- map2(age_prop_mature, 1:2, ~{
-      conv <- optim(par = c(5, 3),
+      conv <- optim(par = c(6, 1),
                     fn = mat_model,
                     method = "L-BFGS-B",
                     lower = 0,
