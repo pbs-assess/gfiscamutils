@@ -159,8 +159,10 @@ plot_ts_mcmc <- function(models,
       max()
   }) |>
     max()
+  if(is.na(end_yr)){
+    end_yr <- models[[1]]$dat$end.yr
+  }
   end_yr <- end_yr + 1
-
   if(is.null(xlim)){
     xlim <- c(start_yr, end_yr)
   }else{

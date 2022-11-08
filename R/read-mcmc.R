@@ -59,6 +59,7 @@ read_mcmc <- function(model,
   # "specialsel"  - the same as "specialage" but for selectivity estimates
   fn_lst <- list(list(mcmc.file, "default"),
                  list(mcmc.biomass.file, "single"),
+                 list(mcmc.catch.file, "single"),
                  list(mcmc.recr.file, "single"),
                  list(mcmc.recr.devs.file, "single"),
                  list(mcmc.fishing.mort.file, "list", "fleet"),
@@ -74,11 +75,9 @@ read_mcmc <- function(model,
                  list(mcmc.proj.file, "projections"))
 
   # Names given to the return list elements. Must be same length as `fn_lst`
-  nms <- c("params", "sbt", "rt", "rdev", "ft",
-           "m", "ut", "vbt",
-           "it", "epsilon", "std_epsilon",
-           "agefits", "ageresids",
-           "selest", "proj")
+  nms <- c("params", "sbt", "ct", "rt", "rdev", "ft", "m", "ut", "vbt",
+           "it", "epsilon", "std_epsilon", "agefits", "ageresids", "selest",
+           "proj")
 
   if(length(nms) != length(fn_lst)){
     stop("Length of `fn_lst` must be the same as the length of `nms`")

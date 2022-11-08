@@ -95,6 +95,10 @@ calc_mcmc <- function(model,
     rownames(out$m_male_quants)[4] <- "MPD"
   }
 
+  # Catch
+  out$ct <- mc$ct
+  out$ct_quants <- quantify(out$ct, mpd$ct)
+
   # Recruitment
   out$rt <- mc$rt
   out$rt_quants <- quantify(out$rt, mpd$rt)

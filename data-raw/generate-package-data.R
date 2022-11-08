@@ -11,6 +11,7 @@ rep.file <- "iscam.rep"
 par.file <- "iscam.par"
 mcmc.file <- "iscam_mcmc.csv"
 mcmc.biomass.file <- "iscam_sbt_mcmc.csv"
+mcmc.catch.file <- "iscam_ct_mcmc.csv"
 mcmc.recr.file <- "iscam_rt_mcmc.csv"
 mcmc.recr.devs.file <- "iscam_rdev_mcmc.csv"
 mcmc.fishing.mort.file <- "iscam_ft_mcmc.csv"
@@ -77,6 +78,7 @@ use_data(rep.file, overwrite = TRUE)
 use_data(par.file, overwrite = TRUE)
 use_data(mcmc.file, overwrite = TRUE)
 use_data(mcmc.biomass.file, overwrite = TRUE)
+use_data(mcmc.catch.file, overwrite = TRUE)
 use_data(mcmc.recr.file, overwrite = TRUE)
 use_data(mcmc.recr.devs.file, overwrite = TRUE)
 use_data(mcmc.fishing.mort.file, overwrite = TRUE)
