@@ -107,6 +107,7 @@ Other Time series plotting functions:
 \code{\link{plot_biomass_grid_mcmc}()},
 \code{\link{plot_biomass_mpd}()},
 \code{\link{plot_biomass_proj_mcmc}()},
+\code{\link{plot_catch_fit_mcmc}()},
 \code{\link{plot_f_mcmc}()},
 \code{\link{plot_index_mcmc}()},
 \code{\link{plot_index_mpd}()},
