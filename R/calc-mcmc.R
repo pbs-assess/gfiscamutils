@@ -95,10 +95,6 @@ calc_mcmc <- function(model,
     rownames(out$m_male_quants)[4] <- "MPD"
   }
 
-  # Catch
-  out$ct <- mc$ct
-  out$ct_quants <- quantify(out$ct, mpd$ct)
-
   # Recruitment
   out$rt <- mc$rt
   out$rt_quants <- quantify(out$rt, mpd$rt)
@@ -133,6 +129,10 @@ calc_mcmc <- function(model,
       q
     })
   }
+
+  # Catch
+  out$ct <- mc$ct
+  out$ct_quants <- build_quant_list(mc$ct, mpd$ct)
 
   # Reshape MPD vulnerable biomass (list of data frames by gear)
   # vbt output is special for some reason

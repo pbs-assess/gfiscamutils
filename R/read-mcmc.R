@@ -59,7 +59,7 @@ read_mcmc <- function(model,
   # "specialsel"  - the same as "specialage" but for selectivity estimates
   fn_lst <- list(list(mcmc.file, "default"),
                  list(mcmc.biomass.file, "single"),
-                 list(mcmc.catch.file, "single"),
+                 list(mcmc.catch.file, "list", "fleet"),
                  list(mcmc.recr.file, "single"),
                  list(mcmc.recr.devs.file, "single"),
                  list(mcmc.fishing.mort.file, "list", "fleet"),

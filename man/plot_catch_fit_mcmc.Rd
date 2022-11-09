@@ -6,7 +6,7 @@
 \usage{
 plot_catch_fit_mcmc(
   model,
-  append_base_txt = " Spawning biomass",
+  append_base_txt = "",
   xlim = NULL,
   ylim = NULL,
   leg_loc = c(0.95, 0.95),

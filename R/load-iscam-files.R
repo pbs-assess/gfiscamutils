@@ -37,6 +37,7 @@ load_iscam_files <- function(model_dir,
   model$par <- read_par_file(file.path(model_dir, par.file))
   # Load MPD results
   model$mpd <- read_report_file(file.path(model_dir, rep.file))
+  model$mpd$proj <- read_csv(file.path(model_dir, mpd.proj.file))
   # Unflatten A_hat so there are nice dataframes of estimated
   #  numbers-at-age for each gear
   model$mpd$a_obs <- extract_age_output(model, type = "obs")

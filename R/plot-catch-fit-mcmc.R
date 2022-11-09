@@ -6,7 +6,7 @@
 #'
 #' @export
 plot_catch_fit_mcmc <- function(model,
-                                append_base_txt = " Spawning biomass",
+                                append_base_txt = "",
                                 xlim = NULL,
                                 ylim = NULL,
                                 leg_loc = c(0.95, 0.95),
@@ -21,25 +21,62 @@ plot_catch_fit_mcmc <- function(model,
   perc[!perc %% 1] <- f(perc[!perc %% 1])
   perc <- paste0(perc, "%")
 
+  # List of length = number of fleets, catch tibble with year and value
   ct_dat <- model$dat$catch |>
     as_tibble() |>
-    group_by(year) |>
-    summarize(value = sum(value))
-  yrs <- ct_dat$year |> as.numeric()
-  lst <- list()
-  val_row <- ct_dat$value |> vec2df(nms = as.character(yrs))
-  lst[[1]] <- val_row
-  lst[[2]] <- val_row
-  lst[[3]] <- val_row
-  lst[[4]] <- val_row
-  df <- do.call("rbind", lst) |> as.matrix()
-  rownames(df) <- c(perc, "MPD")
-  dat_model <- model
+    split(~ gear) |>
+    map(~{.x |> select(year, value)})
 
-  dat_model$mcmccalcs$ct_quants <- df
-  attributes(dat_model)$model_desc = "Catch data"
-  attributes(model)$model_desc = "Catch fit"
-  models <- c(list(model), list(dat_model))
+  # List of length = number of fleets, tibble of catch values, fake quants
+  # with year as colnames
+  ct_dat_byfleet <- ct_dat |>
+    map(~{
+        lst <- list()
+        val_row <- vec2df(.x$value, nms = as.character(.x$year))
+        lst[[1]] <- val_row
+        lst[[2]] <- val_row
+        lst[[3]] <- val_row
+        lst[[4]] <- val_row
+        df <- do.call("rbind", lst) |> as.matrix()
+        rownames(df) <- c(perc, "MPD")
+        df
+      })
+
+  ct_fit_byfleet <- model$mcmccalcs$ct_quants
+
+  # List of length = number of fleets, tibble of catch fits
+  # with year as colnames
+  if(length(ct_fit_byfleet) != length(ct_dat_byfleet)){
+    stop("Number of fleets in catch data not the same as in the catch ",
+         "fit output", call = FALSE)
+  }
+
+  fleet_nms <- model$dat$fleet_gear_names
+
+  # List of length = number of fleets, of models, 1 for each fleet
+  # containing the catch data replacing mcmccalcs$ct_quants
+  models_dat_byfleet <- ct_dat_byfleet |>
+    imap(~{
+      tmp <- model
+      tmp$mcmccalcs$ct_quants <- .x
+      attributes(tmp)$model_desc <- paste0("Catch data - ",
+                                           fleet_nms[as.numeric(.y)])
+      tmp
+    })
+
+  # List of length = number of fleets, of models, 1 for each fleet
+  # containing the catch fits replacing mcmccalcs$ct_quants
+  models_fit_byfleet <- ct_fit_byfleet |>
+    imap(~{
+      tmp <- model
+      tmp$mcmccalcs$ct_quants <- .x
+      attributes(tmp)$model_desc <- paste0("Catch fit - ",
+                                           fleet_nms[as.numeric(.y)])
+      tmp
+    })
+
+  models <- c(models_dat_byfleet,
+              models_fit_byfleet)
   class(models) <- mdl_lst_cls
 
   plot_ts_mcmc(models,
