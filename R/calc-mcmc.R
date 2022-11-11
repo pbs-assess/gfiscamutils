@@ -99,6 +99,35 @@ calc_mcmc <- function(model,
   out$rt <- mc$rt
   out$rt_quants <- quantify(out$rt, mpd$rt)
 
+  # Stock-recruit parameters
+  so <- out$params$so
+  beta <- out$params$beta
+  phie <- out$params$phie
+  if(length(beta) != length(so) || length(beta) != length(phie)){
+    stop("Number of burned-in posteriors for so, beta, and phie for stock ",
+         "recruit calculation arre not the same. Check ", mcmc.file, " file",
+         call. = FALSE)
+  }
+  # Do stock-recruit calculation on each posterior
+  out$sr <- list()
+  bio <- seq(50, 200, length.out = 200)
+  for(i in seq_along(so)){
+    out$sr[[i]] <- vec2df((so[i] * bio) / (1.0 + beta[i] * bio))
+    names(out$sr[[i]]) <- as.character(1:ncol(out$sr[[i]]))
+  }
+  out$sr <- out$sr |>
+    map_df(~{.x})
+
+  sr_mpd <- (mpd$so * mpd$rt * mpd$phie) / (1.0 + mpd$beta * mpd$rt * mpd$phie)
+  out$sr_quants <- quantify(out$sr, sr_mpd)
+  bio <- vec2df(bio, nms = seq_along(bio))
+  row_nms <- rownames(out$sr_quants)
+  out$sr_quants <- out$sr_quants |>
+    as_tibble() |>
+    bind_rows(bio) |>
+    as.matrix()
+  rownames(out$sr_quants) <- c(row_nms, "sbt")
+
   ## Recruitment deviations
   out$rdev <- mc$rdev
   out$rdev_quants <- apply(out$rdev, 2, quantile, prob = probs)
@@ -274,7 +303,7 @@ calc_mcmc <- function(model,
         imap(~{
           x <- .x |> imap(~{
             if(.y != "catch"){
-              quantile(.x, probs)
+              quantile(.x, probs, na.rm = TRUE)
             }
           })
           x[lengths(x) == 0] <- NULL

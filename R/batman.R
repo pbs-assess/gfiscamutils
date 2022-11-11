@@ -4,7 +4,7 @@
 #'
 #' @importFrom ggplot2 ggplot stat_function geom_path aes element_blank labs
 #' @return a ggplot2 object
-batman <- function(){
+batman <- function(line_thick = 5){
   sc <- function(x) sqrt(1 - x ^ 2)                                         # semicircle
   el <- function(x) 3 * sc(abs(x) / 7)                                      # ellipse
   nl <- function(x) (-1) * el(x)                                            # negative of el
@@ -14,8 +14,8 @@ batman <- function(){
   cl  <- data.frame(x = -cr$x, y = cr$y)                                    # cowl left
 
   plot_create <- function(fun, xmin, xmax){
-    rp <- stat_function(fun = fun, xlim = c(xmin,xmax))
-    lp <- stat_function(fun = fun, xlim = c(-xmax, -xmin))
+    rp <- stat_function(fun = fun, xlim = c(xmin,xmax), size = line_thick)
+    lp <- stat_function(fun = fun, xlim = c(-xmax, -xmin), size = line_thick)
     result_plot <- list(left_plot = lp, right_plot = rp)
     return(result_plot)
   }
@@ -48,8 +48,10 @@ batman <- function(){
     bt_plot$left_plot +
     bt_plot$right_plot +
     geom_path(data = cr,
-              na.rm = TRUE) +
+              na.rm = TRUE,
+              size = line_thick) +
     geom_path(data = cl,
-              na.rm = TRUE)
+              na.rm = TRUE,
+              size = line_thick)
   g
 }

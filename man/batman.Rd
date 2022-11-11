@@ -4,7 +4,7 @@
 \alias{batman}
 \title{Call the Batman}
 \usage{
-batman()
+batman(line_thick = 5)
 }
 \value{
 a ggplot2 object

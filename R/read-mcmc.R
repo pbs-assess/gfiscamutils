@@ -46,17 +46,17 @@ read_mcmc <- function(model,
   }
 
   # List of files to load in, with associated type of data:
-  # "default"     - thinning/burnin is done
-  # "single"      - column names are converted to years, output is a data frame
-  # "list"        - the data frame is broken into a list by the third item in
-  #                 the list
-  # "projections" - no processing is done, it is done in calc_mcmc() instead
-  #                 which is sent to `list_by()` to extract by column names
-  # "specialage"  - outputs which are matrices by year, gear, and sex such as
-  #                 age fits or age residuals. There is a special format for
-  #                 these files. See the mcmc_output() function in iscam
-  #                 source (iscam.tpl file) for the output format
-  # "specialsel"  - the same as "specialage" but for selectivity estimates
+  # "default"       - thinning/burnin is done
+  # "single"        - column names are converted to years, output is a data frame
+  # "list"          - the data frame is broken into a list by the third item in
+  #                   the list
+  # "projections"   - no processing is done, it is done in calc_mcmc() instead
+  #                   which is sent to `list_by()` to extract by column names
+  # "df_longer_age  - outputs which are matrices by year, gear, and sex such as
+  #                   age fits or age residuals. There is a special format for
+  #                   these files. See the mcmc_output() function in iscam
+  #                   source (iscam.tpl file) for the output format
+  # "df_longer_sel" - the same as "specialage" but for selectivity estimates
   fn_lst <- list(list(mcmc.file, "default"),
                  list(mcmc.biomass.file, "single"),
                  list(mcmc.catch.file, "list", "fleet"),
@@ -132,7 +132,8 @@ read_mcmc <- function(model,
       warning("File ", fn, " does not exist, check iSCAM output")
     }
     d
-  }) %>% `names<-`(nms)
+  }) %>%
+    `names<-`(nms)
 
   k
 }
