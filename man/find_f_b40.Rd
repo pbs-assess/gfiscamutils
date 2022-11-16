@@ -10,11 +10,11 @@ find_f_b40(
   model,
   bo_refpt = 0.4,
   init_catch = 1,
-  col_in_proj = "B2023",
   root_dir = "d",
   tol = 0.5,
   max_iter = 10,
-  burnin = 1000
+  burnin = 1000,
+  proj_yrs = 50
 )
 }
 \arguments{
@@ -24,8 +24,6 @@ find_f_b40(
 approach in the calculation}
 
 \item{init_catch}{Initial catch value to run the model with}
-
-\item{col_in_proj}{The column name to use as a biomass for the calculation}
 
 \item{root_dir}{The root hard drive name, must be either 'c', 'C',
 'd', or 'D'}
@@ -37,6 +35,8 @@ hit, a warning will be issued and the F value returned will be NA}
 
 \item{burnin}{The number of posterior samples to remove from the beginning
 of the list of posteriors}
+
+\item{proj_yrs}{The number of years to project}
 }
 \value{
 A list of two items, the F and U values. Each of these are the length

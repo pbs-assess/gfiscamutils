@@ -30,7 +30,6 @@
 #' @param bo_refpt A fractional value of B0 to use as the reference point to
 #' approach in the calculation
 #' @param init_catch Initial catch value to run the model with
-#' @param col_in_proj The column name to use as a biomass for the calculation
 #' @param root_dir The root hard drive name, must be either 'c', 'C',
 #' 'd', or 'D'
 #' @param tol The catch tolerance in thousands of tonnes, default 0.5
@@ -38,6 +37,7 @@
 #' hit, a warning will be issued and the F value returned will be NA
 #' @param burnin The number of posterior samples to remove from the beginning
 #' of the list of posteriors
+#' @param proj_yrs The number of years to project
 #'
 #' @return A list of two items, the F and U values. Each of these are the length
 #' of the number of fleets
@@ -45,11 +45,11 @@
 find_f_b40 <- function(model,
                        bo_refpt = 0.4,
                        init_catch = 1,
-                       col_in_proj = "B2023",
                        root_dir = "d",
                        tol = 0.5,
                        max_iter = 10,
-                       burnin = 1000){
+                       burnin = 1000,
+                       proj_yrs = 50){
 
   curr_dir <- getwd()
   on.exit(setwd(curr_dir))
@@ -61,6 +61,7 @@ find_f_b40 <- function(model,
 
   # Change dirs from linux to windows if necessary
   os <- get_os()
+
   if(os == "windows"){
     if(grepl("^/mnt", mcmc_path)){
       pth <- gsub("^/mnt/", "", mcmc_path)
@@ -83,14 +84,14 @@ find_f_b40 <- function(model,
 
   # Set up initial PFC file value before binary catch reduction algorithm
   # which will narrow in on F_Bo_40% removal rate
-  pfc <- base_model$proj
-  pfc$num.projyrs <- 1
+  pfc <- model$proj
+  pfc$num.projyrs <- proj_yrs
   pfc$num.tac <- 1
   pfc$tac.vec <- init_catch
   proj_file <- file.path(tmp_dir, basename(model$proj.file))
   write_projection_file(proj_file, proj_lst = pfc, overwrite = TRUE)
   bash_lines <- c("#!/bin/bash",
-                  "/usr/bin/gfiscam/build/dist/bin/iscam -mceval")
+                  "`which iscam` -mceval")
   writeLines(bash_lines, file.path(tmp_dir, "iscam_eval.sh"))
   setwd(tmp_dir)
   system("chmod +x iscam_eval.sh", intern = TRUE)
@@ -106,6 +107,7 @@ find_f_b40 <- function(model,
     proj <- proj |> slice((burnin + 1):nrow(proj))
     unlink(mcmc.proj.file, force = TRUE)
 
+    col_in_proj <- paste0("B", base_model$dat$end.yr + 50)
     diff_from_bo_refpt <- median(as.numeric(pull(proj, col_in_proj))) -
       bo_refpt * median(as.numeric(sbo))
     if(iter >= max_iter){
