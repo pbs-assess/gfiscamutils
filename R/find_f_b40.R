@@ -30,6 +30,8 @@
 #' @param bo_refpt A fractional value of B0 to use as the reference point to
 #' approach in the calculation
 #' @param init_catch Initial catch value to run the model with
+#' @param spread Amount of catch +/- from the `init_catch` to allow the
+#' catch to wander in the search algorithm
 #' @param root_dir The root hard drive name, must be either 'c', 'C',
 #' 'd', or 'D'
 #' @param tol The catch tolerance in thousands of tonnes, default 0.5
@@ -38,18 +40,23 @@
 #' @param burnin The number of posterior samples to remove from the beginning
 #' of the list of posteriors
 #' @param proj_yrs The number of years to project
+#' @param iscam_path Full path to the ISCAM executable. To get this in Linux,
+#' type 'which iscam'. In Windows type 'where iscam'
 #'
 #' @return A list of two items, the F and U values. Each of these are the length
 #' of the number of fleets
 #' @export
+#' @importFrom gfutilities get_os
 find_f_b40 <- function(model,
                        bo_refpt = 0.4,
-                       init_catch = 1,
+                       init_catch = 6,
+                       spread = 0.5, # 5.75 to 6.25 possible catches
                        root_dir = "d",
-                       tol = 0.5,
+                       tol = 0.1,
                        max_iter = 10,
                        burnin = 1000,
-                       proj_yrs = 50){
+                       proj_yrs = 50,
+                       iscam_path = "/usr/bin/gfiscam/build/dist/bin/iscam"){
 
   curr_dir <- getwd()
   on.exit(setwd(curr_dir))
@@ -62,6 +69,7 @@ find_f_b40 <- function(model,
   # Change dirs from linux to windows if necessary
   os <- get_os()
 
+  pth <- mcmc_path
   if(os == "windows"){
     if(grepl("^/mnt", mcmc_path)){
       pth <- gsub("^/mnt/", "", mcmc_path)
@@ -77,7 +85,15 @@ find_f_b40 <- function(model,
 
   fns <- dir(pth, full.names = TRUE)
   # Remove the csv files as they will be produced by the iscam -mceval calls below
-  fns <- fns[-grep("csv$", fns)]
+  csv_fns <- grep("csv$", fns)
+  if(length(csv_fns)){
+    fns <- fns[-csv_fns]
+  }
+
+  if(!length(grep("iscam.mcm$", fns))){
+    stop("MCMC has not been run in the directory ",
+         pth, ". Run just -mcmc part and make sure a iscam.mcm file exists")
+  }
 
   tmp_dir <- tempdir()
   file.copy(fns, tmp_dir)
@@ -91,15 +107,16 @@ find_f_b40 <- function(model,
   proj_file <- file.path(tmp_dir, basename(model$proj.file))
   write_projection_file(proj_file, proj_lst = pfc, overwrite = TRUE)
   bash_lines <- c("#!/bin/bash",
-                  "`which iscam` -mceval")
+                  paste0(iscam_path, " -mceval"))
   writeLines(bash_lines, file.path(tmp_dir, "iscam_eval.sh"))
   setwd(tmp_dir)
   system("chmod +x iscam_eval.sh", intern = TRUE)
   system("sed -i -e 's/\r$//' iscam_eval.sh", intern = TRUE)
-  iter <- 0
+  iter <- 1
   curr_catch <- init_catch
+  curr_spread <- spread
   repeat{
-    message("Iteration ", iter + 1, " of F_B0_", bo_refpt, " search, catch set to ", curr_catch)
+    message("Iteration ", iter, " of F_B0_", bo_refpt, " search, catch set to ", curr_catch, " tonnes")
     command <- "bash iscam_eval.sh"
     system(command, intern = TRUE)
     # Read and burnin
@@ -110,6 +127,9 @@ find_f_b40 <- function(model,
     col_in_proj <- paste0("B", base_model$dat$end.yr + 50)
     diff_from_bo_refpt <- median(as.numeric(pull(proj, col_in_proj))) -
       bo_refpt * median(as.numeric(sbo))
+    message("Difference between median biomass and ", bo_refpt, "B0 = ", diff_from_bo_refpt)
+    message("Current spread is ", curr_spread)
+
     if(iter >= max_iter){
       warning("Maximum number of iterations reached (", max_iter, "), ",
               "Difference between median of column `", col_in_proj, "` and ",
@@ -124,12 +144,21 @@ find_f_b40 <- function(model,
               bo_refpt, "B0 in one year.")
       break;
     }
-    message("The difference between proj biomass and ", bo_refpt, "B0 is ", diff_from_bo_refpt)
-    # Make catch larger or smaller to zone in to the 0.4B0 value
-    pfc$tac.vec <- curr_catch <- curr_catch + diff_from_bo_refpt
+
+    # Modify catch to zone in to the 0.4B0 value
+    if(diff_from_bo_refpt > 0){
+      # Need more catch
+      curr_catch <- curr_catch + 0.5 * curr_spread
+    }else{
+      # Need less catch
+      curr_catch <- curr_catch - curr_spread
+    }
+    curr_spread <- 0.5 * curr_spread
+    pfc$tac.vec <- curr_catch
     write_projection_file(proj_file, proj_lst = pfc, overwrite = TRUE)
     iter <- iter + 1
   }
+
   f_output <- read.csv(file.path(tmp_dir, mcmc.fishing.mort.file)) |>
     as_tibble()
   f_out <- f_output |>

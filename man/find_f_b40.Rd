@@ -9,12 +9,14 @@ the tolerance of \code{tol} thousand tonnes.}
 find_f_b40(
   model,
   bo_refpt = 0.4,
-  init_catch = 1,
+  init_catch = 6,
+  spread = 0.5,
   root_dir = "d",
-  tol = 0.5,
+  tol = 0.1,
   max_iter = 10,
   burnin = 1000,
-  proj_yrs = 50
+  proj_yrs = 50,
+  iscam_path = "/usr/bin/gfiscam/build/dist/bin/iscam"
 )
 }
 \arguments{
@@ -24,6 +26,9 @@ find_f_b40(
 approach in the calculation}
 
 \item{init_catch}{Initial catch value to run the model with}
+
+\item{spread}{Amount of catch +/- from the \code{init_catch} to allow the
+catch to wander in the search algorithm}
 
 \item{root_dir}{The root hard drive name, must be either 'c', 'C',
 'd', or 'D'}
@@ -37,6 +42,9 @@ hit, a warning will be issued and the F value returned will be NA}
 of the list of posteriors}
 
 \item{proj_yrs}{The number of years to project}
+
+\item{iscam_path}{Full path to the ISCAM executable. To get this in Linux,
+type 'which iscam'. In Windows type 'where iscam'}
 }
 \value{
 A list of two items, the F and U values. Each of these are the length
