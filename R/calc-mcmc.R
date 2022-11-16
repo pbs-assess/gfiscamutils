@@ -112,7 +112,7 @@ calc_mcmc <- function(model,
   out$sr <- list()
   bio <- seq(50, 200, length.out = 200)
   for(i in seq_along(so)){
-    out$sr[[i]] <- vec2df((so[i] * bio) / (1.0 + beta[i] * bio))
+    out$sr[[i]] <- vec2df((so[i] * bio) / (1.0 + beta[i] * bio) * exp(-0.5 * model$mpd$tau * model$mpd$tau))
     names(out$sr[[i]]) <- as.character(1:ncol(out$sr[[i]]))
   }
   out$sr <- out$sr |>
