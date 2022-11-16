@@ -129,7 +129,7 @@ find_f_b40 <- function(model,
       bo_refpt * median(as.numeric(sbo))
     message("Difference between median biomass and ", bo_refpt, "B0 = ", diff_from_bo_refpt)
     message("Current spread is ", curr_spread)
-
+    message("")
     if(iter >= max_iter){
       warning("Maximum number of iterations reached (", max_iter, "), ",
               "Difference between median of column `", col_in_proj, "` and ",
@@ -139,9 +139,9 @@ find_f_b40 <- function(model,
     if(abs(diff_from_bo_refpt) <= tol){
       message("Found a catch where difference between median of column `",
               col_in_proj, "` and 0.4B0 (", diff_from_bo_refpt, ") is within ",
-              "the tolerance of ", tol, ". Model F value for that year is the ",
+              "the tolerance of ", tol, ".\nModel F value for that year is the ",
               "F_B0_", bo_refpt, " removal rate, or the F required to get to ",
-              bo_refpt, "B0 in one year.")
+              bo_refpt, "B0 in ", proj_yrs, " years.")
       break;
     }
 
