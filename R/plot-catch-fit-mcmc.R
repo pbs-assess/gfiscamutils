@@ -86,5 +86,8 @@ plot_catch_fit_mcmc <- function(model,
                leg_loc = leg_loc,
                xlim = xlim,
                ylim = ylim,
-               y_label = "Catch (thousand t)")
+               y_label = "Catch (thousand t)",
+               legend_title = ifelse(fr(),
+                                     "Flotte/Type",
+                                     "Fleet/Type"))
 }
