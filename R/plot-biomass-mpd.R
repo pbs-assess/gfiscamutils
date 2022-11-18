@@ -71,26 +71,35 @@ plot_biomass_mpd <- function(models,
   mpd <- map(models, ~{.x$mpd})
   nms <- names(mpd)
 
-  start_yr <- min(map_dbl(models, ~{.x$dat$start.yr})) + 1
-  end_yr <- max(map_dbl(models, ~{.x$dat$end.yr}))
+  sbt <- map(mpd, ~{
+    sb <- .x$sbt[-length(.x$sbt)]
+    names(sb) <- models[[1]]$dat$start.yr:models[[1]]$dat$end.yr
+    pr <- .x$proj
+    sb_proj <- pr |> select(grep("^B20[0-9]+$", names(pr)))
+    names(sb_proj) <- gsub("^B", "", names(sb_proj))
+    c(sb, sb_proj)
+  })
+
+  start_yr <- map_dbl(sbt, ~{min(as.numeric(names(.x)))}) + 1
+  end_yr <- map_dbl(sbt, ~{max(as.numeric(names(.x)))})
   if(is.null(xlim)){
     xlim <- c(start_yr, end_yr)
   }else{
     if(start_yr > xlim[1]){
       stop("Start year in xlim comes before the data start year")
     }
-    if(end_yr < xlim[2]){
-      stop("End year in xlim comes after the data end year")
-    }
+    # if(end_yr < xlim[2]){
+    #   stop("End year in xlim comes after the data end year")
+    # }
     start_yr <- xlim[1]
     end_yr <- xlim[2]
   }
   bind_yrs <- start_yr:end_yr
-
-  sbt <- map(mpd, ~{.x$sbt}) %>%
+  sbt <- sbt |>
     map(~{
+      mode(.x) <- "numeric"
       length(.x) = end_yr - start_yr + 1
-      .x
+      vec2df(.x, nms = names(.x))
     }) %>%
     do.call(rbind, .)
 
