@@ -31,6 +31,7 @@ plot_biomass_proj_mcmc <- function(model,
                                    label_font_size = 8,
                                    angle_x_labels = FALSE,
                                    ylim = NULL,
+                                   xlim = NULL,
                                    ...){
 
   if(!is_iscam_model(model)){
@@ -74,6 +75,19 @@ plot_biomass_proj_mcmc <- function(model,
       x
     })
 
+  if(!is.null(xlim)){
+    # Remove years past max xlim
+    series_lst   <- series_lst |>
+      map(~{
+        row_nms <- rownames(.x)
+        x <- .x |> as_tibble()
+        x <- x[, as.numeric(names(x)) %in% xlim[1]:xlim[2]] |>
+          as.matrix()
+        rownames(x) <- row_nms
+        x
+      })
+  }
+
   # Make a copy of the model with `sbt` or `depl` replaced so the plotting function
   # is tricked into thinking these are separate models
   models <- imap(series_lst, ~{
@@ -106,6 +120,7 @@ plot_biomass_proj_mcmc <- function(model,
                     probs = probs,
                     line_width = line_width,
                     point_size = point_size,
+                    xlim = c(xlim[1], xlim[2] + 1),
                     ...)
 
   # Get end point coords
