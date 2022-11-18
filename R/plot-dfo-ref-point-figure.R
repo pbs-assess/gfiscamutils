@@ -5,11 +5,13 @@
 #' @param biomass_col The colomn name that you want to shoe output for.
 #' This column will be divided by the SB0 value to get a depletion for
 #' the year in the name of the column
+#' @param line_thickness Thickness of reference point lines (vertical lines)
 #'
 #' @export
 plot_dfo_ref_point_figure <- function(model,
                                       biomass_col = "B2023",
-                                      probs = c(0.025, 0.25, 0.5, 0.75, 0.975)){
+                                      probs = c(0.025, 0.25, 0.5, 0.75, 0.975),
+                                      line_thickness = 0.75){
 
   sym_biomass_col <- sym(biomass_col)
   yr <- as.numeric(str_extract(biomass_col, pattern = "[0-9]+"))
@@ -33,12 +35,35 @@ plot_dfo_ref_point_figure <- function(model,
     setNames(c("tac", "lo", "lomed", "med", "medhi", "hi")) |>
     mutate(tac = as.integer(tac))
 
-  g <- ggplot(depl_quants_yr, aes(x = tac, y = med)) +
-    geom_hline(aes(yintercept = 0.2), color = "red", size = 1) +
-    geom_hline(aes(yintercept = 0.4), linetype = "dashed", color = "green", size = 1) +
-    geom_pointrange(aes(ymin = lomed, ymax = medhi), size = 1, fatten = 1) +
-    geom_pointrange(aes(ymin = lo, ymax = hi), size = 0.5) +
-    scale_x_continuous(labels = as.character(depl_quants_yr$tac), breaks = depl_quants_yr$tac) +
+  # X-axis tick label specs
+  brks <- c(0.2, 0.35, 0.4, 0.6, 0.8)
+  cols <- c("red", "blue", "green", "black", "black")
+  sz <- c(14, 14, 14, 10, 10)
+
+  g <- depl_quants_yr |>
+    ggplot(aes(x = tac, y = med)) +
+    geom_hline(aes(yintercept = 0.2),
+               color = "red",
+               size = line_thickness) +
+    geom_hline(aes(yintercept = 0.35),
+               linetype = "dotted",
+               color = "blue",
+               size = line_thickness) +
+    geom_hline(aes(yintercept = 0.4),
+               linetype = "dashed",
+               color = "green",
+               size = line_thickness) +
+    geom_pointrange(aes(ymin = lomed,
+                        ymax = medhi),
+                    size = 1,
+                    fatten = 1) +
+    geom_pointrange(aes(ymin = lo, ymax = hi),
+                    size = 0.5) +
+    scale_y_continuous(labels = brks,
+                       breaks = brks) +
+    theme(axis.text.x = element_text(color = cols, size = sz)) +
+    scale_x_continuous(labels = as.character(depl_quants_yr$tac),
+                       breaks = depl_quants_yr$tac) +
     ylab(paste0("Relative spawning biomass in ", yr)) +
     xlab(paste0("Catch in ", yr - 1, " (thousand t)")) +
     coord_flip()
