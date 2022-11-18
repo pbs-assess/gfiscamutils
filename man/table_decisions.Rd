@@ -7,7 +7,8 @@
 table_decisions(
   model,
   format = c("latex", "html"),
-  bo_refpts = c(0.2, 0.4),
+  bo_refpts = c(0.2, 0.35, 0.4),
+  num_proj_yrs = 3,
   digits = 2,
   ret_df = FALSE,
   col_widths = NULL,
@@ -19,8 +20,12 @@ table_decisions(
 
 \item{format}{See \code{format} in \code{\link[knitr:kable]{knitr::kable()}}}
 
-\item{bo_refpts}{Vector of two proportional values for the limit reference
-point and Upper stock reference. Values are 0.2B0 and 0.4B0 by default}
+\item{bo_refpts}{Vector of proportional values for the reference
+points}
+
+\item{num_proj_yrs}{The number of projection years to show in the table.
+The output may have more but only this many will be shown. If \code{NULL},
+all projection years will be shown}
 
 \item{digits}{Number of decimal places for the values in the table}
 
