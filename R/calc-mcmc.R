@@ -153,7 +153,11 @@ calc_mcmc <- function(model,
       q <- apply(.x, 2, quantile, prob = probs, na.rm = TRUE)
       # Suppress warning that the MPD is longer than the MCMC, this happens when
       # there are NAs in the final years in the MCMC
-      suppressWarnings(q <- rbind(q, mpd_dat[.y, ]))
+      if(is.data.frame(mpd_dat) || is.matrix(mpd_dat)){
+        q <- rbind(q, mpd_dat[.y, ])
+      }else{
+        q <- rbind(q, mpd_dat)
+      }
       rownames(q)[length(probs) + 1] <- "MPD"
       q
     })
