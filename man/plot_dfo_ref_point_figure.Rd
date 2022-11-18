@@ -8,7 +8,8 @@ bounded by B0 reference points}
 plot_dfo_ref_point_figure(
   model,
   biomass_col = "B2023",
-  probs = c(0.025, 0.25, 0.5, 0.75, 0.975)
+  probs = c(0.025, 0.25, 0.5, 0.75, 0.975),
+  line_thickness = 0.75
 )
 }
 \arguments{
@@ -17,6 +18,8 @@ plot_dfo_ref_point_figure(
 \item{biomass_col}{The colomn name that you want to shoe output for.
 This column will be divided by the SB0 value to get a depletion for
 the year in the name of the column}
+
+\item{line_thickness}{Thickness of reference point lines (vertical lines)}
 }
 \description{
 Plot DFO-style reference point figure with horizontal boxplots and zones

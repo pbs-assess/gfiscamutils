@@ -22,6 +22,7 @@ plot_biomass_proj_mcmc(
   label_font_size = 8,
   angle_x_labels = FALSE,
   ylim = NULL,
+  xlim = NULL,
   ...
 )
 }
@@ -57,6 +58,9 @@ the plot with. To remove all padding, make this 0}
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 
 \item{ylim}{The y limits for the plot. If \code{NULL}, the limits of the data
+will be used}
+
+\item{xlim}{The x limits for the plot. If \code{NULL}, the limits of the data
 will be used}
 
 \item{...}{Arguments passed to \code{\link[=plot_ts_mcmc]{plot_ts_mcmc()}}}
