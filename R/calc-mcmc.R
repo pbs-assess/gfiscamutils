@@ -290,7 +290,7 @@ calc_mcmc <- function(model,
     sbo <- out$params$sbo
     out$proj_depl <- out$proj_sbt |>
       group_by(catch) |>
-      mutate_at(vars(-catch), ~{.x / sbo}) |>
+      mutate_at(vars(-catch), ~{length(sbo) <- length(.x) ; .x / sbo}) |>
       ungroup()
 
     names(out$proj_sbt) <- gsub("B", "", names(out$proj_sbt))
