@@ -7,7 +7,7 @@
 plot_pairs_mcmc(
   model,
   plot_sel = NULL,
-  param_rm = c("rho", "vartheta"),
+  param_rm = c("rho", "vartheta", "so", "beta", "phie"),
   list_param_names = FALSE,
   text_title_size = 12,
   point_size = 1,
