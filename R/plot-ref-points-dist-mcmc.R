@@ -8,7 +8,7 @@
 #' @param line_thickness Thickness of reference point lines (vertical lines)
 #'
 #' @export
-plot_dfo_ref_point_figure <- function(model,
+plot_ref_points_dist_mcmc <- function(model,
                                       biomass_col = "B2023",
                                       probs = c(0.025, 0.25, 0.5, 0.75, 0.975),
                                       line_thickness = 0.75){
@@ -36,9 +36,9 @@ plot_dfo_ref_point_figure <- function(model,
     mutate(tac = as.integer(tac))
 
   # X-axis tick label specs
-  brks <- c(0.2, 0.35, 0.4, 0.6, 0.8)
-  cols <- c("red", "blue", "green", "black", "black")
-  sz <- c(14, 14, 14, 10, 10)
+  brks <- c(0.0, 0.2, 0.35, 0.4, 0.6, 0.8, 1.0)
+  cols <- c("black", "red", "blue", "green", "black", "black")
+  sz <- c(10, 14, 14, 14, 10, 10)
 
   g <- depl_quants_yr |>
     ggplot(aes(x = tac, y = med)) +
@@ -59,8 +59,10 @@ plot_dfo_ref_point_figure <- function(model,
                     fatten = 1) +
     geom_pointrange(aes(ymin = lo, ymax = hi),
                     size = 0.5) +
-    scale_y_continuous(labels = brks,
-                       breaks = brks) +
+    scale_y_continuous(limits = c(0, 1),
+                       labels = brks,
+                       breaks = brks,
+                       expand = c(0, 0)) +
     theme(axis.text.x = element_text(color = cols, size = sz)) +
     scale_x_continuous(labels = as.character(depl_quants_yr$tac),
                        breaks = depl_quants_yr$tac) +

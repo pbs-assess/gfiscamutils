@@ -23,6 +23,7 @@ plot_biomass_proj_mcmc(
   angle_x_labels = FALSE,
   ylim = NULL,
   xlim = NULL,
+  nudge_catch_labels = c(x = 0.3, y = 0),
   ...
 )
 }
@@ -62,6 +63,9 @@ will be used}
 
 \item{xlim}{The x limits for the plot. If \code{NULL}, the limits of the data
 will be used}
+
+\item{nudge_catch_labels}{Position to nudge the catch labels by on the right
+of the ending of the lines}
 
 \item{...}{Arguments passed to \code{\link[=plot_ts_mcmc]{plot_ts_mcmc()}}}
 }

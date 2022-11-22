@@ -12,6 +12,8 @@
 #' @param label_append_text Text to append to the labels
 #' @param label_font_size Size of the catch label font. See `size` argument in
 #' [ggplot2::geom_text()]
+#' @param nudge_catch_labels Position to nudge the catch labels by on the right
+#' of the ending of the lines
 #' @param ... Arguments passed to [plot_ts_mcmc()]
 #'
 #' @export
@@ -32,6 +34,7 @@ plot_biomass_proj_mcmc <- function(model,
                                    angle_x_labels = FALSE,
                                    ylim = NULL,
                                    xlim = NULL,
+                                   nudge_catch_labels = c(x = 0.3, y = 0),
                                    ...){
 
   if(!is_iscam_model(model)){
@@ -142,7 +145,8 @@ plot_biomass_proj_mcmc <- function(model,
                   label = label),
               data = labels,
               inherit.aes = FALSE,
-              position = position_nudge(x = 0.3, y = 0),
+              position = position_nudge(x = nudge_catch_labels[1],
+                                        y = nudge_catch_labels[2]),
               size = label_font_size)
 
   # Create tags for B0 lines, and breaks and labels for y-axis
