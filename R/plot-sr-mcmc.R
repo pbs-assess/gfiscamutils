@@ -1,12 +1,15 @@
 #' Plot the stock-recruitment relationship for an MCMC ISCAM model
 #'
 #' @inheritParams plot_ts_mcmc
+#' @param plot_sr_curve If `TRUE`, plot the stock-recruitment curve
+#' over the points
 #' @export
 #' @importFrom ggplot2 geom_point geom_errorbar geom_errorbarh
 #' @importFrom tidyr pivot_wider pivot_longer
 plot_sr_mcmc <- function(model,
                          probs = c(0.025, 0.5, 0.975),
-                         errorbar_thickness = 0.1){
+                         errorbar_thickness = 0.1,
+                         plot_sr_curve = FALSE){
 
   perc <- probs * 100
   perc[!perc %% 1] <- f(perc[!perc %% 1])
@@ -66,18 +69,20 @@ plot_sr_mcmc <- function(model,
     pivot_wider(names_from = "quant") |>
     select(-year)
 
-  g <- g +
-    geom_path(data = sr_long,
-              aes(x = sbt, y = med),
-              color = "blue",
-              inherit.aes = FALSE) +
-    geom_ribbon(data = sr_long,
-                aes(x = sbt, y = med, ymin = lo, ymax = hi),
+  if(plot_sr_curve){
+    g <- g +
+      geom_path(data = sr_long,
+                aes(x = sbt, y = med),
                 color = "blue",
-                alpha = 0.1,
-                linetype = "dashed",
-                size = 0.5,
-                inherit.aes = FALSE)
+                inherit.aes = FALSE) +
+      geom_ribbon(data = sr_long,
+                  aes(x = sbt, y = med, ymin = lo, ymax = hi),
+                  color = "blue",
+                  alpha = 0.1,
+                  linetype = "dashed",
+                  size = 0.5,
+                  inherit.aes = FALSE)
+  }
 
   g <- g +
     xlab("Spawning Biomass (thousand t)") +

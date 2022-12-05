@@ -4,12 +4,20 @@
 \alias{plot_sr_mcmc}
 \title{Plot the stock-recruitment relationship for an MCMC ISCAM model}
 \usage{
-plot_sr_mcmc(model, probs = c(0.025, 0.5, 0.975), errorbar_thickness = 0.1)
+plot_sr_mcmc(
+  model,
+  probs = c(0.025, 0.5, 0.975),
+  errorbar_thickness = 0.1,
+  plot_sr_curve = FALSE
+)
 }
 \arguments{
 \item{probs}{A 3-element vector of probabilities that appear in the output
 data frames. This is provided in case the data frames have more than three
 different quantile levels}
+
+\item{plot_sr_curve}{If \code{TRUE}, plot the stock-recruitment curve
+over the points}
 }
 \description{
 Plot the stock-recruitment relationship for an MCMC ISCAM model
