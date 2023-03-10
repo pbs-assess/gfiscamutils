@@ -1,273 +1,212 @@
-#' Set main directories for the project. Check existence of all directories and report.
-#' Sensitivity groups will have the base model prepended.
+#' Load models and set up lists and classes for the base model, bridge
+#' model groups, and sensitivity model groups
 #'
-#' @param nongit_dir The full path containing non-version-controlled things
-#' such as data, model runs from iSCAM, and reference materials. Default is "reponame-nongit"
-#' @param models_dir The full path in which the iSCAM model directories are located
-#' @param base_model_dir Name of the base model directory which is a subdirectory of `models`
-#' @param bridge_models_dir Name of the subdirectory of `models_dir` that
-#' contains the bridge model directories
-#' @param bridge_models_dirs A vector of subdirectory names in `models_dir/bridge_models_dir`
-#'  that each contain an individual iSCAM bridge model
-#' @param sens_models_dir Name of the subdirectory of `models_dir` that
-#' contains the sensitivity model directories
-#' @param sens_models_dirs A vector of subdirectory names in `models_dir/sens_models_dir`
-#'  that each contain an individual iSCAM sensitivity model
-#' @param retro_models_dir Name of the subdirectory of `models_dir` that
-#' contains the retrospective model directories
-#' @param retro_models_dirs A vector of subdirectory names in `models_dir/retro_models_dir`
-#'  that each contain an individual iSCAM base model retrospective model
-#' @param check_dir_exists If `TRUE`, check to make sure that all directories exist
+#' @details
+#' If any of the text lists are `NULL`, default description text will be
+#' assigned and a warning given.
 #'
-#' @return A list of seven items, the first two are the same as the input arguments with the same name.
-#' The 3rd is the full path of the base model.
-#' The 4th is the full path of the bridge models directory.
-#' The 5th contains a vector of the full paths to the bridge models which are inside the 4th directory.
-#' The 6th is the full path of the sensitivity models directory.
-#' The 7th contains a vector of the full paths to the sensitivity models which are inside the 6th directory.
-#' The 8th is the full path of the retrospective models directory.
-#' The 9th contains a vector of the full paths to the retrospectives models which are inside the 8th directory.
-#' @importFrom purrr map_lgl
-#' @export
-set_dirs <- function(nongit_dir = file.path(dirname(here()), paste0(basename(here()), "-nongit")),
-                     models_dir = file.path(nongit_dir, "models"),
-                     base_model_dir = "base",
-                     bridge_models_dir = "01-bridge-models",
-                     bridge_models_dirs = NULL,
-                     sens_models_dir = "02-sens-models",
-                     sens_models_dirs = NULL,
-                     retro_models_dir = "03-retrospective-models",
-                     retro_models_dirs = NULL,
-                     check_dir_exists = TRUE){
-
-  stopifnot(!is.null(nongit_dir))
-  if(!dir.exists(nongit_dir) && check_dir_exists){
-    stop("Non-Git directory does not exist:\n",
-         nongit_dir, call. = FALSE)
-  }
-  stopifnot(!is.null(models_dir))
-  if(!dir.exists(models_dir) && check_dir_exists){
-    stop("Models directory does not exist:\n",
-         models_dir, call. = FALSE)
-  }
-  stopifnot(!is.null(base_model_dir))
-  base_model_dir_full <- file.path(models_dir, base_model_dir)
-  if(!dir.exists(base_model_dir_full) && check_dir_exists){
-    stop("Base model directory does not exist:\n",
-         base_model_dir_full, call. = FALSE)
-  }
-
-  bridge_models_dir_full <- file.path(models_dir, bridge_models_dir)
-  if(!dir.exists(bridge_models_dir_full) && check_dir_exists){
-    stop("Bridge models directory does not exist:\n",
-         bridge_models_dir_full, call. = FALSE)
-  }
-  bridge_models_dirs_full <- NULL
-  if(!is.null(bridge_models_dirs)){
-    bridge_models_dirs_full <- map(bridge_models_dirs, ~{
-      x <- file.path(bridge_models_dir_full, .x)
-      dir_existence <- map_lgl(x, ~{dir.exists(.x)})
-      if(!all(dir_existence) && check_dir_exists){
-        stop("Some Sensitivity model directories do not exist:\n",
-             paste0(x[!dir_existence], collapse = "\n"),
-             call. = FALSE)
-      }
-      x
-    })
-  }
-
-  stopifnot(!is.null(sens_models_dir))
-  sens_models_dir_full <- file.path(models_dir, sens_models_dir)
-  if(!dir.exists(sens_models_dir_full) && check_dir_exists){
-    stop("Sensitivity models directory does not exist:\n",
-         sens_models_dir_full, call. = FALSE)
-  }
-  sens_models_dirs_full <- NULL
-  if(!is.null(sens_models_dirs)){
-    sens_models_dirs_full <- map(sens_models_dirs, ~{
-      x <- file.path(sens_models_dir_full, .x)
-      dir_existence <- map_lgl(x, ~{dir.exists(.x)})
-      if(!all(dir_existence) && check_dir_exists){
-        stop("Some Sensitivity model directories do not exist:\n",
-             paste0(x[!dir_existence], collapse = "\n"),
-             call. = FALSE)
-      }
-      c(base_model_dir_full, x)
-    })
-  }
-
-  stopifnot(!is.null(retro_models_dir))
-  retro_models_dir_full <- file.path(models_dir, retro_models_dir)
-  if(!dir.exists(retro_models_dir_full) && check_dir_exists){
-    stop("Retrospective models directory does not exist:\n",
-         retro_models_dir_full, call. = FALSE)
-  }
-  retro_models_dirs_full <- NULL
-  if(!is.null(retro_models_dirs)){
-    retro_models_dirs_full <- map(retro_models_dirs, ~{
-      x <- file.path(retro_models_dir_full, .x)
-      dir_existence <- map_lgl(x, ~{dir.exists(.x)})
-      if(!all(dir_existence) && check_dir_exists){
-        stop("Some Retrospective model directories do not exist:\n",
-             paste0(x[!dir_existence], collapse = "\n"),
-             call. = FALSE)
-      }
-      c(base_model_dir_full, x)
-    })
-  }
-
-  list(nongit_dir = nongit_dir,
-       models_dir = models_dir,
-       base_model_dir = base_model_dir_full,
-       bridge_models_dir = file.path(models_dir, bridge_models_dir),
-       bridge_models_dirs = bridge_models_dirs_full,
-       sens_models_dir = file.path(models_dir, sens_models_dir),
-       sens_models_dirs = sens_models_dirs_full,
-       retro_models_dir = file.path(models_dir, retro_models_dir),
-       retro_models_dirs = retro_models_dirs_full)
-}
-
-#' Load models and set up lists and classes for the base model, bridge model groups, and
-#' sensitivity model groups
-#'
-#' @param main_dirs Output list from [set_dirs()]
-#' @param bridge_models_text A list of vectors of text strings to show in the legends for bridge
-#' model plots, one name for each model, where the list elements represent a group of models
-#' @param sens_models_text A list of vectors of text strings to show in the legends for sensitivity
-#' model plots, one name for each model, where the list elements represent a group of models
-#' @param retro_models_text A list of vectors of text strings to show in the legends for retrospective
-#' model plots, one name for each model, where the list elements represent a group of models
+#' @param drs Output list from [set_dirs()]
+#' @param bridge_models_desc A list of vectors of text strings to show in
+#' the legends for bridge model plots, one name for each model, where the
+#' list elements represent a group of models
+#' @param sens_models_desc A list of vectors of text strings to show in
+#' the legends for sensitivity model plots, one name for each model, where
+#' the list elements represent a group of models
+#' @param request_models_desc A list of vectors of text strings to show in
+#' the legends for request model plots, one name for each model, where the
+#' list elements represent a group of models
+#' @param test_models_desc A list of vectors of text strings to show in the
+#' legends for test model plots, one name for each model, where the list
+#' elements represent a group of models
+#' @param retro_models_desc A list of vectors of text strings to show in
+#' the legends for retrospective model plots, one name for each model,
+#' where the list elements represent a group of models
 #' @param ... Arguments to pass to [create_rds_file()]
+#' @param base_models_desc A list of descriptions for the base models
+#' @param prepend_to_bridge A logical vector of length the same as
+#' `bridge_models_desc`. If `TRUE`, the base model will be prepended to the
+#' group at that index
 #'
-#' @return A list of three items, the base_model inside a single-element list, the list of
-#' bridge model groups, and the list of sensitivity model groups. `bridge_grp` and `sens_grp`
-#' are groups lists of models which are to be compared with each other in the document.
-#' This simplifies plotting and table functions
-#' @importFrom purrr map_chr flatten
-#' @importFrom furrr future_walk
+#' @return A list of items, the base_model inside a single-element
+#' list, the list of bridge model groups, sensitivity model groups, request
+#' model groups, test model groups, and retrospective model groups. These
+#' groups are lists of models which are to be compared with each other in
+#' the document. This simplifies plotting and table functions
 #' @export
 #' @examples
 #' \dontrun{
-#' library(gfiscamutils)
-#' bridge_models_dirs <- list(c("01-base-2015",
-#'                              "02-bridge-update-data"),
-#'                            c("03-bridge-update-likelihood",
-#'                              "04-bridge-update-survey"))
-#' bridge_models_text <- list(c("base model from 2015",
-#'                              "Add new data"),
-#'                            c("Use new lieklihood method",
-#'                              "Add new survey index point"))
-#' sens_models_dirs <- list(c("10-high-m",
-#'                            "11-low-m"),
-#'                          c("12-high-sigma-r"))
-#' sens_models_text <- list(c("Increase prior for M",
-#'                            "Decrease prior for M"),
-#'                          c("Increase prior for sigma R"))
-#' drs <- set_dirs(base_model_dir = "base",
-#'                 bridge_models_dirs = bridge_models_dirs,
-#'                 sens_model_dirs = sens_model_dirs)
-#' retro_models_dirs <- list(c("01-retrospective-1-year",
-#'                             "02-retrospective-2-year",
-#'                             "03-retrospective-3-year"))
-#' retro_models_text <- list(c("Base model - 1 year",
-#'                             "Base model - 2 years",
-#'                             "Base model - 3 years"))
+#' library(tidyverse)
+#' library(lubridate)
+#' bridge_models_dirs <- list(c("01-new-ss-exe",
+#'                              "02-new-catch-age",
+#'                              "03-update-survey"),
+#'                            c("04-age-1-index",
+#'                              "05-new-wt-at-age"))
+#' bridge_models_descs <- list(c("Update Stock Synthesis version to 3.30.20",
+#'                               "Update all fishery catch and comps",
+#'                               "Update pre-2021 survey data"),
+#'                             c("Update wt-at-age data",
+#'                               "Add 2021 survey data"))
+#' sens_models_dirs <- list(c("01-h-prior-mean-low",
+#'                            "02-h-fix-high",
+#'                            "03-sigma-r-fix-low",
+#'                            "04-sigma-r-fix-high",
+#'                            "05-m-02-sd",
+#'                            "06-m-03-sd"),
+#'                          c("07-age-1-survey",
+#'                            "08-comp-weight-harmonic-mean"),
+#'                          c("09-tv-select-phi-extra-low",
+#'                            "10-tv-select-phi-low",
+#'                            "11-tv-select-phi-high"),
+#'                            c("12-max-sel-age-5",
+#'                            "13-max-sel-age-7",
+#'                            "14-max-sel-age-8"))
+#' sens_models_descs <- list(c("Steepness Mean Prior Low (0.5)",
+#'                             "Steepness Fix 1.0",
+#'                             "Sigma R 1.0",
+#'                             "Sigma R 1.6",
+#'                             "Natural Mortality (SD=0.2)",
+#'                             "Natural Mortality (SD=0.3)"),
+#'                           c("Remove Age 1 Index",
+#'                             "Downweight Fishery Comps"),
+#'                           c("Phi t.v. selectivity (0.21)",
+#'                             "Phi t.v. selectivity (0.70)",
+#'                             "Phi t.v. selectivity (2.10)"),
+#'                           c("Max. age selectivity 5",
+#'                             "Max. age selectivity 7",
+#'                             "Max. age selectivity 8"))
+#'
+#' drs <- set_dirs(bridge_models_dirs = bridge_models_dirs,
+#'                 sens_models_dirs = sens_models_dirs,
+#'                 request_models_dirs = request_models_dirs,
+#'                 test_models_dirs = test_models_dirs,
+#'                 retro_models_dirs = retro_models_dirs,
+#'                 prepend_to_bridge = c(TRUE, FALSE))
+#'
 #' model_setup <- function(drs,
-#'                         bridge_models_text = bridge_models_text,
-#'                         sens_models_text = sens_models_text,
-#'                         retro_models_text = retro_models_text,
+#'                         bridge_models_desc = bridge_models_desc,
+#'                         sens_models_desc = sens_models_desc,
+#'                         retro_models_desc = retro_models_desc,
 #'                         overwrite_rds_files = TRUE)
 #' }
-model_setup <- function(main_dirs = NULL,
-                        bridge_models_text = NULL,
-                        sens_models_text = NULL,
-                        retro_models_text = NULL,
+model_setup <- function(drs = NA,
+                        base_models_desc = NA,
+                        bridge_models_desc = NA,
+                        sens_models_desc = NA,
+                        request_models_desc = NA,
+                        test_models_desc = NA,
+                        retro_models_desc = NA,
+                        prepend_to_bridge = NA,
                         ...){
 
-  if(is.null(main_dirs[1])){
-    stop("main_dirs is NULL. Set main_dirs to the output of set_dirs()", call. = FALSE)
+  if(is.null(drs[1]) || is.na(drs[1])){
+    stop("`drs` is `NULL` or `NA`. Set drs to the output of `set_dirs()`",
+         call. = FALSE)
   }
 
-  if(is.null(bridge_models_text[1])){
-    warning("`bridge_models_text` is `NULL`. Using bridge model directory names for plot legends")
-    bridge_models_text <- basename(main_dirs$bridge_models_dirs)
-    bridge_models_text <- bridge_models_text |>
-      map(~{factor(.x, levels = .x)})
+  # Set `NULL` descriptions to defaults where possible (directories exist)
+  if(!is.list(base_models_desc)){
+    base_models_desc <- list(base_models_desc)
   }
+  lst <- list(base_models_desc, bridge_models_desc,
+              sens_models_desc, request_models_desc,
+              test_models_desc)
+  names(lst) <- c("base_models_dirs", "bridge_models_dirs",
+                  "sens_models_dirs", "request_models_dirs",
+                  "test_models_dirs")
+  model_lst <- drs[names(lst)]
 
-  if(is.null(sens_models_text[1])){
-    warning("`sens_models_text` is `NULL`. Using sens model directory names for plot legends")
-    sens_models_text <- basename(main_dirs$sens_models_dirs)
-    sens_models_text <- sens_models_text |>
-      map(~{factor(.x, levels = .x)})
-  }
+  # If the descriptions are not present, use the directory names as
+  # descriptions
+  iter <- 1
+  model_desc_lst <- map2(lst, model_lst, function(grp_descs, grp_drs){
+    nm <- names(lst)[iter]
+    if(is.null(grp_descs[[1]]) || is.na(grp_descs[1])){
+      message("`", nm, "` has a `NULL` or `NA` description.\nAttempting ",
+              "to use directory names for plot legends.")
 
-  if(is.null(retro_models_text[1])){
-    warning("`retro_models_text` is `NULL`. Using retro model directory names for plot legends")
-    retro_models_text <- basename(main_dirs$retro_models_dirs)
-    retro_models_text <- retro_models_text |>
-      map(~{factor(.x, levels = .x)})
-  }
+      if(is.null(grp_drs[1]) || is.na(grp_drs[1])){
+        message("  - Directory names for `", nm, "` are also `NULL` or `NA`")
+        message("  - Cannot set up default descriptions for folders that ",
+                "do not exist\n")
+        NULL
+      }else{
+        message("  - Successfully set descriptions for `", nm, "` to ",
+                "directory names.\n")
+        iter <<- iter + 1
+        return(map(grp_drs, ~{
+          basename(.x)
+        }))
+      }
+    }else{
+      iter <<- iter + 1
+      if(nm == "bridge_models_dirs"){
+        return(map2(grp_descs, prepend_to_bridge, ~{
+          if(.y){
+            c("Last assessment base model", .x)
+          }else{
+            .x
+          }
+        }))
+      }else if(nm == "sens_models_dirs" || nm == "test_models_dirs"){
+        return(map(grp_descs, ~{
+          c(lst$base_models_dirs[[1]], .x)
+        }))
+      }else{
+        return(grp_descs)
+      }
+    }
+    iter <<- iter + 1
+    NA
+  })
 
-  # model_list is a list of three lists, one for the base model, one for the bridge models,
-  # and one for the sensitivity models
-  model_list <- list(base_model_groups = list(main_dirs$base_model_dir),
-                     bridge_model_groups = main_dirs$bridge_models_dirs,
-                     sens_model_groups = main_dirs$sens_models_dirs,
-                     retro_model_groups = main_dirs$retro_models_dirs)
+  # A vector of unique model directories
+  unique_models_dirs <- model_lst[!is.na(model_lst)] |>
+    flatten() |>
+    flatten() |>
+    as.character() |>
+    unique()
 
-  model_names_list <- list(base_model_groups = ifelse(fr(), "Modèle de base", "Base model"),
-                           bridge_model_groups = bridge_models_text,
-                           sens_model_groups = sens_models_text,
-                           retro_model_groups = retro_models_text)
+  # For each type (base, bridge, sens, request, test) extract unique groups,
+  # load them only once if duplicates (to save time/memory) and match with
+  # where they belong in the list according to model_list
+  map2(model_lst, model_desc_lst, function(type, type_nm, ...){
 
-  j <- imap(model_list, function(.x, .y, ...){
-    models <- NULL
-    if(!is.null(.x)){
-      unique_models_dirs <- .x %>%
-        flatten() %>%
-        unique() %>%
-        map_chr(~{.x})
+    if(!is.null(type[1]) && !is.na(type[1])){
+      # Check that the RDS files exists for these models. If they don't, create them
+      walk(unique_models_dirs, function(path, ...){
+        fn <- file.path(path, paste0(basename(path), ".rds"))
+        if(!file.exists(fn)){
+          create_rds_file(path, ...)
+        }}, ...)
 
-      walk(unique_models_dirs, function(x, ...){
-                    create_rds_file(x, ...)},
-                  ...)
-
-      # This ensures that each unique model is loaded only once, even if it is in multiple
-      # sensitivity groups
-      unique_models <- map(unique_models_dirs, ~{load_rds_file(.x)}) %>%
-        `names<-`(unique_models_dirs)
-
-      models <- map2(.x, model_names_list[[.y]], ~{
-        map2(.x, .y, ~{
-          k <- unique_models[[match(.x, unique_models_dirs)]] %>%
-            `class<-`(mdl_cls)
-          # Assign description text to the model (from bridge_model_text and sens_model_text)
-          attr(k, "model_desc") <- .y
-          k
-        }) %>%
-          `names<-`(.y) %>%
-          `class<-`(mdl_lst_cls)
+      # Load the models in from the RDS files
+      unique_models <- map(unique_models_dirs, function(path){
+        fn <- paste0(path, ".rds")
+        readRDS(fn)
       })
     }
-  }, ...)
 
-  base_model <- j[[1]][[1]]
-  bridge_grps <- j[[2]]
-  if(!is.null(bridge_grps)){
-    class(bridge_grps) <- mdl_grp_cls
-  }
-  sens_grps <- j[[3]]
-  if(!is.null(sens_grps)){
-    class(sens_grps) <- mdl_grp_cls
-  }
-  retro_grps <- j[[4]]
-  if(!is.null(retro_grps)){
-    class(retro_grps) <- mdl_grp_cls
-  }
+    # Populate actual model output
+    models <- map2(type, type_nm, function(dirs, descs){
+      if(is.na(type[1])){
+        return(NA)
+      }
 
-  list(base_model = base_model,
-       bridge_grps = bridge_grps,
-       sens_grps = sens_grps,
-       retro_grps = retro_grps)
+      map2(dirs, descs, function(dr, desc){
+        tmp <- unique_models[[match(dr, unique_models_dirs)]]
+        # Add description to the model
+        # Example of how to access description for bridge model
+        # group 1 model 3:
+        # attr(models$bridge_models_dirs[[1]][[3]], "desc")
+        attr(tmp, "model_desc") <- desc
+        tmp <- tmp %>%
+          `class<-`(mdl_cls)
+        # Assign description text to the model (from bridge_model_text and sens_model_text)
+        tmp
+      }) %>%
+        `names<-`(descs) %>%
+        `class<-`(mdl_lst_cls)
+    })
+  })
 }

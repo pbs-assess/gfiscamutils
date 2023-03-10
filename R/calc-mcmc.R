@@ -68,7 +68,7 @@ calc_mcmc <- function(model,
     mc_d <- mc_d |>
       as_tibble() |>
       map_df(~{as.numeric(.x)})
-    j <- apply(mc_d, 2, quantile, prob = probs)
+    j <- apply(mc_d, 2, quantile, prob = probs, na.rm = TRUE)
     if(!is.null(mpd_d)){
       j <- rbind(j, mpd_d)
       rownames(j)[length(probs) + 1] <- "MPD"
@@ -128,7 +128,7 @@ calc_mcmc <- function(model,
     as.matrix()
   rownames(out$sr_quants) <- c(row_nms, "sbt")
 
-  ## Recruitment deviations
+  # Recruitment deviations
   out$rdev <- mc$rdev
   out$rdev_quants <- apply(out$rdev, 2, quantile, prob = probs)
 
@@ -274,6 +274,7 @@ calc_mcmc <- function(model,
 
     out$proj <- mc$proj |>
       rename(catch = TAC) |>
+      mutate_all(~as.numeric(.x)) |>
       split(~catch) |>
       map(~{mcmc_thin(.x, burnin = burnin, thin = thin)})
 
@@ -288,9 +289,12 @@ calc_mcmc <- function(model,
 
     # Calculate depletion values only
     sbo <- out$params$sbo
+
     out$proj_depl <- out$proj_sbt |>
       group_by(catch) |>
-      mutate_at(vars(-catch), ~{length(sbo) <- length(.x) ; .x / sbo}) |>
+      mutate_at(vars(-catch), ~{
+        length(sbo) <- length(.x)
+        as.numeric(.x) / sbo}) |>
       ungroup()
 
     names(out$proj_sbt) <- gsub("B", "", names(out$proj_sbt))
@@ -325,7 +329,19 @@ calc_mcmc <- function(model,
     out$proj_sbt_quants <- calc_proj_quants(out$proj_sbt)
     out$proj_depl_quants <- calc_proj_quants(out$proj_depl)
 
-    # Replace the final year of the sbt with the values obtained from the TAC 0 projection
+    # Replace the final year of the sbt with the values obtained from the
+    # TAC 0 projection
+    if(nrow(out$proj$`0`) < nrow(out$sbt[, ncol(out$sbt)])){
+      diff <- nrow(out$sbt) - nrow(out$proj$`0`)
+      warning("The number of posteriors in the zero catch scenario is ",
+              nrow(out$proj$`0`), " when it should be ",
+              nrow(out$sbt), ". The last ", diff, " posteriors were ",
+              "replicated to allow the RDS file to be built, ",
+              "but you should run the mcmc to a longer chain length\n")
+      rws <- (nrow(out$proj$`0`) + 1):(nrow(out$proj$`0`) + diff)
+      extra_rows <- out$sbt |> slice(rws)
+      out$proj$`0` <- out$proj$`0` |> bind_rows(extra_rows)
+    }
     out$sbt[, ncol(out$sbt)] <- out$proj$`0`[, 2]
     out$sbt_quants <- quantify(out$sbt, mpd$sbt)
   }

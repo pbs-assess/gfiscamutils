@@ -23,6 +23,7 @@ read_data_file <- function(file = NULL,
 
   # remove preceeding whitespace if it exists
   data <- gsub("^[[:blank:]]+", "", data)
+  data <- trimws(data)
 
   # Get the element number for the "Gears" names if present
   dat <- grep("^#.*Gears:.+", data)
@@ -124,39 +125,61 @@ read_data_file <- function(file = NULL,
     tmp$index.units <- gsub("^[[:blank:]]+", "", index.units.str)
   }
 
-  ## Save the number of specimens per year (comment at end of each age comp
-  ##  line), eg. #135 means 135 specimens contributed to the age proportions for
-  ##  that year
-  age.n <- vector()
-  ## Match age comp lines which have N's as comments
+  # Save the number of specimens per year
+  # Match age comp lines which have N's as comments
   tmp$has.age.comp.n <- FALSE
-  pattern <- "^[[:digit:]]{4}[[:space:]]+[[:digit:]][[:space:]]+[[:digit:]][[:space:]]+[[:digit:]][[:space:]]+[[:digit:]].*#([[:digit:]]+).*"
-  dat <- data[grep(pattern, data)]
-  if(length(dat) > 0){
-    for(n in 1:length(dat)){
-      age.n[n] <- sub(pattern, "\\1", dat[n])
-    }
+  pat <- "NSamp|Nsamp|nsamp|nSamp|n_samp|N_samp|n_Samp|N_Samp"
+  nsamp_ind <- grep(pat, data)
+  if(!nsamp_ind[1]){
+    stop("The `", file, "` file is missing the NSamp identifier. ",
+         "The text NSamp must appear on the line before the age comp ",
+         "data start, in the column names line so this function can ",
+         "extract the age comp data from the data file",
+         call. = FALSE)
   }
-  ## age.n is now a vector of values of N for the age comp data.
-  ## The individual gears have not yet been parsed out, this will
-  ##  happen later when the age comps are read in.
+  if(length(nsamp_ind) > 1){
+    stop("More that one NSamp text string was found in the file `",
+         file, "`. This must be a unique string within the data file",
+         call. = FALSE)
+  }
 
-  ## Get the element numbers which start with #.
+  # Find the end of the age comps
+  pat <- "^ |#"
+  agesamp_end_ind <- grep(pat, data[(nsamp_ind + 1):length(data)])
+  nlines_add <- length(data[1:nsamp_ind])
+  if(!agesamp_end_ind[1]){
+    stop("The end of the age comp lines in the `", file, "` file ",
+         "could not be found. There needs to be either a blank line ",
+         "or a line starting with `#` immediately after the age comps",
+         call. = FALSE)
+  }
+  agesamp_end_ind <- agesamp_end_ind[1] + nlines_add
+  dat <- data[(nsamp_ind + 1):(agesamp_end_ind - 1)]
+  pat <- "[0-9]{4}[[:blank:]]+([0-9]+).*"
+  age.n <- map_dbl(dat, ~{
+    as.numeric(gsub(pat, "\\1", .x))
+  })
+
+  # age.n is now a vector of values of N for the age comp data.
+  # The individual gears have not yet been parsed out, this will
+  #  happen later when the age comps are read in.
+
+  # Get the element numbers which start with #.
   dat <- grep("^#.*", data)
-  ## Remove the lines that start with #.
+  # Remove the lines that start with #.
   dat <- data[-dat]
 
-  ## Remove comments which come at the end of a line
+  # Remove comments which come at the end of a line
   dat <- gsub("#.*", "", dat)
 
-  ## Remove preceeding and trailing whitespace
+  # Remove preceeding and trailing whitespace
   dat <- gsub("^[[:blank:]]+", "", dat)
   dat <- gsub("[[:blank:]]+$", "", dat)
 
-  ## Now we have a nice bunch of string elements which are the inputs for iscam.
-  ## Here we parse them into a list structure
-  ## This is dependent on the current format of the DAT file and needs to
-  ##  be updated whenever the DAT file changes format
+  # Now we have a nice bunch of string elements which are the inputs for iscam.
+  # Here we parse them into a list structure
+  # This is dependent on the current format of the DAT file and needs to
+  #  be updated whenever the DAT file changes format
   tmp$num.areas <- as.numeric(dat[ind <- ind + 1])
   tmp$num.groups <- as.numeric(dat[ind <- ind + 1])
   tmp$num.sex <- as.numeric(dat[ind <- ind + 1])
@@ -167,13 +190,13 @@ read_data_file <- function(file = NULL,
   tmp$num.gears <- as.numeric(dat[ind <- ind + 1])
   tmp$prop.female <- as.numeric(dat[ind <- ind + 1])
 
-  ## Gear allocation
+  # Gear allocation
   tmp$gear.alloc  <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   if(!tmp$has_gear_names){
     tmp$gear_names <- 1:length(tmp$gear.alloc)
   }
 
-  ## Age-schedule and population parameters
+  # Age-schedule and population parameters
   tmp$linf      <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
   tmp$k         <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
   tmp$to        <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
@@ -184,7 +207,7 @@ read_data_file <- function(file = NULL,
   tmp$use.mat   <- as.numeric(dat[ind <- ind + 1])
   tmp$mat.vec   <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+|,")[[1]])
 
-  ## Catch data
+  # Catch data
   tmp$num.catch.obs <- as.numeric(dat[ind <- ind + 1])
   tmp$catch         <- matrix(NA, nrow = tmp$num.catch.obs, ncol = 7)
 
@@ -193,11 +216,11 @@ read_data_file <- function(file = NULL,
   }
   colnames(tmp$catch) <- c("year", "gear", "area", "group", "sex", "type", "value")
 
-  ## Abundance indices are a ragged object and are stored as a list of matrices
+  # Abundance indices are a ragged object and are stored as a list of matrices
   tmp$num.indices     <- as.numeric(dat[ind <- ind + 1])
   tmp$num.index.obs   <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$survey.type <- as.numeric(strsplit(dat[ind <- ind + 1], "[[:blank:]]+")[[1]])
-  ##nrows <- sum(tmp$nitnobs)
+  #nrows <- sum(tmp$nitnobs)
   tmp$indices <- list()
   for(index in 1:tmp$num.indices){
     nrows <- tmp$num.index.obs[index]
@@ -208,11 +231,8 @@ read_data_file <- function(file = NULL,
     }
     colnames(tmp$indices[[index]]) <- c("iyr","it","gear","area","group","sex","wt","timing")
   }
-  ## Age composition data are a ragged object and are stored as a list of matrices
+  # Age composition data are a ragged object and are stored as a list of matrices
   tmp$num.age.gears <- as.numeric(dat[ind <- ind + 1])
-  ##if(!tmp$hasAgeGearNames){
-  ##  tmp$ageGearNames <- 1:length(tmp$nagears)
-  ##}
 
   tmp$num.age.gears.vec       <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$num.age.gears.start.age <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
@@ -222,13 +242,13 @@ read_data_file <- function(file = NULL,
   tmp$dm_num_samp             <- as.numeric(dat[ind <- ind + 1])
   tmp$dm_use_single_num_samp  <- as.logical(dat[ind <- ind + 1])
   tmp$age.comps <- NULL
-  ## One list element for each gear (tmp$nagears)
-  ## Check to see if there are age comp data
+  # One list element for each gear (tmp$nagears)
+  # Check to see if there are age comp data
   if(tmp$num.age.gears.vec[1] > 0){
     tmp$age.comps <- list()
     for(gear in 1:tmp$num.age.gears){
       nrows <- tmp$num.age.gears.vec[gear]
-      ## 5 of the 6 here is for the header columns
+      # 5 of the 6 here is for the header columns
       ncols <- tmp$num.age.gears.end.age[gear] - tmp$num.age.gears.start.age[gear] + 7
       tmp$age.comps[[gear]] <- matrix(NA, nrow = nrows, ncol = ncols)
 
@@ -244,7 +264,7 @@ read_data_file <- function(file = NULL,
                                            tmp$num.age.gears.start.age[gear]:tmp$num.age.gears.end.age[gear])
     }
   }
-  ## Build a list of age comp gear N's
+  # Build a list of age comp gear N's
   tmp$age.gears.n <- list()
   start <- 1
   for(ng in 1:length(tmp$num.age.gears.vec)){
@@ -252,7 +272,8 @@ read_data_file <- function(file = NULL,
     tmp$age.gears.n[[ng]] <- age.n[start:end]
     start <- end + 1
   }
-  ## Empirical weight-at-age data
+
+  # Empirical weight-at-age data
   tmp$num.weight.tab <- as.numeric(dat[ind <- ind + 1])
   tmp$num.weight.obs <- as.numeric(dat[ind <- ind + 1])
   tmp$waa <- NULL

@@ -299,6 +299,7 @@ move_legend_to_empty_facet <- function(g) {
 #' the attribute `model_desc` is set to something other than `NULL`
 #' @param model A proposed iscam model object
 #' @return Logical
+#' @importFrom purrr imap_chr
 #' @export
 is_iscam_model <- function(model){
   if(mdl_cls %in% class(model)){

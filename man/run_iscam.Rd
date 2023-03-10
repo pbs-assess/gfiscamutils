@@ -2,7 +2,7 @@
 % Please edit documentation in R/run-iscam.R
 \name{run_iscam}
 \alias{run_iscam}
-\title{Run an iscam model through the \code{\link[base:shell]{base::shell()}} command}
+\title{Run an iscam model through the \code{\link[base:system]{base::shell()}} command}
 \usage{
 run_iscam(
   model_dir,
@@ -43,5 +43,5 @@ MCMC with the remaining arguments}
 \code{\link[base:invisible]{base::invisible()}}
 }
 \description{
-Run an iscam model through the \code{\link[base:shell]{base::shell()}} command
+Run an iscam model through the \code{\link[base:system]{base::shell()}} command
 }

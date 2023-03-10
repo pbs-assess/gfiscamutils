@@ -103,22 +103,22 @@ plot_biomass_mcmc <- function(models,
 
   tso_quants <- map(models, ~{
     .x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "sbo"]
-    }) %>%
-    bind_rows() %>%
-    mutate(model = names(models), year = ifelse(show_bo, start_yr - 1, start_yr)) %>%
+    }) |>
+    bind_rows() |>
+    mutate(model = names(models), year = ifelse(show_bo, start_yr - 1, start_yr)) |>
     select(model, year, everything())
 
   bmsy_quants <- map(models, ~{
     .x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "bmsy"]
-    }) %>%
-    bind_rows() %>%
-    mutate(model = names(models), year = start_yr) %>%
+    }) |>
+    bind_rows() |>
+    mutate(model = names(models), year = start_yr) |>
     select(model, year, everything())
 
   # Remove data prior to first year and change B0 to first year
-  tso_quants <- tso_quants %>%
+  tso_quants <- tso_quants |>
     mutate(year = ifelse(show_bo, start_yr - 1, start_yr))
-  bmsy_quants <- bmsy_quants %>%
+  bmsy_quants <- bmsy_quants |>
     mutate(year = start_yr)
 
   # 'Dodge' B0 points manually
@@ -126,6 +126,7 @@ plot_biomass_mcmc <- function(models,
     warning("`bo_dodge` value of ", bo_dodge, " makes B0 values span a year or more. ",
             "This will cause overlapping in the plot with the main time series")
   }
+
   tso_quants <- tso_quants %>%
     mutate(year = seq(from = first(year), by = bo_dodge, length.out = nrow(.)))
 
@@ -143,7 +144,7 @@ plot_biomass_mcmc <- function(models,
     mtch
   })
 
-  tso_base <- tso_quants %>%
+  tso_base <- tso_quants |>
     slice(1)
   if(show_bo_lines){
     # Show the B0 lines for the first model with CI, behind model lines
