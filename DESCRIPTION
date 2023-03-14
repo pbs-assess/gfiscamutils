@@ -40,5 +40,5 @@ Imports:
   forcats
 Remotes: pbs-assess/gfutilities, pbs-assess/rosettafish
 LazyData: true
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Config/testthat/edition: 3
