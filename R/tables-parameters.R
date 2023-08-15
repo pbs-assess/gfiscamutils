@@ -525,6 +525,10 @@ make.ref.points.table <- function(model.am2,
     replacement = ifelse(translate, " \U00E0 ", " to "),
     x = row.names
   )
+
+  # Identify rows with proportion aged data
+  prop.age.rows <- grep(pattern = "Proportion aged", x = row.names)
+
   if( translate ) {
     row.names <- gsub( pattern="SB", replacement=en2fr("SB", translate),
                        x=row.names )
@@ -538,21 +542,16 @@ make.ref.points.table <- function(model.am2,
   tab.am2 <- as.matrix(tab.am2[,-1])
   tab.am2 <- apply(tab.am2, c(1, 2) , as.numeric)
   # Format the non-proportion data to digits
-  # TODO: identify rows to edit by searching (instead of by row number)
-  n.row <- nrow(tab.am2)
-  tab.am2.non <- tab.am2[-c(n.row - 1, n.row), ]
+  tab.am2.non <- tab.am2[-prop.age.rows, ]
   tab.am2.non <- f(tab.am2.non, digits)
   # Format the proportion-at-age to two digits only
-  tab.am2.prop <- tab.am2[c(n.row - 1, n.row), ]
+  tab.am2.prop <- tab.am2[prop.age.rows, ]
   tab.am2.prop <- f(tab.am2.prop, 2)
   tab.am2 <- rbind(tab.am2.non, tab.am2.prop)
-  # Proportions don't actually have confidence bounds
-  tab.am2[6,1] <- "-"
-  tab.am2[6,3] <- "-"
-  tab.am2[10,1] <- "-"
-  tab.am2[10,3] <- "-"
-  tab.am2[11,1] <- "-"
-  tab.am2[11,3] <- "-"
+  # Identify rows with probabilities
+  prob.rows <- grep(pattern = "$P~(", x = row.names, fixed = TRUE)
+  # Probabilities don't have confidence bounds
+  tab.am2[prob.rows, c(1, 3)] <- "-"
 
   tab <- cbind(row.names,
                as.data.frame(tab.am2))
