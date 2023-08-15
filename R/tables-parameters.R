@@ -534,14 +534,15 @@ make.ref.points.table <- function(model.am2,
   }
   col.names.am2 <- colnames(tab.am2)
   col.names.am2[1] <- paste0("\\textbf{", en2fr("Reference point", translate), "}")
-  ## Remove latex rownames
+  # Remove latex rownames
   tab.am2 <- as.matrix(tab.am2[,-1])
   tab.am2 <- apply(tab.am2, c(1, 2) , as.numeric)
-  ## Format the non-proportion data to digits
+  # Format the non-proportion data to digits
+  # TODO: identify rows to edit by searching (instead of by row number)
   n.row <- nrow(tab.am2)
   tab.am2.non <- tab.am2[-c(n.row - 1, n.row), ]
   tab.am2.non <- f(tab.am2.non, digits)
-  ## Format the proportion-at-age to two digits only
+  # Format the proportion-at-age to two digits only
   tab.am2.prop <- tab.am2[c(n.row - 1, n.row), ]
   tab.am2.prop <- f(tab.am2.prop, 2)
   tab.am2 <- rbind(tab.am2.non, tab.am2.prop)
@@ -563,6 +564,9 @@ make.ref.points.table <- function(model.am2,
   } else {
     colnames(tab) <- col.names.am2
   }
+
+  # Remove 0.6 SB_0
+  tab <- tab[-11, ]
 
   addtorow <- list()
   addtorow$pos <- list(-1, nrow(tab))
