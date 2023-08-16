@@ -125,7 +125,7 @@ load.iscam.files <- function(model.dir, mcmc.subdir = "mcmc", ...){
   ## If it has an 'mcmc' sub-directory, load it
   if(dir.exists(model$mcmcpath)){
     model$mcmc <- read.mcmc(model$mcmcpath)
-    model$mcmccalcs <- calc.mcmc(model, ...)
+    model$mcmccalcs <- calc.mcmc(model, prod.period = prod_period, ...)
     model$mcmc$params <- strip.areas.groups(model$mcmc$params)
     model$mcmc$params <- fix.m(model$mcmc$params)
     model$mcmc$params.est <- get.estimated.params(model$mcmc$params)
@@ -143,7 +143,7 @@ load.iscam.files <- function(model.dir, mcmc.subdir = "mcmc", ...){
 #' @param lower Lower quantile value to apply to MCMC samples
 #' @param upper Upper quantile value to apply to MCMC samples
 #' @param load.proj Load the projections from the MCMC and do the calculations
-#' @param prod.period Info to calculate the productive period (prod_period)
+#' @param prod.period Productive period table [prod_period]
 #' @param ... arguments to pass to [calc.probabilities()]
 #'   to construct the decision tables
 #'
@@ -202,21 +202,11 @@ calc.mcmc <- function(model,
   })
 
   # Productive period info
-  # regions <- sapply(X=prod_period, function(x) x$region)
-  # idx <- which(regions == "model")
-  # prod.period <- prod.period[idx]
-  # prod_yrs <- prod.period$yrs
-  # prod_prop <- prod.period$prop
-
-  # Productive period
-  # prod_period <- sbt %>%
-  #   filter(year %in% prod_yrs) %>%
-  #   select(-year) %>%
-  #   summarise(
-  #     lower = mean(lower)*prop_prod,
-  #     median = mean(median)*prop_prod,
-  #     upper = mean(upper)* prop_prod
-  #   )
+  regions <- sapply(X=prod.period, function(x) x$region)
+  idx <- which(regions == model)
+  prod.period <- prod.period[[idx]]
+  prod.yrs <- as.character(prod.period$yrs)
+  prod.prop <- prod.period$prop
 
   ## Spawning biomass
   sbt.dat <- mcmc.thin(mc$sbt[[1]], burnin, thin)
@@ -226,6 +216,28 @@ calc.mcmc <- function(model,
                       prob = probs)
   sbt.quants <- rbind(sbt.quants, mpd$sbt)
   rownames(sbt.quants)[4] <- "MPD"
+
+  # save(sbt.dat, file = "sbt.dat.RData")
+  # save(sbt.quants, file = "sbt.quants.RData")
+  # load("sbt.dat.RData")
+  # load("sbt.quants.RData")
+
+  # Productive period
+  # sb_prod <- sbt.dat %>%
+  #   filter(year %in% prod_yrs) %>%
+  #   select() %>%
+  #   summarise(
+  #     lower = mean(lower)*prop_prod,
+  #     median = mean(median)*prop_prod,
+  #     upper = mean(upper)* prop_prod
+  #   )
+
+  # prod.dat <- sbt.dat %>%
+  #   tibble() %>%
+  #   select(matches(prod.yrs)) %>%
+  #   as.matrix()
+
+  # prod.quants <- quantile(prod.dat, probs = probs) * prod.prop
 
   ## Depletion
   depl.dat <- NULL
