@@ -548,10 +548,10 @@ make.ref.points.table <- function(model.am2,
   tab.am2.prop <- tab.am2[prop.age.rows, ]
   tab.am2.prop <- f(tab.am2.prop, 2)
   tab.am2 <- rbind(tab.am2.non, tab.am2.prop)
-  # Identify rows with probabilities
+  # Identify rows with probabilities (e.g., "P (")
   prob.rows <- grep(pattern = "$P~(", x = row.names, fixed = TRUE)
   # Probabilities don't have confidence bounds
-  tab.am2[prob.rows, c(1, 3)] <- "-"
+  tab.am2[prob.rows, c(1, 3)] <- "$-~~~$"
 
   tab <- cbind(row.names,
                as.data.frame(tab.am2))
@@ -565,6 +565,7 @@ make.ref.points.table <- function(model.am2,
   }
 
   # Remove 0.6 SB_0
+  # TODO: better to exclude it from coming into this function
   tab <- tab[-11, ]
 
   addtorow <- list()
