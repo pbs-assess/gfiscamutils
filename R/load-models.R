@@ -143,6 +143,7 @@ load.iscam.files <- function(model.dir, mcmc.subdir = "mcmc", ...){
 #' @param lower Lower quantile value to apply to MCMC samples
 #' @param upper Upper quantile value to apply to MCMC samples
 #' @param load.proj Load the projections from the MCMC and do the calculations
+#' @param prod.period Info to calculate the productive period (prod_period)
 #' @param ... arguments to pass to [calc.probabilities()]
 #'   to construct the decision tables
 #'
@@ -154,12 +155,20 @@ calc.mcmc <- function(model,
                       lower = 0.025,
                       upper = 0.975,
                       load.proj = TRUE,
+                      prod.period,
                       ...){
   if(is.null(model$mcmc)){
     stop("The mcmc list was null. Check read.mcmc() function.", call. = FALSE)
   }
 
   probs <- c(lower, 0.5, upper)
+
+  # Productive period info
+  regions <- sapply(X=prod_period, function(x) x$region)
+  idx <- which(regions == "model")
+  prod.period <- prod.period[idx]
+  prod_yrs <- prod.period$yrs
+  prod_prop <- prod.period$prop
 
   ## Parameters
   mc <- model$mcmc
