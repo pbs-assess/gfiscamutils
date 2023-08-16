@@ -163,13 +163,6 @@ calc.mcmc <- function(model,
 
   probs <- c(lower, 0.5, upper)
 
-  # Productive period info
-  regions <- sapply(X=prod_period, function(x) x$region)
-  idx <- which(regions == "model")
-  prod.period <- prod.period[idx]
-  prod_yrs <- prod.period$yrs
-  prod_prop <- prod.period$prop
-
   ## Parameters
   mc <- model$mcmc
   mpd <- model$mpd
@@ -207,6 +200,23 @@ calc.mcmc <- function(model,
   }, error = function(err){
     warning("MCMC calculations for SB0 failed.\n")
   })
+
+  # Productive period info
+  # regions <- sapply(X=prod_period, function(x) x$region)
+  # idx <- which(regions == "model")
+  # prod.period <- prod.period[idx]
+  # prod_yrs <- prod.period$yrs
+  # prod_prop <- prod.period$prop
+
+  # Productive period
+  # prod_period <- sbt %>%
+  #   filter(year %in% prod_yrs) %>%
+  #   select(-year) %>%
+  #   summarise(
+  #     lower = mean(lower)*prop_prod,
+  #     median = mean(median)*prop_prod,
+  #     upper = mean(upper)* prop_prod
+  #   )
 
   ## Spawning biomass
   sbt.dat <- mcmc.thin(mc$sbt[[1]], burnin, thin)
