@@ -217,21 +217,18 @@ calc.mcmc <- function(model,
   sbt.quants <- rbind(sbt.quants, mpd$sbt)
   rownames(sbt.quants)[4] <- "MPD"
 
-  save(sbt.quants, file = "sbt.quants.RData")
-  # load("sbt.quants.RData")
-  prod.yrs <- 1990:1999
-  prod.prop <- 0.8
-
+  # Productive period
   prod.quants <- sbt.quants %>%
     t() %>%
     as_tibble(rownames = "year") %>%
     mutate(year = as.numeric(year)) %>%
     filter(year %in% prod.yrs) %>%
     select(-year) %>%
-    mutate(`5%` = prod.prop*`5%`,
-           `50%` = prod.prop*`50%`,
-           `95%` = prod.prop*`95%`,
-           MPD = prod.prop*MPD) %>%
+    mutate(`5%` = prod.prop * `5%`,
+           `50%` = prod.prop * `50%`,
+           `95%` = prod.prop * `95%`,
+           MPD = prod.prop * MPD) %>%
+    select(-MPD) %>%
     colMeans()
 
   ## Depletion
@@ -377,6 +374,7 @@ calc.mcmc <- function(model,
   last.yr.sbt <- sbt.dat[,ncol(sbt.dat)]
   r.dat <- cbind(r.dat,
                  0.3 * r.dat$sbo,
+                 # prod.quants,
                  sbt.end.1,
                  sbt.end.1 / r.dat$sbo,
                  sbt.end.1 / (0.3 * r.dat$sbo),
@@ -390,6 +388,7 @@ calc.mcmc <- function(model,
                  proj$PropAge4to10)
   names(r.dat) <- c("sbo",
                     paste0("0.3sbo"),
+                    # paste0("sbprod"),
                     paste0("sb", yr.sbt.end.1),
                     paste0("sb", yr.sbt.end.1, "/sbo"),
                     paste0("sb", yr.sbt.end.1, "/0.3sbo"),
@@ -404,8 +403,12 @@ calc.mcmc <- function(model,
 
   r.quants <- apply(r.dat, 2, quantile, prob = probs)
 
+  # Format nicely -- nothing to show if multiplying by 1
+  prop.prod.show <- ifelse(prop.prod == 1, "", prop.prod)
+
   desc.col <- c("$\\mli{SB}_0$",
                 "$0.3\\mli{SB}_0$",
+                # paste0(prop.prod.show, "$\\overline{\\SB}_\\mli{Prod}$"),
                 paste0("$\\mli{SB}_{", yr.sbt.end.1, "}$"),
                 paste0("$\\mli{SB}_{", yr.sbt.end.1,
                        "} / ",
