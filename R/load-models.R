@@ -217,27 +217,22 @@ calc.mcmc <- function(model,
   sbt.quants <- rbind(sbt.quants, mpd$sbt)
   rownames(sbt.quants)[4] <- "MPD"
 
-  # save(sbt.dat, file = "sbt.dat.RData")
-  # save(sbt.quants, file = "sbt.quants.RData")
-  # load("sbt.dat.RData")
+  save(sbt.quants, file = "sbt.quants.RData")
   # load("sbt.quants.RData")
+  prod.yrs <- 1990:1999
+  prod.prop <- 0.8
 
-  # Productive period
-  # sb_prod <- sbt.dat %>%
-  #   filter(year %in% prod_yrs) %>%
-  #   select() %>%
-  #   summarise(
-  #     lower = mean(lower)*prop_prod,
-  #     median = mean(median)*prop_prod,
-  #     upper = mean(upper)* prop_prod
-  #   )
-
-  # prod.dat <- sbt.dat %>%
-  #   tibble() %>%
-  #   select(matches(prod.yrs)) %>%
-  #   as.matrix()
-
-  # prod.quants <- quantile(prod.dat, probs = probs) * prod.prop
+  prod.quants <- sbt.quants %>%
+    t() %>%
+    as_tibble(rownames = "year") %>%
+    mutate(year = as.numeric(year)) %>%
+    filter(year %in% prod.yrs) %>%
+    select(-year) %>%
+    mutate(`5%` = prod.prop*`5%`,
+           `50%` = prod.prop*`50%`,
+           `95%` = prod.prop*`95%`,
+           MPD = prod.prop*MPD) %>%
+    colMeans()
 
   ## Depletion
   depl.dat <- NULL

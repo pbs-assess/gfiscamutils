@@ -11,6 +11,7 @@ calc.mcmc(
   lower = 0.025,
   upper = 0.975,
   load.proj = TRUE,
+  prod.period,
   ...
 )
 }
@@ -26,6 +27,8 @@ calc.mcmc(
 \item{upper}{Upper quantile value to apply to MCMC samples}
 
 \item{load.proj}{Load the projections from the MCMC and do the calculations}
+
+\item{prod.period}{Productive period table [prod_period]}
 
 \item{...}{arguments to pass to [calc.probabilities()]
 to construct the decision tables}
