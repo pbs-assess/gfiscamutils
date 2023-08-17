@@ -201,12 +201,11 @@ calc.mcmc <- function(model,
     warning("MCMC calculations for SB0 failed.\n")
   })
 
-  # Productive period info
-  regions <- sapply(X=prod.period, function(x) x$region)
-  idx <- which(regions == model)
-  prod.period <- prod.period[[idx]]
-  prod.yrs <- as.character(prod.period$yrs)
-  prod.prop <- prod.period$prop
+  # # Productive period info
+  # idx <- which(names(prod.period) == model)
+  # prod.period.i <- prod.period[idx]
+  # prod.yrs <- as.character(prod.period.i$yrs)
+  # prod.prop <- prod.period.i$prop
 
   ## Spawning biomass
   sbt.dat <- mcmc.thin(mc$sbt[[1]], burnin, thin)
@@ -217,19 +216,22 @@ calc.mcmc <- function(model,
   sbt.quants <- rbind(sbt.quants, mpd$sbt)
   rownames(sbt.quants)[4] <- "MPD"
 
-  # Productive period
-  prod.quants <- sbt.quants %>%
-    t() %>%
-    as_tibble(rownames = "year") %>%
-    mutate(year = as.numeric(year)) %>%
-    filter(year %in% prod.yrs) %>%
-    select(-year) %>%
-    mutate(`5%` = prod.prop * `5%`,
-           `50%` = prod.prop * `50%`,
-           `95%` = prod.prop * `95%`,
-           MPD = prod.prop * MPD) %>%
-    select(-MPD) %>%
-    colMeans()
+  # # Productive period
+  # prod.quants <- sbt.quants %>%
+  #   t() %>%
+  #   as_tibble(rownames = "year") %>%
+  #   mutate(year = as.numeric(year)) %>%
+  #   filter(year %in% prod.yrs) %>%
+  #   select(-year) %>%
+  #   mutate(`5%` = prod.prop * `5%`,
+  #          `50%` = prod.prop * `50%`,
+  #          `95%` = prod.prop * `95%`,
+  #          MPD = prod.prop * MPD) %>%
+  #   select(-MPD) %>%
+  #   colMeans()
+
+  # save(prod.period, prod.period.i, prod.yrs, prod.prop, prod.quants,
+  #      file = "prod.RData")
 
   ## Depletion
   depl.dat <- NULL
@@ -374,7 +376,6 @@ calc.mcmc <- function(model,
   last.yr.sbt <- sbt.dat[,ncol(sbt.dat)]
   r.dat <- cbind(r.dat,
                  0.3 * r.dat$sbo,
-                 # prod.quants,
                  sbt.end.1,
                  sbt.end.1 / r.dat$sbo,
                  sbt.end.1 / (0.3 * r.dat$sbo),
@@ -388,7 +389,6 @@ calc.mcmc <- function(model,
                  proj$PropAge4to10)
   names(r.dat) <- c("sbo",
                     paste0("0.3sbo"),
-                    # paste0("sbprod"),
                     paste0("sb", yr.sbt.end.1),
                     paste0("sb", yr.sbt.end.1, "/sbo"),
                     paste0("sb", yr.sbt.end.1, "/0.3sbo"),
@@ -403,12 +403,14 @@ calc.mcmc <- function(model,
 
   r.quants <- apply(r.dat, 2, quantile, prob = probs)
 
-  # Format nicely -- nothing to show if multiplying by 1
-  prop.prod.show <- ifelse(prop.prod == 1, "", prop.prod)
+  # r.quants <- cbind(r.quants, prod.quants)
+  # names(r.quants) <- c(names(r.quants), paste0("sbprod"))
+
+  # # Format nicely -- nothing to show if multiplying by 1
+  # prop.prod.show <- ifelse(prod.prop == 1, "", prod.prop)
 
   desc.col <- c("$\\mli{SB}_0$",
                 "$0.3\\mli{SB}_0$",
-                # paste0(prop.prod.show, "$\\overline{\\SB}_\\mli{Prod}$"),
                 paste0("$\\mli{SB}_{", yr.sbt.end.1, "}$"),
                 paste0("$\\mli{SB}_{", yr.sbt.end.1,
                        "} / ",
@@ -434,6 +436,7 @@ calc.mcmc <- function(model,
                        "0.6\\mli{SB}_0)$"),
                 "$\\text{Proportion aged 3}$",
                 "$\\text{Proportion aged 4 - 10}$")
+                # paste0(prop.prod.show, "$\\overline{\\SB}_\\mli{Prod}$"))
 
   r.quants <- t(r.quants)
   r.quants <- cbind.data.frame(desc.col, r.quants)
@@ -450,6 +453,7 @@ calc.mcmc <- function(model,
            "r.quants",
            "sbt.dat",
            "sbt.quants",
+           # "prod.quants",
            "depl.dat",
            "depl.quants",
            "nat.mort.dat",
