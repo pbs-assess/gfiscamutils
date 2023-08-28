@@ -432,7 +432,7 @@ calc.mcmc <- function(model,
                        "0.6\\mli{SB}_0)$"),
                 "$\\text{Proportion aged 3}$",
                 "$\\text{Proportion aged 4 - 10}$",
-                paste0(prop.prod.show, "$\\overline{\\SB}_\\mli{Prod}$"))
+                paste0("$", prop.prod.show, "\\overline{\\SB}_\\mli{Prod}$"))
 
   r.quants <- t(r.quants)
   r.quants <- cbind.data.frame(desc.col, r.quants)
