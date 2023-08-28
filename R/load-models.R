@@ -155,7 +155,7 @@ calc.mcmc <- function(model,
                       lower = 0.025,
                       upper = 0.975,
                       load.proj = TRUE,
-                      prod.period,
+                      prod.period = prod_period,
                       ...){
   if(is.null(model$mcmc)){
     stop("The mcmc list was null. Check read.mcmc() function.", call. = FALSE)
@@ -202,8 +202,8 @@ calc.mcmc <- function(model,
   })
 
   # Productive period info
-  idx <- which(names(prod.period) == model)
-  prod.period.i <- prod.period[idx]
+  idx <- which(names(prod.period) == basename(model$path))
+  prod.period.i <- prod.period[[idx]]
   prod.yrs <- as.character(prod.period.i$yrs)
   prod.prop <- prod.period.i$prop
 
@@ -229,9 +229,6 @@ calc.mcmc <- function(model,
            MPD = prod.prop * MPD) %>%
     select(-MPD) %>%
     colMeans()
-
-  # TODO: Save temp
-  save(sbt.quants, prod.quants, file = "prod.RData")
 
   ## Depletion
   depl.dat <- NULL
@@ -402,16 +399,11 @@ calc.mcmc <- function(model,
                     "PropAge4to10")
 
   r.quants <- apply(r.dat, 2, quantile, prob = probs)
+  sbprod <- prod.quants
+  r.quants <- cbind(r.quants, sbprod)
 
-  # TODO: Save temp
-  save(r.dat, file = "r.dat.RData")
-  save(r.quants, file = "r.quants.RData")
-
-  # r.quants <- cbind(r.quants, prod.quants)
-  # names(r.quants) <- c(names(r.quants), paste0("sbprod"))
-
-  # # Format nicely -- nothing to show if multiplying by 1
-  # prop.prod.show <- ifelse(prod.prop == 1, "", prod.prop)
+  # Format nicely -- nothing to show if multiplying by 1
+  prop.prod.show <- ifelse(prod.prop == 1, "", prod.prop)
 
   desc.col <- c("$\\mli{SB}_0$",
                 "$0.3\\mli{SB}_0$",
@@ -439,8 +431,8 @@ calc.mcmc <- function(model,
                        "}<",
                        "0.6\\mli{SB}_0)$"),
                 "$\\text{Proportion aged 3}$",
-                "$\\text{Proportion aged 4 - 10}$")
-                # paste0(prop.prod.show, "$\\overline{\\SB}_\\mli{Prod}$"))
+                "$\\text{Proportion aged 4 - 10}$",
+                paste0(prop.prod.show, "$\\overline{\\SB}_\\mli{Prod}$"))
 
   r.quants <- t(r.quants)
   r.quants <- cbind.data.frame(desc.col, r.quants)
@@ -451,6 +443,9 @@ calc.mcmc <- function(model,
 
   # Remove row for 0.6 SB_0
   r.quants <- r.quants[row.names(r.quants) != "psb2024/0.6sbo",]
+
+  # Arrange rows
+  r.quants <- r.quants[c(1, 2, 13, 3:12), ]
 
   sapply(c("p.dat",
            "p.quants",

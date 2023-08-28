@@ -11,7 +11,7 @@ calc.mcmc(
   lower = 0.025,
   upper = 0.975,
   load.proj = TRUE,
-  prod.period,
+  prod.period = prod_period,
   ...
 )
 }
