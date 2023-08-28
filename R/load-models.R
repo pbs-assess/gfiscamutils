@@ -201,11 +201,11 @@ calc.mcmc <- function(model,
     warning("MCMC calculations for SB0 failed.\n")
   })
 
-  # # Productive period info
-  # idx <- which(names(prod.period) == model)
-  # prod.period.i <- prod.period[idx]
-  # prod.yrs <- as.character(prod.period.i$yrs)
-  # prod.prop <- prod.period.i$prop
+  # Productive period info
+  idx <- which(names(prod.period) == model)
+  prod.period.i <- prod.period[idx]
+  prod.yrs <- as.character(prod.period.i$yrs)
+  prod.prop <- prod.period.i$prop
 
   ## Spawning biomass
   sbt.dat <- mcmc.thin(mc$sbt[[1]], burnin, thin)
@@ -216,22 +216,22 @@ calc.mcmc <- function(model,
   sbt.quants <- rbind(sbt.quants, mpd$sbt)
   rownames(sbt.quants)[4] <- "MPD"
 
-  # # Productive period
-  # prod.quants <- sbt.quants %>%
-  #   t() %>%
-  #   as_tibble(rownames = "year") %>%
-  #   mutate(year = as.numeric(year)) %>%
-  #   filter(year %in% prod.yrs) %>%
-  #   select(-year) %>%
-  #   mutate(`5%` = prod.prop * `5%`,
-  #          `50%` = prod.prop * `50%`,
-  #          `95%` = prod.prop * `95%`,
-  #          MPD = prod.prop * MPD) %>%
-  #   select(-MPD) %>%
-  #   colMeans()
+  # Productive period
+  prod.quants <- sbt.quants %>%
+    t() %>%
+    as_tibble(rownames = "year") %>%
+    mutate(year = as.numeric(year)) %>%
+    filter(year %in% prod.yrs) %>%
+    select(-year) %>%
+    mutate(`5%` = prod.prop * `5%`,
+           `50%` = prod.prop * `50%`,
+           `95%` = prod.prop * `95%`,
+           MPD = prod.prop * MPD) %>%
+    select(-MPD) %>%
+    colMeans()
 
-  # save(prod.period, prod.period.i, prod.yrs, prod.prop, prod.quants,
-  #      file = "prod.RData")
+  # TODO: Save temp
+  save(sbt.quants, prod.quants, file = "prod.RData")
 
   ## Depletion
   depl.dat <- NULL
@@ -402,6 +402,10 @@ calc.mcmc <- function(model,
                     "PropAge4to10")
 
   r.quants <- apply(r.dat, 2, quantile, prob = probs)
+
+  # TODO: Save temp
+  save(r.dat, file = "r.dat.RData")
+  save(r.quants, file = "r.quants.RData")
 
   # r.quants <- cbind(r.quants, prod.quants)
   # names(r.quants) <- c(names(r.quants), paste0("sbprod"))
