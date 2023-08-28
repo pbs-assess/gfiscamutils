@@ -519,6 +519,7 @@ make.ref.points.table <- function(model.am2,
   }
 
   tab.am2 <- model.am2$mcmccalcs$r.quants
+
   row.names <- tab.am2[,1]
   row.names <- gsub(
     pattern = " - ",
@@ -563,10 +564,6 @@ make.ref.points.table <- function(model.am2,
   } else {
     colnames(tab) <- col.names.am2
   }
-
-  # Remove 0.6 SB_0
-  # TODO: better to exclude it from coming into this function
-  tab <- tab[-11, ]
 
   addtorow <- list()
   addtorow$pos <- list(-1, nrow(tab))

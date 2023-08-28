@@ -445,6 +445,9 @@ calc.mcmc <- function(model,
   col.names[1] <- latex.bold("Reference point")
   colnames(r.quants) <- col.names
 
+  # Remove row for 0.6 SB_0
+  r.quants <- r.quants[row.names(r.quants) != "psb2024/0.6sbo",]
+
   sapply(c("p.dat",
            "p.quants",
            "p.dat.log",
