@@ -230,6 +230,11 @@ calc.mcmc <- function(model,
     select(-MPD) %>%
     colMeans()
 
+  # Productive period data
+  prod.dat <- sbt.dat[, names(sbt.dat) %in% prod.yrs] %>%
+    rowMeans()
+  prod.dat <- prod.dat * prod.prop
+
   ## Depletion
   depl.dat <- NULL
   depl.quants <- NULL
@@ -375,26 +380,31 @@ calc.mcmc <- function(model,
                  0.3 * r.dat$sbo,
                  sbt.end.1,
                  sbt.end.1 / r.dat$sbo,
-                 sbt.end.1 / (0.3 * r.dat$sbo),
+                 # sbt.end.1 / (0.3 * r.dat$sbo),
                  sum(sbt.end.1 < (0.3 * r.dat$sbo)) / nrow(r.dat),
+                 sum(sbt.end.1 < prod.dat) / nrow(r.dat),
                  last.yr.sbt,
                  last.yr.sbt / r.dat$sbo,
-                 last.yr.sbt / (0.3 * r.dat$sbo),
+                 # last.yr.sbt / (0.3 * r.dat$sbo),
                  sum(last.yr.sbt < (0.3 * r.dat$sbo)) / nrow(r.dat),
-                 sum(last.yr.sbt < (0.6 * r.dat$sbo)) / nrow(r.dat),
+                 sum(last.yr.sbt < prod.dat) / nrow(r.dat),
+                 # sum(last.yr.sbt < (0.6 * r.dat$sbo)) / nrow(r.dat),
                  proj$PropAge3,
                  proj$PropAge4to10)
+
   names(r.dat) <- c("sbo",
                     paste0("0.3sbo"),
                     paste0("sb", yr.sbt.end.1),
                     paste0("sb", yr.sbt.end.1, "/sbo"),
-                    paste0("sb", yr.sbt.end.1, "/0.3sbo"),
+                    # paste0("sb", yr.sbt.end.1, "/0.3sbo"),
                     paste0("psb", yr.sbt.end.1, "/0.3sbo"),
+                    paste0("psb", yr.sbt.end.1, "/sbprod"),
                     paste0("sb", yr.sbt.end),
                     paste0("sb", yr.sbt.end, "/sbo"),
-                    paste0("sb", yr.sbt.end, "/0.3sbo"),
+                    # paste0("sb", yr.sbt.end, "/0.3sbo"),
                     paste0("psb", yr.sbt.end, "/0.3sbo"),
-                    paste0("psb", yr.sbt.end, "/0.6sbo"),
+                    paste0("psb", yr.sbt.end, "/sbprod"),
+                    # paste0("psb", yr.sbt.end, "/0.6sbo"),
                     "PropAge3",
                     "PropAge4to10")
 
@@ -411,25 +421,31 @@ calc.mcmc <- function(model,
                 paste0("$\\mli{SB}_{", yr.sbt.end.1,
                        "} / ",
                        "\\mli{SB}_0$"),
-                paste0("$\\mli{SB}_{", yr.sbt.end.1,
-                       "} / ",
-                       "0.3\\mli{SB}_0$"),
+                # paste0("$\\mli{SB}_{", yr.sbt.end.1,
+                #        "} / ",
+                #        "0.3\\mli{SB}_0$"),
                 paste0("$P~(\\mli{SB}_{", yr.sbt.end.1,
                        "}<",
                        "0.3\\mli{SB}_0)$"),
+                paste0("$P~(\\mli{SB}_{", yr.sbt.end.1,
+                       "}<", prop.prod.show,
+                       "\\overline{\\SB}_\\mli{Prod}$"),
                 paste0("$\\mli{SB}_{", yr.sbt.end, "}$"),
                 paste0("$\\mli{SB}_{", yr.sbt.end,
                        "} / ",
                        "\\mli{SB}_0$"),
-                paste0("$\\mli{SB}_{", yr.sbt.end,
-                       "} / ",
-                       "0.3\\mli{SB}_0$"),
+                # paste0("$\\mli{SB}_{", yr.sbt.end,
+                #        "} / ",
+                #        "0.3\\mli{SB}_0$"),
                 paste0("$P~(\\mli{SB}_{", yr.sbt.end,
                        "}<",
                        "0.3\\mli{SB}_0)$"),
                 paste0("$P~(\\mli{SB}_{", yr.sbt.end,
-                       "}<",
-                       "0.6\\mli{SB}_0)$"),
+                       "}<", prop.prod.show,
+                       "\\overline{\\SB}_\\mli{Prod}$"),
+                # paste0("$P~(\\mli{SB}_{", yr.sbt.end,
+                #        "}<",
+                #        "0.6\\mli{SB}_0)$"),
                 "$\\text{Proportion aged 3}$",
                 "$\\text{Proportion aged 4 - 10}$",
                 paste0("$", prop.prod.show, "\\overline{\\SB}_\\mli{Prod}$"))
@@ -441,16 +457,8 @@ calc.mcmc <- function(model,
   col.names[1] <- latex.bold("Reference point")
   colnames(r.quants) <- col.names
 
-  # Remove obsolete rows
-  r.quants <- r.quants[row.names(r.quants) !=
-                         paste0("sb", yr.sbt.end.1, "/0.3sbo"), ]
-  r.quants <- r.quants[row.names(r.quants) !=
-                         paste0("sb", yr.sbt.end, "/0.3sbo"), ]
-  r.quants <- r.quants[row.names(r.quants) !=
-                         paste0("psb", yr.sbt.end, "/0.6sbo"), ]
-
   # Arrange rows
-  r.quants <- r.quants[c(1, 2, 11, 3:10), ]
+  r.quants <- r.quants[c(1, 2, 13, 3:12), ]
 
   sapply(c("p.dat",
            "p.quants",
