@@ -441,11 +441,16 @@ calc.mcmc <- function(model,
   col.names[1] <- latex.bold("Reference point")
   colnames(r.quants) <- col.names
 
-  # Remove row for 0.6 SB_0
-  r.quants <- r.quants[row.names(r.quants) != "psb2024/0.6sbo",]
+  # Remove obsolete rows
+  r.quants <- r.quants[row.names(r.quants) !=
+                         paste0("sb", yr.sbt.end.1, "/0.3sbo"), ]
+  r.quants <- r.quants[row.names(r.quants) !=
+                         paste0("sb", yr.sbt.end, "/0.3sbo"), ]
+  r.quants <- r.quants[row.names(r.quants) !=
+                         paste0("psb", yr.sbt.end, "/0.6sbo"), ]
 
   # Arrange rows
-  r.quants <- r.quants[c(1, 2, 13, 3:12), ]
+  r.quants <- r.quants[c(1, 2, 11, 3:10), ]
 
   sapply(c("p.dat",
            "p.quants",
