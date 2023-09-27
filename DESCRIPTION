@@ -22,6 +22,7 @@ Imports:
   furrr,
   future,
   ggplot2,
+  gfdata,
   gfutilities,
   gginnards,
   grDevices,
@@ -53,6 +54,7 @@ Imports:
   zoo
 Remotes:
   pbs-assess/csasdown,
+  pbs-assess/gfdata,
   pbs-assess/gfutilities,
   pbs-assess/rosettafish
 Suggests:
@@ -60,5 +62,5 @@ Suggests:
   gfdata
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.2
+RoxygenNote: 7.2.3
 Config/testthat/edition: 3

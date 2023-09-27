@@ -7,65 +7,53 @@
 #' If directories do not exist, they will be assigned `NULL` and a warning
 #' issued. If the `models_dir` does not exist, an error will be thrown.
 #'
-#' @param models_dir Full path in which the SS3 model directories are
+#' @param models_dir Path in which the model directories are
 #' located for the current assessment year
-#' @param last_yr_models_dir Full path in which the SS3 model directories are
-#' located for the the last assessment year
+#' @param nongit_dir Path in which the non-git files for the assessment are
+#' located
 #' @param base_models_dir Name of the base models directory
 #' @param bridge_models_dir Name of the bridging models directory
 #' @param sens_models_dir Name of the sensitivity models directory
-#' @param request_models_dir Name of the request models directory
-#' @param test_models_dir Name of the test models directory
+#' @param retrospectives_models_dir Name of the retrospectives models directory
 #' @param base_models_dirs A vector of subdirectory names in
-#' `base_models_dir` that each contain an individual SS3 base model
+#' `base_models_dir` that each contain an individual base model
 #' @param bridge_models_dirs A vector of subdirectory names in
-#' `bridge_models_dir` that each contain an individual SS3 bridge model
+#' `bridge_models_dir` that each contain an individual bridge model
 #' @param sens_models_dirs A vector of subdirectory names in `sens_models_dir`
-#' that each contain an individual SS3 sensitivity model
-#' @param request_models_dirs A vector of subdirectory names in
-#' `request_models_dir` that each contain an individual SS3 base model request
+#' that each contain an individual sensitivity model
+#' @param retrospectives_models_dirs A vector of subdirectory names in
+#' `retrospectives_models_dir`that each contain an individual retrospective
 #' model
-#' @param test_models_dirs A vector of subdirectory names in `test_models_dir`
-#'  that each contain an individual SS3 base model test model
-#' @param prepend_to_bridge A vector of logical values, the same length as the
-#' number of groups of bridge models (`length(bridge_models_dirs)`) which,
-#' if `TRUE` will prepend the `last_yr_base_model_dir``to the beginning of
-#' the group of that element number. If `NULL` or `NA`, no prepending will
-#' take place
 #' @param suppress_warnings If `TRUE`, warnings about directories not existing
 #' will not be shown
 #'
-#' @return A list of twelve vectors of full paths, which will have `NA`
-#' elements for those which do not exist:
-#' 1.  Full path of `models_dir`
-#' 2.  Full path of `last_yr_base_model_dir`
-#' 3.  Full path of `base_model_dir`
-#' 4.  Full path of `bridge_models_dir`
-#' 5.  Full path of `sens_models_dir`
-#' 6.  Full path of `request_models_dir`
-#' 7.  Full path of `test_models_dir`
-#' 8.  A vector of the base model directories
-#' 9.  A vector of the bridge model directories
-#' 10. A vector of the sensitivity model directories
-#' 11. A vector of the request model directories
-#' 12. A vector of the test model directories
+#' @return A list of vectors of directory names, which will have `NA` elements
+#' for those which do not exist:
+#' 1.  The input directory for `models_dir`
+#' 2.  The input directory for `nongit_dir`
+#' 3.  The input directory for `last_yr_base_model_dir`
+#' 4.  The input directory for `base_model_dir`
+#' 5.  The input directory for `bridge_models_dir`
+#' 6.  The input directory for `sens_models_dir`
+#' 7.  The input directory for `retrospective_models_dir`
+#' 8.  The base model directories
+#' 9.  The bridge model directories
+#' 10. The sensitivity model directories
 #'
 #' @export
 set_dirs <- function(
     models_dir = NA,
-    last_yr_models_dir = NA,
+    nongit_dir = NA,
 
     base_models_dir = "01-base-models",
-    bridge_models_dir = "02-bridging-models",
-    sens_models_dir = "03-sensitivity-models",
-    request_models_dir = "04-request-models",
-    test_models_dir = "05-test-models",
+    bridge_models_dir = "02-bridge-models",
+    sens_models_dir = "03-sens-models",
+    retro_models_dir = "04-retrospective-models",
 
-    base_models_dirs = NA,
+    base_models_dirs = "01-base-model",
     bridge_models_dirs = NA,
     sens_models_dirs = NA,
-    request_models_dirs = NA,
-    test_models_dirs = NA,
+    retro_models_dirs = NA,
     prepend_to_bridge = NA,
     suppress_warnings = FALSE){
 
@@ -79,40 +67,36 @@ set_dirs <- function(
          call. = FALSE)
   }
 
-  if(is.null(last_yr_models_dir) || is.na(last_yr_models_dir)){
-    stop("`last_yr_models_dir` must not be `NULL` or `NA`",
+  if(is.null(nongit_dir) || is.na(nongit_dir)){
+    stop("`nongit_dir` must not be `NULL` or `NA`",
          call. = FALSE)
   }
 
-  if(!dir.exists(last_yr_models_dir)){
-    stop("`last_yr_models_dir` does not exist",
+  if(!dir.exists(nongit_dir)){
+    stop("`nongit_dir` does not exist",
          call. = FALSE)
   }
 
   if(is.null(base_models_dir) ||
      is.null(bridge_models_dir) ||
      is.null(sens_models_dir) ||
-     is.null(request_models_dir) ||
-     is.null(test_models_dir) ||
+     is.null(retro_models_dir) ||
      is.null(base_models_dirs) ||
      is.null(bridge_models_dirs) ||
      is.null(sens_models_dirs) ||
-     is.null(request_models_dirs) ||
-     is.null(test_models_dirs)){
+     is.null(retro_models_dirs)){
     stop("None of the following directory names can be `NULL`:\n",
          "(If you want them to be ignored, set them to `NA`)\n",
          "`base_models_dir`\n`bridge_models_dir`\n`sens_models_dir`\n",
-         "`request_models_dir`\n`test_models_dir`\n`base_models_dirs`\n",
-         "`bridge_models_dirs`\n`sens_models_dirs`\n`request_models_dirs`\n",
-         "`test_models_dirs`\n",
+         "`retro_model_dir`\n`base_models_dirs`\n`bridge_models_dirs`\n",
+         "`sens_models_dirs`\n`retro_models_dirs`\n",
          call. = FALSE)
   }
 
   root_dirs_rel <- c(base_models_dir,
                      bridge_models_dir,
                      sens_models_dir,
-                     request_models_dir,
-                     test_models_dir)
+                     retro_models_dir)
   root_dirs <- file.path(models_dir, root_dirs_rel)
 
   # This works if any of `root_dirs_rel` are `NA` so there is no explicit check
@@ -136,8 +120,7 @@ set_dirs <- function(
   subdirs_rel <- list(base_models_dirs,
                       bridge_models_dirs,
                       sens_models_dirs,
-                      request_models_dirs,
-                      test_models_dirs)
+                      retro_models_dirs)
 
   has_models_subdirs <- map(subdirs_rel, function(type){
     map(type, function(group){
@@ -146,48 +129,12 @@ set_dirs <- function(
   })
 
   # Make full paths. Some may contain NA
-  subdirs <- map2(root_dirs, subdirs_rel, function(root_dir, subdir){
+  dirs <- map2(root_dirs, subdirs_rel, function(root_dir, subdir){
     map(subdir, function(group){
       file.path(root_dir, group)
     })
   })
 
-  # Check that full paths exist. If they don't set them to NA
-  dirs <- map(subdirs, function(subdir){
-    map(subdir, function(group){
-      map_chr(group, function(fn){
-        if(file.exists(fn)){
-          fn
-        }else{
-          NA_character_
-        }
-      })
-    })
-  })
-
-
-  last_yr_base_model_dir <- file.path(last_yr_models_dir,
-                                      basename(base_models_dir),
-                                      base_models_dirs)
-
-  # Prepend last year's base model to the bridge model groups as defined
-  # by `prepend_to_bridge`
-  if(!is.null(prepend_to_bridge[1]) && !is.na(prepend_to_bridge[1])){
-    if(length(prepend_to_bridge) != length(bridge_models_dirs)){
-      stop("Length of `prepend_to_bridge` (", length(prepend_to_bridge),
-           ") is not equal to length of `bridge_model_dirs` (",
-           length(bridge_models_dirs), ")", call. = FALSE)
-    }
-    if(!is.na(dirs[[2]])){
-      dirs[[2]] <- map2(dirs[[2]], prepend_to_bridge, function(br, prp){
-        if(prp){
-          c(last_yr_base_model_dir, br)
-        }else{
-          br
-        }
-      })
-    }
-  }
   # Prepend the base model to each of the sensitivity model groups
   dirs[[3]] <- map(dirs[[3]], function(sns){
     if(is.na(sns[1])){
@@ -197,12 +144,12 @@ set_dirs <- function(
     }
   })
 
-  # Prepend the base model to each of the test model groups
-  dirs[[5]] <- map(dirs[[5]], function(sns){
-    if(is.na(sns[1])){
+  # Prepend the base model to each of the retrospectives model groups
+  dirs[[4]] <- map(dirs[[4]], function(retro){
+    if(is.na(retro[1])){
       NA
     }else{
-      c(dirs[[1]][[1]], sns)
+      c(dirs[[1]][[1]], retro)
     }
   })
 
@@ -216,15 +163,13 @@ set_dirs <- function(
     })
 
   list(models_dir = models_dir,
-       last_yr_base_model_dir = last_yr_base_model_dir,
+       nongit_dir = nongit_dir,
        base_model_dir = base_models_dir,
        bridge_models_dir = bridge_models_dir,
        sens_models_dir = sens_models_dir,
-       request_models_dir = request_models_dir,
-       test_models_dir = test_models_dir,
+       retro_models_dir = retro_models_dir,
        base_models_dirs = dirs[[1]],
        bridge_models_dirs = dirs[[2]],
        sens_models_dirs = dirs[[3]],
-       request_models_dirs = dirs[[4]],
-       test_models_dirs = dirs[[5]])
+       retro_models_dirs = dirs[[4]])
 }
