@@ -2,9 +2,14 @@
 % Please edit documentation in R/gfiscamutils.R
 \docType{package}
 \name{gfiscamutils}
+\alias{gfiscamutils-package}
 \alias{gfiscamutils}
 \title{gfiscamutils package}
 \description{
 See the README on
 \href{https://github.com/pbs-assess/gfiscamutils#readme}{GitHub}
+}
+\author{
+\strong{Maintainer}: Chris Grandin \email{chris.grandin@gmail.com} (\href{https://orcid.org/0000-0002-6746-3486}{ORCID})
+
 }

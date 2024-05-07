@@ -10,10 +10,7 @@ model_setup(
   base_models_desc = NA,
   bridge_models_desc = NA,
   sens_models_desc = NA,
-  request_models_desc = NA,
-  test_models_desc = NA,
   retro_models_desc = NA,
-  prepend_to_bridge = NA,
   ...
 )
 }
@@ -30,21 +27,9 @@ list elements represent a group of models}
 the legends for sensitivity model plots, one name for each model, where
 the list elements represent a group of models}
 
-\item{request_models_desc}{A list of vectors of text strings to show in
-the legends for request model plots, one name for each model, where the
-list elements represent a group of models}
-
-\item{test_models_desc}{A list of vectors of text strings to show in the
-legends for test model plots, one name for each model, where the list
-elements represent a group of models}
-
 \item{retro_models_desc}{A list of vectors of text strings to show in
 the legends for retrospective model plots, one name for each model,
 where the list elements represent a group of models}
-
-\item{prepend_to_bridge}{A logical vector of length the same as
-\code{bridge_models_desc}. If \code{TRUE}, the base model will be prepended to the
-group at that index}
 
 \item{...}{Arguments to pass to \code{\link[=create_rds_file]{create_rds_file()}}}
 }
@@ -62,61 +47,4 @@ model groups, and sensitivity model groups
 \details{
 If any of the text lists are \code{NULL}, default description text will be
 assigned and a warning given.
-}
-\examples{
-\dontrun{
-library(tidyverse)
-library(lubridate)
-bridge_models_dirs <- list(c("01-new-ss-exe",
-                             "02-new-catch-age",
-                             "03-update-survey"),
-                           c("04-age-1-index",
-                             "05-new-wt-at-age"))
-bridge_models_descs <- list(c("Update Stock Synthesis version to 3.30.20",
-                              "Update all fishery catch and comps",
-                              "Update pre-2021 survey data"),
-                            c("Update wt-at-age data",
-                              "Add 2021 survey data"))
-sens_models_dirs <- list(c("01-h-prior-mean-low",
-                           "02-h-fix-high",
-                           "03-sigma-r-fix-low",
-                           "04-sigma-r-fix-high",
-                           "05-m-02-sd",
-                           "06-m-03-sd"),
-                         c("07-age-1-survey",
-                           "08-comp-weight-harmonic-mean"),
-                         c("09-tv-select-phi-extra-low",
-                           "10-tv-select-phi-low",
-                           "11-tv-select-phi-high"),
-                           c("12-max-sel-age-5",
-                           "13-max-sel-age-7",
-                           "14-max-sel-age-8"))
-sens_models_descs <- list(c("Steepness Mean Prior Low (0.5)",
-                            "Steepness Fix 1.0",
-                            "Sigma R 1.0",
-                            "Sigma R 1.6",
-                            "Natural Mortality (SD=0.2)",
-                            "Natural Mortality (SD=0.3)"),
-                          c("Remove Age 1 Index",
-                            "Downweight Fishery Comps"),
-                          c("Phi t.v. selectivity (0.21)",
-                            "Phi t.v. selectivity (0.70)",
-                            "Phi t.v. selectivity (2.10)"),
-                          c("Max. age selectivity 5",
-                            "Max. age selectivity 7",
-                            "Max. age selectivity 8"))
-
-drs <- set_dirs(bridge_models_dirs = bridge_models_dirs,
-                sens_models_dirs = sens_models_dirs,
-                request_models_dirs = request_models_dirs,
-                test_models_dirs = test_models_dirs,
-                retro_models_dirs = retro_models_dirs,
-                prepend_to_bridge = c(TRUE, FALSE))
-
-model_setup <- function(drs,
-                        bridge_models_desc = bridge_models_desc,
-                        sens_models_desc = sens_models_desc,
-                        retro_models_desc = retro_models_desc,
-                        overwrite_rds_files = TRUE)
-}
 }

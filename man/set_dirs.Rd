@@ -6,27 +6,25 @@
 \usage{
 set_dirs(
   models_dir = NA,
-  last_yr_models_dir = NA,
+  nongit_dir = NA,
   base_models_dir = "01-base-models",
-  bridge_models_dir = "02-bridging-models",
-  sens_models_dir = "03-sensitivity-models",
-  request_models_dir = "04-request-models",
-  test_models_dir = "05-test-models",
-  base_models_dirs = NA,
+  bridge_models_dir = "02-bridge-models",
+  sens_models_dir = "03-sens-models",
+  retro_models_dir = "04-retrospective-models",
+  base_models_dirs = "01-base-model",
   bridge_models_dirs = NA,
   sens_models_dirs = NA,
-  request_models_dirs = NA,
-  test_models_dirs = NA,
+  retro_models_dirs = NA,
   prepend_to_bridge = NA,
   suppress_warnings = FALSE
 )
 }
 \arguments{
-\item{models_dir}{Full path in which the SS3 model directories are
+\item{models_dir}{Path in which the model directories are
 located for the current assessment year}
 
-\item{last_yr_models_dir}{Full path in which the SS3 model directories are
-located for the the last assessment year}
+\item{nongit_dir}{Path in which the non-git files for the assessment are
+located}
 
 \item{base_models_dir}{Name of the base models directory}
 
@@ -34,50 +32,38 @@ located for the the last assessment year}
 
 \item{sens_models_dir}{Name of the sensitivity models directory}
 
-\item{request_models_dir}{Name of the request models directory}
-
-\item{test_models_dir}{Name of the test models directory}
-
 \item{base_models_dirs}{A vector of subdirectory names in
-\code{base_models_dir} that each contain an individual SS3 base model}
+\code{base_models_dir} that each contain an individual base model}
 
 \item{bridge_models_dirs}{A vector of subdirectory names in
-\code{bridge_models_dir} that each contain an individual SS3 bridge model}
+\code{bridge_models_dir} that each contain an individual bridge model}
 
 \item{sens_models_dirs}{A vector of subdirectory names in \code{sens_models_dir}
-that each contain an individual SS3 sensitivity model}
-
-\item{request_models_dirs}{A vector of subdirectory names in
-\code{request_models_dir} that each contain an individual SS3 base model request
-model}
-
-\item{test_models_dirs}{A vector of subdirectory names in \code{test_models_dir}
-that each contain an individual SS3 base model test model}
-
-\item{prepend_to_bridge}{A vector of logical values, the same length as the
-number of groups of bridge models (\code{length(bridge_models_dirs)}) which,
-if \code{TRUE} will prepend the \verb{last_yr_base_model_dir``to the beginning of the group of that element number. If }NULL\code{or}NA`, no prepending will
-take place}
+that each contain an individual sensitivity model}
 
 \item{suppress_warnings}{If \code{TRUE}, warnings about directories not existing
 will not be shown}
+
+\item{retrospectives_models_dir}{Name of the retrospectives models directory}
+
+\item{retrospectives_models_dirs}{A vector of subdirectory names in
+\code{retrospectives_models_dir}that each contain an individual retrospective
+model}
 }
 \value{
-A list of twelve vectors of full paths, which will have \code{NA}
-elements for those which do not exist:
+A list of vectors of directory names, which will have \code{NA} elements
+for those which do not exist:
 \enumerate{
-\item Full path of \code{models_dir}
-\item Full path of \code{last_yr_base_model_dir}
-\item Full path of \code{base_model_dir}
-\item Full path of \code{bridge_models_dir}
-\item Full path of \code{sens_models_dir}
-\item Full path of \code{request_models_dir}
-\item Full path of \code{test_models_dir}
-\item A vector of the base model directories
-\item A vector of the bridge model directories
-\item A vector of the sensitivity model directories
-\item A vector of the request model directories
-\item A vector of the test model directories
+\item The input directory for \code{models_dir}
+\item The input directory for \code{nongit_dir}
+\item The input directory for \code{last_yr_base_model_dir}
+\item The input directory for \code{base_model_dir}
+\item The input directory for \code{bridge_models_dir}
+\item The input directory for \code{sens_models_dir}
+\item The input directory for \code{retrospective_models_dir}
+\item The base model directories
+\item The bridge model directories
+\item The sensitivity model directories
 }
 }
 \description{
