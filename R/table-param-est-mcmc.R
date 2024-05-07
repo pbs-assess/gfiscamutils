@@ -11,6 +11,8 @@
 #' @param model_col_widths Widths for columns, except the Parameter column
 #' @param ret_df If `TRUE`, return a data frame. If `FALSE` return a
 #' [csasdown::csas_table()]
+#' @param show_year_range Logical. If `TRUE`, show the "Year range" column
+#' in the output table
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
 #' @return A [csasdown::csas_table()]
@@ -20,6 +22,7 @@ table_param_est_mcmc <- function(model,
                                  probs = c(0.025, 0.5, 0.975),
                                  model_col_widths = NULL,
                                  ret_df = FALSE,
+                                 show_year_range = TRUE,
                                  ...){
 
   if(!is_iscam_model(model)){
@@ -160,7 +163,12 @@ table_param_est_mcmc <- function(model,
 
   names(params_quants) <- gsub("%", "\\\\%", names(params_quants))
 
-  params_quants <-  mutate_if(params_quants, is.numeric, ~{f(., digits)})
+  params_quants <- mutate_if(params_quants, is.numeric, ~{f(., digits)})
+
+  if(!show_year_range){
+    params_quants <- params_quants |>
+      select(-`Year range`)
+  }
 
   if(ret_df){
     return(params_quants)

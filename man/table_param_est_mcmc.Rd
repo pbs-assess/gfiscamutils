@@ -10,6 +10,7 @@ table_param_est_mcmc(
   probs = c(0.025, 0.5, 0.975),
   model_col_widths = NULL,
   ret_df = FALSE,
+  show_year_range = TRUE,
   ...
 )
 }
@@ -26,6 +27,9 @@ different quantile levels}
 
 \item{ret_df}{If \code{TRUE}, return a data frame. If \code{FALSE} return a
 \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
+
+\item{show_year_range}{Logical. If \code{TRUE}, show the "Year range" column
+in the output table}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }
