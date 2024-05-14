@@ -314,7 +314,8 @@ plot_index_mcmc <- function(models,
     if(single_model){
       if(!is.null(text_title_size)){
         g <- g + ggtitle(tex(names(models))) +
-          theme(plot.title = element_text(hjust = 0.5, size = text_title_size))
+          theme(plot.title = element_text(hjust = 0.5,
+                                          size = text_title_size))
       }
     }
   }else if(leg_loc[1] == "facet"){

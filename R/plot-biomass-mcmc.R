@@ -75,19 +75,24 @@ plot_biomass_mcmc <- function(models,
                               point_size = 2,
                               ...){
 
-  g <- plot_ts_mcmc(models,
-                    quant_df = ifelse(rel,
-                                      "depl_quants",
-                                      "sbt_quants"),
-                    y_label = ifelse(rel,
-                                     ifelse(fr(), "Biomasse relative de frai", "Relative Spawning biomass"),
-                                     ifelse(fr(), "Biomasse reproductrice (milliers de t)", "Spawning biomass (thousand t)")),
-                    x_space = x_space,
-                    y_space = y_space,
-                    probs = probs,
-                    line_width = line_width,
-                    point_size = point_size,
-                    ...)
+  g <- plot_ts_mcmc(
+    models,
+    quant_df = ifelse(
+      rel,
+      "depl_quants",
+      "sbt_quants"),
+    y_label = ifelse(
+      rel,
+      ifelse(fr(),
+             "Biomasse relative de frai", "Relative Spawning biomass"),
+      ifelse(fr(),
+             "Biomasse reproductrice (milliers de t)", "Spawning biomass (thousand t)")),
+    x_space = x_space,
+    y_space = y_space,
+    probs = probs,
+    line_width = line_width,
+    point_size = point_size,
+    ...)
 
   if(is_iscam_model(models)){
     model_desc <- attributes(models)$model_desc

@@ -275,8 +275,7 @@ plot_recr_mcmc <- function(models,
       geom_pointrange(data = tso_quants,
                       aes(color = model),
                       lwd = line_width,
-                      fatten = point_size,
-                      size = point_size)
+                      size = point_size * 0.25)
   }
 
   if(is.null(leg_loc)){

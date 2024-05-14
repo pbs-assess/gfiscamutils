@@ -15,7 +15,8 @@ gfiscam_theme <- function(){
         strip.background = element_blank(),
         #strip.text.x = element_text(face = "bold", color = "black"),
         #panel.spacing.x=unit(3, "lines"),
-        plot.margin = unit(c(0.1, 0.6, 0.1, 0.1), "lines"),
+        #plot.margin = unit(c(0.1, 0.6, 0.1, 0.1), "lines"),
+        plot.margin = margin(12, 12, 12, 12),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_rect(color = "black", fill = NA, size = 1)
