@@ -18,9 +18,6 @@
 #' @param fit_line_width The model fit error bar and connecting line width
 #' @param fit_point_size The model fit point size
 #' @param errbar_width The width of the top and bottom crossbar of the errorbars
-#' @param leg_size Legend size from 0-1. Changes all parts of legend
-#' @param leg_text_size Legend text size. Use in combination with `leg_size` to
-#' make legends fit in non-empty facets
 #'
 #' @importFrom RColorBrewer brewer.pal.info
 #' @importFrom tibble enframe
@@ -48,8 +45,6 @@ plot_index_mcmc <- function(models,
                             fit_point_size = 2,
                             errbar_width = 0.5,
                             leg_loc = c(1, 1),
-                            leg_size = NULL,
-                            leg_text_size = NULL,
                             text_title_size = 12,
                             angle_x_labels = FALSE){
 
@@ -278,7 +273,11 @@ plot_index_mcmc <- function(models,
                   ifelse(fr(), "Indice ('000 t)", "Index ('000 t)"))) +
       scale_color_manual(values = model_colors,
                          labels = map(models, ~{tex(as.character(attributes(.x)$model_desc))})) +
-      guides(color = guide_legend(title = legend_title)) +
+      guides(color = guide_legend(title = legend_title,
+                                  byrow = TRUE)) +
+      theme(legend.title=element_blank(),
+            legend.spacing.y = unit(0.0001, "npc"),
+            legend.box.background = element_rect(color = NA)) +
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
   }else if(type == "resids"){
 
@@ -304,7 +303,11 @@ plot_index_mcmc <- function(models,
                   "Log standardized residual")) +
       scale_color_manual(values = model_colors,
                          labels = map(models, ~{tex(as.character(attributes(.x)$model_desc))})) +
-      guides(color = guide_legend(title = legend_title)) +
+      guides(color = guide_legend(title = legend_title,
+                                  byrow = TRUE)) +
+      theme(legend.title=element_blank(),
+            legend.spacing.y = unit(0.0001, "npc"),
+            legend.box.background = element_rect(color = NA)) +
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
   }
 
@@ -327,18 +330,6 @@ plot_index_mcmc <- function(models,
             legend.position = leg_loc,
             legend.background = element_rect(fill = "white", color = "white")) +
       labs(color = legend_title)
-  }
-
-  if(!is.null(leg_size)){
-    g <- g +
-      guides(shape = guide_legend(override.aes = list(size = leg_size))) +
-      guides(color = guide_legend(override.aes = list(size = leg_size)))
-  }
-
-  if(!is.null(leg_text_size)){
-    g <- g  +
-      theme(legend.title = element_text(size = leg_text_size),
-            legend.text = element_text(size = leg_text_size))
   }
 
   if(angle_x_labels){
