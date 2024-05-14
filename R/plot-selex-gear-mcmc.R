@@ -123,29 +123,46 @@ plot_selex_gear_mcmc <- function(model,
   num_posts <- nrow(model$mcmc$params)
   probs <- as.integer(probs * num_posts)
 
-  make_longer <- function(d){
+  # Extract the values from each column that are the at the `slice_ind`
+  # place in the sorted column. This function will disassemble and
+  # re-assemble the data frame `d` and does the extraction by columns
+  # `yearspan` and `Sex`
+  extract_probs <- function(d, slice_ind){
     d |>
+      split(~yearspan + Sex) |>
+      map_dfr(~{
+        nms <- names(.x)
+        age_inds <- grepl("^[[:digit:]]+$", nms)
+        ages <- nms[age_inds]
+        yearspan <- .x$yearspan[1]
+        sex <- .x$Sex[1]
+
+        k <- map_dfc(.x[age_inds], ~{
+          x <- sort(.x)
+          enframe(x[slice_ind], name = NULL)
+        }) |>
+          set_names(ages) |>
+          mutate(yearspan = yearspan,
+                 Sex = sex) |>
+          select(yearspan, Sex, everything())
+      }) |>
       pivot_longer(-c(yearspan, Sex),
                    names_to = "age",
                    values_to = "value") |>
-      mutate(age = as.numeric(age))
+      mutate(age = as.numeric(age)) |>
+      suppressMessages()
   }
 
   lo_vals <- vals |>
-    group_by(yearspan, Sex) |>
-    slice(probs[1]) |>
-    make_longer() |>
+    extract_probs(probs[1]) |>
     rename(lo_value = value)
 
-  med_vals <- vals |>
-    group_by(yearspan, Sex) |>
-    slice(probs[2]) |>
-    make_longer()
+  med_vals <-  vals |>
+    extract_probs(probs[2]) |>
+    rename(value = value)
 
-  hi_vals <- vals |>
-    group_by(yearspan, Sex) |>
-    slice(probs[3]) |>
-    make_longer() |>
+  hi_vals <-  vals |>
+    extract_probs(probs[3]) |>
     rename(hi_value = value)
 
   rib_vals <- lo_vals %>%
@@ -217,7 +234,6 @@ plot_selex_gear_mcmc <- function(model,
     g <- g +
       theme(axis.text.x = element_text(angle = 45, hjust = 0.55, vjust = 0.5))
   }
-
 
   suppressWarnings(print(g))
 }
