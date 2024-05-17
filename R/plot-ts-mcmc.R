@@ -181,6 +181,7 @@ plot_ts_mcmc <- function(models,
 
   # Main time series values
   var_quants <- imap(models, ~{
+
     if(is.null(.x$mcmccalcs[[quant_df]])){
       stop("`$mcmccalcs[[", quant_df, "]]` is `NULL` for model:\n",
            "'", .y, "'\n",
@@ -251,12 +252,11 @@ plot_ts_mcmc <- function(models,
     bind_rows %>%
     as_tibble() %>%
     mutate(model = as.factor(model)) %>%
-    mutate(model = fct_relevel(model, names(models)))
+    mutate(model = fct_relevel(model, names(models))) |>
+    convert_prob_cols_language()
 
   # Match the given probs with their respective quant columns
   prob_cols <- paste0(prettyNum(probs * 100), "%")
-  # In case the decimals have been changed to commas, change them back
-  prob_cols <- gsub(",", ".", prob_cols)
 
   quants <- imap_chr(prob_cols, ~{
     mtch <- grep(.x, names(var_quants), value = TRUE)

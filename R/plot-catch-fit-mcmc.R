@@ -59,8 +59,13 @@ plot_catch_fit_mcmc <- function(model,
     imap(~{
       tmp <- model
       tmp$mcmccalcs$ct_quants <- .x
-      attributes(tmp)$model_desc <- paste0("Catch data - ",
-                                           fleet_nms[as.numeric(.y)])
+      if(french){
+        attributes(tmp)$model_desc <- paste0("Données sur les captures - ",
+                                             fleet_nms[as.numeric(.y)])
+      }else{
+        attributes(tmp)$model_desc <- paste0("catch data - ",
+                                             fleet_nms[as.numeric(.y)])
+      }
       tmp
     })
 
@@ -70,8 +75,13 @@ plot_catch_fit_mcmc <- function(model,
     imap(~{
       tmp <- model
       tmp$mcmccalcs$ct_quants <- .x
-      attributes(tmp)$model_desc <- paste0("Catch fit - ",
-                                           fleet_nms[as.numeric(.y)])
+      if(french){
+        attributes(tmp)$model_desc <- paste0("Attraper l'ajustement - ",
+                                             fleet_nms[as.numeric(.y)])
+      }else{
+        attributes(tmp)$model_desc <- paste0("Catch fit - ",
+                                             fleet_nms[as.numeric(.y)])
+      }
       tmp
     })
 
@@ -86,7 +96,9 @@ plot_catch_fit_mcmc <- function(model,
                leg_loc = leg_loc,
                xlim = xlim,
                ylim = ylim,
-               y_label = "Catch (thousand t)",
+               y_label = ifelse(fr(),
+                                "Captures (milliers de tonnes)",
+                                "Catch (thousand t)"),
                legend_title = ifelse(fr(),
                                      "Flotte/Type",
                                      "Fleet/Type"))

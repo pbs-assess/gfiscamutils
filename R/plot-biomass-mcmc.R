@@ -111,14 +111,16 @@ plot_biomass_mcmc <- function(models,
     }) |>
     bind_rows() |>
     mutate(model = names(models), year = ifelse(show_bo, start_yr - 1, start_yr)) |>
-    select(model, year, everything())
+    select(model, year, everything()) |>
+    convert_prob_cols_language()
 
   bmsy_quants <- map(models, ~{
     .x$mcmccalcs$params_quants[, colnames(.x$mcmccalcs$params_quants) == "bmsy"]
     }) |>
     bind_rows() |>
     mutate(model = names(models), year = start_yr) |>
-    select(model, year, everything())
+    select(model, year, everything()) |>
+    convert_prob_cols_language()
 
   # Remove data prior to first year and change B0 to first year
   tso_quants <- tso_quants |>
@@ -137,11 +139,10 @@ plot_biomass_mcmc <- function(models,
 
   # Match the given probs with their respective quant columns
   prob_cols <- paste0(prettyNum(probs * 100), "%")
-  # In case the decimals have been changed to commas, change them back
-  prob_cols <- gsub(",", ".", prob_cols)
 
   quants <- imap_chr(prob_cols, ~{
     mtch <- grep(.x, names(tso_quants), value = TRUE)
+
     if(!length(mtch)){
       stop("One of the values in `probs` does not appear in the MCMC output data\n",
            .x, call. = FALSE)
@@ -156,35 +157,45 @@ plot_biomass_mcmc <- function(models,
     # Only two lines allowed, Limit Reference Point (LRP) and Upper Stock
     # Reference (USR)
     tso_multiples <- imap(bo_refpts, ~{
-      j <- tso_base %>%
+      j <- tso_base |>
         mutate(!!sym(quants[1]) := !!sym(quants[1]) * .x,
                !!sym(quants[2]) := !!sym(quants[2]) * .x,
-               !!sym(quants[3]) := !!sym(quants[3]) * .x) %>%
+               !!sym(quants[3]) := !!sym(quants[3]) * .x) |>
         mutate(multiplier = .x)
       j
-    }) %>%
-      bind_rows
+    }) |>
+      bind_rows()
 
     if(rel){
       # Need special calculation for the Credible interval for the
       # relative biomass
-      mdl_yr <- tso_base %>%
+      mdl_yr <- tso_base |>
         select(model, year)
-      tso_base_quants <- tso_base %>%
-        select(-model, -year) %>%
-        unlist
+      tso_base_quants <- tso_base |>
+        select(-model, -year) |>
+        unlist()
       tso_mult_list <- map(bo_refpts, ~{
         .x * tso_base_quants / tso_base_quants[2]
       })
-      row1 <- c(unlist(mdl_yr), tso_mult_list[[1]]) %>% t() %>% as_tibble()
-      row2 <- c(unlist(mdl_yr), tso_mult_list[[2]]) %>% t() %>% as_tibble()
-      tso_multiples <- row1 %>%
-        bind_rows(row2) %>%
-        mutate(multiplier = tso_multiples$multiplier,
-               year = as.numeric(year),
-               !!sym(quants[1]) := as.numeric(!!sym(quants[1])),
-               !!sym(quants[2]) := as.numeric(!!sym(quants[2])),
-               !!sym(quants[3]) := as.numeric(!!sym(quants[3])))
+
+      # Make data frame rows for B0 ref points.
+      # This is convoluted because if done in a simpler way, the french
+      # values with commas will prevent the columns from being cast to
+      # numeric
+      model_yr_cols <- tibble(model = mdl_yr$model,
+                              year = mdl_yr$year)
+      row1_prob_cols <- imap_dfc(tso_mult_list[[1]], ~{
+        tibble(!!.y := .x)
+      })
+      row1 <- model_yr_cols |> bind_cols(row1_prob_cols)
+      row2_prob_cols <- imap_dfc(tso_mult_list[[2]], ~{
+        tibble(!!.y := .x)
+      })
+      row2 <- model_yr_cols |> bind_cols(row2_prob_cols)
+
+      tso_multiples <- row1 |>
+        bind_rows(row2) |>
+        mutate(multiplier = tso_multiples$multiplier)
     }
 
     if(refpts_ribbon){
@@ -231,6 +242,7 @@ plot_biomass_mcmc <- function(models,
   }
 
   if(show_bmsy_lines){
+
     # Show the BMSY lines for the first model with CI, behind model lines
     bmsy_base <- bmsy_quants %>%
       slice(1)
