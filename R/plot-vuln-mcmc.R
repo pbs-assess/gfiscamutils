@@ -44,5 +44,7 @@ plot_vuln_mcmc <- function(model,
                  leg_loc = leg_loc,
                  xlim = xlim,
                  ylim = ylim,
-                 y_label = "Biomass (thousand t)")
+                 y_label = ifelse(fr(),
+                                  "Biomasse (milliers de tonnes)",
+                                  "Biomass (thousand t)"))
 }
