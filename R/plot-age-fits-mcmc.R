@@ -82,7 +82,7 @@ plot_age_fits_mcmc <- function(model,
 
   nsex <- model$dat$num.sex
   ages <- as.character(model$dat$start.age:model$dat$end.age)
-  gear_names <- tolower(model$dat$age_gear_names)
+  gear_names <- model$dat$age_gear_names
   gear_name <- gear_names[gear]
 
   comps <- model$mpd$a_obs[[gear]] |>
@@ -111,8 +111,12 @@ plot_age_fits_mcmc <- function(model,
   comps <- comps |>
     select(-sample_size)
 
-  fits <- model$mcmc$agefits |>
-    filter(tolower(gear) == tolower(gear_name)) |>
+  # Translate gear names
+  d <- model$mcmc$agefits |>
+    mutate(gear = tr(gear))
+
+  fits <- d |>
+    filter(gear == gear_name) |>
     pivot_longer(ages, names_to = "age") |>
     group_by(gear, year, sex, age) |>
     summarize(lo = quantile(value, probs = 0.025),
@@ -129,6 +133,7 @@ plot_age_fits_mcmc <- function(model,
       stop("`yrs` must be a numeric or integer type",
            call. = FALSE)
     }
+
     if(!all(min(yrs) %in% fits$year & min(yrs) %in% comps$year)){
       stop("Not all `yrs` exist in the `comps` and `fits` years",
            call. = FALSE)
