@@ -75,12 +75,12 @@ plot_selex_mcmc <- function(model,
   # Remove male "estimates" for models with number of sexes == 1. iSCAM outputs the
   # parameter values even if they were not estimated so they are gibberish
   if(model$dat$num.sex == 1){
-    vals <- vals %>%
+    vals <- vals |>
       filter(sex != 1)
   }
 
-  vals <- vals %>%
-    mutate(sex = ifelse(sex %in% c(0, 2), "Female", "Male"))
+  vals <- vals |>
+    mutate(sex = ifelse(sex %in% c(0, 2), tr("Female"), tr("Male")))
 
   gear_names <- model$dat$gear_names
   if(length(unique(vals$gear)) != length(gear_names)){
@@ -95,19 +95,19 @@ plot_selex_mcmc <- function(model,
            "Available gears numbers are: ", paste(valid_gear_nums, collapse = ", "), "\n\n",
            "Names for these are:\n", paste(gear_names, collapse = "\n"))
     }
-    vals <- vals %>%
+    vals <- vals |>
       filter(gear %in% gear_names[!!gear])
     gear_names <- gear_names[gear]
   }
 
   # Rename the parameter columns because the ages columns would
   # have these same names
-  vals <- vals %>%
+  vals <- vals |>
     rename(p1 = "a_hat", p2 = "g_hat")
 
   # Remove gears with TV selectivity and give a warning
-  vals <- vals %>%
-    split(~gear) %>%
+  vals <- vals |>
+    split(~gear) |>
     imap(~{
       yrs <- unique(.x$start_year)
       if(length(yrs) > 1){
@@ -120,25 +120,25 @@ plot_selex_mcmc <- function(model,
     })
 
   # Remove NULL list elements (fixed parameters)
-  vals <- vals[!sapply(vals, is.null)] %>%
+  vals <- vals[!sapply(vals, is.null)] |>
     bind_rows()
 
   # Add age columns with logistic selectivity calculations
   for(i in ages){
-    vals <- vals %>%
+    vals <- vals |>
       mutate(!!sym(i) := 1 / (1 + exp(-(as.numeric(i) - p1) / p2)))
   }
 
   get_val <- function(d, q){
-    d %>%
-      filter(quants == q) %>%
-      select(-quants) %>%
+    d |>
+      filter(quants == q) |>
+      select(-quants) |>
       pivot_longer(-c(gear, start_year, end_year, Sex, p1, p2),
                    names_to = "age",
-                   values_to = "value") %>%
+                   values_to = "value") |>
       mutate(age = as.numeric(age))
   }
-  vals <- vals %>%
+  vals <- vals |>
     rename(Sex = sex)
 
   # Re-order the posteriors by group in order of a_hat smallest to largest
@@ -186,7 +186,7 @@ plot_selex_mcmc <- function(model,
     make_longer() |>
     rename(hi_value = value)
 
-  rib_vals <- lo_vals %>%
+  rib_vals <- lo_vals |>
     left_join(hi_vals,
               by = c("gear", "Sex", "age")) |>
     mutate(value = lo_value)
@@ -225,8 +225,8 @@ plot_selex_mcmc <- function(model,
   }
   g <- g +
     facet_wrap(~ gear) +
-    xlab("Age") +
-    ylab("Proportion")
+    xlab(tr("Age")) +
+    ylab(tr("Proportion"))
 
   if(show_maturity){
     model$mpd$ma
@@ -253,7 +253,7 @@ plot_selex_mcmc <- function(model,
     g <- g +
       theme(legend.position = "none")
   }else if(leg_loc[1] == "facet"){
-    g <- g %>% move_legend_to_empty_facet()
+    g <- g |> move_legend_to_empty_facet()
   }else{
     g <- g +
       theme(legend.justification = leg_loc,
