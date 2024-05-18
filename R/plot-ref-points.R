@@ -16,11 +16,19 @@ plot_ref_points <- function(model,
                                          expression(italic(B)[MSY]),
                                          expression(italic(MSY)[1]),
                                          expression(italic(MSY)[2]),
-                                         expression(italic(UMSY)[1]),
-                                         expression(italic(UMSY)[2])),
+                                         expression(italic(U[MSY])[1]),
+                                         expression(italic(U[MSY])[2])),
                             color = "black",
                             fill = "steelblue"){
 
+  if(fr()){
+    ref_desc <- c(expression(italic(BR)[0]),
+                  expression(italic(B)[RMD]),
+                  expression(italic(RMD)[1]),
+                  expression(italic(RMD)[2]),
+                  expression(italic(U[RMD])[1]),
+                  expression(italic(U[RMD])[2]))
+  }
   ref_pts_syms <- syms(ref_pts)
 
   params <- model$mcmc$params |>
