@@ -70,15 +70,9 @@ plot_ts_mcmc <- function(models,
                          palette = iscam_palette,
                          all_one_color = NULL,
                          base_color = "black",
-                         legend_title = ifelse(fr(),
-                                               "Modèles",
-                                               "Models"),
-                         x_label = ifelse(fr(),
-                                          "Année",
-                                          "Year"),
-                         y_label = ifelse(fr(),
-                                          "Biomasse reproductrice (milliers de t)",
-                                          "Spawning Biomass (thousand t)"),
+                         legend_title = tr("Models"),
+                         x_label = tr("Year"),
+                         y_label = tr("Spawning Biomass (thousand t)"),
                          append_base_txt = NULL,
                          x_space = 0.5,
                          y_space = 0,
@@ -193,17 +187,17 @@ plot_ts_mcmc <- function(models,
     if("list" %in% class(out)){
       if(facet_wrap_var == "sex"){
         if(length(out) > 2){
-          stop("Length of the `mcmccalcs` output list for ", quant_df, " for the model:\n",
-               "'", .y, "'\n",
-               "is greater than 2, meaning more than two sexes or an error in the\n",
+          stop("Length of the `mcmccalcs` output list for ", quant_df,
+               " for the model:\n", "'", .y, "'\n", "is greater than 2, ",
+               "meaning more than two sexes or an error in the\n",
                "function used to build this list `calc_mcmc()`",
                call. = FALSE)
         }
       }else if(facet_wrap_var == "gear"){
         if(length(out) > length(fleet_names)){
-          stop("Length of the `mcmccalcs` output list for ", quant_df, " for the model:\n",
-               "'", .y, "'\n",
-               "is greater than ", length(fleet_names), ", meaning more than ",
+          stop("Length of the `mcmccalcs` output list for ", quant_df,
+               " for the model:\n", "'", .y, "'\n", "is greater than ",
+               length(fleet_names), ", meaning more than ",
                length(fleet_names), " fleets or an error in the\n",
                "function used to build this list `calc_mcmc()`",
                call. = FALSE)
@@ -211,20 +205,22 @@ plot_ts_mcmc <- function(models,
       }
 
       out <- imap(out, function(.x, y = .y){
-        .x %>%
-          t() %>%
-          as.data.frame %>%
-          rownames_to_column(var = "year") %>%
-          mutate(model = .y) %>%
+        # Make French prob names in caswe they are not already
+        rownames(.x) <- gsub("\\.", ",", rownames(.x))
+        .x |>
+          t() |>
+          as.data.frame() |>
+          rownames_to_column(var = "year") |>
+          mutate(model = .y) |>
           mutate(!!sym(facet_wrap_var) := ifelse(facet_wrap_var == "gear",
                                                  fleet_names[y],
-                                                 ifelse(y == 1, "Male", "Female"))) %>%
-          select(model, year, everything()) %>%
+                                                 ifelse(y == 1, "Male", "Female"))) |>
+          select(model, year, everything()) |>
           mutate(year = as.numeric(year))
-      }) %>%
-        bind_rows %>%
-        as_tibble() %>%
-        mutate(!!sym(facet_wrap_var) := as.factor(!!sym(facet_wrap_var))) %>%
+      }) |>
+        bind_rows() |>
+        as_tibble() |>
+        mutate(!!sym(facet_wrap_var) := as.factor(!!sym(facet_wrap_var))) |>
         mutate(!!sym(facet_wrap_var) := fct_relevel(!!sym(facet_wrap_var),
                                                     ifelse(facet_wrap_var == "gear",
                                                            fleet_names,
@@ -232,26 +228,30 @@ plot_ts_mcmc <- function(models,
 
     }else{
       # Data frame of non-split-sex output
-      out <- out %>%
-          t() %>%
-          as.data.frame %>%
-          rownames_to_column(var = "year") %>%
-          mutate(model = .y) %>%
-          select(model, year, everything()) %>%
+      # Make French prob names in caswe they are not already
+      rownames(out) <- gsub("\\.", ",", rownames(out))
+      out <- out |>
+          t() |>
+          as.data.frame() |>
+          rownames_to_column(var = "year") |>
+          mutate(model = .y) |>
+          select(model, year, everything()) |>
           mutate(year = as.numeric(year))
       if(ts_len < ncol(out)){
         out <- out[, 1:ts_len]
       }
     }
     if("MPD" %in% names(out)){
-      out <- out %>%
+      out <- out |>
         select(-MPD)
     }
     out
-  }) %>%
-    bind_rows %>%
-    as_tibble() %>%
-    mutate(model = as.factor(model)) %>%
+  })
+
+  var_quants <- var_quants |>
+    bind_rows() |>
+    as_tibble() |>
+    mutate(model = as.factor(model)) |>
     mutate(model = fct_relevel(model, names(models))) |>
     convert_prob_cols_language()
 
@@ -269,7 +269,7 @@ plot_ts_mcmc <- function(models,
 
   # Set up x and y axes
   if(!is.null(xlim)){
-    var_quants <- var_quants %>%
+    var_quants <- var_quants |>
       filter(year %in% xlim[1]:xlim[2])
   }
 
@@ -277,19 +277,19 @@ plot_ts_mcmc <- function(models,
   # because only the first model will be plotted in the last year if dodge is not
   # accounted for
   dodge_val <- 0
-  var_dodge <- var_quants %>%
-    split(~model) %>%
+  var_dodge <- var_quants |>
+    split(~model) |>
     map(~{
-      x <- .x %>% mutate(year = year + dodge_val)
+      x <- .x |> mutate(year = year + dodge_val)
       dodge_val <<- dodge_val + 0.1
       x
-    }) %>%
-    bind_rows
+    }) |>
+    bind_rows()
 
   # Color values have black prepended as it is the base model
   model_colors <- c(base_color, palette_colors)
 
-  g <- var_quants %>%
+  g <- var_quants |>
     ggplot(aes(x = year,
                y = !!sym(quants[2]),
                ymin = !!sym(quants[1]),
@@ -301,7 +301,7 @@ plot_ts_mcmc <- function(models,
 
   if(first_model_ribbon){
     first_model_nm <- as.character(var_quants$model[1])
-    var_quants_first <- var_quants %>%
+    var_quants_first <- var_quants |>
       filter(model == first_model_nm)
     g <- g +
       geom_ribbon(data = var_quants_first,

@@ -12,11 +12,12 @@
 plot_f_mcmc <- function(..., type = c("i", "e")){
 
   type <- match.arg(type)
+
   exp_rate_label <- tr("Exploitation rate")
   plot_ts_mcmc(...,
                quant_df = ifelse(type == "i", "ft_quants", "ut_quants"),
                facet_wrap_var = "gear",
                y_label = if(type == "i")
-                 en2fr("Fishing mortality") else
+                 tr("Fishing mortality") else
                    bquote(.(exp_rate_label) ~ U[t]*" = "*1-e^-F))
 }
