@@ -52,15 +52,24 @@ plot_age_resids_mcmc <- function(model,
                         tr("Female"),
                         tr("Male"))) |>
     mutate(age = as.numeric(age)) |>
-    mutate(Sign = ifelse(med >= 0, "Positive", "Negative")) |>
+    mutate(Sign = ifelse(med >= 0, tr("Positive"), tr("Negative"))) |>
     filter(med >= include[1] & med <= include[2]) |>
     rename(`Median residual` = med)
+
+  # If French, this will change the column Sign to Signe
+  sign_sym <- sym(tr("Sign"))
+  resids <- resids |>
+    mutate(!!sign_sym := Sign)
 
   gear_name <- resids$gear |> unique()
 
   g <- ggplot(resids, aes(x = year, y = age)) +
-    geom_point(aes(size = `Median residual`, color = Sign), alpha = 0.1) +
-    geom_point(aes(size = `Median residual`, color = Sign), pch = 21) +
+    geom_point(aes(size = `Median residual`,
+                   color = !!sign_sym),
+               alpha = 0.1) +
+    geom_point(aes(size = `Median residual`,
+                   color = !!sign_sym),
+               pch = 21) +
     scale_color_manual(values = c("red", "black")) +
     scale_size_area() +
     facet_grid(~sex) +
