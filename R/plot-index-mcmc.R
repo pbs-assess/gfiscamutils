@@ -93,13 +93,13 @@ plot_index_mcmc <- function(models,
     .x$dat$index_gear_names
   })
 
-  surv_abbrevs <- surv_abbrev_lst %>%
-    flatten() %>%
-    map_chr(~{.x}) %>%
+  surv_abbrevs <- surv_abbrev_lst |>
+    flatten() |>
+    map_chr(~{.x}) |>
     unique()
-  surv_names <- surv_name_lst %>%
-    flatten() %>%
-    map_chr(~{.x}) %>%
+  surv_names <- surv_name_lst |>
+    flatten() |>
+    map_chr(~{.x}) |>
     unique()
 
   if(length(surv_names) != length(surv_abbrevs)){
@@ -111,10 +111,10 @@ plot_index_mcmc <- function(models,
   if(!is.null(gear)){
     valid_gear_nums <- seq_along(surv_names)
     if(!all(gear %in% valid_gear_nums)){
-      gear_table_str <- surv_names %>%
-        enframe(name = "gear") %>%
-        rename(gear_name = value) %>%
-        capture.output() %>%
+      gear_table_str <- surv_names |>
+        enframe(name = "gear") |>
+        rename(gear_name = value) |>
+        capture.output() |>
         paste(collapse = "\n")
 
       stop("One or more of the gear numbers you requested is outside the ",
@@ -131,23 +131,23 @@ plot_index_mcmc <- function(models,
   surv_abbrevs[surv_abbrevs == "HS MSA"] <- "OTHER HS MSA"
 
   # Add survey names to the table with a left join by survey_abbrev
-  surv_abbrevs_df <- surv_abbrevs %>%
+  surv_abbrevs_df <- surv_abbrevs |>
     enframe(name = NULL)
-  surv_names_df <- surv_names %>%
+  surv_names_df <- surv_names |>
     enframe(name = NULL)
-  surv_df <- surv_abbrevs_df %>%
-    cbind(surv_names_df) %>%
+  surv_df <- surv_abbrevs_df |>
+    cbind(surv_names_df) |>
     `names<-`(c("survey_abbrev", "survey_name"))
 
   surv_index_df <- surv_index |>
     filter(year %in% start_year:end_year) |>
     filter(survey_abbrev %in% !!surv_abbrevs) |>
-    #filter(grepl(paste(surv_abbrevs, collapse = "|"), survey_abbrev)) %>%
+    #filter(grepl(paste(surv_abbrevs, collapse = "|"), survey_abbrev)) |>
     left_join(surv_df, by = "survey_abbrev")
 
   surv_indices <- map_df(surv_abbrevs, ~{
-    surv_index_df %>%
-      filter(survey_abbrev == .x) %>%
+    surv_index_df |>
+      filter(survey_abbrev == .x) |>
       select(year, biomass, lowerci, upperci, survey_name)
   })
 
@@ -158,7 +158,7 @@ plot_index_mcmc <- function(models,
     if(is.null(ind_vals)){
       return(NULL)
     }
-    ind_vals %>%
+    ind_vals |>
       mutate(model = .y)
   })
 
@@ -168,49 +168,54 @@ plot_index_mcmc <- function(models,
          call. = FALSE)
   }
 
+  # Translate survey names
+  vals <- vals |>
+    map(~{.x |>
+        mutate(survey_name = tr(survey_name))})
+
   # Remove any NULL list items (no index fits found in model)
-  vals <- vals[!sapply(vals, is.null)] %>%
-    bind_rows() %>%
+  vals <- vals[!sapply(vals, is.null)] |>
+    bind_rows() |>
     select(model, survey_name, year, biomass, lowerci, upperci)
 
   # Remove all rows where `survey_name` is `NULL` which is caused by it not being in the gear list
-  vals <- vals %>%
+  vals <- vals |>
     filter(!is.na(survey_name))
 
   # Remove any missing indices from the `surv_names` vector and
   # the `surv_indices` data frame
   surv_names <- surv_names[surv_names %in% unique(vals$survey_name)]
 
-  surv_indices <- surv_indices %>%
-    filter(survey_name %in% unique(vals$survey_name)) %>%
+  surv_indices <- surv_indices |>
+    filter(survey_name %in% unique(vals$survey_name)) |>
     mutate(survey_name = fct_relevel(survey_name, !!surv_names))
 
-  vals <- vals %>%
-    filter(survey_name %in% surv_names) %>%
-    mutate(model = factor(model, names(models[names(models) %in% model]))) %>%
+  vals <- vals |>
+    filter(survey_name %in% surv_names) |>
+    mutate(model = factor(model, names(models[names(models) %in% model]))) |>
     mutate(survey_name = factor(survey_name, !!surv_names))
 
   # Filter out for the years provided
-  vals <- vals %>%
+  vals <- vals |>
     filter(year %in% start_year:end_year)
 
   if(type == "fits"){
     vals <- vals %>%
       mutate_at(vars(biomass, lowerci, upperci),
                 function(x){
-                  ifelse(.$survey_name == "Discard CPUE", x / 1e6, x)
+                  ifelse(.$survey_name == tr("Discard CPUE"), x / 1e6, x)
                 })
   }
 
   # Dodge year points a little, cumulative for each model
   dodge_amt <- if(type == "fits") dodge else 0
-  vals <- vals %>%
-    split(~model) %>%
+  vals <- vals |>
+    split(~model) |>
     imap(~{
-      tmp <- .x %>% mutate(year = year + dodge_amt)
+      tmp <- .x |> mutate(year = year + dodge_amt)
       dodge_amt <<- dodge_amt + dodge
       tmp
-    }) %>%
+    }) |>
     bind_rows()
 
   if(type == "fits"){
@@ -218,12 +223,12 @@ plot_index_mcmc <- function(models,
     vals <- vals %>%
       mutate_at(vars(biomass, lowerci, upperci),
                 function(x){
-                  ifelse(.$survey_name == "Discard CPUE", x, x / 1e6)
+                  ifelse(.$survey_name == tr("Discard CPUE"), x, x / 1e6)
                 })
     surv_indices <- surv_indices %>%
       mutate_at(vars(biomass, lowerci, upperci),
                 function(x){
-                  ifelse(.$survey_name == "Discard CPUE", x, x / 1e6)
+                  ifelse(.$survey_name == tr("Discard CPUE"), x, x / 1e6)
                 })
   }
 
@@ -232,7 +237,7 @@ plot_index_mcmc <- function(models,
                     brewer.pal(name = palette,
                                n = palette_info$maxcolors))
 
-  has_dcpue <- "Discard CPUE" %in% unique(surv_indices$survey_name)
+  has_dcpue <- tr("Discard CPUE") %in% unique(surv_indices$survey_name)
   only_dcpue <- has_dcpue && length(unique(surv_indices$survey_name)) == 1
 
   # Remove zeroes from the fit data frame
@@ -266,13 +271,18 @@ plot_index_mcmc <- function(models,
       xlab(tr("Year")) +
       ylab(ifelse(has_dcpue,
                   ifelse(only_dcpue,
-                         ifelse(fr(), "Indice (kg/heure)", "Index (kg/hr)"),
                          ifelse(fr(),
-                                "Indice ('000 t, kg/heure pour la CPUE des rejets)",
-                                "Index ('000 t, kg/hr for Discard CPUE)")),
-                  ifelse(fr(), "Indice ('000 t)", "Index ('000 t)"))) +
+                                "Indice (kg/heure)",
+                                "Index (kg/hr)"),
+                         ifelse(fr(),
+                                "Indice (1000 t, kg/heure pour la CPUE des rejets)",
+                                "Index (1,000 t, kg/hr for Discard CPUE)")),
+                  ifelse(fr(),
+                         "Indice (1000 t)",
+                         "Index (1000 t)"))) +
       scale_color_manual(values = model_colors,
-                         labels = map(models, ~{tex(as.character(attributes(.x)$model_desc))})) +
+                         labels = map(models, ~{
+                           tex(as.character(attributes(.x)$model_desc))})) +
       guides(color = guide_legend(title = legend_title,
                                   byrow = TRUE)) +
       theme(legend.title=element_blank(),
@@ -281,7 +291,7 @@ plot_index_mcmc <- function(models,
       scale_x_continuous(breaks = ~{pretty(.x, n = 5)})
   }else if(type == "resids"){
 
-    g <- vals %>%
+    g <- vals |>
       ggplot(aes(x = year,
                  y = biomass)) +
       stat_identity(yintercept = 0,
@@ -302,7 +312,8 @@ plot_index_mcmc <- function(models,
                   "Résidu normalisé logarithmique",
                   "Log standardized residual")) +
       scale_color_manual(values = model_colors,
-                         labels = map(models, ~{tex(as.character(attributes(.x)$model_desc))})) +
+                         labels = map(models, ~{
+                           tex(as.character(attributes(.x)$model_desc))})) +
       guides(color = guide_legend(title = legend_title,
                                   byrow = TRUE)) +
       theme(legend.title=element_blank(),
@@ -322,7 +333,7 @@ plot_index_mcmc <- function(models,
       }
     }
   }else if(leg_loc[1] == "facet"){
-    g <- g %>% move_legend_to_empty_facet()
+    g <- g |> move_legend_to_empty_facet()
   }else if(leg_loc[1] == "outside"){
   }else{
     g <- g +
