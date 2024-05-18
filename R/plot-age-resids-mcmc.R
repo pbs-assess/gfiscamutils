@@ -38,11 +38,17 @@ plot_age_resids_mcmc <- function(model,
 
   nsex <- model$dat$num.sex
   ages <- as.character(model$dat$start.age:model$dat$end.age)
-  gear_names <- tolower(model$dat$age_gear_names)
+  gear_names <- model$dat$age_gear_names
   gear_name <- gear_names[gear]
 
-  resids <- model$mcmc$ageresids |>
-    filter(tolower(gear) == tolower(gear_name)) |>
+  d <- model$mcmc$ageresids
+
+  # Translate gear names
+  d <- d |>
+    mutate(gear = tr(gear))
+
+  d <- d |>
+    filter(gear == gear_name) |>
     pivot_longer(ages, names_to = "age") |>
     group_by(gear, year, sex, age) |>
     summarize(lo = quantile(value, probs = 0.025),
@@ -56,18 +62,21 @@ plot_age_resids_mcmc <- function(model,
     filter(med >= include[1] & med <= include[2]) |>
     rename(`Median residual` = med)
 
-  # If French, this will change the column Sign to Signe
+  # If French, this will change the column Sign to Signe and Median residual
+  # to its french counterpart
   sign_sym <- sym(tr("Sign"))
-  resids <- resids |>
-    mutate(!!sign_sym := Sign)
+  med_sym <- sym(tr("Median residual"))
+  resids <- d |>
+    mutate(!!sign_sym := Sign) |>
+    mutate(!!med_sym := `Median residual`)
 
   gear_name <- resids$gear |> unique()
 
   g <- ggplot(resids, aes(x = year, y = age)) +
-    geom_point(aes(size = `Median residual`,
+    geom_point(aes(size = !!med_sym,
                    color = !!sign_sym),
                alpha = 0.1) +
-    geom_point(aes(size = `Median residual`,
+    geom_point(aes(size = !!med_sym,
                    color = !!sign_sym),
                pch = 21) +
     scale_color_manual(values = c("red", "black")) +
