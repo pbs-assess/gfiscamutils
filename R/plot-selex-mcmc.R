@@ -79,10 +79,15 @@ plot_selex_mcmc <- function(model,
       filter(sex != 1)
   }
 
+  # Translate gear names
+  vals <- vals |>
+    mutate(gear = tr(gear))
+
   vals <- vals |>
     mutate(sex = ifelse(sex %in% c(0, 2), tr("Female"), tr("Male")))
 
   gear_names <- model$dat$gear_names
+
   if(length(unique(vals$gear)) != length(gear_names)){
     stop("`model$dat$gear_names` is not the same length as the number of gears present\n",
          "  in the MCMC selectivity parameter outputs. Check your declaration of the names\n",
