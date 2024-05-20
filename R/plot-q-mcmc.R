@@ -17,7 +17,7 @@
 plot_q_mcmc <- function(models,
                         gear = 1,
                         append_base_txt = NULL,
-                        legend_title = "Models",
+                        legend_title = tr("Models"),
                         probs = c(0.025, 0.5, 0.975),
                         base_color = "black",
                         palette = iscam_palette,
@@ -74,13 +74,13 @@ plot_q_mcmc <- function(models,
     .x$dat$index_gear_names
   })
 
-  surv_abbrevs <- surv_abbrev_lst %>%
-    flatten() %>%
-    map_chr(~{.x}) %>%
+  surv_abbrevs <- surv_abbrev_lst |>
+    flatten() |>
+    map_chr(~{.x}) |>
     unique()
-  surv_names <- surv_name_lst %>%
-    flatten() %>%
-    map_chr(~{.x}) %>%
+  surv_names <- surv_name_lst |>
+    flatten() |>
+    map_chr(~{.x}) |>
     unique()
 
   if(length(surv_names) != length(surv_abbrevs)){
@@ -100,28 +100,32 @@ plot_q_mcmc <- function(models,
     surv_names <- surv_names[gear]
   }
   surv_abbrevs[surv_abbrevs == "HS MSA"] <- "OTHER HS MSA"
+  surv_names <- tr(surv_names)
+  surv_abbrevs <- tr(surv_abbrevs)
 
   # Add survey names to the table with a left join by survey_abbrev
-  surv_abbrevs_df <- surv_abbrevs %>%
+  surv_abbrevs_df <- surv_abbrevs |>
     enframe(name = NULL)
-  surv_names_df <- surv_names %>%
+  surv_names_df <- surv_names |>
     enframe(name = NULL)
-  surv_df <- surv_abbrevs_df %>%
-    cbind(surv_names_df) %>%
+  surv_df <- surv_abbrevs_df |>
+    cbind(surv_names_df) |>
     `names<-`(c("survey_abbrev", "survey_name"))
 
   q_quants <- imap(models, ~{
-    j <- .x$mcmccalcs$q_quants %>%
-      t() %>%
-      as_tibble(rownames = "gear") %>%
-      mutate(model = .y) %>%
+    j <- .x$mcmccalcs$q_quants |>
+      t() |>
+      as_tibble(rownames = "gear") |>
+      mutate(model = .y) |>
       select(-MPD)
-  }) %>%
-    bind_rows %>%
-    select(model, everything()) %>%
-    mutate(model = as.factor(model)) %>%
+  }) |>
+    bind_rows() |>
+    select(model, everything()) |>
+    mutate(model = as.factor(model)) |>
     rename(survey_abbrev = gear) |>
-    mutate(model = fct_relevel(model, names(models)))
+    mutate(model = fct_relevel(model, names(models))) |>
+    mutate(survey_abbrev = tr(survey_abbrev)) |>
+    convert_prob_cols_language()
 
   q_quants <- q_quants |>
     left_join(surv_df, by = "survey_abbrev") |>
@@ -149,7 +153,7 @@ plot_q_mcmc <- function(models,
 
   x_label <- ""
   y_label <- ""
-  g <- q_quants %>%
+  g <- q_quants |>
     ggplot(aes(x = model,
                y = !!sym(quants[2]),
                ymin = !!sym(quants[1]),
@@ -178,7 +182,7 @@ plot_q_mcmc <- function(models,
       }
     }
   }else if(leg_loc[1] == "facet"){
-    g <- g %>% move_legend_to_empty_facet()
+    g <- g |> move_legend_to_empty_facet()
   }else{
     g <- g +
       theme(legend.justification = leg_loc,
