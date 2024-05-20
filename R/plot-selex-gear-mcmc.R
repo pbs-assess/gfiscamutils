@@ -57,7 +57,7 @@ plot_selex_gear_mcmc <- function(model,
          "representing lower CI, median, and upper CI")
   }
 
-  # Extract selectivity parameters %>%
+  # Extract selectivity parameters |>
 
   vals <- model$mcmc$selest
   if(is.null(vals)){
@@ -68,25 +68,29 @@ plot_selex_gear_mcmc <- function(model,
   # Remove male "estimates" for models with number of sexes == 1. iSCAM outputs the
   # parameter values even if they were not estimated so they are gibberish
   if(model$dat$num.sex == 1){
-    vals <- vals %>%
+    vals <- vals |>
       filter(sex != 1)
   }
 
   vals <- vals |>
-    mutate(sex = ifelse(sex %in% c(0, 2), "Female", "Male"))
+    mutate(sex = ifelse(sex %in% c(0, 2), tr("Female"), tr("Male")))
+
+  # Translate gear names
+  vals <- vals |>
+    mutate(gear = tr(gear))
 
   # Rename the parameter columns because the ages columns would
   # have these same names
-  vals <- vals %>%
+  vals <- vals |>
     rename(p1 = "a_hat", p2 = "g_hat")
 
   # Filter out the gear
-  gear_name <- model$dat$gear_names[gear]
+  gear_name <- tr(model$dat$gear_names[gear])
   if(!length(gear_name)){
     stop("`gear` number ", gear, " was not found in the model")
   }
 
-  vals <- vals %>%
+  vals <- vals |>
     filter(gear == gear_name)
   if(!nrow(vals)){
     stop("`gear` ", gear_name, " was not found in the model selectivity output")
@@ -99,26 +103,23 @@ plot_selex_gear_mcmc <- function(model,
 
   # Add age columns with logistic selectivity calculations
   for(i in ages){
-    vals <- vals %>%
+    vals <- vals |>
       mutate(!!sym(i) := 1 / (1 + exp(-(as.numeric(i) - p1) / p2)))
   }
-
-  vals <- vals |>
-    rename(Sex = sex)
 
   # Re-order the posteriors by group in order of a_hat smallest to largest
   block_lst <- vals |>
    split(~ block)
   vals <- map_dfr(block_lst, function(blk_df){
     sex_lst <- blk_df |>
-      split(~ Sex)
+      split(~ sex)
     sex_lst <- map_dfr(sex_lst, function(sex_df){
       sex_df[order(sex_df$p1), ]
     })
   }) |>
     mutate(yearspan = paste0(gear_name, "(", start_year, "-", end_year, ")")) |>
     select(-c(gear, start_year, end_year, posterior, block, p1, p2)) |>
-    select(yearspan, Sex, everything())
+    select(yearspan, sex, everything())
 
   num_posts <- nrow(model$mcmc$params)
   probs <- as.integer(probs * num_posts)
@@ -129,13 +130,13 @@ plot_selex_gear_mcmc <- function(model,
   # `yearspan` and `Sex`
   extract_probs <- function(d, slice_ind){
     d |>
-      split(~yearspan + Sex) |>
+      split(~yearspan + sex) |>
       map_dfr(~{
         nms <- names(.x)
         age_inds <- grepl("^[[:digit:]]+$", nms)
         ages <- nms[age_inds]
         yearspan <- .x$yearspan[1]
-        sex <- .x$Sex[1]
+        sex <- .x$sex[1]
 
         k <- map_dfc(.x[age_inds], ~{
           x <- sort(.x)
@@ -143,10 +144,10 @@ plot_selex_gear_mcmc <- function(model,
         }) |>
           set_names(ages) |>
           mutate(yearspan = yearspan,
-                 Sex = sex) |>
-          select(yearspan, Sex, everything())
+                 sex = sex) |>
+          select(yearspan, sex, everything())
       }) |>
-      pivot_longer(-c(yearspan, Sex),
+      pivot_longer(-c(yearspan, sex),
                    names_to = "age",
                    values_to = "value") |>
       mutate(age = as.numeric(age)) |>
@@ -165,16 +166,17 @@ plot_selex_gear_mcmc <- function(model,
     extract_probs(probs[3]) |>
     rename(hi_value = value)
 
-  rib_vals <- lo_vals %>%
+  rib_vals <- lo_vals |>
     left_join(hi_vals,
-              by = c("yearspan", "Sex", "age")) |>
+              by = c("yearspan", "sex", "age")) |>
     mutate(value = lo_value)
 
   g <- ggplot(med_vals, aes(x = factor(age),
                             y = value,
-                            group = Sex,
-                            color = Sex,
-                            fill = Sex)) +
+                            group = sex),
+              color = sex,
+              fill = sex,
+              show.legend = FALSE) +
     geom_line() +
     geom_point() +
     xlab("Age") +
@@ -187,27 +189,30 @@ plot_selex_gear_mcmc <- function(model,
       geom_ribbon(data = rib_vals,
                   aes(ymin = lo_value,
                       ymax = hi_value,
-                      group = Sex),
+                      group = sex,
+                      fill = sex),
                   alpha = ci_alpha,
                   color = NA)
   }
 
-  if(show_ci &&ci_type %in% c("line", "both")){
+  if(show_ci && ci_type %in% c("line", "both")){
     g <- g +
       geom_line(data = lo_vals, aes(y = lo_value,
-                                    group = Sex,
-                                    color = Sex),
-                linetype = ci_linetype) +
+                                    group = sex,
+                                    color = sex),
+                linetype = ci_linetype,
+                show.legend = FALSE) +
       geom_line(data = hi_vals, aes(y = hi_value,
-                                    group = Sex,
-                                    color = Sex),
-                linetype = ci_linetype)
+                                    group = sex,
+                                    color = sex),
+                linetype = ci_linetype,
+                show.legend = FALSE)
   }
 
   g <- g +
     facet_wrap(~ yearspan, scales = "free_x") +
-    xlab("Age") +
-    ylab("Proportion")
+    xlab(tr("Age")) +
+    ylab(tr("Proportion"))
 
   if(show_maturity){
     model$mpd$ma
@@ -219,21 +224,27 @@ plot_selex_gear_mcmc <- function(model,
       g <- g +
         geom_function(fun = function(x){1 / (1 + exp(-(x - a50_male) / sigma_a50_male))},
                       color = "blue",
-                      linetype = "dashed")
+                      linetype = "dashed",
+                      show.legend = FALSE)
     }else{
       a50_female <- model$dat$age.at.50.mat[1]
       sigma_a50_female <- model$dat$sd.at.50.mat[1]
     }
     g <- g +
-      geom_function(fun = function(x){1 / (1 + exp(-(x - a50_female) / sigma_a50_female))},
+      geom_function(fun = function(x){
+        1 / (1 + exp(-(x - a50_female) / sigma_a50_female))},
                     color = "red",
-                    linetype = "dashed")
+                    linetype = "dashed",
+        show.legend = FALSE)
   }
 
   if(angle_x_labels){
     g <- g +
       theme(axis.text.x = element_text(angle = 45, hjust = 0.55, vjust = 0.5))
   }
+
+  g <- g +
+    guides(fill = guide_legend(title = tr("Sex")))
 
   suppressWarnings(print(g))
 }

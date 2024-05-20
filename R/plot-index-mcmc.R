@@ -127,6 +127,8 @@ plot_index_mcmc <- function(models,
     surv_abbrevs <- surv_abbrevs[gear]
     surv_names <- surv_names[gear]
   }
+  surv_names <- tr(surv_names)
+  surv_abbrevs <- tr(surv_abbrevs)
 
   surv_abbrevs[surv_abbrevs == "HS MSA"] <- "OTHER HS MSA"
 
