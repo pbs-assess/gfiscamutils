@@ -6,6 +6,12 @@
 \title{gfiscamutils: A package for loading gfiscam model output, with plotting
   and table-making functions}
 \description{
+Provides functions including loading, plotting and making tables for iscam outputs (from https://github.com/pbs-assess/gfiscam).
+
 See the README on
 \href{https://github.com/pbs-assess/gfiscamutils#readme}{GitHub}
+}
+\author{
+\strong{Maintainer}: Chris Grandin \email{chris.grandin@gmail.com} (\href{https://orcid.org/0000-0002-6746-3486}{ORCID})
+
 }
