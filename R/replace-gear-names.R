@@ -99,13 +99,13 @@ replace_gear_names <- function(models,
         if(any(inds)){
           model$dat$gear_abbrevs[inds] <<- .y
         }
-        inds <- grepl(.x, model$dat$fleet_gear_abbrevs)
+        inds <- grepl(.x, model$dat$fleet_abbrevs)
         if(any(inds)){
-          model$dat$fleet_gear_abbrevs[inds] <<- .y
+          model$dat$fleet_abbrevs[inds] <<- .y
         }
-        inds <- grepl(.x, model$dat$index_gear_abbrevs)
+        inds <- grepl(.x, model$dat$index_abbrevs)
         if(any(inds)){
-          model$dat$index_gear_abbrevs[inds] <<- .y
+          model$dat$index_abbrevs[inds] <<- .y
         }
         inds <- grepl(.x, model$dat$age_gear_abbrevs)
         if(any(inds)){
