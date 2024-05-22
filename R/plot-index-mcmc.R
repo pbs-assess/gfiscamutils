@@ -127,10 +127,6 @@ plot_index_mcmc <- function(models,
     surv_abbrevs <- surv_abbrevs[gear]
     surv_names <- surv_names[gear]
   }
-  surv_names <- tr(surv_names)
-  surv_abbrevs <- tr(surv_abbrevs)
-
-  surv_abbrevs[surv_abbrevs == "HS MSA"] <- "OTHER HS MSA"
 
   # Add survey names to the table with a left join by survey_abbrev
   surv_abbrevs_df <- surv_abbrevs |>
@@ -170,11 +166,6 @@ plot_index_mcmc <- function(models,
          call. = FALSE)
   }
 
-  # Translate survey names
-  vals <- vals |>
-    map(~{.x |>
-        mutate(survey_name = tr(survey_name))})
-
   # Remove any NULL list items (no index fits found in model)
   vals <- vals[!sapply(vals, is.null)] |>
     bind_rows() |>
@@ -190,6 +181,7 @@ plot_index_mcmc <- function(models,
 
   surv_indices <- surv_indices |>
     filter(survey_name %in% unique(vals$survey_name)) |>
+    mutate(survey_name = tr(survey_name)) |>
     mutate(survey_name = fct_relevel(survey_name, !!surv_names))
 
   vals <- vals |>
@@ -201,12 +193,15 @@ plot_index_mcmc <- function(models,
   vals <- vals |>
     filter(year %in% start_year:end_year)
 
+  # Translate the gear names
+  vals <- vals |>
+    mutate(survey_name = tr(survey_name))
+
   if(type == "fits"){
-    vals <- vals %>%
-      mutate_at(vars(biomass, lowerci, upperci),
-                function(x){
-                  ifelse(.$survey_name == tr("Discard CPUE"), x / 1e6, x)
-                })
+    vals <- vals |>
+      mutate(across(c(biomass, lowerci, upperci), ~{
+        ifelse(survey_name == tr("Discard CPUE"), .x / 1e6, .x)
+      }))
   }
 
   # Dodge year points a little, cumulative for each model
@@ -222,16 +217,14 @@ plot_index_mcmc <- function(models,
 
   if(type == "fits"){
     # Rescale values
-    vals <- vals %>%
-      mutate_at(vars(biomass, lowerci, upperci),
-                function(x){
-                  ifelse(.$survey_name == tr("Discard CPUE"), x, x / 1e6)
-                })
-    surv_indices <- surv_indices %>%
-      mutate_at(vars(biomass, lowerci, upperci),
-                function(x){
-                  ifelse(.$survey_name == tr("Discard CPUE"), x, x / 1e6)
-                })
+    vals <- vals |>
+      mutate(across(c(biomass, lowerci, upperci), ~{
+        ifelse(survey_name == tr("Discard CPUE"), .x, .x / 1e6)
+      }))
+    surv_indices <- surv_indices |>
+      mutate(across(c(biomass, lowerci, upperci), ~{
+        ifelse(survey_name == tr("Discard CPUE"), .x, .x / 1e6)
+      }))
   }
 
   # Color values have black prepended as it is the base model
@@ -244,6 +237,7 @@ plot_index_mcmc <- function(models,
 
   # Remove zeroes from the fit data frame
   vals <- vals |> filter(biomass != 0 & lowerci != 0 & upperci !=0)
+
 
   if(type == "fits"){
     g <- ggplot(surv_indices,
@@ -273,15 +267,11 @@ plot_index_mcmc <- function(models,
       xlab(tr("Year")) +
       ylab(ifelse(has_dcpue,
                   ifelse(only_dcpue,
-                         ifelse(fr(),
-                                "Indice (kg/heure)",
-                                "Index (kg/hr)"),
+                         tr("Index (kg/hr)"),
                          ifelse(fr(),
                                 "Indice (1000 t, kg/heure pour la CPUE des rejets)",
                                 "Index (1,000 t, kg/hr for Discard CPUE)")),
-                  ifelse(fr(),
-                         "Indice (1000 t)",
-                         "Index (1000 t)"))) +
+                  tr("Index (1000 t)"))) +
       scale_color_manual(values = model_colors,
                          labels = map(models, ~{
                            tex(as.character(attributes(.x)$model_desc))})) +
@@ -310,9 +300,7 @@ plot_index_mcmc <- function(models,
       facet_wrap(~survey_name,
                  scales = "free_y") +
       xlab(tr("Year")) +
-      ylab(ifelse(fr(),
-                  "Résidu normalisé logarithmique",
-                  "Log standardized residual")) +
+      ylab(tr("Log standardized residual")) +
       scale_color_manual(values = model_colors,
                          labels = map(models, ~{
                            tex(as.character(attributes(.x)$model_desc))})) +
