@@ -8,7 +8,7 @@ plot_q_mcmc(
   models,
   gear = 1,
   append_base_txt = NULL,
-  legend_title = "Models",
+  legend_title = tr("Models"),
   probs = c(0.025, 0.5, 0.975),
   base_color = "black",
   palette = iscam_palette,

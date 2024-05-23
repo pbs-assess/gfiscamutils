@@ -8,8 +8,8 @@ plot_ref_points(
   model,
   ref_pts = c("sbo", "bmsy", "msy1", "msy2", "umsy1", "umsy2"),
   ref_desc = c(expression(italic(SB)[0]), expression(italic(B)[MSY]),
-    expression(italic(MSY)[1]), expression(italic(MSY)[2]), expression(italic(UMSY)[1]),
-    expression(italic(UMSY)[2])),
+    expression(italic(MSY)[1]), expression(italic(MSY)[2]),
+    expression(italic(U[MSY])[1]), expression(italic(U[MSY])[2])),
   color = "black",
   fill = "steelblue"
 )

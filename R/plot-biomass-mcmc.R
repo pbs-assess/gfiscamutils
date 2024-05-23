@@ -144,14 +144,15 @@ plot_biomass_mcmc <- function(models,
     mtch <- grep(.x, names(tso_quants), value = TRUE)
 
     if(!length(mtch)){
-      stop("One of the values in `probs` does not appear in the MCMC output data\n",
-           .x, call. = FALSE)
+      stop("One of the values in `probs` does not appear in the MCMC ",
+      "output data\n", .x)
     }
     mtch
   })
 
   tso_base <- tso_quants |>
     slice(1)
+
   if(show_bo_lines){
     # Show the B0 lines for the first model with CI, behind model lines
     # Only two lines allowed, Limit Reference Point (LRP) and Upper Stock

@@ -229,7 +229,9 @@ plot_ts_mcmc <- function(models,
     }else{
       # Data frame of non-split-sex output
       # Make French prob names in caswe they are not already
-      rownames(out) <- gsub("\\.", ",", rownames(out))
+      if(fr()){
+        rownames(out) <- gsub("\\.", ",", rownames(out))
+      }
       out <- out |>
           t() |>
           as.data.frame() |>

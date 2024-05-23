@@ -50,6 +50,9 @@ plot_index_mcmc <- function(models,
 
   type <- match.arg(type)
 
+  surv_index <- surv_index |>
+    mutate(survey_abbrev = tr(survey_abbrev, allow_missing = TRUE))
+
   single_model <- FALSE
   if(is_iscam_model(models)){
     single_model <- TRUE
@@ -140,7 +143,6 @@ plot_index_mcmc <- function(models,
   surv_index_df <- surv_index |>
     filter(year %in% start_year:end_year) |>
     filter(survey_abbrev %in% !!surv_abbrevs) |>
-    #filter(grepl(paste(surv_abbrevs, collapse = "|"), survey_abbrev)) |>
     left_join(surv_df, by = "survey_abbrev")
 
   surv_indices <- map_df(surv_abbrevs, ~{
@@ -169,11 +171,14 @@ plot_index_mcmc <- function(models,
   # Remove any NULL list items (no index fits found in model)
   vals <- vals[!sapply(vals, is.null)] |>
     bind_rows() |>
-    select(model, survey_name, year, biomass, lowerci, upperci)
-
-  # Remove all rows where `survey_name` is `NULL` which is caused by it not being in the gear list
-  vals <- vals |>
-    filter(!is.na(survey_name))
+    select(model, survey_name, year, biomass, lowerci, upperci) |>
+    # Translate the gear names as needed
+    mutate(survey_name = tr(survey_name, allow_missing = TRUE)) |>
+    # Remove all rows where `survey_name` is `NULL` which is caused by it
+    # not being in the gear list
+    filter(!is.na(survey_name)) |>
+  # Filter out for the years provided
+    filter(year %in% start_year:end_year)
 
   # Remove any missing indices from the `surv_names` vector and
   # the `surv_indices` data frame
@@ -181,21 +186,13 @@ plot_index_mcmc <- function(models,
 
   surv_indices <- surv_indices |>
     filter(survey_name %in% unique(vals$survey_name)) |>
-    mutate(survey_name = tr(survey_name)) |>
+    #mutate(survey_name = tr(survey_name, allow_missing = TRUE)) |>
     mutate(survey_name = fct_relevel(survey_name, !!surv_names))
 
   vals <- vals |>
     filter(survey_name %in% surv_names) |>
     mutate(model = factor(model, names(models[names(models) %in% model]))) |>
     mutate(survey_name = factor(survey_name, !!surv_names))
-
-  # Filter out for the years provided
-  vals <- vals |>
-    filter(year %in% start_year:end_year)
-
-  # Translate the gear names
-  vals <- vals |>
-    mutate(survey_name = tr(survey_name))
 
   if(type == "fits"){
     vals <- vals |>
@@ -205,7 +202,8 @@ plot_index_mcmc <- function(models,
   }
 
   # Dodge year points a little, cumulative for each model
-  dodge_amt <- if(type == "fits") dodge else 0
+  dodge_amt <- ifelse(type == "fits", dodge, 0)
+
   vals <- vals |>
     split(~model) |>
     imap(~{
@@ -236,8 +234,8 @@ plot_index_mcmc <- function(models,
   only_dcpue <- has_dcpue && length(unique(surv_indices$survey_name)) == 1
 
   # Remove zeroes from the fit data frame
-  vals <- vals |> filter(biomass != 0 & lowerci != 0 & upperci !=0)
 
+  vals <- vals |> filter(biomass != 0 & lowerci != 0 & upperci !=0)
 
   if(type == "fits"){
     g <- ggplot(surv_indices,
