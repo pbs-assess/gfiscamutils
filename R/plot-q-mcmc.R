@@ -99,9 +99,6 @@ plot_q_mcmc <- function(models,
     surv_abbrevs <- surv_abbrevs[gear]
     surv_names <- surv_names[gear]
   }
-  surv_abbrevs[surv_abbrevs == "HS MSA"] <- "OTHER HS MSA"
-  surv_names <- tr(surv_names)
-  surv_abbrevs <- tr(surv_abbrevs)
 
   # Add survey names to the table with a left join by survey_abbrev
   surv_abbrevs_df <- surv_abbrevs |>

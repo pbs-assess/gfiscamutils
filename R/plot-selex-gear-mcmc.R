@@ -85,7 +85,7 @@ plot_selex_gear_mcmc <- function(model,
     rename(p1 = "a_hat", p2 = "g_hat")
 
   # Filter out the gear
-  gear_name <- tr(model$dat$gear_names[gear])
+  gear_name <- model$dat$gear_names[gear]
   if(!length(gear_name)){
     stop("`gear` number ", gear, " was not found in the model")
   }
