@@ -38,14 +38,13 @@ table_param_est_mcmc <- function(model,
 
   # Match the given probs with their respective quant columns
   prob_cols <- paste0(prettyNum(probs * 100), "%")
-  # In case the decimals have been changed to commas, change them back
-  prob_cols <- gsub(",", ".", prob_cols)
 
   params_quants <- model$mcmccalcs$params_quants |>
     t() |>
     as_tibble(rownames = "param") |>
     filter(param != "f") |>
-    filter(param != "SSB")
+    filter(param != "SSB") |>
+    convert_prob_cols_language()
 
   sel_pat <- "^sel_(age|sd)50_(male|female)_gear([0-9]+)_block([0-9]+)$"
 
@@ -66,10 +65,10 @@ table_param_est_mcmc <- function(model,
   if(length(m_inds)){
     non_selex_df <- non_selex_df |>
       mutate(sex = ifelse(param == "m_sex1",
-                          "female",
+                          tr("female"),
                           sex),
              sex = ifelse(param == "m_sex2",
-                          "male",
+                          tr("male"),
                           sex),
              param = ifelse(param == "m_sex1",
                             "m1",
@@ -93,6 +92,7 @@ table_param_est_mcmc <- function(model,
     q_gear_inds <- as.numeric(gsub("q_gear([0-9]+)", "\\1", q_param_nms))
     non_selex_df[q_inds, "gear"] <- q_real_nms[q_gear_inds]
   }
+
   # Deal with MSY parameters
   gear_names <- model$dat$gear_names
   flt_real_nms <- model$dat$fleet_gear_names
@@ -114,7 +114,8 @@ table_param_est_mcmc <- function(model,
     mutate(gear = gear_names[as.numeric(gsub(sel_pat, "\\3", param))]) |>
     mutate(sex = gsub(sel_pat, "\\2", param)) |>
     mutate(block = as.numeric(gsub(sel_pat, "\\4", param))) |>
-    mutate(gear_num = as.numeric(gsub(sel_pat, "\\3", param)))
+    mutate(gear_num = as.numeric(gsub(sel_pat, "\\3", param))) |>
+    mutate(sex = tr(sex))
 
   sel_nms <- selex_df$param
 
@@ -137,26 +138,31 @@ table_param_est_mcmc <- function(model,
     select(-gear_num) |>
     select(-block)
 
+  param_sym <- sym(tr("Parameter"))
+  gear_sym <- sym(tr("Gear"))
+  sex_sym <- sym(tr("Sex"))
+  yr_rng_sym <- sym(tr("Year range"))
+
   params_quants <- non_selex_df |>
     bind_rows(selex_df) |>
-    select(param, gear, sex, `Year range`, everything())
-
-  nms <- names(params_quants)
-
-  nms[1:3] <- c(ifelse(fr(), "Paramètre", "Parameter"),
-                ifelse(fr(), "Engrenage", "Gear"),
-                ifelse(fr(), "Sexe", "Sex"))
+    select(param, gear, sex, `Year range`, everything()) |>
+    rename(!!param_sym := param,
+           !!gear_sym := gear,
+           !!sex_sym := sex,
+           !!yr_rng_sym := `Year range`)
 
   if(fr()){
+    nms <- params_quants |> names()
     nms <- gsub("%", " %", nms)
+    names(params_quants) <- nms
+    prob_cols <- gsub("%", " %", prob_cols)
   }
-  names(params_quants) <- nms
 
   quants <- imap_chr(prob_cols, ~{
     mtch <- grep(.x, names(params_quants), value = TRUE)
     if(!length(mtch)){
-      stop("One of the values in `probs` does not appear in the MCMC output data\n",
-           .x, call. = FALSE)
+      stop("One of the values in `probs` does not appear in the MCMC ",
+      "output data\n", .x)
     }
     mtch
   })
@@ -167,12 +173,18 @@ table_param_est_mcmc <- function(model,
 
   if(!show_year_range){
     params_quants <- params_quants |>
-      select(-`Year range`)
+      select(-yr_rng_sym)
   }
 
   if(ret_df){
     return(params_quants)
   }
+  # Translate MSY ref point names if necessary
+  params_quants <- params_quants |>
+    mutate(!!param_sym := gsub("MSY",
+                               tr("MSY"),
+                               !!param_sym))
+
   out <- csas_table(params_quants,
                     format = "latex",
                     align = rep("r", ncol(params_quants)),

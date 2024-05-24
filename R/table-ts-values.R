@@ -115,12 +115,16 @@ table_ts_values_mcmc <- function(models,
   # Replace NA's in the table with dashes
   tab[is.na(tab)] <- "--"
 
+  yr_sym <- sym(tr("Year"))
   if(!is.null(start_yr)){
     yrs <- tab[tr("Year")] |> unlist() |> as.numeric()
     if(!start_yr %in% yrs){
       stop("`start_yr` not in the range of years in the model output values",
            call. = FALSE)
     }
+    tab <- tab |>
+      filter(!!yr_sym >= start_yr)
+
     if(fr()){
       tab <- tab |>
         filter(Année >= start_yr)
@@ -129,8 +133,9 @@ table_ts_values_mcmc <- function(models,
         filter(Year >= start_yr)
     }
   }
+
   if(value == "ut"){
-    tab$Year <- as.character(as.numeric(tab$Year) + 1)
+    tab[[yr_sym]] <- as.character(as.numeric(tab[[yr_sym]]) + 1)
     tab <- tab[-nrow(tab) , ]
   }
 

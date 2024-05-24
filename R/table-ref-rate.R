@@ -14,19 +14,23 @@ table_ref_rate <- function(model,
                            ...){
 
   fleet_nms <- model$dat$fleet_gear_names
-  catch_df <- vec2df(c("", "", lst$catch),
+
+  catch_nm <- tr("Catch (kt)")
+  catch_sym <- sym(catch_nm)
+  catch_df <- vec2df(c("", "", f(lst$catch, digits)),
                      nms = c("$F_{0.4B_0}$",
                              "$U_{0.4B_0}$",
-                             "Catch (kt)")) |>
-    mutate_all(as.numeric)
+                             catch_nm))
 
-  d <- tibble(`$F_{0.4B_0}$` = lst$f,
-              `$U_{0.4B_0}$` = lst$u,
-              `Catch (kt)` = lst$catch * model$dat$gear.alloc[1:2]) |>
+  fleet_sym <- sym(tr("Fleet"))
+
+  d <- tibble(`$F_{0.4B_0}$` = f(lst$f, digits),
+              `$U_{0.4B_0}$` = f(lst$u, digits),
+              !!catch_sym := f(lst$catch * model$dat$gear.alloc[1:2], digits)) |>
     bind_rows(catch_df) |>
-    mutate_all(~{f(.x, digits)}) |>
-    mutate(Fleet = c(fleet_nms, "Total")) |>
+    mutate(Fleet = c(fleet_nms, tr("Total"))) |>
     select(Fleet, everything()) |>
+    rename(!!fleet_sym := Fleet) |>
     map_df(~{gsub(" +NA", "", .x)})
 
   csas_table(d,

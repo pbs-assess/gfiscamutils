@@ -153,6 +153,7 @@ table_ref_points_mcmc <- function(models,
 
   if(length(models) == 1){
     # Add the credible interval column
+
     tab <- full_join(tab, ci_df, by = "param") |>
       mutate(param = get_fancy_names(param))
     if(fr()){

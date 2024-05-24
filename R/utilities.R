@@ -505,23 +505,23 @@ get_fancy_names <- function(names){
     }
     if(length(grep("^[0-9\\.]+BMSY$", .x))){
       refpt <- gsub("([0-9\\.]+)BMSY", "\\1", .x)
-      return(paste0("$", refpt, "B_\\mathrm{MSY}$"))
+      return(paste0("$", refpt, "B_\\mathrm{", tr("MSY"), "}$"))
     }
     if(length(grep("^[0-9,]+BMSY$", .x))){
       refpt <- gsub("([0-9,]+)BMSY", "\\1", .x)
-      return(paste0("$", refpt, "B_\\mathrm{MSY}$"))
+      return(paste0("$", refpt, "B_\\mathrm{", tr("MSY"), "}$"))
     }
     if(length(grep("^msy_fleet[0-9]+$", .x))){
       fleet <- gsub("^msy_fleet([0-9]+)$", "\\1", .x)
-      return(paste0("$MSY_\\mathrm{", fleet, "}$"))
+      return(paste0("$", tr("MSY"), "_\\mathrm{", fleet, "}$"))
     }
     if(length(grep("^fmsy_fleet[0-9]+$", .x))){
       fleet <- gsub("^fmsy_fleet([0-9]+)$", "\\1", .x)
-      return(paste0("$F_\\mathrm{MSY_", fleet, "}$"))
+      return(paste0("$F_\\mathrm{", tr("MSY"), "_", fleet, "}$"))
     }
     if(length(grep("^umsy_fleet[0-9]+$", .x))){
       fleet <- gsub("^umsy_fleet([0-9]+)$", "\\1", .x)
-      return(paste0("$U_\\mathrm{MSY_", fleet, "}$"))
+      return(paste0("$U_\\mathrm{", tr("MSY"), "_", fleet, "}$"))
     }
     if(length(grep("^f_fleet[0-9]+_[0-9]+$", .x))){
       fleet <- gsub("^f_fleet([0-9]+)_[0-9]+$", "\\1", .x)
@@ -615,7 +615,7 @@ get_fancy_names <- function(names){
       return(get_sel_name(.x))
     }
 
-    switch(.x,
+    out_nm <- switch(.x,
            "ro" = "$R_\\mathrm{0}$",
            "log_ro" = "$log(R_\\mathrm{0})$",
            "rbar" = "$\\overline{R}$",
@@ -637,46 +637,54 @@ get_fancy_names <- function(names){
            "m" = "$M$",
            "m1" = "$M_1$",
            "m2" = "$M_2$",
-           "m_sex1" = ifelse(fr(), "$M_\\mathrm{homme}$", "$M_\\mathrm{male}$"),
-           "m_sex2" = ifelse(fr(), "$M_\\mathrm{femme}$", "$M_\\mathrm{female}$"),
-           "log_m_sex1" = ifelse(fr(), "$log(M_\\mathrm{homme})$", "$log(M_\\mathrm{male})$"),
-           "log_m_sex2" = ifelse(fr(), "$log(M_\\mathrm{femme})$", "$log(M_\\mathrm{female})$"),
-           "bmsy" = "$B_\\mathrm{MSY}$",
-           "msy" = "$MSY$",
-           "msy1" = "$MSY_\\mathrm{1}$",
-           "msy2" = "$MSY_\\mathrm{2}$",
-           "msy3" = "$MSY_\\mathrm{3}$",
-           "msy4" = "$MSY_\\mathrm{4}$",
-           "msy5" = "$MSY_\\mathrm{5}$",
-           "msy_fleet1" = "$MSY_\\mathrm{1}$",
-           "msy_fleet2" = "$MSY_\\mathrm{2}$",
-           "msy_fleet3" = "$MSY_\\mathrm{3}$",
-           "msy_fleet4" = "$MSY_\\mathrm{4}$",
-           "msy_fleet5" = "$MSY_\\mathrm{5}$",
-           "fmsy" = "$F_\\mathrm{MSY}$",
-           "fmsy1" = "$F_\\mathrm{MSY_1}$",
-           "fmsy2" = "$F_\\mathrm{MSY_2}$",
-           "fmsy3" = "$F_\\mathrm{MSY_3}$",
-           "fmsy4" = "$F_\\mathrm{MSY_4}$",
-           "fmsy5" = "$F_\\mathrm{MSY_5}$",
-           "fmsy_fleet1" = "$F_\\mathrm{MSY_1}$",
-           "fmsy_fleet2" = "$F_\\mathrm{MSY_2}$",
-           "fmsy_fleet3" = "$F_\\mathrm{MSY_3}$",
-           "fmsy_fleet4" = "$F_\\mathrm{MSY_4}$",
-           "fmsy_fleet5" = "$F_\\mathrm{MSY_5}$",
-           "umsy" = "$U_\\mathrm{MSY}$",
-           "umsy1" = "$U_\\mathrm{MSY_1}$",
-           "umsy2" = "$U_\\mathrm{MSY_2}$",
-           "umsy3" = "$U_\\mathrm{MSY_3}$",
-           "umsy4" = "$U_\\mathrm{MSY_4}$",
-           "umsy5" = "$U_\\mathrm{MSY_51}$",
-           "umsy_fleet1" = "$U_\\mathrm{MSY_1}$",
-           "umsy_fleet2" = "$U_\\mathrm{MSY_2}$",
-           "umsy_fleet3" = "$U_\\mathrm{MSY_3}$",
-           "umsy_fleet4" = "$U_\\mathrm{MSY_4}$",
-           "umsy_fleet5" = "$U_\\mathrm{MSY_5}$")
-  })
+           "m_sex1" = paste0("$M_\\mathrm{",
+                             tr("male"),
+                             "}$"),
+           "m_sex2" = paste0("$M_\\mathrm{",
+                             tr("male"),
+                             "}$"),
+           "log_m_sex1" = paste0("$log(M_\\mathrm{",
+                                 tr("male"),
+                                 "})$"),
+           "log_m_sex2" = paste0("$log(M_\\mathrm{",
+                                 tr("female"),
+                                 "})$"),
+           "bmsy" = paste0("$B_\\mathrm{", tr("MSY"), "}$"),
+           "msy" = paste0("$", tr("MSY"), "$"),
+           "msy1" = paste0("$", tr("MSY"), "_\\mathrm{1}$"),
+           "msy2" = paste0("$", tr("MSY"), "_\\mathrm{2}$"),
+           "msy3" = paste0("$", tr("MSY"), "_\\mathrm{3}$"),
+           "msy4" = paste0("$", tr("MSY"), "_\\mathrm{4}$"),
+           "msy5" = paste0("$", tr("MSY"), "_\\mathrm{5}$"),
+           "msy_fleet1" = paste0("$", tr("MSY"), "_\\mathrm{1}$"),
+           "msy_fleet2" = paste0("$", tr("MSY"), "_\\mathrm{2}$"),
+           "msy_fleet3" = paste0("$", tr("MSY"), "_\\mathrm{3}$"),
+           "msy_fleet4" = paste0("$", tr("MSY"), "_\\mathrm{4}$"),
+           "msy_fleet5" = paste0("$", tr("MSY"), "_\\mathrm{5}$"),
+           "fmsy" = paste0("$F_\\mathrm{", tr("MSY"), "}$"),
+           "fmsy1" = paste0("$F_\\mathrm{", tr("MSY"), "_1}$"),
+           "fmsy2" = paste0("$F_\\mathrm{", tr("MSY"), "_2}$"),
+           "fmsy3" = paste0("$F_\\mathrm{", tr("MSY"), "_3}$"),
+           "fmsy4" = paste0("$F_\\mathrm{", tr("MSY"), "_4}$"),
+           "fmsy5" = paste0("$F_\\mathrm{", tr("MSY"), "_5}$"),
+           "fmsy_fleet1" = paste0("$F_\\mathrm{", tr("MSY"), "_1}$"),
+           "fmsy_fleet2" = paste0("$F_\\mathrm{", tr("MSY"), "_2}$"),
+           "fmsy_fleet3" = paste0("$F_\\mathrm{", tr("MSY"), "_3}$"),
+           "fmsy_fleet4" = paste0("$F_\\mathrm{", tr("MSY"), "_4}$"),
+           "fmsy_fleet5" = paste0("$F_\\mathrm{", tr("MSY"), "_5}$"),
 
+           "umsy" = paste0("$U_\\mathrm{", tr("MSY"), "}$"),
+           "umsy1" = paste0("$U_\\mathrm{", tr("MSY"), "_1}$"),
+           "umsy2" = paste0("$U_\\mathrm{", tr("MSY"), "_2}$"),
+           "umsy3" = paste0("$U_\\mathrm{", tr("MSY"), "_3}$"),
+           "umsy4" = paste0("$U_\\mathrm{", tr("MSY"), "_4}$"),
+           "umsy5" = paste0("$U_\\mathrm{", tr("MSY"), "_5}$"),
+           "umsy_fleet1" = paste0("$U_\\mathrm{", tr("MSY"), "_1}$"),
+           "umsy_fleet2" = paste0("$U_\\mathrm{", tr("MSY"), "_2}$"),
+           "umsy_fleet3" = paste0("$U_\\mathrm{", tr("MSY"), "_3}$"),
+           "umsy_fleet4" = paste0("$U_\\mathrm{", tr("MSY"), "_4}$"),
+           "umsy_fleet5" = paste0("$U_\\mathrm{", tr("MSY"), "_5}$"))
+  })
 }
 
 #' Deprecated
