@@ -14,7 +14,7 @@
 #'
 #' @export
 plot_vuln_mcmc <- function(model,
-                           append_base_txt = " Spawning biomass",
+                           append_base_txt = tr("Spawning biomass"),
                            xlim = NULL,
                            ylim = NULL,
                            leg_loc = NULL,
@@ -32,7 +32,8 @@ plot_vuln_mcmc <- function(model,
       tmp <- model
       tmp$mcmccalcs$sbt_quants <- tmp$mcmccalcs$vbt_quants[[.x]]
       gear_names <- model$dat$fleet_gear_names
-      attributes(tmp)$model_desc <- paste0(gear_names[.x], " Vulnerable biomass ")
+      attributes(tmp)$model_desc <- paste(gear_names[.x],
+                                           tr("Vulnerable biomass"))
       tmp
     })
     models <- c(list(model), hacked_vbt)
