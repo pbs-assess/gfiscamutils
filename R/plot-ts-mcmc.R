@@ -131,7 +131,8 @@ plot_ts_mcmc <- function(models,
     as.character(attributes(.x)$model_desc)
   })
   # Set model names for plotting
-  names(models) <- paste(names(models), append_base_txt)
+  names(models) <- paste(names(models), append_base_txt) |>
+    trimws()
   models <- imap(models, ~{
     attributes(.x)$model_desc <- .y
     .x
