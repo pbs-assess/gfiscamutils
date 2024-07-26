@@ -6,7 +6,7 @@
 \usage{
 plot_vuln_mcmc(
   model,
-  append_base_txt = " Spawning biomass",
+  append_base_txt = tr("Spawning biomass"),
   xlim = NULL,
   ylim = NULL,
   leg_loc = NULL,
