@@ -1,5 +1,12 @@
 #' Read in the iscam data file
 #'
+#' @details This file was checked out back in time because it had been
+#' changed to work on Petrale and had to be changed back to work on Arrowtooth.
+#' The command run was:
+#' git checkout 815275c~1 -- R/read-data-file.R
+#' The command to bring it back should be:
+#' git checkout 424f727 -- R/read-data-file.R
+#'
 #' @param file Filename (full path)
 #' @param verbose Say more
 #'
