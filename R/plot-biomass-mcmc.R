@@ -84,9 +84,11 @@ plot_biomass_mcmc <- function(models,
     y_label = ifelse(
       rel,
       ifelse(fr(),
-             "Biomasse relative de frai", "Relative Spawning biomass"),
+             "Biomasse relative de frai",
+             "Relative Spawning biomass"),
       ifelse(fr(),
-             "Biomasse reproductrice (milliers de t)", "Spawning biomass (thousand t)")),
+             "Biomasse reproductrice (milliers de t)",
+             "Spawning biomass (thousand t)")),
     x_space = x_space,
     y_space = y_space,
     probs = probs,
@@ -406,7 +408,8 @@ plot_biomass_mcmc <- function(models,
     tso_quants <- tso_quants |>
       mutate(!!sym(quants[3]) := ifelse(!!sym(quants[3]) > upper_bound,
                                         upper_bound,
-                                        !!sym(quants[3])))
+                                        !!sym(quants[3]))) |>
+      mutate(model = as.factor(model))
 
     g <- g +
       geom_pointrange(data = tso_quants,
