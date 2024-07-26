@@ -3,7 +3,7 @@
 #' See the README on
 #' \href{https://github.com/pbs-assess/gfiscamutils#readme}{GitHub}
 #'
-#' @docType package
+#' @docType _PACKAGE
 #' @name gfiscamutils
 
 #' @importFrom rlang .data
