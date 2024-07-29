@@ -1602,7 +1602,7 @@ calc.ahat <- function(model){
     }
   }
   mpd <- model$mpd
-  if(is.na(mpd)){
+  if(any(is.na(mpd))){
     return(NA)
   }
   ahat <- mpd$A_hat
