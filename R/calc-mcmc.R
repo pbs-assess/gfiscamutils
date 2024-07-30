@@ -48,7 +48,8 @@ calc_mcmc <- function(model,
   mpd <- model$mpd
   out$params <- mc$params
   if(is.null(out$params)){
-    stop("There is no MCMC output for the model in ", model$mcmcpath)
+    stop("There is no MCMC output for the model in ", model$mcmcpath,
+         " Did you remember to run iscam -mceval?")
   }
   out$params <- strip_static_params(model, out$params)
   # Calculate sigma and tau and add to p_dat
