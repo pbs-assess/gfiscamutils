@@ -26,6 +26,10 @@
 #' model
 #' @param suppress_warnings If `TRUE`, warnings about directories not existing
 #' will not be shown
+#' @param base_model_dir Path for the base model, if it is outside the
+#' file structure for an assessment. This is used for SR documents, where there
+#' is a new base model with more data included in a subsequent year. If this
+#' is `NULL`, the usual base model location will be used
 #'
 #' @return A list of vectors of directory names, which will have `NA` elements
 #' for those which do not exist:
@@ -55,7 +59,8 @@ set_dirs <- function(
     sens_models_dirs = NA,
     retro_models_dirs = NA,
     prepend_to_bridge = NA,
-    suppress_warnings = FALSE){
+    suppress_warnings = FALSE,
+    base_model_dir = NULL){
 
   if(is.null(models_dir) || is.na(models_dir)){
     stop("`models_dir` must not be `NULL` or `NA`",
@@ -161,6 +166,8 @@ set_dirs <- function(
       }
       .x
     })
+
+  dirs[[1]] <- base_model_dir %||% dirs[[1]]
 
   list(models_dir = models_dir,
        nongit_dir = nongit_dir,

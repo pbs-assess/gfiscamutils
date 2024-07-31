@@ -73,6 +73,7 @@ table_decisions <- function(model,
   # Make all biomass column names numeric (remove the preceeding 'B')
   # Calculate depletion for all biomass columns
   get_proj <- function(first_yr){
+
     proj <- model$mcmccalcs$proj |>
       imap(~{
         if(is.null(num_proj_yrs)){
@@ -94,10 +95,12 @@ table_decisions <- function(model,
                  "in the data frame for catch level ", .y)
           }
         }
+
         output <- .x |> select(cols_to_keep_inds)
         names(output) <- gsub("^B", "", names(output))
-        # Calculate depletion
-        output |> select(-catch) |> mutate_all(~{.x / sbo})
+        # Calculate depletion - sbo[1:nrow(output)] fixes case where there are
+        # not enough posteriors
+        output |> select(-catch) |> mutate_all(~{.x / sbo[1:nrow(output)]})
       })
   }
 

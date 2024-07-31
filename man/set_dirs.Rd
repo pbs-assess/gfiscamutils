@@ -16,7 +16,8 @@ set_dirs(
   sens_models_dirs = NA,
   retro_models_dirs = NA,
   prepend_to_bridge = NA,
-  suppress_warnings = FALSE
+  suppress_warnings = FALSE,
+  base_model_dir = NULL
 )
 }
 \arguments{
@@ -43,6 +44,11 @@ that each contain an individual sensitivity model}
 
 \item{suppress_warnings}{If \code{TRUE}, warnings about directories not existing
 will not be shown}
+
+\item{base_model_dir}{Path for the base model, if it is outside the
+file structure for an assessment. This is used for SR documents, where there
+is a new base model with more data included in a subsequent year. If this
+is \code{NULL}, the usual base model location will be used}
 
 \item{retrospectives_models_dir}{Name of the retrospectives models directory}
 
