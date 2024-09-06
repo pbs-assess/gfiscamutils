@@ -36,6 +36,7 @@ plot_vuln_mcmc <- function(model,
                                            tr("Vulnerable biomass"))
       tmp
     })
+
     models <- c(list(model), hacked_vbt)
     class(models) <- mdl_lst_cls
     plot_ts_mcmc(models,

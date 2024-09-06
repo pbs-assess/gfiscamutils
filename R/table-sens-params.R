@@ -25,8 +25,8 @@ table_sens_param_changes <- function(sens_desc_vec,
 
   out <- csas_table(tab,
                     format = "latex",
-                    align = rep("r", ncol(tab)),
-                    col_names_align = rep("r", ncol(tab)),
+                    align = c("l", rep("r", ncol(tab) - 1)),
+                    col_names_align = c("l", rep("r", ncol(tab) - 1)),
                     ...)
 
   if(!is.null(col_widths)){
