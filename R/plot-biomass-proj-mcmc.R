@@ -14,6 +14,11 @@
 #' [ggplot2::geom_text()]
 #' @param nudge_catch_labels Position to nudge the catch labels by on the right
 #' of the ending of the lines
+#' @param proj_catch_vals The catch valuies to include in the plot. If `NULL`,
+#' include all values present in the list from the output
+#' (`model$mcmccalcs$proj_sbt_quants`). If non-null, is a vector of values
+#' of catch to filter the projection biomass table on. Only show those values
+#' in the plot
 #' @param ... Arguments passed to [plot_ts_mcmc()]
 #'
 #' @export
@@ -35,6 +40,7 @@ plot_biomass_proj_mcmc <- function(model,
                                    ylim = NULL,
                                    xlim = NULL,
                                    nudge_catch_labels = c(x = 0.3, y = 0),
+                                   proj_catch_vals = NULL,
                                    ...){
 
   if(!is_iscam_model(model)){
@@ -54,6 +60,11 @@ plot_biomass_proj_mcmc <- function(model,
       as_tibble(rownames = "quants") |>
       filter(quants != "MPD")
     proj <- model$mcmccalcs$proj_sbt_quants
+  }
+
+  if(!is.null(proj_catch_vals[1])){
+    proj <- proj |>
+      filter(catch %in% proj_catch_vals)
   }
 
   # Make a list of time series matrices, one for each catch

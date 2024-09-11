@@ -24,6 +24,7 @@ plot_biomass_proj_mcmc(
   ylim = NULL,
   xlim = NULL,
   nudge_catch_labels = c(x = 0.3, y = 0),
+  proj_catch_vals = NULL,
   ...
 )
 }
@@ -66,6 +67,12 @@ will be used}
 
 \item{nudge_catch_labels}{Position to nudge the catch labels by on the right
 of the ending of the lines}
+
+\item{proj_catch_vals}{The catch valuies to include in the plot. If \code{NULL},
+include all values present in the list from the output
+(\code{model$mcmccalcs$proj_sbt_quants}). If non-null, is a vector of values
+of catch to filter the projection biomass table on. Only show those values
+in the plot}
 
 \item{...}{Arguments passed to \code{\link[=plot_ts_mcmc]{plot_ts_mcmc()}}}
 }
