@@ -14,7 +14,7 @@
 #' [ggplot2::geom_text()]
 #' @param nudge_catch_labels Position to nudge the catch labels by on the right
 #' of the ending of the lines
-#' @param proj_catch_vals The catch valuies to include in the plot. If `NULL`,
+#' @param proj_catch_vals The catch values to include in the plot. If `NULL`,
 #' include all values present in the list from the output
 #' (`model$mcmccalcs$proj_sbt_quants`). If non-null, is a vector of values
 #' of catch to filter the projection biomass table on. Only show those values

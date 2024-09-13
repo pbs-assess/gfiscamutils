@@ -4,7 +4,7 @@
 \alias{get_proj_biomass_raw}
 \title{Extract the projection biomass or depletion columns of raw output}
 \usage{
-get_proj_biomass_raw(model, calc_depl = TRUE)
+get_proj_biomass_raw(model, calc_depl = TRUE, ...)
 }
 \arguments{
 \item{model}{An ISCAM model object (class \link{mdl_cls})}
@@ -12,6 +12,8 @@ get_proj_biomass_raw(model, calc_depl = TRUE)
 \item{calc_depl}{If \code{TRUE} calculate relative biomass (depletion) if
 \code{ret_biomass_cols} is \code{TRUE}  and change the output columns to those
 relative biomasses instead of absolute biomass}
+
+\item{...}{Absorb arguments intended for other functions}
 }
 \value{
 a data frame with the (number of posteriors * the number of catch
