@@ -5,12 +5,18 @@
 #' @param biomass_col The colomn name that you want to shoe output for.
 #' This column will be divided by the SB0 value to get a depletion for
 #' the year in the name of the column
+#' @param proj_catch_vals The catch values to include in the plot. If `NULL`,
+#' include all values present in the list from the output
+#' (`model$mcmccalcs$proj_sbt_quants`). If non-null, is a vector of values
+#' of catch to filter the projection biomass table on. Only show those values
+#' in the plot
 #' @param line_thickness Thickness of reference point lines (vertical lines)
 #'
 #' @export
 plot_ref_points_dist_mcmc <- function(model,
                                       biomass_col = "B2023",
                                       probs = c(0.025, 0.25, 0.5, 0.75, 0.975),
+                                      proj_catch_vals = NULL,
                                       line_thickness = 0.75){
 
   sym_biomass_col <- sym(biomass_col)
@@ -18,8 +24,13 @@ plot_ref_points_dist_mcmc <- function(model,
 
   sbo <- model$mcmccalcs$params$sbo
 
+  proj <- model$mcmc$proj
+  if(!is.null(proj_catch_vals[1])){
+    proj <- proj |>
+      filter(TAC %in% proj_catch_vals)
+  }
   # Make a list by TAC (Catch level)
-  tac_lst <- as_tibble(model$mcmc$proj) |>
+  tac_lst <- as_tibble(proj) |>
     split(~TAC)
 
   # This is the depletion quantile table for the year given by the
@@ -67,7 +78,7 @@ plot_ref_points_dist_mcmc <- function(model,
     scale_x_continuous(labels = as.character(depl_quants_yr$tac),
                        breaks = depl_quants_yr$tac) +
     ylab(paste0("Relative spawning biomass in ", yr)) +
-    xlab(paste0("Catch in ", yr - 1, " (thousand t)")) +
+    xlab(paste0("Catch in ", yr - 1, " (kt)")) +
     coord_flip()
   g
 }

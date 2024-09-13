@@ -9,6 +9,7 @@ plot_ref_points_dist_mcmc(
   model,
   biomass_col = "B2023",
   probs = c(0.025, 0.25, 0.5, 0.75, 0.975),
+  proj_catch_vals = NULL,
   line_thickness = 0.75
 )
 }
@@ -18,6 +19,12 @@ plot_ref_points_dist_mcmc(
 \item{biomass_col}{The colomn name that you want to shoe output for.
 This column will be divided by the SB0 value to get a depletion for
 the year in the name of the column}
+
+\item{proj_catch_vals}{The catch values to include in the plot. If \code{NULL},
+include all values present in the list from the output
+(\code{model$mcmccalcs$proj_sbt_quants}). If non-null, is a vector of values
+of catch to filter the projection biomass table on. Only show those values
+in the plot}
 
 \item{line_thickness}{Thickness of reference point lines (vertical lines)}
 }
