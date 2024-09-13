@@ -5,7 +5,14 @@
 \title{Calculate the probabilities that biomasses are under or over given
 reference points}
 \usage{
-calc_probs_biomass(d, refpt = 0.2, prob_gt = TRUE, format = c("latex", "html"))
+calc_probs_biomass(
+  d,
+  refpt = 0.2,
+  prob_gt = TRUE,
+  year_to_year = FALSE,
+  format = c("latex", "html"),
+  ...
+)
 }
 \arguments{
 \item{d}{A data frame containing a column named \code{catch} and other columns
@@ -16,8 +23,19 @@ names as years of depletion}
 
 \item{prob_gt}{Stand for 'probability greater than'. If \code{TRUE},}
 
+\item{year_to_year}{If \code{TRUE}, calculate the probabilities of decline or
+increase from one year to the next (depending on what \code{prob_gt} is, if
+it is \code{TRUE}, it will be the probability of decreasing, if it is \code{FALSE},
+it will be the probability of increasing)}
+
 \item{format}{If 'latex' modify column headers with latex code, if
 'html' modify column headers with html code}
+
+\item{...}{Absorb arguments intended for other functions}
+}
+\value{
+A data frame containing N rows where N is the number of unique
+catch levels in \code{d}
 }
 \description{
 Calculate the probabilities that biomasses are under or over given
