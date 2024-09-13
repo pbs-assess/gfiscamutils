@@ -1,4 +1,5 @@
-#' Create a decision table for iSCAM models
+#' Create a wide decision table for iSCAM models, with all reference  points
+#' in one table
 #'
 #' @description
 #' Produce a decision table for the given iscam model
@@ -126,6 +127,7 @@ table_decisions <- function(model,
     map_dfc(~{.x})
 
   proj <- get_proj(model$dat$end.yr + 1)
+
   # Calculate probability columns for dropping biomass year-to-year
   j <- map(proj, function(proj_tbl){
     # For each projection table at a given catch level ...

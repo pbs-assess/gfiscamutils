@@ -2,7 +2,8 @@
 % Please edit documentation in R/table-decisions.R
 \name{table_decisions}
 \alias{table_decisions}
-\title{Create a decision table for iSCAM models}
+\title{Create a wide decision table for iSCAM models, with all reference  points
+in one table}
 \usage{
 table_decisions(
   model,
