@@ -4,6 +4,7 @@
 #' @param calc_depl If `TRUE` calculate relative biomass (depletion) if
 #' `ret_biomass_cols` is `TRUE`  and change the output columns to those
 #' relative biomasses instead of absolute biomass
+#' @param ... Absorb arguments intended for other functions
 #'
 #' @return a data frame with the (number of posteriors * the number of catch
 #' levels) rows and columns for each year of biomass projected with the years
@@ -11,7 +12,8 @@
 #'
 #' @export
 get_proj_biomass_raw <- function(model,
-                                 calc_depl = TRUE){
+                                 calc_depl = TRUE,
+                                 ...){
 
   num_proj_yrs <- model$proj$num.projyrs
   ctl_options <- model$proj$ctl.options |>
@@ -47,7 +49,8 @@ get_proj_biomass_raw <- function(model,
     d <- d |>
       group_by(catch) |>
       mutate(across(.cols = everything(),
-                    .fns = ~{.x / sbo}))
+                    .fns = ~{.x / sbo})) |>
+      ungroup()
   }
 
   d
