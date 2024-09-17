@@ -93,8 +93,9 @@ plot_traces_mcmc <- function(model,
       mutate(x = row_number())
 
     g <- ggplot(param_dat, aes(x, y)) +
-      geom_point(size = 0.5, color = "blue") +
-      geom_line(color = "darkblue") +
+      #geom_point(size = 0.01, color = "blue") +
+      geom_line(color = "darkblue",
+                size = 0.05) +
       ggtitle(param_name) +
       ylab("") +
       xlab("") +
