@@ -106,6 +106,9 @@ table_catch <- function(catch_df,
 #' which have had [gfplot::tidy_catch()] applied
 #' @param fleet_nms A vector of names for the fleets, to appear on the table.
 #' Must be the same length as `catch_df_lst`
+#' @param show_total_col If `TRUE`, show a column with the total landings
+#' and discards for all fleets
+#' @param bold_headers If `TRUE`, make all column headers bold
 #' @export
 table_catch_fleet <- function(catch_df_lst = NULL,
                               fleet_nms = NULL,
@@ -113,6 +116,8 @@ table_catch_fleet <- function(catch_df_lst = NULL,
                               gear_col_widths = "5em",
                               scale_factor = 1e3,
                               ret_df = FALSE,
+                              show_total_col = TRUE,
+                              bold_headers = TRUE,
                               ...){
 
   if(is.null(catch_df_lst)){
@@ -145,6 +150,14 @@ table_catch_fleet <- function(catch_df_lst = NULL,
            call. = FALSE)
     }
   }
+
+  # Capitalize all words in gear names for table headers
+  fleet_nms <- strsplit(fleet_nms, " ") |>
+    map_chr(\(flt){
+        paste0(toupper(substring(flt, 1, 1)),
+               substring(flt, 2),
+               collapse = " ")
+    })
 
   catch_df <- map2_dfr(catch_df_lst,
                        fleet_nms,
@@ -185,13 +198,33 @@ table_catch_fleet <- function(catch_df_lst = NULL,
   tab <- tab |>
     pivot_wider(names_from = Fleet, values_from = c("Landings", "Discarded"))
 
-  # Order the columns by area
-  tmp <- map(fleets, ~{tab[, grep(.x, names(tab))]}) |>
+  # Order the columns by fleet
+  tmp <- map(fleets, ~{
+    x <- tab[, grep(.x, names(tab))]
+    if(show_total_col){
+      x <- x |>
+        mutate(total = rowSums(x))
+    }
+    x
+    }) |>
     map_dfc(~{.x})
-  tab <- cbind(enframe(tab$Year, name = NULL), tmp) |>
-    as_tibble() |>
-    rename(Year = value)
+  if(show_total_col){
+    # Add total of totals
+    tot <- tmp[, grep("total", names(tmp))] |>
+      rowSums() |>
+      enframe(name = NULL)
+    tmp <- tmp |>
+      bind_cols(tot)
+  }
+
+  tab <- cbind(enframe(tab$Year,
+                       value = "Year",
+                       name = NULL), tmp) |>
+    as_tibble()
+
   names(tab) <- gsub("^(Landings|Discarded)_.*$", "\\1", names(tab))
+  names(tab) <- gsub("^total.*$", "Total", names(tab))
+  names(tab) <- gsub("^value$", "Total Catch", names(tab))
 
   # Replace NA's in the table with dashes
   tab[is.na(tab)] <- 0
@@ -202,22 +235,35 @@ table_catch_fleet <- function(catch_df_lst = NULL,
 
   header_vec <- c(" " = 1)
   for(i in seq_along(fleets)){
-    header <- 2
+    header <- ifelse(show_total_col, 3, 2)
     names(header) <- fleets[i]
     header_vec <- c(header_vec, header)
   }
 
   names(tab) <- tr(names(tab))
-  fleet_nm <- length(fleets) * 2
+  fleet_nm <- length(fleets) * ifelse(show_total_col, 3, 2)
   names(fleet_nm) <- tr("Fleet")
-  fleet_header_vec <- c(" " = 1, fleet_nm)
+  fleet_header_vec <- c(" ", fleet_nm)
+
+  if(show_total_col){
+    header_vec <- c(header_vec, " " = 1)
+  }
+
+  # Make bold headers
+  if(bold_headers){
+    names(tab) <- paste0("\\textbf{", names(tab), "}")
+    names(header_vec) <- ifelse(names(header_vec) == " ",
+                                " ",
+                                paste0("\\\\textbf{", names(header_vec), "}"))
+  }
+
   out <- csas_table(tab,
                     format = "latex",
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
                     ...) |>
-    add_header_above(header = header_vec) |>
-    add_header_above(header = fleet_header_vec)
+    add_header_above(header = header_vec, escape = FALSE) #|>
+    #add_header_above(header = fleet_header_vec)
 
   if(!is.null(gear_col_widths)){
     out <- out |>
@@ -302,6 +348,7 @@ table_catch_area <- function(catch_df,
   area_nm <- length(areas) * 2
   names(area_nm) <- tr("Area")
   area_header_vec <- c(" " = 1, area_nm)
+
   out <- csas_table(tab,
                     format = "latex",
                     align = rep("r", ncol(tab)),

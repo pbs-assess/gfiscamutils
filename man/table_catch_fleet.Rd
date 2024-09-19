@@ -12,6 +12,8 @@ table_catch_fleet(
   gear_col_widths = "5em",
   scale_factor = 1000,
   ret_df = FALSE,
+  show_total_col = TRUE,
+  bold_headers = TRUE,
   ...
 )
 }
@@ -31,6 +33,11 @@ in tonnes}
 
 \item{ret_df}{If \code{TRUE} return a data frame, if \code{FALSE}, return an
 \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
+
+\item{show_total_col}{If \code{TRUE}, show a column with the total landings
+and discards for all fleets}
+
+\item{bold_headers}{If \code{TRUE}, make all column headers bold}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }
