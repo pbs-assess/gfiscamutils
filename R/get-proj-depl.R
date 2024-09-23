@@ -13,6 +13,7 @@
 #' @export
 get_proj_biomass_raw <- function(model,
                                  calc_depl = TRUE,
+                                 rm_yrs = NULL,
                                  ...){
 
   num_proj_yrs <- model$proj$num.projyrs
@@ -31,6 +32,13 @@ get_proj_biomass_raw <- function(model,
   ct_ind <- grep("^catch$", names(proj))
   b_inds <- grep(col_regex, names(proj))
 
+  if(!is.null(rm_yrs[1])){
+    # Remove some year columns from the table
+    rm_regex <- paste0("B", rm_yrs, collapse = "|")
+    rm_inds <- grep(rm_regex, names(proj)[b_inds])
+    b_inds <- b_inds[-rm_inds]
+  }
+
   if(!length(ct_ind)){
     stop("There are no columns with the name `catch` in the ",
          "`model$mcmccalcs$proj` output")
@@ -39,6 +47,7 @@ get_proj_biomass_raw <- function(model,
     stop("There are no columns of the format B2024 in the ",
          "`model$mcmccalcs$proj` output")
   }
+
   d <- proj |>
     select(ct_ind, b_inds)
   # Remove preceding 'B' from year columns (ignores catch col)
