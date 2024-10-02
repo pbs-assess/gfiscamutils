@@ -4,7 +4,7 @@
 \alias{get_proj_biomass_raw}
 \title{Extract the projection biomass or depletion columns of raw output}
 \usage{
-get_proj_biomass_raw(model, calc_depl = TRUE, ...)
+get_proj_biomass_raw(model, calc_depl = TRUE, rm_yrs = NULL, ...)
 }
 \arguments{
 \item{model}{An ISCAM model object (class \link{mdl_cls})}

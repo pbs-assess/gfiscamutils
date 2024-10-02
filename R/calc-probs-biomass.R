@@ -35,7 +35,7 @@ calc_probs_biomass <- function(d,
   esc_bo <- ifelse(format == "html", "B_{0}", "B\\textsubscript{0}")
   esc_open_b <- ifelse(format == "html", "B_{", "B\\textsubscript{")
   esc_close_b <- "}"
-  esc_close_prob <- ifelse(format == "html", "\\)", ")")
+  esc_close_prob <- ifelse(format == "html", ")\\)", ")")
 
   if(year_to_year){
 

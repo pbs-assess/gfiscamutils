@@ -84,7 +84,6 @@ table_catch <- function(catch_df,
   names(tab) <- tr(names(tab))
 
   out <- csas_table(tab,
-                    format = "latex",
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
                     ...)
@@ -262,7 +261,6 @@ table_catch_fleet <- function(catch_df_lst = NULL,
   }
 
   out <- csas_table(tab,
-                    format = "latex",
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
                     ...) |>
