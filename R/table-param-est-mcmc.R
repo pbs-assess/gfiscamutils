@@ -60,6 +60,12 @@ table_param_est_mcmc <- function(model,
     select(-is_selex) |>
     mutate(gear = "--", sex = "--", `Year range` = year_range)
 
+  # Remove so, bo, phi_e, and beta 'parameters'
+  params_rm <- grep("^so$|^bo$|^beta$|^phie$",
+                    non_selex_df$param,
+                    value = TRUE)
+  non_selex_df <- non_selex_df |>
+    filter(!param %in% params_rm)
   # Deal with the M parameters
   m_inds <- grep("^m_sex[0-2]*", non_selex_df$param)
   if(length(m_inds)){

@@ -33,14 +33,15 @@ plot_biomass_proj_mcmc <- function(model,
                                    bo_refpt_colors = c("red", "green"),
                                    line_width = 1,
                                    point_size = 2,
-                                   label_digits = 2,
-                                   label_append_text = " kt",
-                                   label_font_size = 8,
+                                   #label_digits = 2,
+                                   #label_append_text = " kt",
+                                   #label_font_size = 8,
                                    angle_x_labels = FALSE,
                                    ylim = NULL,
                                    xlim = NULL,
                                    nudge_catch_labels = c(x = 0.3, y = 0),
                                    proj_catch_vals = NULL,
+                                   append_to_catch_level_names = "kt",
                                    ...){
 
   if(!is_iscam_model(model)){
@@ -122,13 +123,27 @@ plot_biomass_proj_mcmc <- function(model,
   })
   class(models) <- mdl_lst_cls
 
-  g <- plot_ts_mcmc(models,
-                    quant_df = ifelse(rel,
-                                      "depl_quants",
-                                      "sbt_quants"),
-                    y_label = ifelse(rel,
-                                     ifelse(fr(), "Biomasse relative de frai", "Relative Spawning biomass"),
-                                     ifelse(fr(), "Biomasse reproductrice (milliers de t)", "Spawning biomass (thousand t)")),
+  # Append catch level units for the legend
+  models[names(models) != "Base model"] <- models[names(models) != "Base model"] |>
+    map(~{
+      attributes(.x)$model_desc <- paste0(attributes(.x)$model_desc,
+                                          " ",
+                                          append_to_catch_level_names)
+      .x
+    })
+
+  g <- plot_ts_mcmc(
+    models,
+    quant_df = ifelse(rel,
+                      "depl_quants",
+                      "sbt_quants"),
+    y_label = ifelse(rel,
+                     ifelse(fr(),
+                            "Biomasse relative de frai",
+                            "Relative Spawning biomass"),
+                     ifelse(fr(),
+                            "Biomasse reproductrice (milliers de t)",
+                            "Spawning biomass (thousand t)")),
                     x_space = x_space,
                     y_space = y_space,
                     probs = probs,
@@ -138,27 +153,27 @@ plot_biomass_proj_mcmc <- function(model,
                     ...)
 
   # Get end point coords
-  labels <- map_dbl(series_lst, ~{
-    .x <- as_tibble(.x, rownames = "quants")
-    nc <- ncol(.x)
-    .x <- .x |>
-      filter(quants == "50%") |>
-      pull() |>
-      round(digits = label_digits)
-  }) |>
-    enframe() |>
-    mutate(year = max(g$data$year) + 0.5) |>
-    mutate(label = paste0(name, label_append_text))
-
-  g <- g +
-    geom_text(aes(x = year,
-                  y = value,
-                  label = label),
-              data = labels,
-              inherit.aes = FALSE,
-              position = position_nudge(x = nudge_catch_labels[1],
-                                        y = nudge_catch_labels[2]),
-              size = label_font_size)
+  # labels <- map_dbl(series_lst, ~{
+  #   .x <- as_tibble(.x, rownames = "quants")
+  #   nc <- ncol(.x)
+  #   .x <- .x |>
+  #     filter(quants == "50%") |>
+  #     pull() |>
+  #     round(digits = label_digits)
+  # }) |>
+  #   enframe() |>
+  #   mutate(year = max(g$data$year) + 0.5) |>
+  #   mutate(label = paste0(name, label_append_text))
+  #
+  # g <- g +
+  #   geom_text(aes(x = year,
+  #                 y = value,
+  #                 label = label),
+  #             data = labels,
+  #             inherit.aes = FALSE,
+  #             position = position_nudge(x = nudge_catch_labels[1],
+  #                                       y = nudge_catch_labels[2]),
+  #             size = label_font_size)
 
   # Create tags for B0 lines, and breaks and labels for y-axis
   if(is.null(ylim)){

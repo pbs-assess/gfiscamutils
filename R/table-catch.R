@@ -210,7 +210,7 @@ table_catch_fleet <- function(catch_df_lst = NULL,
   if(show_total_col){
     # Add total of totals
     tot <- tmp[, grep("total", names(tmp))] |>
-      rowSums() |>
+      rowSums(na.rm = TRUE) |>
       enframe(name = NULL)
     tmp <- tmp |>
       bind_cols(tot)
