@@ -49,7 +49,7 @@
 #' minimum and the ceiling of the maximum value (including CI)
 #' @param units One of "1000 t" or "kt". The text that will appear in the
 #' y-axis label. The "1000 t" text will be changed to "1,000 t" or "1 000 t"
-#' foe English or French
+#' for English or French respectively
 #' @param ... Arguments passed to [plot_ts_mcmc()]
 #'
 #' @importFrom tibble rownames_to_column

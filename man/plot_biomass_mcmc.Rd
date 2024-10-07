@@ -91,7 +91,7 @@ minimum and the ceiling of the maximum value (including CI)}
 
 \item{units}{One of "1000 t" or "kt". The text that will appear in the
 y-axis label. The "1000 t" text will be changed to "1,000 t" or "1 000 t"
-foe English or French}
+for English or French respectively}
 
 \item{...}{Arguments passed to \code{\link[=plot_ts_mcmc]{plot_ts_mcmc()}}}
 }

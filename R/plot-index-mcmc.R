@@ -18,6 +18,9 @@
 #' @param fit_line_width The model fit error bar and connecting line width
 #' @param fit_point_size The model fit point size
 #' @param errbar_width The width of the top and bottom crossbar of the errorbars
+#' @param units One of "1000 t" or "kt". The text that will appear in the
+#' y-axis label. The "1000 t" text will be changed to "1,000 t" or "1 000 t"
+#' for English or French respectively
 #'
 #' @importFrom RColorBrewer brewer.pal.info
 #' @importFrom tibble enframe
@@ -46,7 +49,19 @@ plot_index_mcmc <- function(models,
                             errbar_width = 0.5,
                             leg_loc = c(1, 1),
                             text_title_size = 12,
-                            angle_x_labels = FALSE){
+                            angle_x_labels = FALSE,
+                            units = c("kt", "1000 t")){
+
+  units <- match.arg(units)
+  if(fr()){
+    if(units == "1000 t"){
+      units <- "1 000 t"
+    }
+  }else{
+    if(units == "1000 t"){
+      units <- "1,000 t"
+    }
+  }
 
   type <- match.arg(type)
 
@@ -245,7 +260,8 @@ plot_index_mcmc <- function(models,
                 linetype = "dotted") +
       geom_point(size = index_point_size,
                  color = index_color) +
-      geom_errorbar(aes(ymin = lowerci, ymax = upperci),
+      geom_errorbar(aes(ymin = lowerci,
+                        ymax = upperci),
                     width = errbar_width,
                     size = index_line_width,
                     color = index_color) +
@@ -267,9 +283,9 @@ plot_index_mcmc <- function(models,
                   ifelse(only_dcpue,
                          tr("Index (kg/hr)"),
                          ifelse(fr(),
-                                "Indice (1000 t, kg/heure pour la CPUE des rejets)",
-                                "Index (1,000 t, kg/hr for Discard CPUE)")),
-                  tr("Index (1000 t)"))) +
+                                paste0("Indice (", units, ", kg/heure pour la CPUE des rejets)"),
+                                paste0("Index (", units, ", kg/hr for Discard CPUE)"))),
+                  paste0(tr("Index"), " (", units, ")"))) +
       scale_color_manual(values = model_colors,
                          labels = map(models, ~{
                            tex(as.character(attributes(.x)$model_desc))})) +

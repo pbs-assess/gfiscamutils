@@ -24,7 +24,8 @@ plot_index_mcmc(
   errbar_width = 0.5,
   leg_loc = c(1, 1),
   text_title_size = 12,
-  angle_x_labels = FALSE
+  angle_x_labels = FALSE,
+  units = c("kt", "1000 t")
 )
 }
 \arguments{
@@ -67,6 +68,10 @@ model}
 is the bottom left corner}
 
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
+
+\item{units}{One of "1000 t" or "kt". The text that will appear in the
+y-axis label. The "1000 t" text will be changed to "1,000 t" or "1 000 t"
+for English or French respectively}
 }
 \description{
 Plot MCMC index fits or residuals for a single or group of models by gear
