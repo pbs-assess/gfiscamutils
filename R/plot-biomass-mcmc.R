@@ -47,6 +47,9 @@
 #' @param ylim A vector of two values, representing the minimum and maximum
 #' values for the plot on the y-axis. If `NULL`, defaults will be zero for the
 #' minimum and the ceiling of the maximum value (including CI)
+#' @param units One of "1000 t" or "kt". The text that will appear in the
+#' y-axis label. The "1000 t" text will be changed to "1,000 t" or "1 000 t"
+#' foe English or French
 #' @param ... Arguments passed to [plot_ts_mcmc()]
 #'
 #' @importFrom tibble rownames_to_column
@@ -73,7 +76,19 @@ plot_biomass_mcmc <- function(models,
                               ylim = NULL,
                               line_width = 1,
                               point_size = 2,
+                              units = c("kt", "1000 t"),
                               ...){
+
+  units <- match.arg(units)
+  if(fr()){
+    if(units == "1000 t"){
+      units <- "1 000 t"
+    }
+  }else{
+    if(units == "1000 t"){
+      units <- "1,000 t"
+    }
+  }
 
   g <- plot_ts_mcmc(
     models,
@@ -87,8 +102,8 @@ plot_biomass_mcmc <- function(models,
              "Biomasse relative de frai",
              "Relative Spawning biomass"),
       ifelse(fr(),
-             "Biomasse reproductrice (milliers de t)",
-             "Spawning biomass (thousand t)")),
+             paste0("Biomasse reproductrice (", units, ")"),
+             paste0("Spawning biomass (", units, ")"))),
     x_space = x_space,
     y_space = y_space,
     probs = probs,

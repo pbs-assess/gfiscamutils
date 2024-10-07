@@ -17,14 +17,12 @@ plot_biomass_proj_mcmc(
   bo_refpt_colors = c("red", "green"),
   line_width = 1,
   point_size = 2,
-  label_digits = 2,
-  label_append_text = " kt",
-  label_font_size = 8,
   angle_x_labels = FALSE,
   ylim = NULL,
   xlim = NULL,
   nudge_catch_labels = c(x = 0.3, y = 0),
   proj_catch_vals = NULL,
+  append_to_catch_level_names = "kt",
   ...
 )
 }
@@ -50,13 +48,6 @@ the plot with. To remove all padding, make this 0}
 
 \item{point_size}{Point size for all median points on the plot}
 
-\item{label_digits}{Number of digits to show in the catch labels}
-
-\item{label_append_text}{Text to append to the labels}
-
-\item{label_font_size}{Size of the catch label font. See \code{size} argument in
-\code{\link[ggplot2:geom_text]{ggplot2::geom_text()}}}
-
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 
 \item{ylim}{The y limits for the plot. If \code{NULL}, the limits of the data
@@ -75,6 +66,13 @@ of catch to filter the projection biomass table on. Only show those values
 in the plot}
 
 \item{...}{Arguments passed to \code{\link[=plot_ts_mcmc]{plot_ts_mcmc()}}}
+
+\item{label_digits}{Number of digits to show in the catch labels}
+
+\item{label_append_text}{Text to append to the labels}
+
+\item{label_font_size}{Size of the catch label font. See \code{size} argument in
+\code{\link[ggplot2:geom_text]{ggplot2::geom_text()}}}
 }
 \description{
 Plot a model's time series (either spawning biomass or relaive spawning
