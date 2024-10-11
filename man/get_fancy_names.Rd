@@ -7,7 +7,7 @@
 get_fancy_names(names)
 }
 \arguments{
-\item{name}{A vector of iSCAM parameter names to make fancy}
+\item{names}{A vector of iSCAM parameter names to make fancy}
 }
 \value{
 an R expression which represents the parameter name in latex math format

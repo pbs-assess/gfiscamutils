@@ -8,9 +8,13 @@
 #' @family Time series plotting functions
 #'
 #' @param show_ro Show the initial recruitment, R0 median line and credible interval
+#'
 #' @param ro_ribbon See `refpts_ribbon` in [plot_biomass_mcmc()]
 #' @param ro_alpha See `refpts_alpha` in [plot_biomass_mcmc()]
 #' @param r_dodge See `bo_dodge` in [plot_biomass_mcmc()]
+#' @param ro_color The color of the R0 point
+#' @param text_title_size Size of text for the axis titles
+#' @param ... Absorbs arguments meant for other functions
 #' @export
 plot_recr_mcmc <- function(models,
                            show_ro = TRUE,
@@ -27,7 +31,6 @@ plot_recr_mcmc <- function(models,
                            r_dodge = 0.1,
                            x_space = 0.5,
                            append_base_txt = NULL,
-                           ind_letter = NULL,
                            leg_loc = c(1, 1),
                            probs = c(0.025, 0.5, 0.975),
                            text_title_size = 12,

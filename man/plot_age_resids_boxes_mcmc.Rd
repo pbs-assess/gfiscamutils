@@ -27,14 +27,15 @@ plot_age_resids_boxes_mcmc(
 
 \item{gear}{The number of the gear to plot}
 
-\item{type}{The type of residual plot to create. Options are "age", "year",
-and "birth_year"}
+\item{type}{One of "age", "year", or "birth_year"}
+
+\item{probs}{Probability values to use in the plots}
 
 \item{comp_color}{Color for the age comp data lines and points}
 
-\item{comp_point_size}{Size of the age comp data points}
+\item{comp_point_size}{Size of the age composition points}
 
-\item{ci_type}{One of "line", "ribbon", "both" to show the credible interval}
+\item{ci_type}{One of "both" or "line", type of confidence interval}
 
 \item{ci_linetype}{See \code{linetype} in \link{ggplot2}. Only used if \code{ci_type} is
 "line" or "both"}
@@ -44,17 +45,16 @@ and "birth_year"}
 \item{ci_alpha}{Opacity between 0 and 1 for the credible intervals ribbons.
 Only used if \code{ci_type} is "ribbon" or "both"}
 
-\item{ylim}{For residual plots, set the y-axis limits with this two-element
-vector}
+\item{ylim}{The y-axis limits (vector of 2)}
+
+\item{text_title_size}{Size of text for the axis titles}
 
 \item{text_title_inc_mdl_nm}{Logical. If \code{TRUE}, make the model name the
 main title and the gear the subtitle. If \code{FALSE}, do not show the model
 name, and make the gear the main title (if \code{text_title_size} is \code{NULL},
 no title will be shown)}
 
-\item{leg_loc}{A two-element vector describing the X-Y values between 0 and
-1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
-is the bottom left corner}
+\item{leg_loc}{Legend location (vector of 2)}
 
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 }

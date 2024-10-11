@@ -5,6 +5,7 @@
 #' biomass, recruitment, depletion, and fishing mortality
 #'
 #' @inheritParams table_param_est_mcmc
+#' @param models A list of iscam model objects (class [mdl_lst_cls])
 #' @param model_desc A description for the models to be shown in multicolumn
 #' headings in the table (if more than one model only). If `NULL`, names will
 #' be created (Model 1, Model 2, etc.)
@@ -126,12 +127,12 @@ table_ts_values_mcmc <- function(models,
       filter(!!yr_sym >= start_yr)
 
     if(fr()){
-      tab <- tab |>
-        filter(Année >= start_yr)
+      col <- sym("Ann\u00E9e")
     }else{
-      tab <- tab |>
-        filter(Year >= start_yr)
+      col <- sym("Year")
     }
+    tab <- tab |>
+      filter(!!col >= start_yr)
   }
 
   if(value == "ut"){

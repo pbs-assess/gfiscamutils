@@ -17,6 +17,10 @@ table_ref_points_mcmc(
 )
 }
 \arguments{
+\item{models}{A list of iscam model objects (class \link{mdl_lst_cls})}
+
+\item{type}{On eof "median" or "ci" for credible interval}
+
 \item{bo_refpts}{Vector of two proportional values for the limit reference
 point and Upper stock reference. Values are 0.2B0 and 0.4B0 by default}
 

@@ -24,10 +24,10 @@ the \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 \item{digits}{The number of decimal places to report on all except the
 \code{alpha} parameter}
 
-\item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
-
-\item{alpha_digitws}{The number of decimal places to report on the \code{alpha}
+\item{alpha_digits}{The number of decimal places to report on the \code{alpha}
 parameter}
+
+\item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }
 \value{
 Either a \link{data.frame} or a \code{\link[csasdown:csas_table]{csasdown::csas_table()}}, depending on

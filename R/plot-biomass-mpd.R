@@ -4,6 +4,20 @@
 #' @inheritParams plot_ts_mcmc
 #' @family Time series plotting functions
 #'
+#' @param rel Logical. If `TRUE`, plot the relative biomass
+#' @param show_bo Logical. If `TRUE`, show the B0 point
+#' @param show_bo_lines Logical. If `TRUE`, show the B0 uncertainty
+#' @param bo_refpts A vector of 2 B0-based reference points
+#' @param show_bmsy_lines Logical. If `TRUE`, show the BMSY uncertainty
+#' @param bmsy_refpts A vector of 2 BMSY-based reference points
+#' @param bo_refpt_colors A vector of two colors, for the corresponding B0
+#' values in `bo_refpts`
+#' @param bmsy_refpt_colors A vector of two colors, for the corresponding BMSY
+#' values in `bmsy_refpts`
+#' @param text_title_size Size of the axis label text
+#' @param bo_dodge Value to offset the B0 point by on the x-axis (in years)
+#' @param ... Absorbs arguments meant for other functions
+
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_biomass_mpd <- function(models,
@@ -26,7 +40,6 @@ plot_biomass_mpd <- function(models,
                              bmsy_refpts = c(0.4, 0.8),
                              bo_refpt_colors = c("red", "green"),
                              bmsy_refpt_colors = c("salmon", "darkgreen"),
-                             ind_letter = NULL,
                              leg_loc = NULL,
                              text_title_size = 12,
                              angle_x_labels = FALSE,

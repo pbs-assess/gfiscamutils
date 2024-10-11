@@ -189,7 +189,14 @@ modify_model_path <- function(model_fns, paths){
 
 #' Create a one-row tibble from a vector of values
 #'
-#' @param vec A vector
+#' @details If the vector `vec` is a named vector, the names will become the
+#' column names of the resulting data frame. If the `nms` vector is provided,
+#' the names of the data frame will be set to those names, regardless of
+#' whether or not the vector `vec` had names.
+#'
+#' @param vec A vector of single values
+#' @param nms A vector of names to set as column names in the resulting
+#' data frame. Must be the same length as `vec`
 #'
 #' @return A [tibble::tibble()] with one row
 #' @export
@@ -206,7 +213,11 @@ vec2df <- function(vec, nms = NULL){
     t() |>
     as_tibble()
 
-  if(!is.null(df)){
+  if(!is.null(names(vec))){
+    names(df) <- names(vec)
+  }
+
+  if(!is.null(df) && !is.null(nms)){
     names(df) <- nms
   }
 
@@ -315,9 +326,10 @@ is_iscam_model <- function(model){
 #' @details
 #' Checks not only that the list has class `mdl_lst_cls` but that each list
 #' element is a valid iscam model object.
-#' @param model A proposed iscam model list object
+#' @param models A list of proposed iscam model list objects
 #' @return Logical
 is_iscam_model_list <- function(models){
+
   if(mdl_lst_cls %in% class(models)){
     mdls <- map_lgl(models, ~{
       is_iscam_model(.x)
@@ -350,11 +362,11 @@ is_iscam_model_group <- function(lst){
 
 #' Calculate age fits / age residuals and selectivity estimates quantiles
 #'
-#'  @param lst A list as output by [load_special()]
-#'  of either MCMC age fits, age residuals, or selectivity estimates
-#'  @param type The type of quantiles to calculate
-#'  @param probs A vector of three values for quantiles calculations
-#'  @export
+#' @param lst A list as output by [load_longer()]
+#' of either MCMC age fits, age residuals, or selectivity estimates
+#' @param type The type of quantiles to calculate
+#' @param probs A vector of three values for quantiles calculations
+#' @export
 calc_longer_quants <- function(lst,
                                type = c("age", "sel"),
                                probs = c(0.025, 0.5, 0.975)){
@@ -386,12 +398,11 @@ calc_longer_quants <- function(lst,
 #' and super/subscripts. Also italicizes estimated parameter names.
 #'
 #' @param name iscam parameter name to make fancy
-#' @param substr Logical. If `TRUE`, return all `substitute()`
+#' @param subst Logical. If `TRUE`, return all `substitute()`
 #' expressions which are necessary for rendering by certain functions.
 #' If `FALSE`, return all `expression()` expressions
 #'
 #' @return an R expression which represents the fancy version of the parameter name
-#' @importFrom gfutilities firstup
 #' @export
 get_fancy_expr <- function(name, subst = FALSE){
 
@@ -486,7 +497,7 @@ get_fancy_expr <- function(name, subst = FALSE){
 #' Includes expressions which have special characters (greek)
 #' and super/subscripts.
 #'
-#' @param name A vector of iSCAM parameter names to make fancy
+#' @param names A vector of iSCAM parameter names to make fancy
 #'
 #' @return an R expression which represents the parameter name in latex math format
 #' @export
@@ -758,7 +769,7 @@ calc_rho_vartheta <- function(sig, tau){
 #' given the mean and standard deviation
 #'
 #' @param mu Mean of the distribution
-#' @param sd Standard deviation of the distribution
+#' @param cv Coefficient of variation of the distribution
 #'
 #' @return A vector of two values, alpha and beta
 #' @export
@@ -788,11 +799,13 @@ calc_beta_mean_cv <- function(alpha, beta) {
 #' @details
 #' The psv file is generated when the MCMC is run in ADMB and is used to
 #' perform the calculations needed for the -mceval step. It contains the
-#' posterior values in binary fowmat.
+#' posterior values in binary format.
 #'
 #' @param fn Filename
-#' @param nsamples Number of samples
-read_psv <- function(fn, n_samples = 10000){
+#' @param n_samples Number of samples
+#' @return A [base::matrix]
+read_psv <- function(fn,
+                     n_samples = 10000){
 
   file_n <- file(fn, "rb")
   n_par <- readBin(file_n, what = integer(), n = 1)

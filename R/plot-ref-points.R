@@ -4,6 +4,10 @@
 #'
 #' @return A [cowplot::plot_grid()] of [ggplot2::ggplot()] box plots
 #' @importFrom ggplot2 geom_histogram
+#' @param ref_pts A vector of the names of reference points to plot
+#' @param ref_desc A vector of fancy descriptions for the values in `ref_pts`
+#' @param color The histogram color (outline of bars)
+#' @param fill The histogram bar fill color
 #' @export
 plot_ref_points <- function(model,
                             ref_pts = c("sbo",

@@ -4,6 +4,7 @@
 #' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
 #' @family Time series plotting functions
 #'
+#' @param model An iscam model object (`mdl_cls`)
 #' @export
 plot_catch_fit_mcmc <- function(model,
                                 append_base_txt = "",
@@ -59,11 +60,11 @@ plot_catch_fit_mcmc <- function(model,
     imap(~{
       tmp <- model
       tmp$mcmccalcs$ct_quants <- .x
-      if(french){
-        attributes(tmp)$model_desc <- paste0("Données sur les captures - ",
+      if(fr()){
+        attributes(tmp)$model_desc <- paste0("Donn\u00E9es sur les captures - ",
                                              fleet_nms[as.numeric(.y)])
       }else{
-        attributes(tmp)$model_desc <- paste0("catch data - ",
+        attributes(tmp)$model_desc <- paste0("Catch data - ",
                                              fleet_nms[as.numeric(.y)])
       }
       tmp
@@ -75,7 +76,7 @@ plot_catch_fit_mcmc <- function(model,
     imap(~{
       tmp <- model
       tmp$mcmccalcs$ct_quants <- .x
-      if(french){
+      if(fr()){
         attributes(tmp)$model_desc <- paste0("Attraper l'ajustement - ",
                                              fleet_nms[as.numeric(.y)])
       }else{
@@ -97,8 +98,8 @@ plot_catch_fit_mcmc <- function(model,
                xlim = xlim,
                ylim = ylim,
                y_label = ifelse(fr(),
-                                "Captures (milliers de tonnes)",
-                                "Catch (thousand t)"),
+                                "Captures (kt)",
+                                "Catch (kt)"),
                legend_title = ifelse(fr(),
                                      "Flotte/Type",
                                      "Fleet/Type"))

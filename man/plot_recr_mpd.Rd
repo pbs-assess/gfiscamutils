@@ -20,7 +20,6 @@ plot_recr_mpd(
   r_dodge = 0.1,
   x_space = 0.5,
   append_base_txt = NULL,
-  ind_letter = NULL,
   leg_loc = NULL,
   probs = c(0.025, 0.5, 0.975),
   text_title_size = 12,
@@ -31,7 +30,11 @@ plot_recr_mpd(
 \arguments{
 \item{models}{A list of iscam model objects (class \link{mdl_lst_cls})}
 
+\item{model_names}{A vector of nice names (for plotting) for the \code{models}}
+
 \item{show_ro}{Show the initial recruitment, R0 median line and credible interval}
+
+\item{ro_color}{The color of the R0 point}
 
 \item{legend_title}{Title for legend}
 
@@ -70,11 +73,11 @@ is the bottom left corner}
 data frames. This is provided in case the data frames have more than three
 different quantile levels}
 
+\item{text_title_size}{Size of text for the axis titles}
+
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 
-\item{ro_ribbon}{See \code{refpts_ribbon} in \code{\link[=plot_biomass_mcmc]{plot_biomass_mcmc()}}}
-
-\item{ro_alpha}{See \code{refpts_alpha} in \code{\link[=plot_biomass_mcmc]{plot_biomass_mcmc()}}}
+\item{...}{Absorbs arguments meant for other functions}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

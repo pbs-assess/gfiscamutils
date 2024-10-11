@@ -12,6 +12,10 @@ table_ref_rate(model, lst, format = "latex", digits = 3, ...)
 \item{lst}{A list of the reference rate and associated parameters as
 output by \code{\link[=find_f_b40]{find_f_b40()}}}
 
+\item{format}{One of "latex" or "html"}
+
+\item{digits}{Number of decimal places to show in the table}
+
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }
 \value{

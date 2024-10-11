@@ -27,9 +27,9 @@ table_param_settings <- function(model,
     params_out <- params |>
       mutate(param = case_when(param == "log_ro" ~ "Le recrutement de log [$\\ln(R_\\mathrm{0})$]",
                                param == "h" ~ "La pente [$h$]",
-                               param == "log_m" ~ "La mortalité naturelle de log [$\\ln(M)$]",
-                               param == "log_m_male" ~ "La mortalité naturelle de log (homme) [$\\ln(M_\\mathrm{male})$]",
-                               param == "log_m_female" ~ "La mortalité naturelle de log (femme) [$\\ln(M_\\mathrm{female})$]",
+                               param == "log_m" ~ "La mortalit\u00E9 naturelle de log [$\\ln(M)$]",
+                               param == "log_m_male" ~ "La mortalit\u00E9 naturelle de log (homme) [$\\ln(M_\\mathrm{male})$]",
+                               param == "log_m_female" ~ "La mortalit\u00E9 naturelle de log (femme) [$\\ln(M_\\mathrm{female})$]",
                                param == "log_rbar" ~ "Le recrutement moyen de log [$\\ln(\\overline{R})$]",
                                param == "log_rinit" ~ "Le recrutement initial de log [$\\ln(\\overline{R}_\\mathrm{init})$]",
                                param == "rho" ~ "Rapport de variance, erreur d'observation [$\\rho$]",
@@ -58,7 +58,7 @@ table_param_settings <- function(model,
       if(row$phz < 1){
         tibble(numest = 0,
                bounds = ifelse(fr(),
-                               "Fixé",
+                               "Fix\u00E9",
                                "Fixed"),
                prior = paste0("$", f(row$ival, 3), "$"))
       }else if(row$prior == 0){
@@ -85,7 +85,7 @@ table_param_settings <- function(model,
         tibble(numest = 1,
                bounds = paste0("[", row$lb, ", ", row$ub, "]"),
                prior = paste0(ifelse(fr(),
-                                     "Bêta($\\alpha=",
+                                     "B\u00EAta($\\alpha=",
                                      "Beta($\\alpha="),
                               row$p1, ", \\beta=", row$p2, "$)"))
       }else if(row$prior == 4){
@@ -97,7 +97,7 @@ table_param_settings <- function(model,
   params_out <- params_out |>
     bind_cols(j) |>
     mutate(numest = ifelse((param == "Log natural mortality [$ln(M)$]" |
-                              param == "La mortalité naturelle de log [$ln(M)$]") &
+                              param == "La mortalit\u00E9 naturelle de log [$ln(M)$]") &
                              numest != 0, model$dat$num.sex, numest))
 
   sel <- model$ctl$sel |> as_tibble(rownames = "param")
@@ -122,25 +122,25 @@ table_param_settings <- function(model,
   # Hardwired bounds of 0,1 for age-at-50% and 0,Inf for age-at-50% SD
   params_out <- params_out |>
     add_row(param = ifelse(fr(),
-                           "Âge de la pêche à une sélectivité logistique de 50 \\% ($\\hat{a}_k$)",
+                           "\u00C2ge de la p\u00EAche \u00E0 une s\u00E9lectivit\u00E9 logistique de 50 \\% ($\\hat{a}_k$)",
                            "Fishery age at 50\\% logistic selectivity ($\\hat{a}_k$)"),
             numest = fish_est,
             bounds = "[0, 1]",
             prior = "Uniform") |>
     add_row(param = ifelse(fr(),
-                           "Pêche SD de la sélectivité logistique ($\\hat{\\gamma}_\\mathrm{k}$)",
+                           "P\u00EAche SD de la s\u00E9lectivit\u00E9 logistique ($\\hat{\\gamma}_\\mathrm{k}$)",
                            "Fishery SD of logistic selectivity ($\\hat{\\gamma}_\\mathrm{k}$)"),
             numest = fish_est,
             bounds = "[0, 1]",
             prior = "Uniform") |>
     add_row(param = ifelse(fr(),
-                           "Âge de l'enquête à 50 \\% de sélectivité logistique ($\\hat{a}_\\mathrm{k}$)",
+                           "\u00C2ge de l'enqu\u00EAte \u00E0 50 \\% de s\u00E9lectivit\u00E9 logistique ($\\hat{a}_\\mathrm{k}$)",
                            "Survey age at 50\\% logistic selectivity ($\\hat{a}_\\mathrm{k}$)"),
             numest = surv_est,
             bounds = "[0, 1]",
             prior = "Uniform") |>
     add_row(param = ifelse(fr(),
-                           "Enquête SD de la sélectivité logistique ($\\hat{\\gamma}_\\mathrm{k}$)",
+                           "Enqu\u00EAte SD de la s\u00E9lectivit\u00E9 logistique ($\\hat{\\gamma}_\\mathrm{k}$)",
                            "Survey SD of logistic selectivity ($\\hat{\\gamma}_\\mathrm{k}$)"),
             numest = surv_est,
             bounds = "[0, 1]",
@@ -151,7 +151,7 @@ table_param_settings <- function(model,
   num_inds <- model$ctl$num.indices
   params_out <- params_out |>
     add_row(param = ifelse(fr(),
-                           "La capturabilité dans les relevés ($q_\\mathrm{k}$)",
+                           "La capturabilit\u00E9 dans les relev\u00E9s ($q_\\mathrm{k}$)",
                            "Survey catchability ($q_\\mathrm{k}$)"),
             numest = num_inds,
             bounds = "[0, 1]",
@@ -167,13 +167,13 @@ table_param_settings <- function(model,
   num_init_rec_params <- length(unlist(map(par$`init_log_rec_devs:`, ~{strsplit(as.character(trimws(.x)), split = " ")[[1]]})))
   params_out <- params_out |>
     add_row(param = ifelse(fr(),
-                           "Valeurs logarithmiques de la mortalité par pêche  ($\\Gamma_\\mathrm{k,t}$)",
+                           "Valeurs logarithmiques de la mortalit\u00E9 par p\u00EAche  ($\\Gamma_\\mathrm{k,t}$)",
                            "Log fishing mortality values ($\\Gamma_\\mathrm{k,t}$)"),
             numest = num_f_params,
             bounds = "[-30, 3]",
             prior = "[-30, 3]") |>
     add_row(param = ifelse(fr(),
-                           "Écarts logarithmiques de recrutement ($\\omega_\\mathrm{t}$)",
+                           "\u00C9carts logarithmiques de recrutement ($\\omega_\\mathrm{t}$)",
                            "Log recruitment deviations ($\\omega_\\mathrm{t}$)"),
             numest = num_rec_params,
             bounds = "None",
@@ -181,7 +181,7 @@ table_param_settings <- function(model,
                            "Normale($0, \\tau$)",
                            "Normal($0, \\tau$)")) |>
     add_row(param = ifelse(fr(),
-                           "Écarts initiaux de recrutement logarithmique ($\\omega_\\mathrm{init,t}$)",
+                           "\u00C9carts initiaux de recrutement logarithmique ($\\omega_\\mathrm{init,t}$)",
                            "Initial log recruitment deviations ($\\omega_\\mathrm{init,t}$)"),
             numest = num_init_rec_params,
             bounds = ifelse(fr(),
@@ -195,7 +195,7 @@ table_param_settings <- function(model,
                          tr("Number estimated"),
                          tr("Bounds [low, high]"),
                          ifelse(fr(),
-                                "Priorité (moyenne, SD) (valeur unique = fixe)",
+                                "Priorit\u00E9 (moyenne, SD) (valeur unique = fixe)",
                                 "Prior (mean, SD) (single value = fixed)"))
 
   if(ret_df){

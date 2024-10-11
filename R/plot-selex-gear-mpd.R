@@ -6,6 +6,8 @@
 #' @inheritParams plot_selex_mcmc
 #' @family Selectivity plotting functions
 #'
+#' @param gear A gear number to plot
+#' @param title The title ([ggplot2] `title`)
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom dplyr group_split
 #' @importFrom stats setNames

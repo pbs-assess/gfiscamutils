@@ -1,11 +1,12 @@
 #' Plot the stock-recruitment relationship for an MCMC ISCAM model
 #'
 #' @inheritParams plot_ts_mcmc
-#' @param plot_sr_curve If `TRUE`, plot the stock-recruitment curve
+#' @param plot_sr_curve Logical. If `TRUE`, plot the stock-recruitment curve
 #' over the points
+#' @param model An iSCAM model object as created in [load_iscam_files()]
+#' @param errorbar_thickness Line thickness for the errorbars
+#'
 #' @export
-#' @importFrom ggplot2 geom_point geom_errorbar geom_errorbarh
-#' @importFrom tidyr pivot_wider pivot_longer
 plot_sr_mcmc <- function(model,
                          probs = c(0.025, 0.5, 0.975),
                          errorbar_thickness = 0.1,

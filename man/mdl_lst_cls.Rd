@@ -6,13 +6,19 @@
 \title{The iSCAM model list class}
 \format{
 An object of class \code{character} of length 1.
+
+An object of class \code{character} of length 1.
 }
 \usage{
+mdl_lst_cls
+
 mdl_lst_cls
 }
 \description{
 This class defines a list as being a list of one or more iSCAM models.
 Each element of the list must have class \link{mdl_cls} to qualify.
 Model lists are assigned this class in \code{\link[=model_setup]{model_setup()}}
+
+The name of the ISCAM model class
 }
 \keyword{datasets}

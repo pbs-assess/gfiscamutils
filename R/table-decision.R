@@ -6,6 +6,7 @@
 #' all catch values present in the projections will be used
 #' @param ret_df Logical. If `TRUE` return a data frame with the values,
 #' instead of the [csasdown::csas_table()] formatted table
+#' @param format One of "html" or "latex"
 #' @param bold_header If `TRUE`, make the headers bold. This only works
 #' if the `format` is 'html'. If it is 'latex', you must paste latex bold
 #' macros around the column headers manually

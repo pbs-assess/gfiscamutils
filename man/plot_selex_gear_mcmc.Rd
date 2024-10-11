@@ -28,6 +28,8 @@ This is provided in case the data frames have more than three different quantile
 
 \item{show_maturity}{If \code{TRUE}, overlay the maturity ogive on the selectivity plots}
 
+\item{show_ci}{Logical. If \code{TRUE}, show the credible intervals}
+
 \item{ages}{A character vector from 1 to the maximum age to show on
 the plot. Defaults to the max age in the model. This may be needed when
 The selectivity goes past the maximum age, so that we may see the
@@ -41,6 +43,8 @@ selectivity curve}
 
 \item{ci_alpha}{Opacity between 0 and 1 for the credible intervals ribbons. Only used if
 \code{ci_type} is "ribbon" or "both"}
+
+\item{angle_x_labels}{The angle for the x-axis tick labels}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

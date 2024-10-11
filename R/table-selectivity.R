@@ -1,10 +1,13 @@
 #' Make a table of selectivity parameter estimate comparisons for MPD models
 #'
-#' @rdname param_est_mpd_table
+#' @param models A list of An ISCAM model objects (class [mdl_lst_cls])
+#' @param digits Number of decimal places to show
+#' @param french If `TRUE`, display the table in French
+#' @param model_col_widths A vector of column widths. If `NULL`, the defaults
+#' are used
+#' @param ... Arguments passed to [csasdown::csas_table()]
 #'
-#' @return an [csasdown::csas_table()]
-#' @importFrom dplyr everything case_when
-#' @importFrom csasdown csas_table
+#' @return a [csasdown::csas_table()]
 #' @export
 sel_param_est_mpd_table <- function(models,
                                     digits = 3,

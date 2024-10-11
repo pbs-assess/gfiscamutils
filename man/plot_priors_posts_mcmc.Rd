@@ -18,8 +18,11 @@ plot_priors_posts_mcmc(
 \item{param_rm}{A vector of parameter names to remove. If any are not found
 in the output, a warning will be issued. If \code{NULL}, nothing is removed}
 
-\item{priors_only}{Logical. If \code{TRUE}, plot the priors only. If \code{FALSE},
-plot both priors and associated posterior histograms}
+\item{priors_only}{Logical. If \code{TRUE}, plot the priors only, not the
+posteriors}
+
+\item{text_title_size}{Add the model description as a title with this font size. The text
+comes from the \code{model_desc} attribute of \code{model}. If this is \code{NULL}, don't show a title}
 
 \item{...}{Additional arguments passed to \code{\link[cowplot:plot_grid]{cowplot::plot_grid()}}}
 }

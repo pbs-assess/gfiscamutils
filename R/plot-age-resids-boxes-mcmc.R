@@ -3,6 +3,12 @@
 #' @inheritParams plot_age_fits_mcmc
 #' @family Age plotting functions
 #'
+#' @param type One of "age", "year", or "birth_year"
+#' @param comp_point_size Size of the age composition points
+#' @param ylim The y-axis limits (vector of 2)
+#' @param leg_loc Legend location (vector of 2)
+#' @param probs Probability values to use in the plots
+#' @param ci_type One of "both" or "line", type of confidence interval
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_age_resids_boxes_mcmc <- function(model,
@@ -121,9 +127,13 @@ plot_age_resids_boxes_mcmc <- function(model,
                  outlier.size = 0.5) +
     scale_fill_manual(values = c("#FF000050", "#0000FF50")) +
     geom_hline(aes(yintercept = 0), color = "red", linetype = "dashed", size = 0.3) +
-    ylab(ifelse(fr(), "Résidus normalisés logarithmiques", "Log standardized residuals")) +
+    ylab(ifelse(fr(),
+                "R\u00E9sidus normalis\u00E9s logarithmiques",
+                "Log standardized residuals")) +
     xlab(ifelse(type == "birth_year",
-                ifelse(fr(), "Année de naissance", "Year of birth"),
+                ifelse(fr(),
+                       "Ann\u00E9e de naissance",
+                       "Year of birth"),
                 tr(firstup(type)))) +
     scale_y_continuous(breaks = seq(-5, 5, by = 0.5))
 

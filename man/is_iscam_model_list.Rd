@@ -7,7 +7,7 @@
 is_iscam_model_list(models)
 }
 \arguments{
-\item{model}{A proposed iscam model list object}
+\item{models}{A list of proposed iscam model list objects}
 }
 \value{
 Logical

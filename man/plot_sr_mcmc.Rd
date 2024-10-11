@@ -12,11 +12,15 @@ plot_sr_mcmc(
 )
 }
 \arguments{
+\item{model}{An iSCAM model object as created in \code{\link[=load_iscam_files]{load_iscam_files()}}}
+
 \item{probs}{A 3-element vector of probabilities that appear in the output
 data frames. This is provided in case the data frames have more than three
 different quantile levels}
 
-\item{plot_sr_curve}{If \code{TRUE}, plot the stock-recruitment curve
+\item{errorbar_thickness}{Line thickness for the errorbars}
+
+\item{plot_sr_curve}{Logical. If \code{TRUE}, plot the stock-recruitment curve
 over the points}
 }
 \description{

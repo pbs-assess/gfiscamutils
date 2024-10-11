@@ -21,7 +21,11 @@ plot_age_fits_mpd(
 
 \item{comp_color}{Color for the age comp data lines and points}
 
-\item{comp_point_size}{Size of the age comp data points}
+\item{comp_point_size}{Size of the age composition points}
+
+\item{fit_line_color}{Color fot the age fit line}
+
+\item{text_title_size}{Size of text for the axis titles}
 
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 }

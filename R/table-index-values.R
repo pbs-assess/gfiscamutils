@@ -3,6 +3,7 @@
 #' @param model An iSCAM model object as created in [load_iscam_files()]
 #' @param col_widths Widths for columns, except the Parameter column
 #' the [csasdown::csas_table()]
+#' @param digits Number of decimal points to show in table
 #' @param ... Arguments passed to [csasdown::csas_table()]
 #'
 #' @return A [csasdown::csas_table()] object

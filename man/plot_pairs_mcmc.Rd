@@ -29,6 +29,9 @@ in the output, a warning will be issued. If \code{NULL}, nothing is removed}
 by this function, but do not actually plot it. This is to help you to use the
 \code{param_rm} argument, so you know what the names to be removed can be}
 
+\item{text_title_size}{Add the model description as a title with this font size. The text
+comes from the \code{model_desc} attribute of \code{model}. If this is \code{NULL}, don't show a title}
+
 \item{point_size}{Size of the points on each pairs panel in the lower triangle}
 
 \item{tick_label_size}{Size of the tick labels on both axes}

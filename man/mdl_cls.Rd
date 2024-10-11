@@ -6,13 +6,19 @@
 \title{The iSCAM model class}
 \format{
 An object of class \code{character} of length 1.
+
+An object of class \code{character} of length 1.
 }
 \usage{
+mdl_cls
+
 mdl_cls
 }
 \description{
 This class defines a list as being input and output for a single iSCAM model.
 The list must have the 'model_desc' attribute to qualify.
 Models are assigned this class in \code{\link[=load_iscam_files]{load_iscam_files()}}
+
+The name of the ISCAM model class
 }
 \keyword{datasets}

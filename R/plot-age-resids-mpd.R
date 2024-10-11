@@ -3,6 +3,11 @@
 #' @inheritParams plot_age_fits_mcmc
 #' @family Age plotting functions
 #'
+#' @param type One of "age", "year", or "birthy_year"
+#' @param comp_point_size Size of the age composition points
+#' @param fit_line_color Color for the age fit line
+#' @param ylim The y-axis limits (vector of 2)
+#' @param leg_loc Legend location (vector of 2)
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom ggplot2 geom_linerange facet_grid
 #' @export
@@ -11,7 +16,7 @@ plot_age_resids_mpd <- function(model,
                                 type = c("age", "year", "birth_year"),
                                 comp_color = "black",
                                 comp_point_size = 0.5,
-                                fir_line_color = "red",
+                                fit_line_color = "red",
                                 ylim = c(-3, 3),
                                 text_title_size = 12,
                                 leg_loc = c(1, 1),

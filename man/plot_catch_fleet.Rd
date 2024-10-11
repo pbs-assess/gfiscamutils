@@ -10,6 +10,8 @@ plot_catch_fleet(catch_lst, fleet_nms, ...)
 \item{catch_lst}{A list of catch data frames, as output from
 \code{\link[gfdata:get_data]{gfdata::get_catch()}}}
 
+\item{fleet_nms}{A vector of fleet names to use in the plot}
+
 \item{...}{Arguments passed to \code{\link[gfplot:plot_catch]{gfplot::plot_catch()}}}
 }
 \value{

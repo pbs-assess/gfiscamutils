@@ -15,8 +15,25 @@ table_sens_q(
   placement = "H"
 )
 }
+\arguments{
+\item{models}{A list of iscam model objects (class \link{mdl_lst_cls})}
+
+\item{model.names}{A vector of nice names (for plotting) for the \code{models}}
+
+\item{digits}{Number of decimal points to show in table}
+
+\item{xcaption}{Caption}
+
+\item{xlabel}{Latex label}
+
+\item{font.size}{Size of font in table}
+
+\item{space.size}{Size of spaces between cells}
+
+\item{placement}{See \code{\link[xtable:print.xtable]{xtable::print.xtable()}}}
+}
 \value{
-an xtable
+an \code{\link[xtable:xtable]{xtable::xtable()}} object
 }
 \description{
 Make a table of the values of q, including quantiles

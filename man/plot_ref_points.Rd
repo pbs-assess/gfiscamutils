@@ -16,6 +16,14 @@ plot_ref_points(
 }
 \arguments{
 \item{model}{An iscam model object (class \link{mdl_cls})}
+
+\item{ref_pts}{A vector of the names of reference points to plot}
+
+\item{ref_desc}{A vector of fancy descriptions for the values in \code{ref_pts}}
+
+\item{color}{The histogram color (outline of bars)}
+
+\item{fill}{The histogram bar fill color}
 }
 \value{
 A \code{\link[cowplot:plot_grid]{cowplot::plot_grid()}} of \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} box plots

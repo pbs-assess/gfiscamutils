@@ -5,7 +5,7 @@
 #'
 #' @details Extract the data frame given (data) by unflattening into a list of matrices
 #'   by group. The group number is located in the names of the columns of the
-#'   data frame in this format: "prefix[groupnum]_year" where [groupnum] is one
+#'   data frame in this format: "prefix(groupnum)_year" where (groupnum) is one
 #'   or more digits representing the group number and prefix is the string
 #'   given as an argument to the function.
 #'

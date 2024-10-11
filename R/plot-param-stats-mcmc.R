@@ -2,7 +2,7 @@
 #' Heidelberger & Welch statistic histograms. This is a re-coded version of
 #' https://github.com/r4ss/r4ss/blob/bioscale/R/mcmc.nuisance.R
 #'
-#' @param model A model as output by [load_models()]
+#' @param model A model as returned by [load_rds_file()]
 #' @param col A color to shade the bars
 #' @param effn_labels If TRUE, add labels to the top of the bars on the
 #' effective sample size plot
@@ -18,9 +18,6 @@
 #' value for the end of the arrow pointing to the bar where R0 is
 #'
 #' @return A [barplot()]
-#' @importFrom gfutilities get_shade
-#' @importFrom coda heidel.diag mcmc geweke.diag spectrum0.ar
-#' @importFrom tibble enframe
 #' @export
 plot_param_stats_mcmc <- function(model,
                                   col = get_shade(color = "blue", opacity = 30),
@@ -107,10 +104,10 @@ plot_param_stats_mcmc <- function(model,
     }else{
       hw <- as.list(heidel.diag(mcmc(.x), pvalue = 0.05))
       if(hw[1] == 0){
-        hwuse <- `if`(fr(), "Échoué", "Failed")
+        hwuse <- `if`(fr(), "\u00C9chou\u00E9", "Failed")
         hwsums[2] <<- hwsums[2] + 1
       }else if(hw[1] == 1){
-        hwuse <- `if`(fr(), "Adopté", "Passed")
+        hwuse <- `if`(fr(), "Adopt\u00E9", "Passed")
         hwsums[3] <<- hwsums[3] + 1
       }
     }
@@ -138,7 +135,7 @@ plot_param_stats_mcmc <- function(model,
        main = "",
        ylab = "",
        xlab = `if`(fr(),
-                   "Taille effective de l'échantillon",
+                   "Taille effective de l'\u00E9chantillon",
                    "Effective sample size"),
        breaks = c(seq(0, draws, by = (draws / 10))),
        xlim = c(0, draws),
@@ -166,7 +163,7 @@ plot_param_stats_mcmc <- function(model,
        col = col)
 
   arg_names <- `if`(fr(),
-                    c("Pas de test", "Échoué", "Adopté"),
+                    c("Pas de test", "\u00C9chou\u00E9", "Adopt\u00E9"),
                     c("No test", "Failed", "Passed"))
   barplot(hwsums,
           space = 0,

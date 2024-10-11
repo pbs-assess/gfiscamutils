@@ -7,6 +7,9 @@
 #' @family MCMC diagnostics plots
 #' @param ... Arguments passed to [base::plot()]
 #'
+#' @param text_title_size Size of the axis label text
+#' @param rows_cols The number of rows and columns in the plot
+#' grid (vector of 2)
 #' @return Nothing. Plots a grid of autocorrelation plots
 #' @export
 plot_autocorr_mcmc <- function(model,

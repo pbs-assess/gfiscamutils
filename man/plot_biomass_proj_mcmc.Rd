@@ -44,6 +44,12 @@ the plot with. To remove all padding, make this 0}
 \item{y_space}{The amount of y-interval space to pad the top and bottom of
 the plot with. To remove all padding, make this 0}
 
+\item{show_bo_lines}{Logical. If \code{TRUE}, show the B0 uncertainty}
+
+\item{bo_refpts}{A vector of 2 B0-based reference points}
+
+\item{bo_refpt_colors}{A vector of two colors, for the corresponding}
+
 \item{line_width}{Width of all median lines on the plot}
 
 \item{point_size}{Point size for all median points on the plot}
@@ -65,14 +71,12 @@ include all values present in the list from the output
 of catch to filter the projection biomass table on. Only show those values
 in the plot}
 
+\item{append_to_catch_level_names}{Text to append to the catch levels in the plot}
+
 \item{...}{Arguments passed to \code{\link[=plot_ts_mcmc]{plot_ts_mcmc()}}}
-
-\item{label_digits}{Number of digits to show in the catch labels}
-
-\item{label_append_text}{Text to append to the labels}
-
-\item{label_font_size}{Size of the catch label font. See \code{size} argument in
-\code{\link[ggplot2:geom_text]{ggplot2::geom_text()}}}
+}
+\value{
+An \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
 }
 \description{
 Plot a model's time series (either spawning biomass or relaive spawning

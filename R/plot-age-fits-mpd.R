@@ -3,6 +3,8 @@
 #' @inheritParams plot_age_fits_mcmc
 #' @family Age plotting functions
 #'
+#' @param comp_point_size Size of the age composition points
+#' @param fit_line_color Color fot the age fit line
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom ggplot2 geom_linerange facet_grid
 #' @export

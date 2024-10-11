@@ -4,6 +4,8 @@
 #' @param calc_depl If `TRUE` calculate relative biomass (depletion) if
 #' `ret_biomass_cols` is `TRUE`  and change the output columns to those
 #' relative biomasses instead of absolute biomass
+#' @param rm_yrs A vector of years to remove from the table. If `NULL`, remove
+#' none
 #' @param ... Absorb arguments intended for other functions
 #'
 #' @return a data frame with the (number of posteriors * the number of catch

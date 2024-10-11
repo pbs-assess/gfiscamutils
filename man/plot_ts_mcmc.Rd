@@ -51,6 +51,10 @@ model}
 
 \item{legend_title}{Title for legend}
 
+\item{x_label}{The x-axis title label}
+
+\item{y_label}{The y-axis title label}
+
 \item{append_base_txt}{A vector of strings to append to the model names for
 display on the plot legend or title}
 
@@ -84,15 +88,13 @@ is the bottom left corner}
 data frames. This is provided in case the data frames have more than three
 different quantile levels}
 
-\item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
-
-\item{bo_dodge}{The amount to offset the initial value (B0 or R0) values
-from each other so the values and uncertainty can be easily seen for
-multiple models}
-
-\item{title_text_size}{Add the model description as a title with this font
+\item{text_title_size}{Add the model description as a title with this font
 size. The text comes from the \code{model_desc} attribute of \code{model}. If this is
 \code{NULL}, don't show a title}
+
+\item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
+
+\item{...}{Absorbs arguments meant for other functions}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

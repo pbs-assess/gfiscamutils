@@ -17,14 +17,14 @@ autocorr_plot <- function(x,
                           ...){
 
   if(auto_layout){
-    oldpar <- par(mfrow = coda:::set.mfrow(Nchains = coda:::nchain(x),
-                                           Nparms = coda:::nvar(x)))
+    oldpar <- par(mfrow = coda:::set.mfrow(Nchains = coda::nchain(x),
+                                           Nparms = coda::nvar(x)))
   }
-  if(!coda:::is.mcmc.list(x)){
-    x <- coda:::mcmc.list(coda:::as.mcmc(x))
+  if(!coda::is.mcmc.list(x)){
+    x <- coda::mcmc.list(coda::as.mcmc(x))
   }
 
-  for(i in 1:coda:::nchain(x)){
+  for(i in 1:coda::nchain(x)){
     if(missing(lag_max)){
       xacf <- acf(coda:::as.ts.mcmc(x[[i]]),
           plot = FALSE)
@@ -33,7 +33,7 @@ autocorr_plot <- function(x,
                   lag.max = lag_max,
                   plot = FALSE)
     }
-    for(j in 1:coda:::nvar(x)){
+    for(j in 1:coda::nvar(x)){
       plot(xacf$lag[, j, j],
            xacf$acf[, j, j],
            type = "h",

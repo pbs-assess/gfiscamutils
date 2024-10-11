@@ -7,6 +7,8 @@
 #' estimates files.
 #'
 #' @param fn The CSV filename
+#' @param type Type of file: 'age' or 'sel'. Used to set the correct start
+#' year column name only
 #' @param gear_names A vector of gear names to use in the resulting data frame.
 #' If `NULL`, the gear numbers in the file will be used
 #' @param burnin The number of MCMC records to remove for burnin period
@@ -17,10 +19,6 @@
 #'
 #' @return The list of output data frames representing the age fits, age
 #' residuals, or selectivity parameter estimates by gear and year
-#' @importFrom readr read_csv
-#' @importFrom dplyr cur_group_id filter group_by ungroup slice select
-#' @importFrom rlang sym
-#' @importFrom lubridate year
 #' @export
 load_longer <- function(fn,
                         type = c("age", "sel"),

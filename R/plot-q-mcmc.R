@@ -5,13 +5,12 @@
 #'
 #' @details
 #' This function can plot either multiple gears for a single model on one plot,
-#' or a single gear from multiple models on a single plot. Errors will be
-#' thrown if trying to plot multiple gears and multiple models together. To
-#' do that, call [plot_q_grid_mcmc()] instead.
+#' or a single gear from multiple models on a single plot.
 #'
 #' @inheritParams plot_ts_mcmc
 #' @family Time series plotting functions
 #'
+#' @param text_title_size Size of text for the axis titles
 #' @param gear The number of the gear to plot
 #' @export
 plot_q_mcmc <- function(models,
@@ -21,7 +20,6 @@ plot_q_mcmc <- function(models,
                         probs = c(0.025, 0.5, 0.975),
                         base_color = "black",
                         palette = iscam_palette,
-                        ci_alpha = 0.3,
                         leg_loc = c(1, 1),
                         text_title_size = 12,
                         angle_x_labels = FALSE){

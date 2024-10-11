@@ -28,6 +28,11 @@ in the output, a warning will be issued. If \code{NULL}, nothing is removed}
 by this function, but do not actually plot it. This is to help you to use the
 \code{param_rm} argument, so you know what the names to be removed can be}
 
+\item{text_title_size}{Size of the axis label text}
+
+\item{rows_cols}{The number of rows and columns in the plot
+grid (vector of 2)}
+
 \item{...}{Arguments passed to \code{\link[base:plot]{base::plot()}}}
 }
 \value{

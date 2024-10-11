@@ -8,6 +8,8 @@ plot_recr_grid_mcmc(models, ...)
 }
 \arguments{
 \item{models}{A list of iscam model objects (class \link{mdl_lst_cls})}
+
+\item{...}{Arguments passed to \code{\link[=plot_biomass_mcmc]{plot_biomass_mcmc()}} and \code{\link[=plot_recr_mcmc]{plot_recr_mcmc()}}}
 }
 \value{
 A \code{\link[cowplot:plot_grid]{cowplot::plot_grid()}} object

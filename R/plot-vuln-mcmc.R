@@ -5,10 +5,7 @@
 #' intervals
 #'
 #' @inheritParams plot_ts_mcmc
-#' @param inc_sbt Logical. If `TRUE`, put all gear's vulnerable biomass
-#' on one plot along with the spawning biomass (sbt). If `FALSE`, make
-#' a panel plot with one vulnerable biomass plot per panel, with no
-#' spawning biomass
+#' @param model An iSCAM model object as created in [load_iscam_files()]
 #' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
 #' @family Time series plotting functions
 #'

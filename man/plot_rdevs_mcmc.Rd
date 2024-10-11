@@ -15,7 +15,6 @@ plot_rdevs_mcmc(
   base_color = "black",
   x_space = 0.5,
   append_base_txt = NULL,
-  ind_letter = NULL,
   leg_loc = c(1, 1),
   probs = c(0.025, 0.5, 0.975),
   text_title_size = 12,
@@ -58,7 +57,11 @@ is the bottom left corner}
 data frames. This is provided in case the data frames have more than three
 different quantile levels}
 
+\item{text_title_size}{Size of text for the axis titles}
+
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
+
+\item{...}{Absorb arguments intended for other functions}
 }
 \description{
 Plot the MCMC recruitment deviation time series trajectories with credible intervals

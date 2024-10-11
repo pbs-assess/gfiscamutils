@@ -21,6 +21,8 @@ plot_age_resids_mcmc(
 \item{include}{Two-element vector of the minimum and maximum values
 to include. Eliminates large outliers which bias the bubble sizes}
 
+\item{text_title_size}{Size of text for the axis titles}
+
 \item{text_title_inc_mdl_nm}{Logical. If \code{TRUE}, make the model name the
 main title and the gear the subtitle. If \code{FALSE}, do not show the model
 name, and make the gear the main title (if \code{text_title_size} is \code{NULL},

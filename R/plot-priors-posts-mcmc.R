@@ -25,7 +25,9 @@
 #' @inheritParams plot_traces_mcmc
 #' @family MCMC diagnostics plots
 #'
-#' @importFrom cowplot plot_grid
+#' @param priors_only Logical. If `TRUE`, plot the priors only, not the
+#' posteriors
+#'
 #' @export
 plot_priors_posts_mcmc <- function(model,
                                    param_rm = c("sel",

@@ -14,22 +14,22 @@
 #' @param base_models_dir Name of the base models directory
 #' @param bridge_models_dir Name of the bridging models directory
 #' @param sens_models_dir Name of the sensitivity models directory
-#' @param retrospectives_models_dir Name of the retrospectives models directory
+#' @param retro_models_dir Name of the retrospectives models directory
 #' @param base_models_dirs A vector of subdirectory names in
 #' `base_models_dir` that each contain an individual base model
 #' @param bridge_models_dirs A vector of subdirectory names in
 #' `bridge_models_dir` that each contain an individual bridge model
 #' @param sens_models_dirs A vector of subdirectory names in `sens_models_dir`
 #' that each contain an individual sensitivity model
-#' @param retrospectives_models_dirs A vector of subdirectory names in
-#' `retrospectives_models_dir`that each contain an individual retrospective
-#' model
+#' @param retro_models_dirs A vector of subdirectory names in
+#' `retro_models_dir`that each contain an individual retrospective model
 #' @param suppress_warnings If `TRUE`, warnings about directories not existing
 #' will not be shown
 #' @param base_model_dir Path for the base model, if it is outside the
 #' file structure for an assessment. This is used for SR documents, where there
 #' is a new base model with more data included in a subsequent year. If this
 #' is `NULL`, the usual base model location will be used
+#' @param prepend_to_bridge Logical. If `TRUE` prepend the base model to the bridge model list (not implemented)
 #'
 #' @return A list of vectors of directory names, which will have `NA` elements
 #' for those which do not exist:

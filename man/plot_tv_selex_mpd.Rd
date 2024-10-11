@@ -8,6 +8,10 @@ plot_tv_selex_mpd(model, gear = NULL, title = NULL)
 }
 \arguments{
 \item{model}{An iscam model object (class \link{mdl_cls})}
+
+\item{gear}{A gear number to plot}
+
+\item{title}{The title (\link{ggplot2} \code{title})}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

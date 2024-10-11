@@ -26,7 +26,6 @@ plot_biomass_mpd(
   bmsy_refpts = c(0.4, 0.8),
   bo_refpt_colors = c("red", "green"),
   bmsy_refpt_colors = c("salmon", "darkgreen"),
-  ind_letter = NULL,
   leg_loc = NULL,
   text_title_size = 12,
   angle_x_labels = FALSE,
@@ -35,6 +34,10 @@ plot_biomass_mpd(
 }
 \arguments{
 \item{models}{A list of iscam model objects (class \link{mdl_lst_cls})}
+
+\item{rel}{Logical. If \code{TRUE}, plot the relative biomass}
+
+\item{show_bo}{Logical. If \code{TRUE}, show the B0 point}
 
 \item{legend_title}{Title for legend}
 
@@ -57,9 +60,7 @@ when \code{first_model_ribbon} is \code{TRUE}}
 \code{palette}. This is called \code{base_color} because it is likely to be a base
 model}
 
-\item{bo_dodge}{The amount to offset the initial value (B0 or R0) values
-from each other so the values and uncertainty can be easily seen for
-multiple models}
+\item{bo_dodge}{Value to offset the B0 point by on the x-axis (in years)}
 
 \item{x_space}{The amount of x-interval space to pad the left and right of
 the plot with. To remove all padding, make this 0}
@@ -67,11 +68,29 @@ the plot with. To remove all padding, make this 0}
 \item{append_base_txt}{A vector of strings to append to the model names for
 display on the plot legend or title}
 
+\item{show_bo_lines}{Logical. If \code{TRUE}, show the B0 uncertainty}
+
+\item{bo_refpts}{A vector of 2 B0-based reference points}
+
+\item{show_bmsy_lines}{Logical. If \code{TRUE}, show the BMSY uncertainty}
+
+\item{bmsy_refpts}{A vector of 2 BMSY-based reference points}
+
+\item{bo_refpt_colors}{A vector of two colors, for the corresponding B0
+values in \code{bo_refpts}}
+
+\item{bmsy_refpt_colors}{A vector of two colors, for the corresponding BMSY
+values in \code{bmsy_refpts}}
+
 \item{leg_loc}{A two-element vector describing the X-Y values between 0 and
 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
 is the bottom left corner}
 
+\item{text_title_size}{Size of the axis label text}
+
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
+
+\item{...}{Absorbs arguments meant for other functions}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

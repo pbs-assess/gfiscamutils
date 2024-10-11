@@ -18,6 +18,9 @@ load_longer(
 \arguments{
 \item{fn}{The CSV filename}
 
+\item{type}{Type of file: 'age' or 'sel'. Used to set the correct start
+year column name only}
+
 \item{gear_names}{A vector of gear names to use in the resulting data frame.
 If \code{NULL}, the gear numbers in the file will be used}
 

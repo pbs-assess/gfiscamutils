@@ -12,6 +12,17 @@ table_sens_param_changes(
   ...
 )
 }
+\arguments{
+\item{sens_desc_vec}{A vector of sensitivity descriptions}
+
+\item{sens_change_vec}{A vector of sensitivity changes}
+
+\item{ret_df}{Logical. If \code{TRUE}, return a data frame instead of the table}
+
+\item{col_widths}{A vector of column widths. See \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
+
+\item{...}{Arguments passed to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
+}
 \value{
 A \code{\link[csasdown:csas_table]{csasdown::csas_table()}}
 }

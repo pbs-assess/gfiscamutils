@@ -8,9 +8,10 @@
 #' @family Selectivity plotting functions
 #'
 #' @param gear The gear number in the model
+#' @param show_ci Logical. If `TRUE`, show the credible intervals
+#' @param angle_x_labels The angle for the x-axis tick labels
 #'
 #' @return A [ggplot2::ggplot()] object
-#' @importFrom ggplot2 geom_function
 #' @export
 plot_selex_gear_mcmc <- function(model,
                                  gear = 1,

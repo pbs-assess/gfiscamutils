@@ -2,7 +2,7 @@
 #' bounded by B0 reference points
 #'
 #' @param model An iscam model object (class [mdl_cls])
-#' @param biomass_col The colomn name that you want to shoe output for.
+#' @param biomass_col The column name that you want to shoe output for.
 #' This column will be divided by the SB0 value to get a depletion for
 #' the year in the name of the column
 #' @param proj_catch_vals The catch values to include in the plot. If `NULL`,
@@ -11,6 +11,7 @@
 #' of catch to filter the projection biomass table on. Only show those values
 #' in the plot
 #' @param line_thickness Thickness of reference point lines (vertical lines)
+#' @param probs Probability values to use in the plot
 #'
 #' @export
 plot_ref_points_dist_mcmc <- function(model,

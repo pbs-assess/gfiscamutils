@@ -7,7 +7,7 @@
 #' @details Extract the data frame given (data) by unflattening into a list of matrices
 #'   by area-sex and gear. The area-sex number is located in the names of the
 #'   columns of the data frame in this format:
-#'   "prefix[areasexnum]_gear[gearnum]_year" where [areasexnum] and [gearnum]
+#'   "prefix(areasexnum)_gear(gearnum)_year" where (areasexnum) and (gearnum)
 #'   are one or more digits and prefix is the string given as an argument
 #'   to the function.
 #'

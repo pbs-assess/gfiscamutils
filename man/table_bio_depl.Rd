@@ -17,10 +17,31 @@ table_bio_depl(
   translate = FALSE
 )
 }
+\arguments{
+\item{model}{An iSCAM model object as created in \code{\link[=load_iscam_files]{load_iscam_files()}}}
+
+\item{syr}{Start year}
+
+\item{digits}{Number of decimal places in the table}
+
+\item{xcaption}{Table caption}
+
+\item{xlabel}{Latex table label}
+
+\item{font.size}{Size of font}
+
+\item{space.size}{Size of spaces between cells}
+
+\item{placement}{Latex table placement string, eg. "H" or "tbp"}
+
+\item{tabular.environment}{See \code{\link[xtable:print.xtable]{xtable::print.xtable()}}}
+
+\item{translate}{Logical. If \code{TRUE}, translate to French}
+}
 \value{
 an xtable
 }
 \description{
 Make a table with both spawning biomass and depletion in it.
-Based on \code{\link[=table_ts_value]{table_ts_value()}}, but wider with both and extra headers
+Based on \code{\link[=table_ts_values_mcmc]{table_ts_values_mcmc()}}, but wider with both and extra headers
 }

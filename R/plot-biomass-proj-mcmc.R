@@ -8,10 +8,6 @@
 #' @param model_name Name of the input model
 #' @param rel Logical. Make plot relative to initial estimate (B0), also known
 #' as depletion
-#' @param label_digits Number of digits to show in the catch labels
-#' @param label_append_text Text to append to the labels
-#' @param label_font_size Size of the catch label font. See `size` argument in
-#' [ggplot2::geom_text()]
 #' @param nudge_catch_labels Position to nudge the catch labels by on the right
 #' of the ending of the lines
 #' @param proj_catch_vals The catch values to include in the plot. If `NULL`,
@@ -21,6 +17,11 @@
 #' in the plot
 #' @param ... Arguments passed to [plot_ts_mcmc()]
 #'
+#' @param show_bo_lines Logical. If `TRUE`, show the B0 uncertainty
+#' @param bo_refpts A vector of 2 B0-based reference points
+#' @param bo_refpt_colors A vector of two colors, for the corresponding
+#' @param append_to_catch_level_names Text to append to the catch levels in the plot
+#' @return An [ggplot2::ggplot()] object
 #' @export
 plot_biomass_proj_mcmc <- function(model,
                                    model_name = "Base model",

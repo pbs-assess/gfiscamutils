@@ -14,14 +14,11 @@
 #' @param list_param_names Logical. If `TRUE`, list the parameter names that will be plot
 #' by this function, but do not actually plot it. This is to help you to use the
 #' `param_rm` argument, so you know what the names to be removed can be
-#' @param priors_only Logical. If `TRUE`, plot the priors only. If `FALSE`,
-#' plot both priors and associated posterior histograms
-#' @param title_text_size Add the model description as a title with this font size. The text
+#' @param text_title_size Add the model description as a title with this font size. The text
 #' comes from the `model_desc` attribute of `model`. If this is `NULL`, don't show a title
 #' @param ... Additional arguments passed to [cowplot::plot_grid()]
 #'
 #' @return A [ggplot2::ggplot()] object
-#' @importFrom cowplot ggdraw draw_label
 #' @export
 plot_traces_mcmc <- function(model,
                              plot_sel = FALSE,

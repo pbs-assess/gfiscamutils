@@ -7,6 +7,8 @@
 plot_f_mcmc(..., type = c("i", "e"))
 }
 \arguments{
+\item{...}{Absorbs arguments meant for other functions}
+
 \item{type}{'i' means instantaneous, 'e' means exploitation rate (Ut)}
 }
 \description{

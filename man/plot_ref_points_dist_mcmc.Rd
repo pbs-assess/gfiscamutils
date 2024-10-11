@@ -16,9 +16,11 @@ plot_ref_points_dist_mcmc(
 \arguments{
 \item{model}{An iscam model object (class \link{mdl_cls})}
 
-\item{biomass_col}{The colomn name that you want to shoe output for.
+\item{biomass_col}{The column name that you want to shoe output for.
 This column will be divided by the SB0 value to get a depletion for
 the year in the name of the column}
+
+\item{probs}{Probability values to use in the plot}
 
 \item{proj_catch_vals}{The catch values to include in the plot. If \code{NULL},
 include all values present in the list from the output

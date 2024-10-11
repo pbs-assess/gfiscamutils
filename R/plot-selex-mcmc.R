@@ -6,6 +6,7 @@
 #' @family Selectivity plotting functions
 #'
 #' @param model An iscam model object (class [mdl_cls])
+#' @param gear A gear number to plot
 #' @param probs A 3-element vector of probabilities that appear in the output data frames
 #' This is provided in case the data frames have more than three different quantile levels
 #' @param show_maturity If `TRUE`, overlay the maturity ogive on the selectivity plots
@@ -22,7 +23,8 @@
 #' 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
 #' is the bottom left corner. It can also be the string "facet" in which case
 #' the legend will appear in the empty facet if it exists.
-
+#' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
+#'
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom ggplot2 geom_function
 #' @export

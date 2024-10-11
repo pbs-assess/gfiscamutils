@@ -21,6 +21,8 @@ plot_selex_mcmc(
 \arguments{
 \item{model}{An iscam model object (class \link{mdl_cls})}
 
+\item{gear}{A gear number to plot}
+
 \item{probs}{A 3-element vector of probabilities that appear in the output data frames
 This is provided in case the data frames have more than three different quantile levels}
 
@@ -44,6 +46,8 @@ selectivity curve}
 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
 is the bottom left corner. It can also be the string "facet" in which case
 the legend will appear in the empty facet if it exists.}
+
+\item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

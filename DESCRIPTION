@@ -9,7 +9,6 @@ Authors@R:
            comment = c(ORCID = "https://orcid.org/0000-0002-6746-3486"))
 Description: Provides functions including loading, plotting and making tables for iscam outputs (from https://github.com/pbs-assess/gfiscam).
 License: GPL-3
-Encoding: UTF-8
 Depends: R (>= 2.10)
 Imports:
   coda,
@@ -28,11 +27,14 @@ Imports:
   grDevices,
   GGally,
   grid,
+  hake,
   here,
   kableExtra,
+  knitr,
   latex2exp,
   lemon,
   lubridate,
+  patchwork,
   purrr,
   RColorBrewer,
   readr,
@@ -56,9 +58,9 @@ Remotes:
   pbs-assess/gfutilities,
   pbs-assess/rosettafish
 Suggests:
-  boot,
-  gfdata
+  boot
 LazyData: true
+Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Config/testthat/edition: 3

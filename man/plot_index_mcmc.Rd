@@ -40,6 +40,10 @@ if \code{dat} is the output from the \code{\link[gfdata:get_data]{gfdata::get_su
 If a gear number out of range is included, a lookup table with gear numbers and names
 will be shown}
 
+\item{start_year}{Year to start the plot}
+
+\item{end_year}{Year to end the plot}
+
 \item{append_base_txt}{A vector of strings to append to the model names for
 display on the plot legend or title}
 
@@ -50,6 +54,8 @@ display on the plot legend or title}
 \item{base_color}{A color to prepend to the brewer colors which are set by
 \code{palette}. This is called \code{base_color} because it is likely to be a base
 model}
+
+\item{dodge}{Amount to offset multiple model points on x-axis (in years)}
 
 \item{index_line_width}{The index data error bar and connecting line width}
 
@@ -66,6 +72,8 @@ model}
 \item{leg_loc}{A two-element vector describing the X-Y values between 0 and
 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
 is the bottom left corner}
+
+\item{text_title_size}{Size of text for the axis titles}
 
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 

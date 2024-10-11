@@ -15,6 +15,8 @@ plot_catch_fit_mcmc(
 )
 }
 \arguments{
+\item{model}{An iscam model object (\code{mdl_cls})}
+
 \item{append_base_txt}{A vector of strings to append to the model names for
 display on the plot legend or title}
 

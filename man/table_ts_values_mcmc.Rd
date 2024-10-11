@@ -16,6 +16,8 @@ table_ts_values_mcmc(
 )
 }
 \arguments{
+\item{models}{A list of iscam model objects (class \link{mdl_lst_cls})}
+
 \item{model_desc}{A description for the models to be shown in multicolumn
 headings in the table (if more than one model only). If \code{NULL}, names will
 be created (Model 1, Model 2, etc.)}

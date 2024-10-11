@@ -33,6 +33,10 @@ If \code{NULL}, all years will be included}
 
 \item{comp_color}{Color for the age comp data lines and points}
 
+\item{comp_width}{Age comp bar widths}
+
+\item{comp_alpha}{Age comp bar alpha value (0-1)}
+
 \item{ci_linetype}{See \code{linetype} in \link{ggplot2}. Only used if \code{ci_type} is
 "line" or "both"}
 
@@ -40,6 +44,8 @@ If \code{NULL}, all years will be included}
 
 \item{ci_alpha}{Opacity between 0 and 1 for the credible intervals ribbons.
 Only used if \code{ci_type} is "ribbon" or "both"}
+
+\item{text_title_size}{Size of text for the axis titles}
 
 \item{text_title_inc_mdl_nm}{Logical. If \code{TRUE}, make the model name the
 main title and the gear the subtitle. If \code{FALSE}, do not show the model
@@ -55,24 +61,6 @@ Included for cases where the sample size is shared or repeated for both sexes.}
 \item{sample_size_x}{The x value (age) to place the sample size label}
 
 \item{sample_size_y}{The y value (0-1) to place the sample size label}
-
-\item{type}{The type of residual plot to create. Options are "age", "year",
-and "birth_year"}
-
-\item{comp_point_size}{Size of the age comp data points}
-
-\item{ci_type}{One of "line", "ribbon", "both" to show the credible interval}
-
-\item{ylim}{For residual plots, set the y-axis limits with this two-element
-vector}
-
-\item{title_text_size}{Add the model description as a title with this font
-size. The text comes from the \code{model_desc} attribute of \code{model}. If this is
-\code{NULL}, don't show a title}
-
-\item{leg_loc}{A two-element vector describing the X-Y values between 0 and
-1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
-is the bottom left corner}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

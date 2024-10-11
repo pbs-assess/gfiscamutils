@@ -12,7 +12,6 @@ plot_q_mcmc(
   probs = c(0.025, 0.5, 0.975),
   base_color = "black",
   palette = iscam_palette,
-  ci_alpha = 0.3,
   leg_loc = c(1, 1),
   text_title_size = 12,
   angle_x_labels = FALSE
@@ -42,6 +41,8 @@ model}
 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
 is the bottom left corner}
 
+\item{text_title_size}{Size of text for the axis titles}
+
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
 }
 \description{
@@ -49,9 +50,7 @@ Plot catchability plots for MCMC output with credible intervals
 }
 \details{
 This function can plot either multiple gears for a single model on one plot,
-or a single gear from multiple models on a single plot. Errors will be
-thrown if trying to plot multiple gears and multiple models together. To
-do that, call \code{\link[=plot_q_grid_mcmc]{plot_q_grid_mcmc()}} instead.
+or a single gear from multiple models on a single plot.
 }
 \seealso{
 Other Time series plotting functions: 

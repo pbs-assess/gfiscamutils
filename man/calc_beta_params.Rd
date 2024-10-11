@@ -10,7 +10,7 @@ calc_beta_params(mu, cv)
 \arguments{
 \item{mu}{Mean of the distribution}
 
-\item{sd}{Standard deviation of the distribution}
+\item{cv}{Coefficient of variation of the distribution}
 }
 \value{
 A vector of two values, alpha and beta

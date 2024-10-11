@@ -1,5 +1,11 @@
 #' Create a table summarizing changes for sensitivity models
 #'
+#' @param sens_desc_vec A vector of sensitivity descriptions
+#' @param sens_change_vec A vector of sensitivity changes
+#' @param ret_df Logical. If `TRUE`, return a data frame instead of the table
+#' @param col_widths A vector of column widths. See [csasdown::csas_table()]
+#' @param ... Arguments passed to [csasdown::csas_table()]
+#'
 #' @return A [csasdown::csas_table()]
 #' @export
 table_sens_param_changes <- function(sens_desc_vec,

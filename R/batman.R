@@ -2,6 +2,7 @@
 #'
 #' https://charlotte-ngs.github.io/BatmanPlot/BatmanPlotPost.html
 #'
+#' @param line_thick Line thickness
 #' @importFrom ggplot2 ggplot stat_function geom_path aes element_blank labs
 #' @return a ggplot2 object
 batman <- function(line_thick = 5){

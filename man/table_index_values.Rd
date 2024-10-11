@@ -12,6 +12,8 @@ table_index_values(model, col_widths = "5em", digits = 2, ...)
 \item{col_widths}{Widths for columns, except the Parameter column
 the \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 
+\item{digits}{Number of decimal points to show in table}
+
 \item{...}{Arguments passed to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }
 \value{

@@ -4,31 +4,22 @@
 #'
 #' @param model An iscam model object (class [mdl_cls])
 #' @param gear The number of the gear to plot
-#' @param type The type of residual plot to create. Options are "age", "year",
-#' and "birth_year"
 #' @param yrs A vector of years to include in the plot. If the maximum extends
 #' past the range of years in the data, the maximum in the data will be used.
 #' If `NULL`, all years will be included
 #' @param comp_color Color for the age comp data lines and points
-#' @param comp_point_size Size of the age comp data points
-#' @param ci_type One of "line", "ribbon", "both" to show the credible interval
+#' @param comp_width Age comp bar widths
+#' @param comp_alpha Age comp bar alpha value (0-1)
 #' @param ci_linetype See `linetype` in [ggplot2]. Only used if `ci_type` is
 #' "line" or "both"
 #' @param ci_color Color for the lines or ribbon for the credible intervals
 #' @param ci_alpha Opacity between 0 and 1 for the credible intervals ribbons.
 #' Only used if `ci_type` is "ribbon" or "both"
-#' @param ylim For residual plots, set the y-axis limits with this two-element
-#' vector
-#' @param title_text_size Add the model description as a title with this font
-#' size. The text comes from the `model_desc` attribute of `model`. If this is
-#' `NULL`, don't show a title
+#' @param text_title_size Size of text for the axis titles
 #' @param text_title_inc_mdl_nm Logical. If `TRUE`, make the model name the
 #' main title and the gear the subtitle. If `FALSE`, do not show the model
 #' name, and make the gear the main title (if `text_title_size` is `NULL`,
 #' no title will be shown)
-#' @param leg_loc A two-element vector describing the X-Y values between 0 and
-#' 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
-#' is the bottom left corner
 #' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
 #' @param show_sample_size_f_only If `TRUE`, show the sample size in the female
 #' panels only. If `FALSE`, show the sample size in both male and female panels.

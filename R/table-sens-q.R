@@ -1,12 +1,20 @@
 #' Create a table comparing estimates of q across models
 #'
+#' @param models A list of iscam model objects (class [mdl_lst_cls])
+#' @param model.names A vector of nice names (for plotting) for the `models`
+#' @param digits Number of decimal points to show in table
+#' @param xcaption Caption
+#' @param xlabel Latex label
+#' @param font.size Size of font in table
+#' @param space.size Size of spaces between cells
+#' @param placement See [xtable::print.xtable()]
+#'
 #' @description
 #' Make a table of the values of q, including quantiles
 #'
-#' @return an xtable
+#' @return an [xtable::xtable()] object
+#'
 #' @export
-#' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align latex.perc latex.cmidr
-#' @importFrom xtable xtable
 table_sens_q <- function(models,
                          model.names,
                          digits = 3,

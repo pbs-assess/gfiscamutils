@@ -7,6 +7,8 @@
 #' @inheritParams plot_ts_mcmc
 #' @family Time series plotting functions
 #'
+#' @param text_title_size Size of text for the axis titles
+#' @param ... Absorb arguments intended for other functions
 #' @export
 plot_rdevs_mcmc <- function(models,
                             legend_title = "Models",
@@ -18,7 +20,6 @@ plot_rdevs_mcmc <- function(models,
                             base_color = "black",
                             x_space = 0.5,
                             append_base_txt = NULL,
-                            ind_letter = NULL,
                             leg_loc = c(1, 1),
                             probs = c(0.025, 0.5, 0.975),
                             text_title_size = 12,
@@ -142,7 +143,7 @@ plot_rdevs_mcmc <- function(models,
                ymax = !!sym(quants[3]))) +
     xlab(tr("Year")) +
     ylab(ifelse(fr(),
-                "Écarts logarithmiques de recrutement",
+                "\u00C9carts logarithmiques de recrutement",
                 "Log recruitement deviations")) +
     scale_color_manual(values = model_colors) +
     scale_x_continuous(limits = c(xlim[1], max(ts_dodge$year)),

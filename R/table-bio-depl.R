@@ -1,13 +1,23 @@
 #' Create a table containing biomass and depletion estimates
 #'
+#' @param model An iSCAM model object as created in [load_iscam_files()]
+#' @param syr Start year
+#' @param digits Number of decimal places in the table
+#' @param xcaption Table caption
+#' @param xlabel Latex table label
+#' @param font.size Size of font
+#' @param space.size Size of spaces between cells
+#' @param placement Latex table placement string, eg. "H" or "tbp"
+#' @param tabular.environment See [xtable::print.xtable()]
+#' @param translate Logical. If `TRUE`, translate to French
+#'
 #' @description
 #' Make a table with both spawning biomass and depletion in it.
-#' Based on [table_ts_value()], but wider with both and extra headers
+#' Based on [table_ts_values_mcmc()], but wider with both and extra headers
 #'
 #' @return an xtable
 #' @export
 #' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align latex.perc latex.cmidr
-#' @importFrom xtable xtable
 table_bio_depl <- function(model,
                            syr,
                            digits = 3,

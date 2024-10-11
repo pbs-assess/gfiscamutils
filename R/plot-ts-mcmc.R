@@ -31,9 +31,6 @@
 #' @param base_color A color to prepend to the brewer colors which are set by
 #' `palette`. This is called `base_color` because it is likely to be a base
 #' model
-#' @param bo_dodge The amount to offset the initial value (B0 or R0) values
-#' from each other so the values and uncertainty can be easily seen for
-#' multiple models
 #' @param x_space The amount of x-interval space to pad the left and right of
 #' the plot with. To remove all padding, make this 0
 #' @param y_space The amount of y-interval space to pad the top and bottom of
@@ -57,10 +54,13 @@
 #' @param leg_loc A two-element vector describing the X-Y values between 0 and
 #' 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
 #' is the bottom left corner
-#' @param title_text_size Add the model description as a title with this font
+#' @param text_title_size Add the model description as a title with this font
 #' size. The text comes from the `model_desc` attribute of `model`. If this is
 #' `NULL`, don't show a title
 #' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
+#' @param x_label The x-axis title label
+#' @param y_label The y-axis title label
+#' @param ... Absorbs arguments meant for other functions
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export

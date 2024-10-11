@@ -3,6 +3,8 @@
 #' @param model An iscam model object (class [mdl_cls])
 #' @param lst A list of the reference rate and associated parameters as
 #' output by [find_f_b40()]
+#' @param format One of "latex" or "html"
+#' @param digits Number of decimal places to show in the table
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
 #' @return A [csasdown::csas_table()]

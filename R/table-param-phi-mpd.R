@@ -9,7 +9,6 @@
 #' @param yrs A vector of years to include in the table. If `NULL`, all
 #' will be included
 #' @param digits Number of digits to show
-#' @param french If `TRUE` translate to French
 #' @param col_widths Widths for columns, except the Parameter column
 #' @param ret_df If `TRUE`, return a data.frame instead of the
 #' [csasdown::csas_table()]

@@ -28,8 +28,7 @@ calc_mcmc(
 
 \item{load_proj}{Do the calculations for the projections}
 
-\item{...}{arguments to pass to \code{\link[=calc_proj_probs]{calc_proj_probs()}} to construct the
-decision tables}
+\item{...}{Arguments to be absorbed by other functions}
 }
 \value{
 A list of each parameter for which quantiles were calculated

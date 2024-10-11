@@ -12,7 +12,7 @@
 #' @param ret_df Logical. If `TRUE`, return the [data.frame] and not
 #' @param digits The number of decimal places to report on all except the
 #' `alpha` parameter
-#' @param alpha_digitws The number of decimal places to report on the `alpha`
+#' @param alpha_digits The number of decimal places to report on the `alpha`
 #' parameter
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'

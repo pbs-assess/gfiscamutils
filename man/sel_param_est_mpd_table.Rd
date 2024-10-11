@@ -12,8 +12,20 @@ sel_param_est_mpd_table(
   ...
 )
 }
+\arguments{
+\item{models}{A list of An ISCAM model objects (class \link{mdl_lst_cls})}
+
+\item{digits}{Number of decimal places to show}
+
+\item{french}{If \code{TRUE}, display the table in French}
+
+\item{model_col_widths}{A vector of column widths. If \code{NULL}, the defaults
+are used}
+
+\item{...}{Arguments passed to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
+}
 \value{
-an \code{\link[csasdown:csas_table]{csasdown::csas_table()}}
+a \code{\link[csasdown:csas_table]{csasdown::csas_table()}}
 }
 \description{
 Make a table of selectivity parameter estimate comparisons for MPD models

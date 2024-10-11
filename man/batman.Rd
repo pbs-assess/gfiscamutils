@@ -6,6 +6,9 @@
 \usage{
 batman(line_thick = 5)
 }
+\arguments{
+\item{line_thick}{Line thickness}
+}
 \value{
 a ggplot2 object
 }

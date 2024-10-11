@@ -9,7 +9,7 @@ get_fancy_expr(name, subst = FALSE)
 \arguments{
 \item{name}{iscam parameter name to make fancy}
 
-\item{substr}{Logical. If \code{TRUE}, return all \code{substitute()}
+\item{subst}{Logical. If \code{TRUE}, return all \code{substitute()}
 expressions which are necessary for rendering by certain functions.
 If \code{FALSE}, return all \code{expression()} expressions}
 }

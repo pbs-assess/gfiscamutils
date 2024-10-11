@@ -6,6 +6,10 @@
 #' @inheritParams plot_index_mcmc
 #' @family Time series plotting functions
 #'
+#' @param start_year Year to start the plot
+#' @param end_year Year to end the plot
+#' @param dodge Amount to offset multiple model points on x-axis (in years)
+
 #' @export
 plot_index_mpd <- function(models,
                            type = c("fits", "resids"),

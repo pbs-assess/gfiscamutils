@@ -9,6 +9,8 @@ table_iscam_param_desc(model, ...)
 }
 \arguments{
 \item{model}{An iscam model object (class \link{mdl_cls})}
+
+\item{...}{Arguments passed to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }
 \value{
 A \code{\link[knitr:kable]{knitr::kable()}} table

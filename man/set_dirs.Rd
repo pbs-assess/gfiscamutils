@@ -33,6 +33,8 @@ located}
 
 \item{sens_models_dir}{Name of the sensitivity models directory}
 
+\item{retro_models_dir}{Name of the retrospectives models directory}
+
 \item{base_models_dirs}{A vector of subdirectory names in
 \code{base_models_dir} that each contain an individual base model}
 
@@ -42,6 +44,11 @@ located}
 \item{sens_models_dirs}{A vector of subdirectory names in \code{sens_models_dir}
 that each contain an individual sensitivity model}
 
+\item{retro_models_dirs}{A vector of subdirectory names in
+\code{retro_models_dir}that each contain an individual retrospective model}
+
+\item{prepend_to_bridge}{Logical. If \code{TRUE} prepend the base model to the bridge model list (not implemented)}
+
 \item{suppress_warnings}{If \code{TRUE}, warnings about directories not existing
 will not be shown}
 
@@ -49,12 +56,6 @@ will not be shown}
 file structure for an assessment. This is used for SR documents, where there
 is a new base model with more data included in a subsequent year. If this
 is \code{NULL}, the usual base model location will be used}
-
-\item{retrospectives_models_dir}{Name of the retrospectives models directory}
-
-\item{retrospectives_models_dirs}{A vector of subdirectory names in
-\code{retrospectives_models_dir}that each contain an individual retrospective
-model}
 }
 \value{
 A list of vectors of directory names, which will have \code{NA} elements

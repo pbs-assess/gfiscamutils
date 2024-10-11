@@ -34,8 +34,6 @@ will be included}
 each sex. If \code{FALSE}, the female value will be used}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
-
-\item{french}{If \code{TRUE} translate to French}
 }
 \value{
 An \code{\link[csasdown:csas_table]{csasdown::csas_table()}}

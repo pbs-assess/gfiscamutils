@@ -4,6 +4,8 @@
 #' Make a table of reference points for MCMC iSCAM models
 #'
 #' @inheritParams table_param_est_mcmc
+#' @param models A list of iscam model objects (class [mdl_lst_cls])
+#' @param type On eof "median" or "ci" for credible interval
 #' @param bo_refpts Vector of two proportional values for the limit reference
 #' point and Upper stock reference. Values are 0.2B0 and 0.4B0 by default
 #' @param bmsy_refpts Vector of two proportional values for the limit reference
@@ -15,8 +17,6 @@
 #' is supplied, an error will be thrown
 #'
 #' @return A [csasdown::csas_table()]
-#' @importFrom purrr imap_dfr
-#' @importFrom readr parse_number locale
 #' @export
 table_ref_points_mcmc <- function(models,
                                   type = c("median", "ci"),
@@ -46,7 +46,7 @@ table_ref_points_mcmc <- function(models,
          call. = FALSE)
   }
 
-  param_col_name <- ifelse(fr(), "Paramètre", "Parameter")
+  param_col_name <- ifelse(fr(), "Param\u00E8tre", "Parameter")
 
   # Match the given probs with their respective quant columns
   prob_cols <- paste0(prettyNum(probs * 100), "%")
@@ -157,7 +157,7 @@ table_ref_points_mcmc <- function(models,
     tab <- full_join(tab, ci_df, by = "param") |>
       mutate(param = get_fancy_names(param))
     if(fr()){
-      names(tab) <- c("Point de référence", "Médiane", "Intervalle crédible")
+      names(tab) <- c("Point de r\u00E9f\u00E9rence", "M\u00E9diane", "Intervalle cr\u00E9dible")
     }else{
       names(tab) <- c("Reference point", "Median", "Credible interval")
     }

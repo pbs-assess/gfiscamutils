@@ -13,6 +13,9 @@ get_proj_biomass_raw(model, calc_depl = TRUE, rm_yrs = NULL, ...)
 \code{ret_biomass_cols} is \code{TRUE}  and change the output columns to those
 relative biomasses instead of absolute biomass}
 
+\item{rm_yrs}{A vector of years to remove from the table. If \code{NULL}, remove
+none}
+
 \item{...}{Absorb arguments intended for other functions}
 }
 \value{

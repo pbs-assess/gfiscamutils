@@ -7,8 +7,7 @@
 #' @param load_proj Do the calculations for the projections
 #' @param index_scale Number to multiply the index values by so they match the
 #' `survey_index` values
-#' @param ... arguments to pass to [calc_proj_probs()] to construct the
-#' decision tables
+#' @param ... Arguments to be absorbed by other functions
 #'
 #' @return A list of each parameter for which quantiles were calculated
 #' @importFrom dplyr rename bind_rows
@@ -27,7 +26,7 @@ calc_mcmc <- function(model,
   if(length(probs) != 3){
     stop("`probs` must be a vector of three numeric values")
   }
-  if(class(probs) != "numeric"){
+  if(!inherits(probs, "numeric")){
     stop("`probs` must be a numeric vector")
   }
   if(any(probs < 0 | probs > 1)){

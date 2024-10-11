@@ -9,7 +9,10 @@ read_psv(fn, n_samples = 10000)
 \arguments{
 \item{fn}{Filename}
 
-\item{nsamples}{Number of samples}
+\item{n_samples}{Number of samples}
+}
+\value{
+A \link[base:matrix]{base::matrix}
 }
 \description{
 Read ADMB-generated psv file
@@ -17,5 +20,5 @@ Read ADMB-generated psv file
 \details{
 The psv file is generated when the MCMC is run in ADMB and is used to
 perform the calculations needed for the -mceval step. It contains the
-posterior values in binary fowmat.
+posterior values in binary format.
 }

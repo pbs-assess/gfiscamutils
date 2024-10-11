@@ -9,6 +9,8 @@ plot_selex_mpd(model, gear = NULL, show_maturity = FALSE, title = NULL)
 \arguments{
 \item{model}{An iscam model object (class \link{mdl_cls})}
 
+\item{gear}{Gear numbers to use in the plot}
+
 \item{show_maturity}{If \code{TRUE}, overlay the maturity ogive on the selectivity plots}
 
 \item{title}{The plot title. NULL means no title}

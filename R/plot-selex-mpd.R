@@ -7,7 +7,7 @@
 #' @family Selectivity plotting functions
 #'
 #' @param title The plot title. NULL means no title
-#'
+#' @param gear Gear numbers to use in the plot
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom ggplot2 geom_function
 #' @export

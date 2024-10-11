@@ -23,6 +23,8 @@ all catch values present in the projections will be used}
 \item{ret_df}{Logical. If \code{TRUE} return a data frame with the values,
 instead of the \code{\link[csasdown:csas_table]{csasdown::csas_table()}} formatted table}
 
+\item{format}{One of "html" or "latex"}
+
 \item{bold_header}{If \code{TRUE}, make the headers bold. This only works
 if the \code{format} is 'html'. If it is 'latex', you must paste latex bold
 macros around the column headers manually}

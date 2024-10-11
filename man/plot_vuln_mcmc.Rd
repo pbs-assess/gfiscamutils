@@ -14,6 +14,8 @@ plot_vuln_mcmc(
 )
 }
 \arguments{
+\item{model}{An iSCAM model object as created in \code{\link[=load_iscam_files]{load_iscam_files()}}}
+
 \item{append_base_txt}{A vector of strings to append to the model names for
 display on the plot legend or title}
 
@@ -28,11 +30,6 @@ will be used}
 is the bottom left corner}
 
 \item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
-
-\item{inc_sbt}{Logical. If \code{TRUE}, put all gear's vulnerable biomass
-on one plot along with the spawning biomass (sbt). If \code{FALSE}, make
-a panel plot with one vulnerable biomass plot per panel, with no
-spawning biomass}
 }
 \description{
 Plot vulnerable biomass time series plots for MCMC output with credible

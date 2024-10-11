@@ -6,6 +6,9 @@
 #' @inheritParams plot_ts_mcmc
 #' @family Time series plotting functions
 #'
+#' @param start_year Year to start the plot
+#' @param end_year Year to end the plot
+#' @param dodge Amount to offset multiple model points on x-axis (in years)
 #' @param surv_index The `survey_index` data frame which is `dat$survey_index`
 #' if `dat` is the output from the [gfdata::get_survey_index()] function
 #' @param type Either 'fits' or 'resids' for model fits or residuals respectively
@@ -17,17 +20,12 @@
 #' @param index_color The color used for the observed index lines and points
 #' @param fit_line_width The model fit error bar and connecting line width
 #' @param fit_point_size The model fit point size
+#' @param text_title_size Size of text for the axis titles
 #' @param errbar_width The width of the top and bottom crossbar of the errorbars
 #' @param units One of "1000 t" or "kt". The text that will appear in the
 #' y-axis label. The "1000 t" text will be changed to "1,000 t" or "1 000 t"
 #' for English or French respectively
 #'
-#' @importFrom RColorBrewer brewer.pal.info
-#' @importFrom tibble enframe
-#' @importFrom purrr flatten map_chr map_df map2
-#' @importFrom dplyr mutate_at
-#' @importFrom ggplot2 geom_ribbon facet_wrap scale_color_brewer
-#' @importFrom utils capture.output
 #' @export
 plot_index_mcmc <- function(models,
                             type = c("fits", "resids"),

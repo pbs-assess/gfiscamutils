@@ -7,6 +7,7 @@
 #' @inheritParams plot_ts_mcmc
 #' @family Time series plotting functions
 #'
+#' @param ... Arguments passed to [plot_biomass_mcmc()] and [plot_recr_mcmc()]
 #' @return A [cowplot::plot_grid()] object
 #' @export
 plot_recr_grid_mcmc <- function(models,

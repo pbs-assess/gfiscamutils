@@ -7,11 +7,20 @@
 vec2df(vec, nms = NULL)
 }
 \arguments{
-\item{vec}{A vector}
+\item{vec}{A vector of single values}
+
+\item{nms}{A vector of names to set as column names in the resulting
+data frame. Must be the same length as \code{vec}}
 }
 \value{
 A \code{\link[tibble:tibble]{tibble::tibble()}} with one row
 }
 \description{
 Create a one-row tibble from a vector of values
+}
+\details{
+If the vector \code{vec} is a named vector, the names will become the
+column names of the resulting data frame. If the \code{nms} vector is provided,
+the names of the data frame will be set to those names, regardless of
+whether or not the vector \code{vec} had names.
 }
