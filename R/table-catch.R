@@ -81,8 +81,6 @@ table_catch <- function(catch_df,
     return(tab)
   }
 
-  names(tab) <- tr(names(tab))
-
   out <- csas_table(tab,
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
@@ -225,9 +223,6 @@ table_catch_fleet <- function(catch_df_lst = NULL,
   names(tab) <- gsub("^Discarded", "Discards", names(tab))
   names(tab) <- gsub("^total.*$", "Total", names(tab))
   names(tab) <- gsub("^value$", "Total Catch", names(tab))
-
-  # Change to French if necessary
-  names(tab) <- tr(names(tab))
 
   # Replace NA's in the table with dashes
   tab[is.na(tab)] <- 0
