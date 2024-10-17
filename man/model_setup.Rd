@@ -46,5 +46,7 @@ model groups, and sensitivity model groups
 }
 \details{
 If any of the text lists are \code{NULL}, default description text will be
-assigned and a warning given.
+assigned and a warning given. If the object "models" is already in
+existence, that will be used and only the names will be changed. This
+allows for easy and fast switching between French and English.
 }

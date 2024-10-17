@@ -3,7 +3,9 @@
 #'
 #' @details
 #' If any of the text lists are `NULL`, default description text will be
-#' assigned and a warning given.
+#' assigned and a warning given. If the object "models" is already in
+#' existence, that will be used and only the names will be changed. This
+#' allows for easy and fast switching between French and English.
 #'
 #' @param drs Output list from [set_dirs()]
 #' @param bridge_models_desc A list of vectors of text strings to show in
@@ -90,50 +92,73 @@ model_setup <- function(drs = NA,
   # For each type (base, bridge, sens, request, test) extract unique groups,
   # load them only once if duplicates (to save time/memory) and match with
   # where they belong in the list according to model_list
-  model_grps <- map2(model_lst, model_desc_lst, function(type, type_nm, ...){
+  if(exists("models")){
+    # If the loading has already been done, just reset the model names so it is
+    # easy and fast to switch back and forth from English to French
+    model_grps <- map2(models, lst, \(model_grp, descs){
+      map2(model_grp, descs, \(mdls, desc){
+        names(mdls) <- desc
+        mdls <- map2(mdls, desc, \(mdl, dsc){
+          attr(mdl, "model_desc") <- dsc
+          mdl <- mdl |>
+            `class<-`(mdl_cls)
 
-    if(!is.null(type[1]) && !is.na(type[1])){
-      # Check that the RDS files exists for these models
-      walk(unique_models_dirs, function(path, ...){
-        fn <- file.path(dirname(path), paste0(basename(path), ".rds"))
-        if(!file.exists(fn)){
-          stop("RDS file missing: `", fn, "`", call. = FALSE)
-          #create_rds_file(path, ...)
-        }}, ...)
+          mdl
+        }) |>
+          `class<-`(mdl_lst_cls)
 
-      # Load the models in from the RDS files
-      unique_models <- map(unique_models_dirs, function(path){
-        fn <- file.path(dirname(path), paste0(basename(path), ".rds"))
-        readRDS(fn)
+        mdls
       })
-    }
+    })
+  }else{
+    model_grps <- map2(model_lst,
+                       model_desc_lst,
+                       \(type, type_nm, ...){
 
-    # Populate actual model output
-    models <- map2(type, type_nm, function(dirs, descs){
-      if(is.na(type[1])){
-        return(NA)
+      if(!is.null(type[1]) && !is.na(type[1])){
+        # Check that the RDS files exists for these models
+        walk(unique_models_dirs, \(path, ...){
+          fn <- file.path(dirname(path), paste0(basename(path), ".rds"))
+          if(!file.exists(fn)){
+            stop("RDS file missing: `", fn, "`", call. = FALSE)
+            #create_rds_file(path, ...)
+          }}, ...)
+
+        # Load the models in from the RDS files
+        unique_models <- map(unique_models_dirs, function(path){
+          fn <- file.path(dirname(path), paste0(basename(path), ".rds"))
+          readRDS(fn)
+        })
       }
 
-      map2(dirs, descs, function(dr, desc){
-        tmp <- unique_models[[match(dr, unique_models_dirs)]]
-        # Add description to the model
-        # Example of how to access description for bridge model
-        # group 1 model 3:
-        # attr(models$bridge_models_dirs[[1]][[3]], "desc")
-        attr(tmp, "model_desc") <- desc
-        tmp <- tmp %>%
-          `class<-`(mdl_cls)
-        # Assign description text to the model (from bridge_model_text and sens_model_text)
-        tmp
-      }) %>%
-        `names<-`(descs) %>%
-        `class<-`(mdl_lst_cls)
-    })
-  })
+      # Populate actual model output
+      models <- map2(type, type_nm, \(dirs, descs){
+        if(is.na(type[1])){
+          return(NA)
+        }
 
-  names(model_grps) <- c("base_grps",
-                         "bridge_grps",
-                         "sens_grps",
-                         "retro_grps")
+        map2(dirs, descs, \(dr, desc){
+          tmp <- unique_models[[match(dr, unique_models_dirs)]]
+          # Add description to the model
+          # Example of how to access description for bridge model
+          # group 1 model 3:
+          # attr(models$bridge_models_dirs[[1]][[3]], "desc")
+          attr(tmp, "model_desc") <- desc
+          tmp <- tmp |>
+            `class<-`(mdl_cls)
+          # Assign description text to the model (from bridge_model_text and sens_model_text)
+          tmp
+        }) |>
+          `names<-`(descs) |>
+          `class<-`(mdl_lst_cls)
+      })
+    })
+
+    names(model_grps) <- c("base_grps",
+                           "bridge_grps",
+                           "sens_grps",
+                           "retro_grps")
+  }
+
   model_grps
 }
