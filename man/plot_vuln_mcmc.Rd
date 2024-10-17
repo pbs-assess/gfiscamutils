@@ -10,7 +10,8 @@ plot_vuln_mcmc(
   xlim = NULL,
   ylim = NULL,
   leg_loc = NULL,
-  angle_x_labels = FALSE
+  angle_x_labels = FALSE,
+  units = c("kt", "1000 t")
 )
 }
 \arguments{
@@ -29,7 +30,12 @@ will be used}
 1 to anchor the legend to. eg. c(1, 1) is the top right corner and c(0, 0)
 is the bottom left corner}
 
-\item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels}
+\item{angle_x_labels}{If \code{TRUE} put 45 degree angle on x-axis tick labels
+minimum and the ceiling of the maximum value (including CI)}
+
+\item{units}{One of "1000 t" or "kt". The text that will appear in the
+y-axis label. The "1000 t" text will be changed to "1,000 t" or "1 000 t"
+for English or French respectively}
 }
 \description{
 Plot vulnerable biomass time series plots for MCMC output with credible

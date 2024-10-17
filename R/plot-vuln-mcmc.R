@@ -7,6 +7,10 @@
 #' @inheritParams plot_ts_mcmc
 #' @param model An iSCAM model object as created in [load_iscam_files()]
 #' @param angle_x_labels If `TRUE` put 45 degree angle on x-axis tick labels
+#' minimum and the ceiling of the maximum value (including CI)
+#' @param units One of "1000 t" or "kt". The text that will appear in the
+#' y-axis label. The "1000 t" text will be changed to "1,000 t" or "1 000 t"
+#' for English or French respectively
 #' @family Time series plotting functions
 #'
 #' @export
@@ -15,8 +19,19 @@ plot_vuln_mcmc <- function(model,
                            xlim = NULL,
                            ylim = NULL,
                            leg_loc = NULL,
-                           angle_x_labels = FALSE){
+                           angle_x_labels = FALSE,
+                           units = c("kt", "1000 t")){
 
+  units <- match.arg(units)
+  if(fr()){
+    if(units == "1000 t"){
+      units <- "1 000 t"
+    }
+  }else{
+    if(units == "1000 t"){
+      units <- "1,000 t"
+    }
+  }
 
     if(!is_iscam_model(model)){
       stop("The `model` is not a ", mdl_cls, " class", call. = FALSE)
@@ -43,5 +58,5 @@ plot_vuln_mcmc <- function(model,
                  leg_loc = leg_loc,
                  xlim = xlim,
                  ylim = ylim,
-                 y_label = paste0(tr("Biomass"), " (kt)"))
+                 y_label = paste0(tr("Biomass"), " (", units, ")"))
 }
