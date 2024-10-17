@@ -198,11 +198,26 @@ plot_selex_mcmc <- function(model,
               by = c("gear", "Sex", "age")) |>
     mutate(value = lo_value)
 
-  g <- ggplot(med_vals, aes(x = factor(age),
-                            y = value,
-                            group = Sex,
-                            color = Sex,
-                            fill = Sex)) +
+  # Need to change the Sex column to Sexe for French in all data frames
+  change_sex_col <- \(d){
+    nms <- names(d)
+    nms[nms == "Sex"] <- ifelse(fr(), "Sexe", "Sex")
+    names(d) <- nms
+    d
+  }
+  med_vals <- change_sex_col(med_vals)
+  rib_vals <- change_sex_col(rib_vals)
+  lo_vals <- change_sex_col(lo_vals)
+  hi_vals <- change_sex_col(hi_vals)
+
+  sex_col <- sym(ifelse(fr(), "Sexe", "Sex"))
+
+  g <- ggplot(med_vals,
+              aes(x = factor(age),
+                  y = value,
+                  group = !!sex_col,
+                  color = !!sex_col,
+                  fill = !!sex_col)) +
     geom_line() +
     geom_point() +
     xlab("Age") +
@@ -215,19 +230,19 @@ plot_selex_mcmc <- function(model,
       geom_ribbon(data = rib_vals,
                   aes(ymin = lo_value,
                       ymax = hi_value,
-                      group = Sex),
+                      group = !!sex_col),
                   alpha = ci_alpha,
                   color = NA)
   }
   if(ci_type %in% c("line", "both")){
     g <- g +
       geom_line(data = lo_vals, aes(y = lo_value,
-                                    group = Sex,
-                                    color = Sex),
+                                    group = !!sex_col,
+                                    color = !!sex_col),
                 linetype = ci_linetype) +
       geom_line(data = hi_vals, aes(y = hi_value,
-                                    group = Sex,
-                                    color = Sex),
+                                    group = !!sex_col,
+                                    color = !!sex_col),
                 linetype = ci_linetype)
   }
   g <- g +
@@ -250,7 +265,7 @@ plot_selex_mcmc <- function(model,
       a50_female <- model$dat$age.at.50.mat[1]
       sigma_a50_female <- model$dat$sd.at.50.mat[1]
     }
-      g <- g +
+    g <- g +
       geom_function(fun = function(x){1 / (1 + exp(-(x - a50_female) / sigma_a50_female))},
                     color = "red",
                     linetype = "dashed")
