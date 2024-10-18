@@ -10,6 +10,7 @@ table_catch_area(
   start_yr = NULL,
   gear_col_widths = "5em",
   scale_factor = 1000,
+  bold_headers = TRUE,
   ...
 )
 
@@ -18,6 +19,7 @@ table_catch_area(
   start_yr = NULL,
   gear_col_widths = "5em",
   scale_factor = 1000,
+  bold_headers = TRUE,
   ...
 )
 }
@@ -30,6 +32,8 @@ table_catch_area(
 
 \item{scale_factor}{Value to divide all the catches by to make the table
 in tonnes}
+
+\item{bold_headers}{If \code{TRUE}, make all column headers bold}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }

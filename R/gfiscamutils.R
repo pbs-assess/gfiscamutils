@@ -37,6 +37,7 @@
 #' @importFrom readr read_csv
 #' @importFrom rlang .data sym
 #' @importFrom stats acf as.formula cor.test quantile
+#' @importFrom stringr str_wrap
 #' @importFrom tibble enframe
 #' @importFrom tidyr pivot_wider pivot_longer
 #' @importFrom utils capture.output

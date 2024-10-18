@@ -300,7 +300,8 @@ plot_ts_mcmc <- function(models,
     xlab(x_label) +
     ylab(y_label) +
     scale_color_manual(values = model_colors,
-                       labels = map(models, ~{tex(as.character(attributes(.x)$model_desc))}))
+                       labels = map(models,
+                                    ~{tex(as.character(attributes(.x)$model_desc))}))
 
   if(first_model_ribbon){
     first_model_nm <- as.character(var_quants$model[1])

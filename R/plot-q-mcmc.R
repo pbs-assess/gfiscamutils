@@ -155,13 +155,12 @@ plot_q_mcmc <- function(models,
                ymax = !!sym(quants[3]))) +
     xlab(x_label) +
     ylab(y_label) +
-    scale_color_manual(values = model_colors) +
     guides(color = guide_legend(title = legend_title)) +
     theme(axis.text.x = element_blank(),
           axis.ticks.x = element_blank()) +
     scale_color_manual(values = model_colors,
-                       labels = map(models, ~{tex(as.character(attributes(.x)$model_desc))}))
-
+                       labels = map(models,
+                                    ~{tex(as.character(attributes(.x)$model_desc))}))
 
   g <- g +
     geom_pointrange(aes(color = model)) +

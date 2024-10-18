@@ -153,6 +153,7 @@ tr <- function(x, ...){
 #' @importFrom latex2exp TeX
 #' @export
 tex <- function(text){
+
   unname(TeX(text))
 }
 
