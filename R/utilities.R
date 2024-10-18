@@ -271,10 +271,11 @@ gear_lu_table <- function(model,
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom lemon reposition_legend
 #' @export
-move_legend_to_empty_facet <- function(g) {
+move_legend_to_empty_facet <- function(g){
+
   if(!(inherits(g, "gtable"))){
     if(inherits(g, "ggplot")){
-      gp <- ggplotGrob(g) # convert to grob
+      gp <- ggplotGrob(g)
     }else{
       message("This is neither a ggplot object nor a grob ",
               "generated from ggplotGrob. Returning original plot.")
@@ -285,22 +286,23 @@ move_legend_to_empty_facet <- function(g) {
   }
 
   # check for unfilled facet panels
-  facet_panels <- grep("^panel", gp[["layout"]][["name"]])
+  facet_panels <- grep("^panel", gp$layout$name)
   empty_facet_panels <- sapply(facet_panels,
-                               function(i){
-                                 "zeroGrob" %in% class(gp[["grobs"]][[i]])
-                                 })
-  empty_facet_panels <- facet_panels[empty_facet_panels]
+                               \(i){
+                                 "zeroGrob" %in% class(gp$grobs[[i]])
+                               })
+  empty_facet_panels_ind <- facet_panels[empty_facet_panels]
 
   # establish name of empty panels
-  empty_facet_panels <- gp[["layout"]][empty_facet_panels, ]
+  empty_facet_panels <- gp$layout[empty_facet_panels_ind, ]
   names <- empty_facet_panels$name
   if(!length(names)){
-    stop("There are no empty facets to place the legend in", call. = FALSE)
+    stop("There are no empty facets to place the legend in")
   }
+
   # example of names:
   #[1] "panel-3-2" "panel-3-3"
-  reposition_legend(g, 'center', panel = names)
+  reposition_legend(g, "center", panel = names)
 }
 
 #' Determine if a model is a valid iSCAM model
