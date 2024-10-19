@@ -373,8 +373,8 @@ table_catch_area <- function(catch_df,
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
                     ...) |>
-    add_header_above(header = header_vec, bold = TRUE) |>
-    add_header_above(header = area_header_vec, bold = TRUE)
+    add_header_above(header = header_vec, bold = bold_headers) |>
+    add_header_above(header = area_header_vec, bold = bold_headers)
 
   if(!is.null(gear_col_widths)){
     out <- out |>

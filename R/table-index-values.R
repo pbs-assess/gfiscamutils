@@ -4,14 +4,15 @@
 #' @param col_widths Widths for columns, except the Parameter column
 #' the [csasdown::csas_table()]
 #' @param digits Number of decimal points to show in table
+#' @param bold_headers If `TRUE`, make all column headers bold
 #' @param ... Arguments passed to [csasdown::csas_table()]
 #'
 #' @return A [csasdown::csas_table()] object
-#' @importFrom dplyr arrange
 #' @export
 table_index_values <- function(model,
                                col_widths = "5em",
                                digits = 2,
+                               bold_headers = TRUE,
                                ...){
 
 
@@ -58,12 +59,17 @@ table_index_values <- function(model,
   tmp_nms_inds <- which(names(tab) != "CV")
   names(tab)[tmp_nms_inds] <- tr(names(tab)[tmp_nms_inds])
 
+  # Make bold headers
+  if(bold_headers){
+    names(tab) <- paste0("\\textbf{", names(tab), "}")
+  }
+
   out <- csas_table(tab,
                     format = "latex",
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
                     ...) |>
-    add_header_above(header = header_vec, escape = TRUE)
+    add_header_above(header = header_vec, bold = bold_headers)
 
   if(!is.null(col_widths)){
     out <- out |>

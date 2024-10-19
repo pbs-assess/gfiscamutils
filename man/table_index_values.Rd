@@ -4,7 +4,13 @@
 \alias{table_index_values}
 \title{Create a table of index data values}
 \usage{
-table_index_values(model, col_widths = "5em", digits = 2, ...)
+table_index_values(
+  model,
+  col_widths = "5em",
+  digits = 2,
+  bold_headers = TRUE,
+  ...
+)
 }
 \arguments{
 \item{model}{An iSCAM model object as created in \code{\link[=load_iscam_files]{load_iscam_files()}}}
@@ -13,6 +19,8 @@ table_index_values(model, col_widths = "5em", digits = 2, ...)
 the \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 
 \item{digits}{Number of decimal points to show in table}
+
+\item{bold_headers}{If \code{TRUE}, make all column headers bold}
 
 \item{...}{Arguments passed to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }

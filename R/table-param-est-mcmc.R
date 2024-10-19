@@ -13,6 +13,7 @@
 #' [csasdown::csas_table()]
 #' @param show_year_range Logical. If `TRUE`, show the "Year range" column
 #' in the output table
+#' @param bold_headers If `TRUE`, make all column headers bold
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
 #' @return A [csasdown::csas_table()]
@@ -23,6 +24,7 @@ table_param_est_mcmc <- function(model,
                                  model_col_widths = NULL,
                                  ret_df = FALSE,
                                  show_year_range = TRUE,
+                                 bold_headers = TRUE,
                                  ...){
 
   if(!is_iscam_model(model)){
@@ -190,6 +192,11 @@ table_param_est_mcmc <- function(model,
     mutate(!!param_sym := gsub("MSY",
                                tr("MSY"),
                                !!param_sym))
+
+  # Make bold headers
+  if(bold_headers){
+    names(params_quants) <- paste0("\\textbf{", names(params_quants), "}")
+  }
 
   out <- csas_table(params_quants,
                     format = "latex",

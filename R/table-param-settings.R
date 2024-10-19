@@ -9,15 +9,14 @@
 #' instead of the [knitr::kable()] formatted table
 #' @param col_widths The width of all columns other than the first. If `NULL`,
 #' do not set
+#' @param bold_headers If `TRUE`, make all column headers bold
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
 #' @export
-#' @importFrom gfutilities latex.bold latex.mlc latex.size.str get.align
-#' @importFrom purrr pmap_dfr
-#' @importFrom dplyr add_row
 table_param_settings <- function(model,
                                  ret_df = FALSE,
                                  col_widths = "5em",
+                                 bold_headers = TRUE,
                                  ...){
 
   params <- model$ctl$params |>
@@ -201,12 +200,17 @@ table_param_settings <- function(model,
   if(ret_df){
     return(params_out)
   }
+
+  # Make bold headers
+  if(bold_headers){
+    names(params_out) <- paste0("\\textbf{", names(params_out), "}")
+  }
+
   tab <- csas_table(params_out,
                     col.names = names(params_out),
                     align = c("l", rep("r", ncol(params_out) - 1)),
                     format = "latex",
                     ...)
-
 
   if(!is.null(col_widths)){
     tab <- tab |>

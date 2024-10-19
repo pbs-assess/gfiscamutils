@@ -11,6 +11,7 @@ table_param_est_mcmc(
   model_col_widths = NULL,
   ret_df = FALSE,
   show_year_range = TRUE,
+  bold_headers = TRUE,
   ...
 )
 }
@@ -30,6 +31,8 @@ different quantile levels}
 
 \item{show_year_range}{Logical. If \code{TRUE}, show the "Year range" column
 in the output table}
+
+\item{bold_headers}{If \code{TRUE}, make all column headers bold}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }

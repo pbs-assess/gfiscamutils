@@ -4,7 +4,13 @@
 \alias{table_param_settings}
 \title{Create a table summarizing parameterization of an iSCAM model}
 \usage{
-table_param_settings(model, ret_df = FALSE, col_widths = "5em", ...)
+table_param_settings(
+  model,
+  ret_df = FALSE,
+  col_widths = "5em",
+  bold_headers = TRUE,
+  ...
+)
 }
 \arguments{
 \item{model}{A single output model}
@@ -14,6 +20,8 @@ instead of the \code{\link[knitr:kable]{knitr::kable()}} formatted table}
 
 \item{col_widths}{The width of all columns other than the first. If \code{NULL},
 do not set}
+
+\item{bold_headers}{If \code{TRUE}, make all column headers bold}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }
