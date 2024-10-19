@@ -9,6 +9,7 @@ table_sens_param_changes(
   sens_change_vec,
   ret_df = FALSE,
   col_widths = NULL,
+  bold_headers = TRUE,
   ...
 )
 }
@@ -20,6 +21,8 @@ table_sens_param_changes(
 \item{ret_df}{Logical. If \code{TRUE}, return a data frame instead of the table}
 
 \item{col_widths}{A vector of column widths. See \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
+
+\item{bold_headers}{If \code{TRUE}, make all column headers bold}
 
 \item{...}{Arguments passed to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }

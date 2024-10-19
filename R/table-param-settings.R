@@ -201,7 +201,6 @@ table_param_settings <- function(model,
     return(params_out)
   }
 
-  # Make bold headers
   if(bold_headers){
     names(params_out) <- paste0("\\textbf{", names(params_out), "}")
   }
