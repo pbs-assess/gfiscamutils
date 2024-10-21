@@ -18,13 +18,14 @@
 #'
 #' @return Either a [data.frame] or a [csasdown::csas_table()], depending on
 #' the value of `return_df`
-#' @importFrom purrr map_dfr
+#' @param bold_headers If `TRUE`, make all column headers bold
 #' @export
 table_growth_params <- function(model,
                                 col_widths = NULL,
                                 ret_df = FALSE,
                                 digits = 2,
                                 alpha_digits = 7,
+                                bold_headers = TRUE,
                                 ...){
 
   if(is_iscam_model_list(model) && length(model) == 1){
@@ -39,13 +40,27 @@ table_growth_params <- function(model,
     stop("`model` is not an iscam model object")
   }
 
-  param_names <- enframe(c("Asymptotic length ($l_{inf}$)",
-                           "Brody growth coefficient ($k$)",
-                           "Theoretical age at zero length ($t_0$)",
-                           "Scalar in length-weight allometry ($\\alpha$)",
-                           "Power parameter in length-weight allometry ($\\beta$)",
-                           "Age at 50\\% maturity ($\\dot{a}$)",
-                           "SD at 50\\% maturity ($\\dot{\\gamma}$)"),
+  param_names <- enframe(c(ifelse(fr(),
+                                  "Longueur asymptotique ($l_{inf}$)",
+                                  "Asymptotic length ($l_{inf}$)"),
+                           ifelse(fr(),
+                                  "Coefficient de croissance de Brody ($k$)",
+                                  "Brody growth coefficient ($k$)"),
+                           ifelse(fr(),
+                                  "Âge théorique à la longueur zéro ($t_0$)",
+                                  "Theoretical age at zero length ($t_0$)"),
+                           ifelse(fr(),
+                                  "Scalaire dans l'allométrie longueur-poids ($\\alpha$)",
+                                  "Scalar in length-weight allometry ($\\alpha$)"),
+                           ifelse(fr(),
+                                  "Paramètre de puissance dans l'allométrie longueur-poids ($\\beta$)",
+                                  "Power parameter in length-weight allometry ($\\beta$)"),
+                           ifelse(fr(),
+                                  "Âge à 50 ans ($\\dot{a}$)",
+                                  "Age at 50\\% maturity ($\\dot{a}$)"),
+                           ifelse(fr(),
+                                  "SD à 50\\% de maturité ($\\dot{\\gamma}$)",
+                                  "SD at 50\\% maturity ($\\dot{\\gamma}$)")),
                          name = NULL) |>
     rename(Parameter = value)
 
@@ -81,6 +96,10 @@ table_growth_params <- function(model,
   names(params) <- c(tr("Parameter"),
                      tr("Female"),
                      tr("Male"))
+
+  if(bold_headers){
+    names(params) <- paste0("\\textbf{", names(params), "}")
+  }
 
   out <- csas_table(params,
                     format = "latex",
