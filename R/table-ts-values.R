@@ -142,7 +142,6 @@ table_ts_values_mcmc <- function(models,
     tab <- tab[-nrow(tab) , ]
   }
 
-  # Make bold headers
   if(bold_headers){
     names(tab) <- paste0("\\textbf{", names(tab), "}")
   }
