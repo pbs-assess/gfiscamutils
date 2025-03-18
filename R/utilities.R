@@ -54,7 +54,7 @@ get_num_params_est <- function(model){
 #' @param param The name of a parameter
 #' @param digits The number of digits to return in all numerical output
 #'
-#' @return A vector of 3 values, as stated in the decription
+#' @return A vector of 3 values, as stated in the description
 #' @export
 get_parvals <- function(model, param, digits = 0){
 
@@ -125,23 +125,6 @@ get_group_parvals <- function(model_grp_lst,
     })
     models[lengths(models) > 1]
   })
-}
-
-#' Translate from English to French
-#'
-#' @details
-#' If options(french) has been set, the translation will happen,
-#' If options(french) is `NULL` or `FALSE`, no translation will happen
-#'
-#' @param x A character vector to translate
-#' @param ... Arguments to pass to [rosettafish::en2fr()]
-#'
-#' @return The possibly translated character vector
-#' @importFrom rosettafish en2fr
-#' @importFrom csasdown fr
-#' @export
-tr <- function(x, ...){
-  en2fr(x, translate = fr(), ...)
 }
 
 #' Create an expression from a string that may have a latex string in it

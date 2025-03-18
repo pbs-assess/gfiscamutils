@@ -18,7 +18,8 @@
 #' @import knitr
 #' @import purrr
 #' @import readr
-#' @import reshape2
+#' @import reshape
+#' @import rosettafish
 #' @rawNamespace import(scales, except = c(col_factor, discard))
 #' @import sp
 #' @rawNamespace import(testthat, except = c(edition_get, is_null, local_edition, matches))
@@ -27,7 +28,7 @@
 #' @import zoo
 #' @importFrom coda heidel.diag mcmc geweke.diag spectrum0.ar
 #' @importFrom cowplot ggdraw draw_label
-#' @importFrom csasdown csas_table
+#' @importFrom csasdown csas_table fr tr
 #' @importFrom hake insert_row
 #' @importFrom graphics barplot text
 #' @importFrom grDevices colorRampPalette

@@ -15,7 +15,7 @@ get_parvals(model, param, digits = 0)
 \item{digits}{The number of digits to return in all numerical output}
 }
 \value{
-A vector of 3 values, as stated in the decription
+A vector of 3 values, as stated in the description
 }
 \description{
 Get a vector of values (median, CI interval, and end year) for
