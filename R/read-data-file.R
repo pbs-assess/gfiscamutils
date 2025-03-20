@@ -215,6 +215,7 @@ read_data_file <- function(file = NULL,
     }
     colnames(tmp$indices[[index]]) <- c("iyr","it","gear","area","group","sex","wt","timing")
   }
+
   ## Age composition data are a ragged object and are stored as a list of matrices
   tmp$num.age.gears <- as.numeric(dat[ind <- ind + 1])
   ##if(!tmp$hasAgeGearNames){
@@ -227,8 +228,9 @@ read_data_file <- function(file = NULL,
   tmp$eff                     <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$age.comp.flag           <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$dm_num_samp             <- as.numeric(dat[ind <- ind + 1])
-  tmp$dm_use_single_num_samp  <- as.logical(dat[ind <- ind + 1])
+  tmp$dm_use_single_num_samp  <- as.logical(as.numeric(dat[ind <- ind + 1]))
   tmp$age.comps <- NULL
+
   ## One list element for each gear (tmp$nagears)
   ## Check to see if there are age comp data
   if(tmp$num.age.gears.vec[1] > 0){
@@ -251,6 +253,7 @@ read_data_file <- function(file = NULL,
                                            tmp$num.age.gears.start.age[gear]:tmp$num.age.gears.end.age[gear])
     }
   }
+
   ## Build a list of age comp gear N's
   tmp$age.gears.n <- list()
   start <- 1
@@ -259,6 +262,7 @@ read_data_file <- function(file = NULL,
     tmp$age.gears.n[[ng]] <- age.n[start:end]
     start <- end + 1
   }
+
   ## Empirical weight-at-age data
   tmp$num.weight.tab <- as.numeric(dat[ind <- ind + 1])
   tmp$num.weight.obs <- as.numeric(dat[ind <- ind + 1])

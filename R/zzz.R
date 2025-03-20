@@ -198,8 +198,7 @@ globalVariables(c(
 ".x", "1", "2", ":=", "Area", "Discarded", "Fleet", "Landings", "MPD", "Median", "residual",
 "Year", "range", "coord_cartesian", "errbar_width", "expansion", "geom_col", "geom_hline",
 "geom_segment", "geom_smooth", "guide_legend", "guides", "ival",
-"mcmc.age.resids.file", "mcmc.catch.file", "mcmc.index.resids.file",
-"mcmc.index.standardized.resids.file", "med", "med_rt", "phz", "priortype",
+"med", "med_rt", "phz", "priortype",
 "scale_size_area", "scale_x_continuous", "survey_name",
 
 "Median residual", "Sign", "TAC", "Year range", "age", "base_model", "ci_df", "end_year",
