@@ -78,8 +78,12 @@ plot_ref_points_dist_mcmc <- function(model,
     theme(axis.text.x = element_text(color = cols, size = sz)) +
     scale_x_continuous(labels = as.character(depl_quants_yr$tac),
                        breaks = depl_quants_yr$tac) +
-    ylab(paste0("Relative spawning biomass in ", yr)) +
-    xlab(paste0("Catch in ", yr - 1, " (kt)")) +
+    ylab(ifelse(fr(),
+                paste0("Biomasse reproductrice relative en ", yr),
+                paste0("Relative spawning biomass in ", yr))) +
+    xlab(ifelse(fr(),
+                paste0("Attraper en ", yr - 1, " (kt)"),
+                paste0("Catch in ", yr - 1, " (kt)"))) +
     coord_flip()
   g
 }

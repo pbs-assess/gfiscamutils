@@ -24,7 +24,7 @@
 #' @return An [ggplot2::ggplot()] object
 #' @export
 plot_biomass_proj_mcmc <- function(model,
-                                   model_name = "Base model",
+                                   model_name = csasdown::tr("Base model"),
                                    rel = FALSE,
                                    probs = c(0.025, 0.5, 0.975),
                                    x_space = 0.5,
@@ -125,7 +125,7 @@ plot_biomass_proj_mcmc <- function(model,
   class(models) <- mdl_lst_cls
 
   # Append catch level units for the legend
-  models[names(models) != "Base model"] <- models[names(models) != "Base model"] |>
+  models[names(models) != tr("Base model")] <- models[names(models) != tr("Base model")] |>
     map(~{
       attributes(.x)$model_desc <- paste0(attributes(.x)$model_desc,
                                           " ",
@@ -143,8 +143,8 @@ plot_biomass_proj_mcmc <- function(model,
                             "Biomasse relative de frai",
                             "Relative Spawning biomass"),
                      ifelse(fr(),
-                            "Biomasse reproductrice (milliers de t)",
-                            "Spawning biomass (thousand t)")),
+                            "Biomasse reproductrice (kt)",
+                            "Spawning biomass (kt)")),
                     x_space = x_space,
                     y_space = y_space,
                     probs = probs,

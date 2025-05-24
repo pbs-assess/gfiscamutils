@@ -19,6 +19,7 @@
 #' @return Either a [data.frame] or a [csasdown::csas_table()], depending on
 #' the value of `return_df`
 #' @param bold_headers If `TRUE`, make all column headers bold
+#'
 #' @export
 table_growth_params <- function(model,
                                 col_widths = NULL,
