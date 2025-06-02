@@ -12,7 +12,6 @@ table_ts_values_mcmc(
   digits = 2,
   probs = c(0.025, 0.5, 0.975),
   model_col_widths = NULL,
-  bold_headers = TRUE,
   ...
 )
 }
@@ -37,8 +36,6 @@ data frames. This is provided in case the data frames have more than three
 different quantile levels}
 
 \item{model_col_widths}{Widths for columns, except the Parameter column}
-
-\item{bold_headers}{If \code{TRUE}, make all column headers bold}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }

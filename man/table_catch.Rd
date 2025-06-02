@@ -11,7 +11,6 @@ table_catch(
   gear_col_widths = "5em",
   scale_factor = 1000,
   ret_df = FALSE,
-  bold_headers = TRUE,
   ...
 )
 }
@@ -30,8 +29,6 @@ in tonnes}
 
 \item{ret_df}{If \code{TRUE} return a data frame, if \code{FALSE}, return an
 \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
-
-\item{bold_headers}{If \code{TRUE}, make all column headers bold}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }

@@ -13,7 +13,6 @@ table_ref_points_mcmc(
   probs = c(0.025, 0.5, 0.975),
   model_col_widths = NULL,
   ord = NULL,
-  bold_headers = TRUE,
   ...
 )
 }
@@ -41,8 +40,6 @@ appear in the table based on what they were by default. If \code{NULL} the
 default order will be shown, then based on what you see, you decide what
 row order to supply to this argument. If too short or too long a vector
 is supplied, an error will be thrown}
-
-\item{bold_headers}{If \code{TRUE}, make all column headers bold}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }

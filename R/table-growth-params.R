@@ -18,7 +18,6 @@
 #'
 #' @return Either a [data.frame] or a [csasdown::csas_table()], depending on
 #' the value of `return_df`
-#' @param bold_headers If `TRUE`, make all column headers bold
 #'
 #' @export
 table_growth_params <- function(model,
@@ -26,7 +25,6 @@ table_growth_params <- function(model,
                                 ret_df = FALSE,
                                 digits = 2,
                                 alpha_digits = 7,
-                                bold_headers = TRUE,
                                 ...){
 
   if(is_iscam_model_list(model) && length(model) == 1){
@@ -97,10 +95,6 @@ table_growth_params <- function(model,
   names(params) <- c(tr("Parameter"),
                      tr("Female"),
                      tr("Male"))
-
-  if(bold_headers){
-    names(params) <- paste0("\\textbf{", names(params), "}")
-  }
 
   out <- csas_table(params,
                     format = "latex",

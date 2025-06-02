@@ -9,7 +9,6 @@
 #' in tonnes
 #' @param ret_df If `TRUE` return a data frame, if `FALSE`, return an
 #' [csasdown::csas_table()]
-#' @param bold_headers If `TRUE`, make all column headers bold
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
 #' @return A [csasdown::csas_table()]
@@ -20,7 +19,6 @@ table_catch <- function(catch_df,
                         gear_col_widths = "5em",
                         scale_factor = 1e3,
                         ret_df = FALSE,
-                        bold_headers = TRUE,
                         ...){
 
   if(length(unique(catch_df$species_common_name)) > 1){
@@ -36,7 +34,6 @@ table_catch <- function(catch_df,
                             start_yr,
                             gear_col_widths,
                             scale_factor,
-                            bold_headers = bold_headers,
                             ...))
   }
 
@@ -86,10 +83,6 @@ table_catch <- function(catch_df,
 
   names(tab) <- tr(names(tab))
 
-  if(bold_headers){
-    names(tab) <- paste0("\\textbf{", names(tab), "}")
-  }
-
   out <- csas_table(tab,
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
@@ -114,7 +107,7 @@ table_catch <- function(catch_df,
 #' Must be the same length as `catch_df_lst`
 #' @param show_total_col If `TRUE`, show a column with the total landings
 #' and discards for all fleets
-#' @param bold_headers If `TRUE`, make all column headers bold
+#'
 #' @export
 table_catch_fleet <- function(catch_df_lst = NULL,
                               fleet_nms = NULL,
@@ -123,7 +116,6 @@ table_catch_fleet <- function(catch_df_lst = NULL,
                               scale_factor = 1e3,
                               ret_df = FALSE,
                               show_total_col = TRUE,
-                              bold_headers = TRUE,
                               ...){
 
   if(is.null(catch_df_lst)){
@@ -262,20 +254,11 @@ table_catch_fleet <- function(catch_df_lst = NULL,
     header_vec <- c(header_vec, " " = 1)
   }
 
-  # Make bold headers
-  if(bold_headers){
-    names(tab) <- paste0("\\textbf{", names(tab), "}")
-    names(header_vec) <- ifelse(names(header_vec) == " ",
-                                " ",
-                                paste0("\\\\textbf{", names(header_vec), "}"))
-  }
-
   out <- csas_table(tab,
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
                     ...) |>
-    add_header_above(header = header_vec, escape = FALSE) #|>
-    #add_header_above(header = fleet_header_vec)
+    add_header_above(header = header_vec, escape = FALSE)
 
   if(!is.null(gear_col_widths)){
     out <- out |>
@@ -295,7 +278,6 @@ table_catch_area <- function(catch_df,
                              start_yr = NULL,
                              gear_col_widths = "5em",
                              scale_factor = 1e3,
-                             bold_headers = TRUE,
                              ...){
 
   catch_df <- catch_df |>
@@ -363,18 +345,13 @@ table_catch_area <- function(catch_df,
   names(area_nm) <- tr("Area")
   area_header_vec <- c(" " = 1, area_nm)
 
-  # Make bold headers
-  if(bold_headers){
-    names(tab) <- paste0("\\textbf{", names(tab), "}")
-  }
-
   out <- csas_table(tab,
                     format = "latex",
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
                     ...) |>
-    add_header_above(header = header_vec, bold = bold_headers) |>
-    add_header_above(header = area_header_vec, bold = bold_headers)
+    add_header_above(header = header_vec, ...) |>
+    add_header_above(header = area_header_vec, ...)
 
   if(!is.null(gear_col_widths)){
     out <- out |>

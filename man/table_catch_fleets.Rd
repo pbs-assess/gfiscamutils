@@ -13,7 +13,6 @@ table_catch_fleets(
   scale_factor = 1000,
   ret_df = FALSE,
   show_total_col = TRUE,
-  bold_headers = TRUE,
   format = "latex",
   ...
 )
@@ -37,8 +36,6 @@ in tonnes}
 
 \item{show_total_col}{If \code{TRUE}, show a column with the total landings
 and discards for all fleets}
-
-\item{bold_headers}{If \code{TRUE}, make all column headers bold}
 
 \item{format}{See \code{format} parameter in \code{\link[knitr:kable]{knitr::kable()}}}
 

@@ -7,7 +7,7 @@ biomass) and its projections}
 \usage{
 plot_biomass_proj_mcmc(
   model,
-  model_name = "Base model",
+  model_name = csasdown::tr("Base model"),
   rel = FALSE,
   probs = c(0.025, 0.5, 0.975),
   x_space = 0.5,

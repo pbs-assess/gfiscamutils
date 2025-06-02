@@ -14,7 +14,6 @@
 #' 'ut' (exploitation rate), or 'depl' (depletion)
 #' @param start_yr Year to start the table with. If `NULL`, all years will
 #' be included
-#' @param bold_headers If `TRUE`, make all column headers bold
 #'
 #' @return A [csasdown::csas_table()]
 #' @export
@@ -25,7 +24,6 @@ table_ts_values_mcmc <- function(models,
                                  digits = 2,
                                  probs = c(0.025, 0.5, 0.975),
                                  model_col_widths = NULL,
-                                 bold_headers = TRUE,
                                  ...){
 
   value <- match.arg(value)
@@ -142,10 +140,6 @@ table_ts_values_mcmc <- function(models,
     tab <- tab[-nrow(tab) , ]
   }
 
-  if(bold_headers){
-    names(tab) <- paste0("\\textbf{", names(tab), "}")
-  }
-
   out <- csas_table(tab,
                     format = "latex",
                     align = rep("r", ncol(tab)),
@@ -172,7 +166,7 @@ table_ts_values_mcmc <- function(models,
       }
     }
     if(bold_headers){
-      names(gear_header_vec) <- gsub("^\\$", "$\\\\\\\\mathbf{", names(gear_header_vec))
+      names(gear_header_vec) <- gsub("^\\$", "$\\\\mathbf{", names(gear_header_vec))
       names(gear_header_vec) <- gsub("\\$$", "}$", names(gear_header_vec))
     }
 

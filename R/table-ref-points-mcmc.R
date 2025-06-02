@@ -15,7 +15,6 @@
 #' default order will be shown, then based on what you see, you decide what
 #' row order to supply to this argument. If too short or too long a vector
 #' is supplied, an error will be thrown
-#' @param bold_headers If `TRUE`, make all column headers bold
 #'
 #' @return A [csasdown::csas_table()]
 #' @export
@@ -27,7 +26,6 @@ table_ref_points_mcmc <- function(models,
                                   probs = c(0.025, 0.5, 0.975),
                                   model_col_widths = NULL,
                                   ord = NULL,
-                                  bold_headers = TRUE,
                                   ...){
 
   type <- match.arg(type)
@@ -190,11 +188,6 @@ table_ref_points_mcmc <- function(models,
            call. = FALSE)
     }
     tab <- tab[ord, ]
-  }
-
-  # Make bold headers
-  if(bold_headers){
-    names(tab) <- paste0("\\textbf{", names(tab), "}")
   }
 
   out <- csas_table(tab,

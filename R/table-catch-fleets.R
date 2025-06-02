@@ -9,7 +9,6 @@
 #' Must be the same length as `catch_df_lst`
 #' @param show_total_col If `TRUE`, show a column with the total landings
 #' and discards for all fleets
-#' @param bold_headers If `TRUE`, make all column headers bold
 #' @param format See `format` parameter in [knitr::kable()]
 #' @export
 table_catch_fleets <- function(catch_df_lst = NULL,
@@ -19,7 +18,6 @@ table_catch_fleets <- function(catch_df_lst = NULL,
                                scale_factor = 1e3,
                                ret_df = FALSE,
                                show_total_col = TRUE,
-                               bold_headers = TRUE,
                                format = "latex",
                                ...){
 
@@ -154,19 +152,6 @@ table_catch_fleets <- function(catch_df_lst = NULL,
 
   if(show_total_col){
     header_vec <- c(header_vec, " " = 1)
-  }
-
-  # Make bold headers
-  if(bold_headers){
-    if(format == "latex"){
-      names(tab) <- paste0("\\textbf{", names(tab), "}")
-      names(header_vec) <- ifelse(names(header_vec) == " ",
-                                  " ",
-                                  paste0("\\\\textbf{", names(header_vec), "}"))
-    }else if(format == "html"){
-    }else{
-      stop("`format` must be one of 'latex' or 'html")
-    }
   }
 
   out <- csas_table(tab,

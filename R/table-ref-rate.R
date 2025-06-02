@@ -56,6 +56,7 @@ table_ref_rate <- function(model,
 
   csas_table(d,
              format = format,
+             bold_headers = FALSE,
              ...) |>
     row_spec(2, hline_after = TRUE)
 }
