@@ -24,6 +24,7 @@ table_ts_values_mcmc <- function(models,
                                  digits = 2,
                                  probs = c(0.025, 0.5, 0.975),
                                  model_col_widths = NULL,
+                                 bold_headers = TRUE,
                                  ...){
 
   value <- match.arg(value)
@@ -144,6 +145,7 @@ table_ts_values_mcmc <- function(models,
                     format = "latex",
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
+                    bold_headers = bold_headers,
                     ...)
 
   if(len_gears > 1){
