@@ -24,7 +24,7 @@ table_ts_values_mcmc <- function(models,
                                  digits = 2,
                                  probs = c(0.025, 0.5, 0.975),
                                  model_col_widths = NULL,
-                                 bold_headers = TRUE,
+                                 bold_header = TRUE,
                                  ...){
 
   value <- match.arg(value)
@@ -143,9 +143,11 @@ table_ts_values_mcmc <- function(models,
 
   out <- csas_table(tab,
                     format = "latex",
+                    booktabs = TRUE,
+                    linesep = "",
+                    bold_header = bold_header,
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
-                    bold_headers = bold_headers,
                     ...)
 
   if(len_gears > 1){
@@ -167,14 +169,13 @@ table_ts_values_mcmc <- function(models,
         gear_header_vec <- c(gear_header_vec, header)
       }
     }
-    if(bold_headers){
+    if(bold_header){
       names(gear_header_vec) <- gsub("^\\$", "$\\\\mathbf{", names(gear_header_vec))
       names(gear_header_vec) <- gsub("\\$$", "}$", names(gear_header_vec))
     }
 
     out <- out |>
-      add_header_above(header = gear_header_vec,
-                       escape = FALSE)
+      add_header_above(header = gear_header_vec, escape = FALSE)
   }
 
   if(length(models) > 1){

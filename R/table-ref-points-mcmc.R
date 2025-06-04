@@ -25,6 +25,7 @@ table_ref_points_mcmc <- function(models,
                                   digits = 2,
                                   probs = c(0.025, 0.5, 0.975),
                                   model_col_widths = NULL,
+                                  bold_header = TRUE,
                                   ord = NULL,
                                   ...){
 
@@ -192,6 +193,9 @@ table_ref_points_mcmc <- function(models,
 
   out <- csas_table(tab,
                     format = "latex",
+                    booktabs = TRUE,
+                    linesep = "",
+                    bold_header = bold_header,
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
                     ...)

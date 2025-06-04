@@ -18,8 +18,9 @@ table_catch_fleet <- function(catch_df_lst = NULL,
                               scale_factor = 1e3,
                               ret_df = FALSE,
                               show_total_col = TRUE,
+                              bold_header = TRUE,
                               ...){
-  browser()
+
   if(is.null(catch_df_lst)){
     stop("`catch_df_lst` must not be `NULL`",
          call. = FALSE)
@@ -155,10 +156,21 @@ table_catch_fleet <- function(catch_df_lst = NULL,
   if(show_total_col){
     header_vec <- c(header_vec, " " = 1)
   }
+  if(bold_header){
+    pat <- "^ *$"
+
+    nms <- names(header_vec)
+    nms[!grepl(pat, nms)] <- paste0("\\textbf{", nms[!grepl(pat, nms)], "}")
+    names(header_vec) <- nms
+  }
 
   out <- csas_table(tab,
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
+                    format = "latex",
+                    booktabs = TRUE,
+                    linesep = "",
+                    bold_header = bold_header,
                     ...) |>
     add_header_above(header = header_vec, escape = FALSE)
 

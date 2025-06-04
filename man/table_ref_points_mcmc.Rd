@@ -12,6 +12,7 @@ table_ref_points_mcmc(
   digits = 2,
   probs = c(0.025, 0.5, 0.975),
   model_col_widths = NULL,
+  bold_header = TRUE,
   ord = NULL,
   ...
 )

@@ -11,6 +11,7 @@ table_param_est_mcmc(
   model_col_widths = NULL,
   ret_df = FALSE,
   show_year_range = TRUE,
+  bold_header = TRUE,
   ...
 )
 }

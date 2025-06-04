@@ -12,6 +12,7 @@ table_sens_param_changes <- function(sens_desc_vec,
                                      sens_change_vec,
                                      ret_df = FALSE,
                                      col_widths = NULL,
+                                     bold_header = TRUE,
                                      ...){
 
   if(length(sens_desc_vec) != length(sens_change_vec)){
@@ -31,6 +32,9 @@ table_sens_param_changes <- function(sens_desc_vec,
 
   out <- csas_table(tab,
                     format = "latex",
+                    booktabs = TRUE,
+                    linesep = "",
+                    bold_header = bold_header,
                     align = rep("l", ncol(tab)),
                     col_names_align = rep("l", ncol(tab)),
                     ...)

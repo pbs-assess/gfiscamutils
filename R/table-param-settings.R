@@ -15,6 +15,7 @@
 table_param_settings <- function(model,
                                  ret_df = FALSE,
                                  col_widths = "5em",
+                                 bold_header = TRUE,
                                  ...){
 
   params <- model$ctl$params |>
@@ -197,6 +198,10 @@ table_param_settings <- function(model,
                                 "Priorit\u00E9 (moyenne, SD) (valeur unique = fixe)",
                                 "Prior (mean, SD) (single value = fixed)"))
 
+  if(bold_header){
+    names(params_out) <- paste0("\\textbf{", names(params_out), "}")
+  }
+
   if(ret_df){
     return(params_out)
   }
@@ -205,6 +210,9 @@ table_param_settings <- function(model,
                     col.names = names(params_out),
                     align = c("l", rep("r", ncol(params_out) - 1)),
                     format = "latex",
+                    booktabs = TRUE,
+                    linesep = "",
+                    bold_header = bold_header,
                     ...)
 
   if(!is.null(col_widths)){

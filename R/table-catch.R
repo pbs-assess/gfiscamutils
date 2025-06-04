@@ -19,6 +19,7 @@ table_catch <- function(catch_df,
                         gear_col_widths = "5em",
                         scale_factor = 1e3,
                         ret_df = FALSE,
+                        bold_header = TRUE,
                         ...){
 
   if(length(unique(catch_df$species_common_name)) > 1){
@@ -31,9 +32,10 @@ table_catch <- function(catch_df,
 
   if(by_area){
     return(table_catch_area(catch_df,
-                            start_yr,
-                            gear_col_widths,
-                            scale_factor,
+                            start_yr = start_yr,
+                            gear_col_widths = gear_col_widths,
+                            scale_factor = scale_factor,
+                            bold_header = bold_header,
                             ...))
   }
 
@@ -86,6 +88,10 @@ table_catch <- function(catch_df,
   out <- csas_table(tab,
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
+                    format = "latex",
+                    booktabs = TRUE,
+                    linesep = "",
+                    bold_header = bold_header,
                     ...)
 
   if(!is.null(gear_col_widths)){

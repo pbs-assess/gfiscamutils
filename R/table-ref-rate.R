@@ -5,16 +5,15 @@
 #' output by [find_f_b40()]
 #' @param format One of "latex" or "html"
 #' @param digits Number of decimal places to show in the table
-#' @param bold_headers If `TRUE`, make all column headers bold
+#' @param bold_header If `TRUE`, make all column headers bold
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
 #' @return A [csasdown::csas_table()]
 #' @export
 table_ref_rate <- function(model,
                            lst,
-                           format = "latex",
                            digits = 3,
-                           bold_headers = TRUE,
+                           bold_header = TRUE,
                            ...){
 
   fleet_nms <- model$dat$fleet_gear_names
@@ -45,7 +44,7 @@ table_ref_rate <- function(model,
     rename(!!fleet_sym := Fleet) |>
     map_df(~{gsub(" +NA", "", .x)})
 
-  if(bold_headers){
+  if(bold_header){
     names(d) <- gsub("^\\$", "$\\\\mathbf{", names(d))
     names(d) <- gsub("\\$$", "}$", names(d))
     inds_not_math <- !grepl("^\\$", names(d))
@@ -55,8 +54,10 @@ table_ref_rate <- function(model,
   }
 
   csas_table(d,
-             format = format,
-             bold_headers = FALSE,
+             format = "latex",
+             booktabs = TRUE,
+             linesep = "",
+             bold_header = bold_header,
              ...) |>
     row_spec(2, hline_after = TRUE)
 }

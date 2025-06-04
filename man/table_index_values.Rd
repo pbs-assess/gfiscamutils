@@ -4,7 +4,13 @@
 \alias{table_index_values}
 \title{Create a table of index data values}
 \usage{
-table_index_values(model, col_widths = "5em", digits = 2, ...)
+table_index_values(
+  model,
+  col_widths = "5em",
+  digits = 2,
+  bold_header = TRUE,
+  ...
+)
 }
 \arguments{
 \item{model}{An iSCAM model object as created in \code{\link[=load_iscam_files]{load_iscam_files()}}}

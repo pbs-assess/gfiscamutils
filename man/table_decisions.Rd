@@ -12,6 +12,7 @@ table_decisions(
   num_proj_yrs = 3,
   digits = 2,
   ret_df = FALSE,
+  bold_header = TRUE,
   col_widths = NULL,
   ...
 )

@@ -23,6 +23,7 @@ table_param_est_mcmc <- function(model,
                                  model_col_widths = NULL,
                                  ret_df = FALSE,
                                  show_year_range = TRUE,
+                                 bold_header = TRUE,
                                  ...){
 
   if(!is_iscam_model(model)){
@@ -193,6 +194,9 @@ table_param_est_mcmc <- function(model,
 
   out <- csas_table(params_quants,
                     format = "latex",
+                    booktabs = TRUE,
+                    linesep = "",
+                    bold_header = bold_header,
                     align = rep("r", ncol(params_quants)),
                     col_names_align = rep("r", ncol(params_quants)),
                     ...)

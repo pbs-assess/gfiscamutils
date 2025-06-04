@@ -11,6 +11,7 @@
 table_index_values <- function(model,
                                col_widths = "5em",
                                digits = 2,
+                               bold_header = TRUE,
                                ...){
 
 
@@ -57,12 +58,22 @@ table_index_values <- function(model,
   tmp_nms_inds <- which(names(tab) != "CV")
   names(tab)[tmp_nms_inds] <- tr(names(tab)[tmp_nms_inds])
 
+  if(bold_header){
+    pat <- "^ *$"
+
+    nms <- names(header_vec)
+    nms[!grepl(pat, nms)] <- paste0("\\textbf{", nms[!grepl(pat, nms)], "}")
+    names(header_vec) <- nms
+  }
   out <- csas_table(tab,
                     format = "latex",
+                    booktabs = TRUE,
+                    linesep = "",
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
+                    bold_header = TRUE,
                     ...) |>
-    add_header_above(header = header_vec, ...)
+    add_header_above(header = header_vec, escape = FALSE)
 
   if(!is.null(col_widths)){
     out <- out |>

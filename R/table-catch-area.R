@@ -8,6 +8,7 @@ table_catch_area <- function(catch_df,
                              start_yr = NULL,
                              gear_col_widths = "5em",
                              scale_factor = 1e3,
+                             bold_header = TRUE,
                              ...){
 
   catch_df <- catch_df |>
@@ -74,13 +75,28 @@ table_catch_area <- function(catch_df,
   names(area_nm) <- tr("Area")
   area_header_vec <- c(" " = 1, area_nm)
 
+  if(bold_header){
+    pat <- "^ *$"
+
+    nms <- names(header_vec)
+    nms[!grepl(pat, nms)] <- paste0("\\textbf{", nms[!grepl(pat, nms)], "}")
+    names(header_vec) <- nms
+
+    nms <- names(area_header_vec)
+    nms[!grepl(pat, nms)] <- paste0("\\textbf{", nms[!grepl(pat, nms)], "}")
+    names(area_header_vec) <- nms
+  }
+
   out <- csas_table(tab,
                     format = "latex",
+                    booktabs = TRUE,
+                    linesep = "",
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol(tab)),
+                    bold_header = bold_header,
                     ...) |>
-    add_header_above(header = header_vec) |>
-    add_header_above(header = area_header_vec)
+    add_header_above(header = header_vec, escape = FALSE) |>
+    add_header_above(header = area_header_vec, escape = FALSE)
 
   if(!is.null(gear_col_widths)){
     out <- out |>

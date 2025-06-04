@@ -4,14 +4,7 @@
 \alias{table_ref_rate}
 \title{Make a table containing the reference rate and values adssociated with it}
 \usage{
-table_ref_rate(
-  model,
-  lst,
-  format = "latex",
-  digits = 3,
-  bold_headers = TRUE,
-  ...
-)
+table_ref_rate(model, lst, digits = 3, bold_header = TRUE, ...)
 }
 \arguments{
 \item{model}{An iscam model object (class \link{mdl_cls})}
@@ -19,13 +12,13 @@ table_ref_rate(
 \item{lst}{A list of the reference rate and associated parameters as
 output by \code{\link[=find_f_b40]{find_f_b40()}}}
 
-\item{format}{One of "latex" or "html"}
-
 \item{digits}{Number of decimal places to show in the table}
 
-\item{bold_headers}{If \code{TRUE}, make all column headers bold}
+\item{bold_header}{If \code{TRUE}, make all column headers bold}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
+
+\item{format}{One of "latex" or "html"}
 }
 \value{
 A \code{\link[csasdown:csas_table]{csasdown::csas_table()}}

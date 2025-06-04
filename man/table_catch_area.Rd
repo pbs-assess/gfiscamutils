@@ -10,6 +10,7 @@ table_catch_area(
   start_yr = NULL,
   gear_col_widths = "5em",
   scale_factor = 1000,
+  bold_header = TRUE,
   ...
 )
 }

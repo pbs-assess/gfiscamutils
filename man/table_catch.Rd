@@ -11,6 +11,7 @@ table_catch(
   gear_col_widths = "5em",
   scale_factor = 1000,
   ret_df = FALSE,
+  bold_header = TRUE,
   ...
 )
 }

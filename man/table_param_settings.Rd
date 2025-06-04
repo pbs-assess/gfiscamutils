@@ -4,7 +4,13 @@
 \alias{table_param_settings}
 \title{Create a table summarizing parameterization of an iSCAM model}
 \usage{
-table_param_settings(model, ret_df = FALSE, col_widths = "5em", ...)
+table_param_settings(
+  model,
+  ret_df = FALSE,
+  col_widths = "5em",
+  bold_header = TRUE,
+  ...
+)
 }
 \arguments{
 \item{model}{A single output model}

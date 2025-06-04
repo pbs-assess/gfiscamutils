@@ -26,6 +26,7 @@ table_decisions <- function(model,
                             num_proj_yrs = 3,
                             digits = 2,
                             ret_df = FALSE,
+                            bold_header = TRUE,
                             col_widths = NULL,
                             ...){
 
@@ -160,7 +161,9 @@ table_decisions <- function(model,
 
   out <- csas_table(tab,
                     format = format,
-                    bold_header = FALSE,
+                    booktabs = TRUE,
+                    linesep = "",
+                    bold_header = bold_header,
                     align = rep("r", ncol(tab)),
                     col_names_align = rep("r", ncol("tab")),
                     ...)

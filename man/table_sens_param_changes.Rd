@@ -9,6 +9,7 @@ table_sens_param_changes(
   sens_change_vec,
   ret_df = FALSE,
   col_widths = NULL,
+  bold_header = TRUE,
   ...
 )
 }

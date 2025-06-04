@@ -13,6 +13,7 @@ table_catch_fleet(
   scale_factor = 1000,
   ret_df = FALSE,
   show_total_col = TRUE,
+  bold_header = TRUE,
   ...
 )
 }
