@@ -95,7 +95,7 @@ model_setup <- function(drs = NA,
   if(exists("models")){
     # If the loading has already been done, just reset the model names so it is
     # easy and fast to switch back and forth from English to French
-    model_grps <- map2(models, lst, \(model_grp, descs){
+    model_grps <- map2(models, model_desc_lst, \(model_grp, descs){
       map2(model_grp, descs, \(mdls, desc){
         names(mdls) <- desc
         mdls <- map2(mdls, desc, \(mdl, dsc){
