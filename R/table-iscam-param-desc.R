@@ -7,6 +7,7 @@
 #' @return A [knitr::kable()] table
 #' @export
 table_iscam_param_desc <- function(model,
+                                   bold_header = TRUE,
                                    ...){
 
   header <- c("Symbol", "Description")
@@ -175,9 +176,12 @@ table_iscam_param_desc <- function(model,
   }
 
   k <- csas_table(xx,
-                  format = "latex",
                   align = rep("l", ncol(xx)),
                   col_names_align = rep("l", ncol(xx)),
+                  format = "latex",
+                  booktabs = TRUE,
+                  linesep = "",
+                  bold_header = bold_header,
                   ...)
 
   k
