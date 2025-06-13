@@ -10,6 +10,7 @@ table_growth_params(
   ret_df = FALSE,
   digits = 2,
   alpha_digits = 7,
+  bold_header = TRUE,
   ...
 )
 }
@@ -26,6 +27,8 @@ the \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 
 \item{alpha_digits}{The number of decimal places to report on the \code{alpha}
 parameter}
+
+\item{bold_header}{Logical. If \code{TRUE} make the table header row boldface}
 
 \item{...}{Arguments to pass to \code{\link[csasdown:csas_table]{csasdown::csas_table()}}}
 }

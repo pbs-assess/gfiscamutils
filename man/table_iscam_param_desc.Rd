@@ -5,7 +5,7 @@
 \title{Create the ISCAM model parameter description table as found in the
 Model Description appendix}
 \usage{
-table_iscam_param_desc(model, ...)
+table_iscam_param_desc(model, bold_header = TRUE, ...)
 }
 \arguments{
 \item{model}{An iscam model object (class \link{mdl_cls})}

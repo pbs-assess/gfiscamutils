@@ -9,6 +9,7 @@
 #' instead of the [knitr::kable()] formatted table
 #' @param col_widths The width of all columns other than the first. If `NULL`,
 #' do not set
+#' @param bold_header Logical. If `TRUE` make the table header row boldface
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
 #' @export

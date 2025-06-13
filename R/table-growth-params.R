@@ -14,6 +14,7 @@
 #' `alpha` parameter
 #' @param alpha_digits The number of decimal places to report on the `alpha`
 #' parameter
+#' @param bold_header Logical. If `TRUE` make the table header row boldface
 #' @param ... Arguments to pass to [csasdown::csas_table()]
 #'
 #' @return Either a [data.frame] or a [csasdown::csas_table()], depending on
@@ -25,6 +26,7 @@ table_growth_params <- function(model,
                                 ret_df = FALSE,
                                 digits = 2,
                                 alpha_digits = 7,
+                                bold_header = TRUE,
                                 ...){
 
   if(is_iscam_model_list(model) && length(model) == 1){
@@ -97,9 +99,12 @@ table_growth_params <- function(model,
                      tr("Male"))
 
   out <- csas_table(params,
-                    format = "latex",
                     align = c("l", rep("r", ncol(params) - 1)),
                     col_names_align = rep("r", ncol(params)),
+                    format = "latex",
+                    booktabs = TRUE,
+                    linesep = "",
+                    bold_header = bold_header,
                     ...)
 
   if(!is.null(col_widths)){
