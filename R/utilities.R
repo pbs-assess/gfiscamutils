@@ -299,6 +299,7 @@ move_legend_to_empty_facet <- function(g){
 #' @importFrom purrr imap_chr
 #' @export
 is_iscam_model <- function(model){
+
   if(mdl_cls %in% class(model)){
     if(!is.null(attributes(model)$model_desc)){
       return(TRUE)

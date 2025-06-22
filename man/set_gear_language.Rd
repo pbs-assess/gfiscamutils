@@ -5,16 +5,14 @@
 \title{Translate the gear names and abbreviations in the models list for all
 models to either French of English}
 \usage{
-set_gear_language(models, curr_gear_lang = NULL)
+set_gear_language(models)
 }
 \arguments{
 \item{models}{A list of the models}
-
-\item{curr_gear_lang}{The language that the gear names are currently
-stored as.}
 }
 \value{
-A modified \code{models} list
+A modified \code{models} list of class \code{mdl_lst_cls} which is an ISCAM
+model list
 }
 \description{
 Translate the gear names and abbreviations in the models list for all

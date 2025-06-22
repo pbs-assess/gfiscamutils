@@ -73,6 +73,7 @@ plot_age_fits_mcmc <- function(model,
 
   nsex <- model$dat$num.sex
   ages <- as.character(model$dat$start.age:model$dat$end.age)
+
   gear_names <- model$dat$age_gear_names
   gear_name <- gear_names[gear]
 

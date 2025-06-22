@@ -153,6 +153,7 @@ table_decisions <- function(model,
   tab <- bind_cols(ptab, j) |>
     mutate(catch = as.numeric(names(proj))) |>
     select(catch, everything())
+
   names(tab)[1] <- tr("Catch (thousand t)")
 
   if(ret_df){

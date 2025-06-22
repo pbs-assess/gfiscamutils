@@ -66,7 +66,8 @@ read_data_file <- function(file = NULL,
   dat <- grep("^#.*FleetAbbrevs:.+", data)
   tmp$has_fleet_abbrevs <- FALSE
   if(length(dat > 0)){
-    # The gear abbreviations were in the file. These are the survey_abbrev column in the survey index data
+    # The gear abbreviations were in the file. These are the `survey_abbrev`
+    # column in the survey index data
     fleet_abbrevs_str <- gsub("^#.*FleetAbbrevs:(.+)", "\\1", data[dat])
     fleet_abbrevs <- strsplit(fleet_abbrevs_str, ",")[[1]]
     tmp$fleet_abbrevs <- gsub("^[[:blank:]]+", "", fleet_abbrevs)

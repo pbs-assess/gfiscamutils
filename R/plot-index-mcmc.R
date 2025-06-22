@@ -64,7 +64,7 @@ plot_index_mcmc <- function(models,
   type <- match.arg(type)
 
   surv_index <- surv_index |>
-    mutate(survey_abbrev = tr(survey_abbrev, allow_missing = TRUE))
+    mutate(survey_abbrev = tr(survey_abbrev))
 
   single_model <- FALSE
   if(is_iscam_model(models)){
@@ -186,7 +186,7 @@ plot_index_mcmc <- function(models,
     bind_rows() |>
     select(model, survey_name, year, biomass, lowerci, upperci) |>
     # Translate the gear names as needed
-    mutate(survey_name = tr(survey_name, allow_missing = TRUE)) |>
+    mutate(survey_name = tr(survey_name)) |>
     # Remove all rows where `survey_name` is `NULL` which is caused by it
     # not being in the gear list
     filter(!is.na(survey_name)) |>
