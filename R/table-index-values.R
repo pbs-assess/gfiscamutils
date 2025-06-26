@@ -61,7 +61,7 @@ table_index_values <- function(model,
   if(bold_header){
     pat <- "^ *$"
 
-    nms <- names(header_vec)
+    nms <- linebreak(names(header_vec))
     nms[!grepl(pat, nms)] <- paste0("\\textbf{", nms[!grepl(pat, nms)], "}")
     names(header_vec) <- nms
   }

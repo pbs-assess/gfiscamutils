@@ -21,7 +21,7 @@ set_gear_language <- function(models){
       # For each model group in the model type group
       type_grp |> map(\(grp){
         # For each model in each models group
-        grp |> map(\(model){
+        grp <- grp |> map(\(model){
 
           model$dat$gear_names <- tr(model$dat$gear_names)
           model$dat$age_gear_names <- tr(model$dat$age_gear_names)
@@ -30,11 +30,14 @@ set_gear_language <- function(models){
 
           model$dat$gear_abbrevs <- tr(model$dat$gear_abbrevs)
           model$dat$age_gear_abbrevs <- tr(model$dat$age_gear_abbrevs)
+          model$dat$index_abbrevs <- tr(model$dat$index_abbrevs)
           model$dat$index_gear_abbrevs <- tr(model$dat$index_gear_abbrevs)
           model$dat$fleet_gear_abbrevs <- tr(model$dat$fleet_gear_abbrevs)
 
           model
         })
+        class(grp) <- mdl_lst_cls
+        grp
       })
     })
 
