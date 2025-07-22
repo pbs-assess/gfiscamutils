@@ -3,8 +3,8 @@
 #' See the README on
 #' \href{https://github.com/pbs-assess/gfiscamutils#readme}{GitHub}
 #'
-#' @docType package
 #' @name gfiscamutils
+"_PACKAGE"
 
 #' @importFrom rlang .data
 #' @importFrom stats quantile
