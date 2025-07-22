@@ -313,11 +313,7 @@ autocorr.plot <- function(x,
                           ask,
                           ...){
   if (missing(ask)){
-    ask <- if(is.R()) {
-      dev.interactive()
-    }else{
-      interactive()
-    }
+    ask <- dev.interactive()
   }
   oldpar <- NULL
   on.exit(par(oldpar))
