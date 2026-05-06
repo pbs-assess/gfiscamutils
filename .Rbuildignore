@@ -1,3 +1,5 @@
 ^gfiscamutils\.Rproj$
 ^\.Rproj\.user$
 data-raw
+^\.positai$
+^\.claude$

@@ -55,7 +55,7 @@ run_iscam <- function(model_dir,
 #' @param ... Arguments passed to [run_iscam()]
 #'
 #' @return Nothing
-#' @importFrom furrr future_map future_options
+#' @importFrom furrr future_map furrr_options
 #' @importFrom future plan
 #' @export
 run_multiple_iscam <- function(model_dirs, ...){
